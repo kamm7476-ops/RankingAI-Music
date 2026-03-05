@@ -6,20 +6,20 @@ const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
 
-// 🌟 1. 진짜 데이터베이스(MongoDB) 연결 (kamm7476 계정 적용)
+// 🌟 몽고DB 연결 (회원님의 아이디와 비번 적용 완료!)
 const DB_URI = "mongodb+srv://kamm7476:01483890Nki@cluster0.y95nodi.mongodb.net/RankingAI?retryWrites=true&w=majority";
 
 mongoose.connect(DB_URI)
     .then(() => console.log("✅ 몽고DB 연결 성공! (슈퍼 관리자 모드)"))
     .catch(err => console.log("❌ DB 연결 실패:", err.message));
 
-// 🌟 2. 데이터 보관함(설계도) - owner(주인) 필드 추가
+// 데이터 설계도
 const Artist = mongoose.model('Artist', new mongoose.Schema({
     name: String, artist: String, type: String, genre: String, 
     pulse: { type: Number, default: 0 },
     image: { type: String, default: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500" }, 
     url: String,
-    owner: String // 누가 올렸는지 기록
+    owner: String 
 }));
 
 const User = mongoose.model('User', new mongoose.Schema({
@@ -42,22 +42,20 @@ app.use(session({
 
 const upload = multer({ dest: 'public/uploads/' });
 
-// 🛠️ 관리자인지 확인하는 마법의 함수
+// 🛠️ 관리자인지 확인하는 함수
 const isAdmin = (user) => user && user.username === 'kamm7476';
 
-// 메인 페이지
 app.get('/', async (req, res) => {
     try {
         const artists = await Artist.find().sort({ _id: -1 });
         res.render('index', { 
             artists, 
             user: req.session.user || null,
-            isAdmin: isAdmin(req.session.user) // 관리자 여부 전달
+            isAdmin: isAdmin(req.session.user) 
         });
     } catch (e) { res.status(500).send("DB 연결 대기 중..."); }
 });
 
-// 회원가입
 app.post('/signup', async (req, res) => {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
     try {
@@ -66,7 +64,6 @@ app.post('/signup', async (req, res) => {
     } catch (e) { res.send('<script>alert("이미 있는 아이디입니다!"); window.location.href="/";</script>'); }
 });
 
-// 로그인
 app.post('/login', async (req, res) => {
     const user = await User.findOne({ username: req.body.username });
     if (user && await bcrypt.compare(req.body.password, user.password)) {
@@ -75,10 +72,8 @@ app.post('/login', async (req, res) => {
     } else { res.send('<script>alert("로그인 정보가 틀립니다."); window.location.href="/";</script>'); }
 });
 
-// 로그아웃
 app.get('/logout', (req, res) => { req.session.destroy(); res.redirect('/'); });
 
-// 업로드
 app.post('/upload', upload.single('mediaFile'), async (req, res) => {
     if (!req.session.user) return res.redirect('/');
     await Artist.create({
@@ -87,12 +82,11 @@ app.post('/upload', upload.single('mediaFile'), async (req, res) => {
         type: req.body.type,
         genre: req.body.genre,
         url: req.file ? `/uploads/${req.file.filename}` : "#",
-        owner: req.session.user.username // 현재 로그인한 사람을 주인으로 저장
+        owner: req.session.user.username 
     });
     res.redirect('/');
 });
 
-// 🌟 수정 기능 (본인이거나 관리자일 때만!)
 app.post('/edit/:id', async (req, res) => {
     if (!req.session.user) return res.redirect('/');
     const song = await Artist.findById(req.params.id);
@@ -106,7 +100,6 @@ app.post('/edit/:id', async (req, res) => {
     res.redirect('/');
 });
 
-// 🌟 삭제 기능 (본인이거나 관리자일 때만!)
 app.post('/delete/:id', async (req, res) => {
     if (!req.session.user) return res.redirect('/');
     const song = await Artist.findById(req.params.id);
