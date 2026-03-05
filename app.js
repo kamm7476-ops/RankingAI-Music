@@ -8,7 +8,7 @@ const session = require('express-session');
 
 // 🌟 1. 진짜 데이터베이스(MongoDB) 연결! (아이디/비번 교체 완료)
 // 주의: 아래 주소에서 01483890Nki**** 부분의 ****를 진짜 비밀번호로 꼭 바꿔주세요!!
-const DB_URI = "mongodb+srv://kamm7476:01483890Nki****@cluster0.y95nodi.mongodb.net/RankingAI?retryWrites=true&w=majority";
+const DB_URI = "mongodb+srv://kamm7476:01483890Nki@cluster0.y95nodi.mongodb.net/RankingAI?retryWrites=true&w=majority";
 
 mongoose.connect(DB_URI)
     .then(() => console.log("✅ [경축] 드디어 진짜 MongoDB 데이터베이스 연결 성공!!"))
