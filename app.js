@@ -1,13 +1,14 @@
 const express = require('express');
-const mongoose = require('mongoose'); // 👉 다시 돌아온 몽구스(MongoDB)
+const mongoose = require('mongoose');
 const app = express();
 const path = require('path');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
 
-// 🌟 1. 진짜 데이터베이스(MongoDB) 연결!
-const DB_URI = "mongodb+srv://janggun74:01483890nki@cluster0.y95nodi.mongodb.net/RankingAI?retryWrites=true&w=majority";
+// 🌟 1. 진짜 데이터베이스(MongoDB) 연결! (아이디/비번 교체 완료)
+// 주의: 아래 주소에서 01483890Nki**** 부분의 ****를 진짜 비밀번호로 꼭 바꿔주세요!!
+const DB_URI = "mongodb+srv://kamm7476:01483890Nki****@cluster0.y95nodi.mongodb.net/RankingAI?retryWrites=true&w=majority";
 
 mongoose.connect(DB_URI)
     .then(() => console.log("✅ [경축] 드디어 진짜 MongoDB 데이터베이스 연결 성공!!"))
@@ -68,7 +69,11 @@ app.post('/login', async (req, res) => {
     }
 });
 
-app.get('/logout', (req, res) => { req.session.destroy(); res.redirect('/'); });
+// 로그아웃
+app.get('/logout', (req, res) => { 
+    req.session.destroy(); 
+    res.redirect('/'); 
+});
 
 // 업로드 (DB에 곡 정보 저장)
 app.post('/upload', upload.fields([{ name: 'imageFile', maxCount: 1 }, { name: 'mediaFile', maxCount: 1 }]), async (req, res) => {
@@ -92,5 +97,6 @@ app.post('/upload', upload.fields([{ name: 'imageFile', maxCount: 1 }, { name: '
     res.redirect('/');
 });
 
-// 폰 접속 허용 서버
-app.listen(3000, '0.0.0.0', () => console.log('🚀 서버 가동 중: 포트 3000번 (진짜 DB 모드)'));
+// 👉 Render 포트 에러 해결 완료!
+const port = process.env.PORT || 3000;
+app.listen(port, '0.0.0.0', () => console.log(`🚀 서버 가동 중: 포트 ${port}번 (진짜 DB 모드)`));
