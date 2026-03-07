@@ -28,11 +28,11 @@ const Artist = mongoose.model('Artist', new mongoose.Schema({
     pulse: { type: Number, default: 0 }, likedBy: [String], owner: String
 }));
 
-// 4. 앱 설정
+// 31~34번 줄 부근을 아래 내용으로 똑같이 수정하세요!
 app.set('view engine', 'ejs');
-app.use(express.static('public'));
-app.use('/uploads', express.static('public/uploads'));
-app.use(express.urlencoded({ extended: true }));
+app.set('views', path.join(__dirname, 'views')); // path.join을 써야 Render 서버가 경로를 잘 찾습니다.
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.use(session({ secret: 'cyber-secret', resave: false, saveUninitialized: true }));
 
 // 언어 설정 미들웨어
