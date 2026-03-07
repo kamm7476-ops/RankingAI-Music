@@ -1,171 +1,35 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RankingAI | Premium Music Hub</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+    <title>Ranking AI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
     <style>
-        :root { --main-gold: #ffd700; --bg-black: #0a0a0a; --card-bg: #1a1a1a; --text-gray: #b0b0b0; }
-        body { background-color: var(--bg-black); color: white; font-family: 'Noto Sans KR', sans-serif; margin: 0; padding-top: 80px; }
-        
-        /* 1. 세련된 상단바 (지니/멜론 스타일) */
-        nav { width: 100%; height: 80px; background: rgba(10, 10, 10, 0.95); display: flex; justify-content: space-between; align-items: center; padding: 0 5%; position: fixed; top: 0; z-index: 1000; border-bottom: 1px solid #222; backdrop-filter: blur(10px); }
-        .logo { color: var(--main-gold); font-family: 'Poppins', sans-serif; font-size: 1.8rem; font-weight: 600; text-decoration: none; letter-spacing: 1px; }
-        .btn-upload { background: var(--main-gold); color: black; border: none; padding: 10px 25px; border-radius: 50px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-upload:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
-
-        /* 2. 메인 배너 (웅장한 느낌) */
-        .hero { text-align: center; padding: 60px 20px; background: linear-gradient(to bottom, #1a1a1a, var(--bg-black)); }
-        .hero h1 { font-size: 3rem; margin-bottom: 10px; background: linear-gradient(to right, #fff, #ffd700); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-        /* 3. 랭킹 카드 그리드 */
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; }
-        
-        .music-card { background: var(--card-bg); border-radius: 20px; overflow: hidden; border: 1px solid #282828; transition: 0.4s; position: relative; }
-        .music-card:hover { transform: translateY(-10px); border-color: var(--main-gold); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        
-        .card-img { width: 100%; height: 300px; background-size: cover; background-position: center; position: relative; }
-        .rank-badge { position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.8); color: var(--main-gold); padding: 5px 15px; border-radius: 12px; font-weight: bold; font-size: 1.3rem; border: 1px solid var(--main-gold); }
-        
-        .card-info { padding: 20px; }
-        .card-info h3 { margin: 0; font-size: 1.3rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .card-info p { color: var(--text-gray); margin: 8px 0 15px; font-size: 1rem; }
-        
-        /* 4. 음원 다운로드 방지 플레이어 */
-        audio { width: 100%; height: 40px; filter: invert(90%) hue-rotate(180deg) brightness(1.5); margin-bottom: 15px; border-radius: 10px; }
-        
-        .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #282828; padding-top: 15px; }
-        .heart-count { color: #ff4757; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 6px; }
-        
-        /* 5. 관리자 전용 메뉴 (kamm7476 전용) */
-        .admin-controls { display: flex; gap: 10px; }
-        .btn-sm { padding: 6px 15px; border-radius: 8px; border: none; font-size: 0.85rem; cursor: pointer; color: white; transition: 0.2s; }
-        .btn-edit { background: #333; }
-        .btn-del { background: #e84118; }
-        .btn-sm:hover { opacity: 0.8; }
-
-        /* 6. 모달 디자인 (고급 팝업) */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(8px); }
-        .modal-content { background: #1a1a1a; padding: 40px; border-radius: 30px; width: 450px; border: 1px solid var(--main-gold); }
-        .modal-content h2 { color: var(--main-gold); margin-top: 0; text-align: center; margin-bottom: 25px; }
-        input, select { width: 100%; padding: 14px; margin: 12px 0; background: #222; border: 1px solid #333; color: white; border-radius: 12px; box-sizing: border-box; font-size: 1rem; }
-        input:focus { outline: 1px solid var(--main-gold); }
-        .btn-submit { background: var(--main-gold); color: black; border: none; width: 100%; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 20px; }
+        body { background: #0a0b10; color: white; font-family: sans-serif; }
+        .nav { display: flex; justify-content: space-between; padding: 20px; border-bottom: 1px solid #222; }
+        .logo { font-size: 1.5rem; color: #00d4ff; font-weight: bold; text-decoration: none; }
+        .rank-card { background: rgba(255,255,255,0.05); margin: 10px 0; padding: 20px; border-radius: 15px; display: flex; align-items: center; }
+        .album-art { width: 60px; height: 60px; border-radius: 10px; margin: 0 20px; }
     </style>
 </head>
 <body>
-
-    <% const melonGenres = ["발라드", "댄스", "랩/힙합", "R&B/Soul", "트로트", "POP", "록/메탈", "인디음악", "OST", "재즈", "클래식"]; %>
-
-    <nav>
-        <a href="/" class="logo">RANKING AI</a>
-        <div class="nav-btns">
-            <% if (user) { %>
-                <span style="color:var(--text-gray); margin-right:20px;"><%= user.username %>님</span>
-                <button class="btn-upload" onclick="document.getElementById('upload-modal').style.display='flex'">
-                    <i class="fas fa-plus"></i> 곡 등록
-                </button>
-                <a href="/logout" style="color: #666; text-decoration: none; margin-left: 20px;">로그아웃</a>
-            <% } else { %>
-                <button onclick="document.getElementById('login-modal').style.display='flex'" style="background:none; color:white; border:none; cursor:pointer; margin-right:25px; font-size:1rem;">로그인</button>
-                <button class="btn-upload" onclick="document.getElementById('signup-modal').style.display='flex'">무료 회원가입</button>
-            <% } %>
+    <nav class="nav">
+        <a href="/" class="logo"><%= t.logo %></a>
+        <div>
+            <a href="/change-lang/ko">KO</a> | <a href="/change-lang/en">EN</a>
         </div>
     </nav>
-
-    <div class="hero">
-        <div class="container">
-            <h1>Today's AI Chart</h1>
-            <p style="color: var(--text-gray); font-size: 1.2rem;">가장 핫한 AI 아티스트들의 실시간 랭킹</p>
-        </div>
-    </div>
-
-    <div class="container">
-        <div class="card-grid">
-            <% artists.forEach(function(song, index) { %>
-                <div class="music-card">
-                    <div class="card-img" style="background-image: url('<%= song.image %>');">
-                        <div class="rank-badge"><%= index + 1 %></div>
-                    </div>
-                    
-                    <div class="card-info">
-                        <h3><%= song.name %></h3> <p><i class="fas fa-user-astronaut"></i> <%= song.artist %> • <span style="color:var(--main-gold)"><%= song.genre %></span></p> <% if(song.url && song.url !== '#') { %>
-                            <audio controls controlsList="nodownload" oncontextmenu="return false;">
-                                <source src="<%= song.url %>" type="audio/mpeg">
-                            </audio>
-                        <% } %>
-
-                        <div class="card-footer">
-                            <div class="heart-count">
-                                <i class="fas fa-heart"></i> <%= (song.pulse || 0).toLocaleString() %>
-                            </div>
-                            
-                            <% if (user && (song.owner === user.username || isAdmin)) { %>
-                                <div class="admin-controls">
-                                    <button class="btn-sm btn-edit" onclick="openEditModal('<%= song._id %>', '<%= song.name %>', '<%= song.artist %>', '<%= song.genre %>')">수정</button>
-                                    <form action="/delete/<%= song._id %>" method="POST" onsubmit="return confirm('정말 삭제할까요?')">
-                                        <button type="submit" class="btn-sm btn-del">삭제</button>
-                                    </form>
-                                    <% if (isAdmin && song.owner !== user.username) { %>
-                                        <span style="position:absolute; bottom:5px; right:15px; color:var(--main-gold); font-size:0.6rem;">ADMIN MODE</span>
-                                    <% } %>
-                                </div>
-                            <% } %>
-                        </div>
-                    </div>
+    <div style="padding: 20px;">
+        <h2><%= t.chartTitle %></h2>
+        <% artists.forEach((song, i) => { %>
+            <div class="rank-card">
+                <div><%= i+1 %></div>
+                <img src="<%= song.image %>" class="album-art">
+                <div>
+                    <strong><%= song.name %></strong><br>
+                    <small><%= song.artist %></small>
                 </div>
-
-                <div id="editModal<%= song._id %>" class="modal">
-                    <div class="modal-content">
-                        <h2>수정하기</h2>
-                        <form action="/edit/<%= song._id %>" method="POST">
-                            <input type="text" name="title" value="<%= song.name %>" placeholder="곡 제목" required>
-                            <input type="text" name="artist" value="<%= song.artist %>" placeholder="아티스트" required>
-                            <select name="genre">
-                                <% melonGenres.forEach(g => { %>
-                                    <option value="<%= g %>" <%= song.genre === g ? 'selected' : '' %>><%= g %></option>
-                                <% }) %>
-                            </select>
-                            <button type="submit" class="btn-submit">저장 완료</button>
-                            <button type="button" onclick="this.parentElement.parentElement.parentElement.style.display='none'" style="background:none; border:none; color:#666; width:100%; margin-top:15px; cursor:pointer;">취소</button>
-                        </form>
-                    </div>
-                </div>
-            <% }); %>
-        </div>
+            </div>
+        <% }) %>
     </div>
-
-    <div id="upload-modal" class="modal">
-        <div class="modal-content">
-            <h2>🎵 New Track</h2>
-            <form action="/upload" method="POST" enctype="multipart/form-data">
-                <input type="text" name="title" placeholder="음악 제목" required>
-                <input type="text" name="artist" placeholder="아티스트 이름" required>
-                <select name="type">
-                    <option value="music">MUSIC</option>
-                    <option value="mv">MV</option>
-                </select>
-                <select name="genre">
-                    <option value="" disabled selected>멜론 장르 선택</option>
-                    <% melonGenres.forEach(g => { %> <option value="<%= g %>"><%= g %></option> <% }) %>
-                </select>
-                <input type="file" name="mediaFile" required>
-                <button type="submit" class="btn-submit">차트에 등록</button>
-                <button type="button" onclick="this.parentElement.parentElement.parentElement.style.display='none'" style="background:none; border:none; color:#666; width:100%; margin-top:15px; cursor:pointer;">닫기</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="login-modal" class="modal"> <div class="modal-content"> <h2>Login</h2> <form action="/login" method="POST"> <input type="text" name="username" placeholder="아이디" required> <input type="password" name="password" placeholder="비밀번호" required> <button type="submit" class="btn-submit">로그인</button> <button type="button" onclick="this.parentElement.parentElement.parentElement.style.display='none'" style="background:none; border:none; color:#666; width:100%; margin-top:15px; cursor:pointer;">닫기</button> </form> </div> </div>
-    <div id="signup-modal" class="modal"> <div class="modal-content"> <h2>Join Us</h2> <form action="/signup" method="POST"> <input type="text" name="username" placeholder="아이디" required> <input type="password" name="password" placeholder="비밀번호" required> <button type="submit" class="btn-submit">회원가입 완료</button> <button type="button" onclick="this.parentElement.parentElement.parentElement.style.display='none'" style="background:none; border:none; color:#666; width:100%; margin-top:15px; cursor:pointer;">닫기</button> </form> </div> </div>
-
-    <script>
-        function openEditModal(id, title, artist, genre) {
-            document.getElementById('editModal' + id).style.display = 'flex';
-        }
-    </script>
 </body>
 </html>
