@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RANKING AI</title>
     <style>
-        body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; padding-bottom: 100px; /* 플레이어 공간 확보 */ }
+        body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; padding-bottom: 100px; }
         a { text-decoration: none; color: inherit; }
 
         .main-header { background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
@@ -46,7 +46,8 @@
         .btn-upload { background: #ff5722; color: #000; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
         
         .genre-selector { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
-        .genre-btn { background: #222; color: #aaa; border: 1px solid #333; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; }
+        .genre-btn { background: #222; color: #aaa; border: 1px solid #333; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; transition: 0.2s; }
+        .genre-btn:hover { background: #333; color: #fff; }
         .genre-btn.active { background: rgba(255, 87, 34, 0.15); color: #ff5722; border-color: #ff5722; font-weight: bold; }
 
         .chart-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; border-bottom: 2px solid #222; padding-bottom: 15px; }
@@ -55,14 +56,14 @@
         .tab { color: #777; cursor: pointer; font-weight: 600; font-size: 16px; padding-bottom: 10px; }
         .tab.active { color: #ff5722; border-bottom: 3px solid #ff5722; }
 
-        /* 🌟 멜론 스타일 컨트롤 바 (전체듣기, 선택듣기, 담기) */
         .chart-controls { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; }
         .control-btn { background: #161718; color: #fff; border: 1px solid #444; padding: 8px 15px; border-radius: 20px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
         .control-btn:hover { background: #333; border-color: #ff5722; color: #ff5722; }
         .control-my-music { background: #ff5722; color: #000; font-weight: bold; border-color: #ff5722; }
 
         .music-list { width: 100%; border-collapse: collapse; }
-        .music-item { border-bottom: 1px solid #1a1b1c; }
+        .music-item { border-bottom: 1px solid #1a1b1c; transition: 0.2s; }
+        .music-item:hover { background: rgba(255,255,255,0.02); }
         .music-item td { padding: 15px 10px; vertical-align: top; }
         .check-col { width: 30px; text-align: center; vertical-align: middle !important; }
         .custom-checkbox { width: 18px; height: 18px; accent-color: #ff5722; cursor: pointer; }
@@ -82,7 +83,6 @@
         .lyrics-line { padding: 5px 0; display: flex; gap: 8px; cursor: pointer; }
         .lyrics-time { color: #ff5722; font-weight: bold; width: 45px; text-align: right; }
 
-        /* 🌟 하단 고정형 연속 플레이어 */
         .bottom-player-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #1a1c1e; border-top: 2px solid #ff5722; padding: 10px 40px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); }
         .player-info { display: flex; align-items: center; gap: 15px; width: 300px; }
         .player-cover { width: 50px; height: 50px; border-radius: 5px; background: #000; object-fit: cover; }
@@ -123,7 +123,10 @@
                 <button type="submit" class="top-search-btn">🔍</button>
             </form>
             <div class="auth-buttons">
-                <% if (user && user.role === 'admin') { %><a href="/admin" class="btn-admin">👑 관리자</a><% } %>
+                <% if (user && user.role === 'admin') { %>
+                    <a href="/admin" class="btn-admin">👑 관리자</a>
+                <% } %>
+                
                 <% if (user) { %>
                     <span style="color: #aaa; font-size: 14px;"><%= user.id %>님</span>
                     <a href="/logout" class="btn-login">로그아웃</a>
@@ -150,17 +153,39 @@
                 <div class="upload-section">
                     <h3 style="margin-top:0; color:#ff5722;">🎵 회원을 위한 음원 업로드</h3>
                     <form action="/add-music" method="POST" enctype="multipart/form-data" id="musicForm">
-                        <div class="input-row"><input type="text" name="name" placeholder="곡 제목" required><input type="text" name="artist" placeholder="아티스트" required></div>
+                        <div class="input-row">
+                            <input type="text" name="name" placeholder="곡 제목" required>
+                            <input type="text" name="artist" placeholder="아티스트" required>
+                        </div>
+                        
                         <div class="genre-selector">
                             <button type="button" class="genre-btn" data-genre="발라드">발라드</button>
                             <button type="button" class="genre-btn" data-genre="댄스">댄스</button>
                             <button type="button" class="genre-btn" data-genre="랩/힙합">랩/힙합</button>
                             <button type="button" class="genre-btn" data-genre="R&B/Soul">R&B/Soul</button>
                             <button type="button" class="genre-btn" data-genre="인디음악">인디음악</button>
+                            <button type="button" class="genre-btn" data-genre="록/메탈">록/메탈</button>
+                            <button type="button" class="genre-btn" data-genre="트로트">트로트</button>
+                            <button type="button" class="genre-btn" data-genre="포크/블루스">포크/블루스</button>
+                            <button type="button" class="genre-btn" data-genre="일렉트로니카">일렉트로니카</button>
+                            <button type="button" class="genre-btn" data-genre="OST">OST</button>
                             <button type="button" class="genre-btn" data-genre="POP">POP</button>
+                            <button type="button" class="genre-btn" data-genre="J-POP">J-POP</button>
+                            <button type="button" class="genre-btn" data-genre="클래식">클래식</button>
+                            <button type="button" class="genre-btn" data-genre="재즈">재즈</button>
+                            <button type="button" class="genre-btn" data-genre="뉴에이지">뉴에이지</button>
+                            <button type="button" class="genre-btn" data-genre="국악">국악</button>
+                            <button type="button" class="genre-btn" data-genre="CCM/종교">CCM/종교</button>
+                            <button type="button" class="genre-btn" data-genre="동요/태교">동요/태교</button>
+                            <button type="button" class="genre-btn" data-genre="뮤지컬/연극">뮤지컬/연극</button>
+                            <button type="button" class="genre-btn" data-genre="기타장르">기타장르</button>
                         </div>
                         <input type="hidden" name="genre" id="hiddenGenreInput" required>
-                        <div class="input-row"><input type="text" name="aiTool" placeholder="사용 프로그램 (예: Suno)" required><input type="text" name="realName" placeholder="업로더 실명 (비공개)" required></div>
+                        
+                        <div class="input-row">
+                            <input type="text" name="aiTool" placeholder="사용 프로그램 (예: Suno)" required>
+                            <input type="text" name="realName" placeholder="업로더 실명 (비공개)" required>
+                        </div>
                         <textarea name="lyrics" placeholder="가사를 시간과 함께 입력하세요. (예: [00:15] 첫 번째 가사)"></textarea>
                         <div class="input-row">
                             <div style="flex:1;"><span style="font-size: 12px; color: #ff5722;">🖼️ 커버 이미지</span><input type="file" name="image" accept="image/*" class="file-upload" required></div>
@@ -171,9 +196,16 @@
                 </div>
 
                 <div class="chart-header">
-                    <div class="chart-title">랭킹AI 100 <% if (searchQuery) { %><span style="font-size:16px; color:#ff5722;">(검색결과: <%= searchQuery %>) <a href="/" style="color:#aaa; text-decoration:underline;">초기화</a></span><% } %></div>
+                    <div class="chart-title">랭킹AI 100 
+                        <% if (typeof searchQuery !== 'undefined' && searchQuery) { %>
+                            <span style="font-size:16px; color:#ff5722;">(검색결과: <%= searchQuery %>) <a href="/" style="color:#aaa; text-decoration:underline;">초기화</a></span>
+                        <% } %>
+                    </div>
                     <div class="tabs">
-                        <div class="tab active">실시간</div><div class="tab">일간</div><div class="tab">주간</div><div class="tab">월간</div>
+                        <div class="tab active" onclick="switchTab(this)">실시간</div>
+                        <div class="tab" onclick="switchTab(this)">일간</div>
+                        <div class="tab" onclick="switchTab(this)">주간</div>
+                        <div class="tab" onclick="switchTab(this)">월간</div>
                     </div>
                 </div>
 
@@ -196,7 +228,9 @@
                                 <div class="song-title">
                                     <%= music.name %>
                                     <% if (user && (user.id === music.uploader || user.role === 'admin') && music._id !== "dummy") { %>
-                                        <form action="/delete-music/<%= music._id %>" method="POST" style="display:inline;" onsubmit="return confirm('삭제하시겠습니까?');"><button type="submit" style="background:none; border:none; color:#ff4a4a; cursor:pointer; font-size:12px;">🗑️ 삭제</button></form>
+                                        <form action="/delete-music/<%= music._id %>" method="POST" style="display:inline;" onsubmit="return confirm('삭제하시겠습니까?');">
+                                            <button type="submit" style="background:none; border:none; color:#ff4a4a; cursor:pointer; font-size:12px;">🗑️ 삭제</button>
+                                        </form>
                                     <% } %>
                                 </div>
                                 <div class="singer"><%= music.artist %> (<%= music.genre %>) <span class="ai-badge">🎵 <%= music.aiTool %></span></div>
@@ -209,8 +243,176 @@
                                 </div>
 
                                 <div id="lyrics-<%= music._id %>" class="hidden-box lyrics-window"><div id="lyrics-content-<%= music._id %>"></div></div>
+                                
                                 <div id="comments-<%= music._id %>" class="hidden-box">
                                     <div style="max-height: 150px; overflow-y: auto; margin-bottom:15px;">
-                                        <% if(music.comments && music.comments.length > 0) { music.comments.forEach(c => { %>
-                                            <div style="border-bottom: 1px solid #333; padding: 8px 0;"><span style="color:#ff5722; font-weight:bold; font-size:13px;"><%= c.author %></span><span style="font-size:14px; margin-left:8px; color:#ddd;"><%= c.text %></span></div>
-                                        <% })} else { %
+                                        <% if (music.comments && music.comments.length > 0) { %>
+                                            <% music.comments.forEach(function(c) { %>
+                                                <div style="border-bottom: 1px solid #333; padding: 8px 0;">
+                                                    <span style="color:#ff5722; font-weight:bold; font-size:13px;"><%= c.author %></span>
+                                                    <span style="font-size:14px; margin-left:8px; color:#ddd;"><%= c.text %></span>
+                                                </div>
+                                            <% }); %>
+                                        <% } else { %>
+                                            <p style="font-size:13px; color:#777;">아직 댓글이 없습니다.</p>
+                                        <% } %>
+                                    </div>
+                                    
+                                    <% if (music._id !== "dummy") { %>
+                                        <form action="/add-comment/<%= music._id %>" method="POST" style="display:flex; gap:10px;">
+                                            <input type="text" name="commentText" placeholder="댓글..." style="flex:1; padding:10px; border-radius:6px; border:1px solid #444; background:#222; color:white;" required>
+                                            <button type="submit" style="background:#ff5722; color:black; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer;">등록</button>
+                                        </form>
+                                    <% } %>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr><td colspan="4" style="text-align:center; padding:100px; color:#555;">검색된 곡이 없습니다.</td></tr>
+                    <% } %>
+                </table>
+            </div>
+
+            <div class="sidebar-right">
+                <h3 class="sidebar-title">🏆 인기 아티스트</h3>
+                <ul class="artist-list">
+                    <% popularArtists.forEach(function(artist, idx) { %>
+                        <li class="artist-item">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span class="artist-rank"><%= idx + 1 %></span>
+                                <a href="/?search=<%= encodeURIComponent(artist._id) %>" class="artist-name"><%= artist._id %></a>
+                            </div>
+                            <span class="artist-count"><%= artist.count %>곡</span>
+                        </li>
+                    <% }); %>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-player-bar">
+        <div class="player-info">
+            <img src="https://via.placeholder.com/50/222222/ff5722?text=Play" id="main-player-cover" class="player-cover">
+            <div class="player-text">
+                <span id="main-player-title" class="player-title">선택된 곡이 없습니다</span>
+                <span id="main-player-artist" class="player-artist">목록에서 음악을 선택해주세요</span>
+            </div>
+        </div>
+        <audio id="main-audio" class="main-audio-element" controls controlsList="nodownload"></audio>
+    </div>
+
+    <script>
+        const genreBtns = document.querySelectorAll('.genre-btn');
+        const hiddenInput = document.getElementById('hiddenGenreInput');
+        genreBtns.forEach(btn => {
+            btn.addEventListener('click', function() { 
+                genreBtns.forEach(b => b.classList.remove('active')); 
+                this.classList.add('active'); 
+                hiddenInput.value = this.getAttribute('data-genre'); 
+            });
+        });
+        
+        document.getElementById('musicForm').addEventListener('submit', function(e) { 
+            if (!hiddenInput.value) { e.preventDefault(); alert('장르를 선택해주세요!'); } 
+        });
+
+        let playlist = [];
+        let currentIndex = 0;
+        const mainAudio = document.getElementById('main-audio');
+
+        function toggleAll(source) {
+            const checkboxes = document.querySelectorAll('.song-check');
+            checkboxes.forEach(cb => cb.checked = source.checked);
+        }
+
+        function loadTrack(index) {
+            if(index >= 0 && index < playlist.length) {
+                const track = playlist[index];
+                if(!track.audio) { alert("음원 파일이 없는 곡입니다."); return; }
+                
+                document.getElementById('main-player-title').innerText = track.title;
+                document.getElementById('main-player-artist').innerText = track.artist;
+                document.getElementById('main-player-cover').src = track.cover;
+                
+                mainAudio.src = track.audio;
+                mainAudio.play();
+                currentIndex = index;
+            }
+        }
+
+        mainAudio.addEventListener('ended', function() {
+            if(currentIndex + 1 < playlist.length) loadTrack(currentIndex + 1);
+        });
+
+        function playSingleTrack(btnElement) {
+            const tr = btnElement.closest('.music-item');
+            playlist = [{ id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio }];
+            loadTrack(0);
+        }
+
+        function playAll() {
+            const rows = document.querySelectorAll('.music-item');
+            playlist = Array.from(rows).map(tr => ({ id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio })).filter(t => t.audio !== "");
+            if(playlist.length > 0) loadTrack(0); else alert("재생할 음원이 없습니다.");
+        }
+
+        function playSelected() {
+            const checkedBoxes = document.querySelectorAll('.song-check:checked');
+            if(checkedBoxes.length === 0) return alert("재생할 곡을 먼저 체크해주세요!");
+            
+            playlist = Array.from(checkedBoxes).map(cb => {
+                const tr = cb.closest('.music-item');
+                return { id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio };
+            }).filter(t => t.audio !== "");
+            
+            if(playlist.length > 0) loadTrack(0); else alert("재생 가능한 음원이 없습니다.");
+        }
+
+        function addSelectedToMyMusic() {
+            const checkedBoxes = document.querySelectorAll('.song-check:checked');
+            if(checkedBoxes.length === 0) return alert("담을 곡을 체크해주세요!");
+
+            const musicIds = Array.from(checkedBoxes).map(cb => cb.value);
+
+            fetch('/add-to-mymusic', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ musicIds: musicIds })
+            })
+            .then(res => res.json())
+            .then(data => alert(data.message))
+            .catch(err => alert("에러가 발생했습니다. 다시 시도해주세요."));
+        }
+
+        function switchTab(clickedTab) { 
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); 
+            clickedTab.classList.add('active'); 
+            alert(`[${clickedTab.innerText} 차트]로 전환합니다.`); 
+        }
+
+        function parseAndShowLyrics(musicId, rawLyrics) {
+            if(musicId === "dummy") return alert("가짜 데이터입니다.");
+            const lyricsWindow = document.getElementById('lyrics-' + musicId);
+            const contentDiv = document.getElementById('lyrics-content-' + musicId);
+            if(lyricsWindow.style.display === 'block') { lyricsWindow.style.display = 'none'; return; }
+            contentDiv.innerHTML = '';
+            rawLyrics.split('\n').forEach(line => {
+                const match = line.match(/^\[(\d{2}):(\d{2})\](.*)$/);
+                const lineDiv = document.createElement('div');
+                lineDiv.className = 'lyrics-line';
+                if (match) {
+                    const totalSecs = parseInt(match[1]) * 60 + parseInt(match[2]);
+                    lineDiv.onclick = function() { mainAudio.currentTime = totalSecs; mainAudio.play(); };
+                    lineDiv.innerHTML = `<span class="lyrics-time">${match[1]}:${match[2]}</span><span class="lyrics-text">${match[3]}</span>`;
+                } else if(line.trim() !== '') {
+                    lineDiv.style.cursor = 'default';
+                    lineDiv.innerHTML = `<span class="lyrics-time" style="visibility:hidden">00:00</span><span class="lyrics-text">${line}</span>`;
+                }
+                contentDiv.appendChild(lineDiv);
+            });
+            lyricsWindow.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
