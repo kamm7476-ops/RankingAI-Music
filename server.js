@@ -23,7 +23,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(session({ secret: 'ranking-ai-secret', resave: false, saveUninitialized: true }));
 
 app.use((req, res, next) => {
-    // 테스트용 임시 관리자 로그인 상태 (나중에 실제 로그인 로직으로 교체)
     if (!req.session.user) {
         req.session.user = { id: 'kamm7476', name: '관리자본명', role: 'admin' }; 
     }
@@ -31,38 +30,46 @@ app.use((req, res, next) => {
     next();
 });
 
-// 메인 화면
+// 메인 화면 (차트)
 app.get('/', (req, res) => {
-    // 🌟 aiTool 항목이 추가된 임시 데이터
     const artists = [
         { 
             name: "밤양갱 (AI Cover)", 
             artist: "비비(BIBI)", 
             genre: "K-POP", 
-            aiTool: "Suno AI", // <-- 사용한 프로그램 데이터
+            aiTool: "Suno AI",
             lyrics: "[00:00] 달디달고 달디달고 달디단\n[00:05] 밤양갱 밤양갱", 
             uploader: "kamm7476", 
             uploaderRealName: "관리자본명",
-            imageUrl: "https://via.placeholder.com/150/111111/00e5ff?text=Album"
+            imageUrl: "https://via.placeholder.com/150/111111/00e5ff?text=Album",
+            // 🌟 임시로 재생할 수 있는 샘플 음악 URL 추가
+            audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" 
         }
     ];
     res.render('index', { artists: artists }); 
 });
 
-// 🌟 로그인 화면으로 가는 길
-app.get('/login', (req, res) => {
-    res.render('login');
+app.get('/login', (req, res) => res.render('login'));
+app.get('/signup', (req, res) => res.render('signup'));
+
+// 🌟 소통을 위한 커뮤니티(게시판) 화면 보여주기
+app.get('/board', (req, res) => {
+    // 임시 게시글 데이터
+    const posts = [
+        { title: "Suno AI로 만든 곡 평가해주세요!", author: "음악초보", date: "2026-03-08" },
+        { title: "요즘 이 차트 1위 곡 미쳤네요;;", author: "리스너", date: "2026-03-08" },
+        { title: "가사 싱크 어떻게 맞추나요?", author: "창작자", date: "2026-03-07" }
+    ];
+    res.render('board', { posts: posts });
 });
 
-// 🌟 회원가입 화면으로 가는 길
-app.get('/signup', (req, res) => {
-    res.render('signup');
+// 🌟 게시판 글쓰기 처리 (지금은 작성 후 게시판으로 돌아가게 설정)
+app.post('/add-post', (req, res) => {
+    console.log("새 게시글이 등록되었습니다.");
+    res.redirect('/board');
 });
 
-// 곡 등록 처리 (aiTool 포함)
 app.post('/add-music', upload.single('image'), (req, res) => {
-    const { name, artist, genre, aiTool, lyrics, realName } = req.body;
-    console.log(`새로운 곡 등록됨: ${name} (프로그램: ${aiTool}) / 실명: ${realName}`);
     res.redirect('/'); 
 });
 
