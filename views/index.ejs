@@ -2,14 +2,11 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RANKING AI</title>
     <style>
-        /* 프리미엄 블랙 & 네온 감성 (지니/멜론 스타일) */
         body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; }
         a { text-decoration: none; color: inherit; }
 
-        /* 우측 상단 로그인 포함된 헤더 */
         .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
         .logo { font-size: 26px; font-weight: 900; color: #00e5ff; letter-spacing: -1px; }
         .auth-buttons { display: flex; gap: 20px; align-items: center; }
@@ -19,7 +16,6 @@
 
         .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
 
-        /* 업로드 폼 (회원 전용) */
         .upload-section { background: #161718; padding: 30px; border-radius: 15px; margin-bottom: 40px; border: 1px solid #222; }
         .input-row { display: flex; gap: 15px; margin-bottom: 15px; }
         input[type="text"] { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; }
@@ -28,14 +24,12 @@
         .btn-upload { background: #333; color: #fff; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .btn-upload:hover { background: #00e5ff; color: #000; }
 
-        /* 차트 메뉴 (실시간, 일간 등) */
         .chart-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; border-bottom: 2px solid #222; padding-bottom: 15px; }
         .chart-title { font-size: 28px; font-weight: bold; }
         .tabs { display: flex; gap: 25px; }
         .tab { color: #777; cursor: pointer; font-weight: 600; font-size: 16px; padding-bottom: 10px; }
         .tab.active { color: #00e5ff; border-bottom: 3px solid #00e5ff; }
 
-        /* 랭킹 리스트 */
         .music-list { width: 100%; border-collapse: collapse; }
         .music-item { border-bottom: 1px solid #1a1b1c; transition: 0.2s; }
         .music-item:hover { background: #1a1c1e; }
@@ -44,15 +38,17 @@
         .album-art { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
         
         .song-info { display: flex; flex-direction: column; gap: 4px; }
-        .song-title { font-size: 16px; font-weight: 600; }
-        .singer { font-size: 14px; color: #888; }
+        .song-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .singer { font-size: 14px; color: #888; display: flex; align-items: center; gap: 8px; }
         
-        /* 비공개 정보 및 버튼 */
+        /* 🌟 AI 프로그램 이름이 들어갈 예쁜 네온 배지 */
+        .ai-badge { background: rgba(0, 229, 255, 0.1); border: 1px solid #00e5ff; color: #00e5ff; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
+        
         .private-info { font-size: 12px; color: #ff4a4a; margin-top: 4px; }
-        .edit-btn { background: #333; color: #fff; font-size: 12px; padding: 3px 8px; border-radius: 4px; margin-left: 10px; cursor: pointer; }
-        .lyrics-box { display: none; background: #111; padding: 15px; border-radius: 8px; margin-top: 10px; font-size: 14px; color: #ccc; line-height: 1.6; border: 1px solid #222; }
+        .edit-btn { background: #333; color: #fff; font-size: 11px; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+        .edit-btn:hover { background: #444; }
         
-        /* 인터랙션 버튼 (듣기, 좋아요, 댓글) */
+        .lyrics-box { display: none; background: #111; padding: 15px; border-radius: 8px; margin-top: 10px; font-size: 14px; color: #ccc; line-height: 1.6; border: 1px solid #222; }
         .actions { display: flex; gap: 15px; font-size: 20px; cursor: pointer; color: #888; }
         .actions span:hover { color: #00e5ff; transform: scale(1.1); transition: 0.2s; }
     </style>
@@ -74,11 +70,14 @@
                 <div class="input-row">
                     <input type="text" name="name" placeholder="곡 제목" required>
                     <input type="text" name="artist" placeholder="아티스트" required>
+                </div>
+                <div class="input-row">
                     <input type="text" name="genre" placeholder="장르 (예: 댄스, 발라드)">
+                    <input type="text" name="aiTool" placeholder="사용 프로그램 (예: Suno, Udio, 직접 작곡)" required>
                 </div>
                 <textarea name="lyrics" placeholder="가사를 입력하세요. (예: [00:15] 싱크 가사)"></textarea>
                 <div class="input-row">
-                    <input type="text" name="realName" placeholder="업로더 실명 (본인과 관리자에게만 노출됩니다)" required>
+                    <input type="text" name="realName" placeholder="업로더 실명 (비공개 처리됨)" required>
                     <input type="file" name="image" accept="image/*" class="file-upload" required>
                     <button type="submit" class="btn-upload">차트 등록</button>
                 </div>
@@ -108,7 +107,10 @@
                                 <span class="edit-btn">곡 정보 수정</span>
                             <% } %>
                         </div>
-                        <div class="singer"><%= music.artist %> (<%= music.genre %>)</div>
+                        <div class="singer">
+                            <%= music.artist %> (<%= music.genre %>)
+                            <span class="ai-badge">🎵 <%= music.aiTool %></span>
+                        </div>
                         
                         <% if (user && (user.id === music.uploader || user.role === 'admin')) { %>
                             <div class="private-info">🔒 등록자 정보 (비공개): <%= music.uploaderRealName %></div>
