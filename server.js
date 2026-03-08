@@ -15,7 +15,7 @@ const translations = {
 };
 
 // 17번 줄부터 22번 줄까지를 아래 내용으로 덮어씌우세요.
-// server.js 19번 줄을 이 주소로 정확하게 교체하세요!
+// 19번 줄을 아래 코드로 '정확히' 교체하세요. (비밀번호 ranking1234)
 const DB_URI = "mongodb+srv://kamm7476:ranking1234@cluster0.y95nodi.mongodb.net/RankingAI?retryWrites=true&w=majority";
 // 21번 줄 mongoose.connect 부분을 이걸로 교체!
 mongoose.connect(DB_URI, { serverSelectionTimeoutMS: 5000 })
@@ -60,5 +60,6 @@ const PORT = 4000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`✅ 서버가 http://localhost:${PORT} 에서 드디어 실행 중입니다!`);
 });
+
 
 
