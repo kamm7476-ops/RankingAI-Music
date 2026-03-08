@@ -9,7 +9,6 @@ const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, 'public/uploads/'),
     filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
 });
-// 🌟 이제 이미지와 오디오 파일을 모두 받을 수 있게 설정합니다.
 const upload = multer({ storage: storage });
 
 const DB_URI = process.env.DB_URI;
@@ -17,7 +16,6 @@ mongoose.connect(DB_URI)
     .then(() => console.log('✅ DB 연결 성공! (비밀번호 숨김 모드)'))
     .catch(err => console.log('❌ DB 에러:', err.message));
 
-// 🌟 음악 설계도에 '오디오 URL'과 '댓글(comments)' 항목 추가
 const musicSchema = new mongoose.Schema({
     name: String, artist: String, genre: String, aiTool: String, lyrics: String,
     uploader: String, uploaderRealName: String, imageUrl: String, audioUrl: String,
@@ -75,13 +73,11 @@ app.get('/admin', (req, res) => {
     res.render('admin', { stats: { users: 0, musics: 0, reports: 0 } });
 });
 
-// 🌟 사진과 MP3 파일을 동시에 받아서 DB에 저장하는 마법!
 app.post('/add-music', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'audio', maxCount: 1 }]), async (req, res) => {
     try {
         const { name, artist, genre, aiTool, lyrics, realName } = req.body;
         const uploader = req.session.user ? req.session.user.id : 'guest';
         
-        // 사진과 음원 파일이 서버에 잘 올라왔는지 확인 후 경로 저장
         const imageUrl = req.files && req.files['image'] ? `/uploads/${req.files['image'][0].filename}` : 'https://via.placeholder.com/150/111111/00e5ff?text=Album';
         const audioUrl = req.files && req.files['audio'] ? `/uploads/${req.files['audio'][0].filename}` : '';
 
@@ -97,7 +93,6 @@ app.post('/add-music', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'a
     }
 });
 
-// 🌟 곡마다 댓글을 달 수 있게 해주는 특별한 길 추가
 app.post('/add-comment/:id', async (req, res) => {
     try {
         const musicId = req.params.id;
@@ -107,12 +102,36 @@ app.post('/add-comment/:id', async (req, res) => {
         const music = await Music.findById(musicId);
         if(music) {
             music.comments.push({ author: author, text: text });
-            await music.save(); // 댓글을 곡 데이터 안에 쏙 집어넣고 저장
+            await music.save(); 
         }
-        res.redirect('/'); // 댓글 달면 바로 메인화면 새로고침
+        res.redirect('/'); 
     } catch (err) {
-        console.log("댓글 저장 에러:", err);
+        console.log("댓글 에러:", err);
         res.redirect('/');
+    }
+});
+
+// 🌟 곡 삭제 기능 추가 (본인이거나 관리자일 때만 삭제 허용)
+app.post('/delete-music/:id', async (req, res) => {
+    try {
+        if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/';</script>");
+
+        const musicId = req.params.id;
+        const music = await Music.findById(musicId);
+        
+        if (!music) return res.send("<script>alert('이미 삭제되었거나 존재하지 않는 곡입니다.'); location.href='/';</script>");
+
+        // 권한 확인: 'admin' 이거나 이 곡을 올린 'uploader' 본인일 때만!
+        if (req.session.user.role === 'admin' || req.session.user.id === music.uploader) {
+            await Music.findByIdAndDelete(musicId);
+            console.log(`🗑️ 음악 삭제 완료: ${music.name}`);
+            res.redirect('/'); // 삭제 후 메인화면으로
+        } else {
+            res.send("<script>alert('삭제 권한이 없습니다! (본인 곡만 삭제 가능)'); location.href='/';</script>");
+        }
+    } catch (err) {
+        console.log("삭제 에러:", err);
+        res.send("<script>alert('삭제 중 오류가 발생했습니다.'); location.href='/';</script>");
     }
 });
 
