@@ -16,78 +16,107 @@ mongoose.connect(DB_URI)
     .then(() => console.log('✅ RANKING AI DB 완벽 연결!'))
     .catch(err => console.log('❌ DB 에러:', err.message));
 
+// 🌟 1. 몽고DB에 음악을 저장할 '데이터 설계도(Schema)' 만들기
+const musicSchema = new mongoose.Schema({
+    name: String,
+    artist: String,
+    genre: String,
+    aiTool: String,
+    lyrics: String,
+    uploader: String,
+    uploaderRealName: String,
+    imageUrl: String,
+    audioUrl: String,
+    createdAt: { type: Date, default: Date.now } // 업로드된 시간 자동 기록
+});
+const Music = mongoose.model('Music', musicSchema);
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(session({ secret: 'ranking-ai-secret', resave: false, saveUninitialized: true }));
 
-// 🌟 접속한 사람의 로그인 정보를 화면으로 전달 (이제 강제로 관리자를 만들지 않습니다!)
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
     next();
 });
 
-// 메인 화면
-app.get('/', (req, res) => {
-    const artists = [
-        { 
-            name: "밤양갱 (AI Cover)", artist: "비비(BIBI)", genre: "K-POP", aiTool: "Suno AI",
-            lyrics: "[00:00] 달디달고 달디달고 달디단\n[00:05] 밤양갱 밤양갱", 
-            uploader: "kamm7476", uploaderRealName: "관리자본명",
-            imageUrl: "https://via.placeholder.com/150/111111/00e5ff?text=Album",
-            audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" 
+// 🌟 2. 메인 화면 (임시 데이터가 아니라 '진짜 DB'에서 곡을 꺼내옵니다!)
+app.get('/', async (req, res) => {
+    try {
+        // 최신순(-1)으로 DB에 저장된 음악들을 모두 가져옵니다.
+        let artists = await Music.find().sort({ createdAt: -1 });
+        
+        // 만약 DB가 텅 비어있다면, 안내 메시지용 가짜 데이터를 하나 보여줍니다.
+        if (artists.length === 0) {
+            artists = [{
+                name: "첫 곡의 주인공이 되어보세요!", artist: "RANKING AI", genre: "안내", aiTool: "시스템",
+                lyrics: "아직 등록된 곡이 없습니다. 위에서 음원을 업로드 해주세요.", 
+                uploader: "admin", uploaderRealName: "관리자",
+                imageUrl: "https://via.placeholder.com/150/222222/00e5ff?text=No+Music"
+            }];
         }
-    ];
-    res.render('index', { artists: artists }); 
+        res.render('index', { artists: artists }); 
+    } catch (err) {
+        console.log(err);
+        res.send("데이터를 불러오는 중 에러가 발생했습니다.");
+    }
 });
 
-// 로그인 화면 보여주기
 app.get('/login', (req, res) => res.render('login'));
-
-// 🌟 실제 로그인 처리 로직
 app.post('/login', (req, res) => {
     const { id, pw } = req.body;
-
-    // 관리자 아이디(kamm7476)와 비밀번호(ranking2026)를 입력했을 때만 특별 권한 부여!
     if (id === 'kamm7476' && pw === 'ranking2026') {
         req.session.user = { id: id, name: '최고관리자', role: 'admin' };
-        console.log('👑 관리자 로그인 성공!');
     } else {
-        // 그 외의 아이디로 로그인하면 일반 유저 권한 부여 (임시)
         req.session.user = { id: id, name: '일반유저', role: 'user' };
-        console.log(`👤 일반 유저 로그인: ${id}`);
     }
-    
-    res.redirect('/'); // 로그인 후 메인으로 이동
-});
-
-// 🌟 로그아웃 기능
-app.get('/logout', (req, res) => {
-    req.session.destroy(); // 로그인 기록 삭제
     res.redirect('/');
 });
-
-app.get('/signup', (req, res) => res.render('signup'));
-
-app.get('/board', (req, res) => {
-    const posts = [
-        { title: "Suno AI로 만든 곡 평가해주세요!", author: "음악초보", date: "2026-03-08" },
-        { title: "요즘 이 차트 1위 곡 미쳤네요;;", author: "리스너", date: "2026-03-08" }
-    ];
-    res.render('board', { posts: posts });
+app.get('/logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('/');
 });
-
-// 관리자 전용 공간 보안 확인
+app.get('/signup', (req, res) => res.render('signup'));
+app.get('/board', (req, res) => {
+    res.render('board', { posts: [] });
+});
 app.get('/admin', (req, res) => {
     if (!req.session.user || req.session.user.role !== 'admin') {
         return res.send("<script>alert('접근 권한이 없습니다! (관리자 전용)'); location.href='/';</script>");
     }
-    res.render('admin', { stats: { users: 154, musics: 32, reports: 0 } });
+    res.render('admin', { stats: { users: 0, musics: 0, reports: 0 } });
+});
+
+// 🌟 3. 곡 등록 시 DB에 "진짜로 저장"하는 핵심 마법!
+app.post('/add-music', upload.single('image'), async (req, res) => {
+    try {
+        const { name, artist, genre, aiTool, lyrics, realName } = req.body;
+        const uploader = req.session.user ? req.session.user.id : 'guest';
+        
+        // 이미지를 올렸으면 그 경로를, 안 올렸으면 기본 이미지를 씁니다.
+        const imageUrl = req.file ? `/uploads/${req.file.filename}` : 'https://via.placeholder.com/150/111111/00e5ff?text=Album';
+
+        // 새로 받은 곡 정보 포장하기
+        const newMusic = new Music({
+            name, artist, genre, aiTool, lyrics,
+            uploaderRealName: realName,
+            uploader, imageUrl
+        });
+
+        // 몽고DB에 영구 저장!
+        await newMusic.save();
+        console.log(`✅ DB 저장 성공: ${name}`);
+
+        res.redirect('/'); // 저장이 끝나면 메인 화면으로 돌아가기
+    } catch (err) {
+        console.log("❌ 음악 저장 실패:", err);
+        res.send("<script>alert('음원 등록에 실패했습니다.'); location.href='/';</script>");
+    }
 });
 
 app.post('/add-post', (req, res) => res.redirect('/board'));
-app.post('/add-music', upload.single('image'), (req, res) => res.redirect('/'));
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 포트 ${PORT}에서 실행 중!`));
