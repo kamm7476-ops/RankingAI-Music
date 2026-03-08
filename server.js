@@ -2,60 +2,52 @@ const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const session = require('express-session');
+const multer = require('multer'); // 이미지 업로드 도구
 const app = express();
 
-// 1. 번역 데이터 (화면 글자 설정)
-const translations = {
-    ko: { title: "랭킹 AI", login: "로그인", signup: "회원가입", community: "커뮤니티" },
-    en: { title: "Ranking AI", login: "Login", signup: "Sign Up", community: "Community" },
-    jp: { title: "ランキングAI", login: "ログイン", signup: "登録", community: "라운지" }
-};
+// 1. 이미지 저장 경로 설정 (public/uploads 폴더 사용)
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, 'public/uploads/'),
+    filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+});
+const upload = multer({ storage: storage });
 
-// 2. 몽고DB 연결 (사용자님 계정 정보 적용)
+// 2. 몽고DB 연결 (비밀번호 ranking2026 적용)
 const DB_URI = "mongodb+srv://kamm7476:ranking2026@cluster0.y95nodi.mongodb.net/RankingAI?retryWrites=true&w=majority";
-
 mongoose.connect(DB_URI)
-    .then(() => console.log('✅ Global DB Connected Successfully!'))
-    .catch(err => console.log('❌ DB 연결 에러:', err.message));
+    .then(() => console.log('✅ DB 연결 성공!'))
+    .catch(err => console.log('❌ DB 에러:', err.message));
 
-// 3. 서버 설정
+// 3. 앱 설정
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({
-    secret: 'ranking-secret-key',
-    resave: false,
-    saveUninitialized: true
-}));
+app.use(express.static('public')); // CSS, 이미지 파일 경로
+app.use(express.urlencoded({ extended: true })); // 폼 입력값 읽기
+app.use(session({ secret: 'ranking-key', resave: false, saveUninitialized: true }));
 
-// 4. 무한 리다이렉트(뺑뺑이) 방지 코드
+// 4. 언어 설정 미들웨어 (무한 뺑뺑이 방지)
 app.use((req, res, next) => {
-    if (!req.session.lang) {
-        req.session.lang = 'ko';
-    }
-    res.locals.t = translations[req.session.lang] || translations['ko'];
+    if (!req.session.lang) req.session.lang = 'ko';
+    const translations = {
+        ko: { title: "랭킹 AI", login: "로그인", upload: "아티스트 등록" },
+        en: { title: "Ranking AI", login: "Login", upload: "Add Artist" }
+    };
+    res.locals.t = translations[req.session.lang];
     res.locals.currentLang = req.session.lang;
-    res.locals.user = req.session.user || null;
-    next(); 
+    next();
 });
 
+// 5. 메인 페이지 (에러 방지용 artists 데이터 포함)
 app.get('/', (req, res) => {
-    // artists라는 빈 박스([])를 같이 보내줘야 에러가 안 납니다!
+    // 실제 운영 시에는 DB에서 데이터를 찾아와야 하지만, 
+    // 지금은 에러 방지를 위해 빈 목록([])을 먼저 보냅니다.
     res.render('index', { artists: [] }); 
 });
 
-app.get('/change-lang/:lang', (req, res) => {
-    const lang = req.params.lang;
-    if (translations[lang]) {
-        req.session.lang = lang;
-    }
+// 6. 이미지 업로드 처리 경로
+app.post('/add-artist', upload.single('image'), (req, res) => {
+    console.log("새 아티스트 등록 시도 중...");
     res.redirect('/');
 });
 
-// 6. 서버 시동
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-    console.log(`✅ 서버 오픈! 포트번호: ${PORT}`);
-});
-
-
+app.listen(PORT, () => console.log(`🚀 서버 실행 중: ${PORT}`));
