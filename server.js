@@ -11,13 +11,13 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// 🌟 1. 몽고DB 완벽 연결
-const DB_URI = "mongodb+srv://kamm7476:ranking2026@cluster0.y95nodi.mongodb.net/RankingAI?retryWrites=true&w=majority";
+// 🌟 비밀번호가 있던 자리를 지우고, Render의 '비밀 금고(Environment)'에서 가져오도록 수정했습니다!
+const DB_URI = process.env.DB_URI;
+
 mongoose.connect(DB_URI)
-    .then(() => console.log('✅ RANKING AI DB 완벽 연결 성공!'))
+    .then(() => console.log('✅ DB 연결 성공! (비밀번호 숨김 모드)'))
     .catch(err => console.log('❌ DB 에러:', err.message));
 
-// 🌟 2. 음악 데이터 설계도 (이제 진짜로 저장됩니다!)
 const musicSchema = new mongoose.Schema({
     name: String, artist: String, genre: String, aiTool: String, lyrics: String,
     uploader: String, uploaderRealName: String, imageUrl: String, audioUrl: String,
@@ -36,11 +36,10 @@ app.use((req, res, next) => {
     next();
 });
 
-// 🌟 3. 메인 화면 (DB에서 진짜 음악들을 불러옵니다)
+// 메인 화면
 app.get('/', async (req, res) => {
     try {
-        let artists = await Music.find().sort({ createdAt: -1 }); // 최신순 정렬
-        
+        let artists = await Music.find().sort({ createdAt: -1 });
         if (artists.length === 0) {
             artists = [{
                 name: "첫 곡의 주인공이 되어보세요!", artist: "RANKING AI", genre: "안내", aiTool: "시스템",
@@ -51,13 +50,11 @@ app.get('/', async (req, res) => {
         }
         res.render('index', { artists: artists }); 
     } catch (err) {
-        console.log("DB 불러오기 에러:", err);
-        // 에러가 나도 무한 뺑뺑이 돌지 않게 안전하게 처리
-        res.send("<h1>데이터를 불러오는 중 일시적인 에러가 발생했습니다. 잠시 후 새로고침 해주세요.</h1>");
+        console.log("DB 에러:", err);
+        res.send("<h1>데이터를 불러오는 중 에러가 발생했습니다.</h1>");
     }
 });
 
-// 로그인, 회원가입, 커뮤니티, 관리자 라우터
 app.get('/login', (req, res) => res.render('login'));
 app.post('/login', (req, res) => {
     const { id, pw } = req.body;
@@ -68,9 +65,15 @@ app.post('/login', (req, res) => {
     }
     res.redirect('/');
 });
-app.get('/logout', (req, res) => { req.session.destroy(); res.redirect('/'); });
+
+app.get('/logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('/');
+});
+
 app.get('/signup', (req, res) => res.render('signup'));
 app.get('/board', (req, res) => res.render('board', { posts: [] }));
+
 app.get('/admin', (req, res) => {
     if (!req.session.user || req.session.user.role !== 'admin') {
         return res.send("<script>alert('접근 권한이 없습니다!'); location.href='/';</script>");
@@ -78,7 +81,6 @@ app.get('/admin', (req, res) => {
     res.render('admin', { stats: { users: 0, musics: 0, reports: 0 } });
 });
 
-// 🌟 4. 음악 등록 시 DB에 완벽하게 저장하는 기능 활성화!
 app.post('/add-music', upload.single('image'), async (req, res) => {
     try {
         const { name, artist, genre, aiTool, lyrics, realName } = req.body;
@@ -89,7 +91,7 @@ app.post('/add-music', upload.single('image'), async (req, res) => {
             name, artist, genre, aiTool, lyrics, uploaderRealName: realName, uploader, imageUrl
         });
 
-        await newMusic.save(); // DB에 영구 저장!
+        await newMusic.save();
         res.redirect('/'); 
     } catch (err) {
         console.log("저장 실패:", err);
@@ -97,7 +99,5 @@ app.post('/add-music', upload.single('image'), async (req, res) => {
     }
 });
 
-app.post('/add-post', (req, res) => res.redirect('/board'));
-
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`🚀 RANKING AI 실서버 실행 중: ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 RANKING AI 포트 ${PORT}에서 실행 중!`));
