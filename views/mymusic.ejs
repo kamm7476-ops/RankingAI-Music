@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이뮤직 - RANKING AI</title>
+    <style>
+        body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; padding-bottom: 100px; }
+        a { text-decoration: none; color: inherit; }
+        .main-header { background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; border-bottom: 1px solid #1a1b1c; }
+        .logo { font-size: 28px; font-weight: 900; color: #ff5722; letter-spacing: -1px; } 
+        .auth-buttons { display: flex; gap: 20px; align-items: center; }
+        .btn-menu { color: #fff; font-weight: bold; font-size: 15px; }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+        .page-title { font-size: 32px; font-weight: bold; color: #ff5722; margin-bottom: 10px; }
+        .page-desc { color: #aaa; margin-bottom: 30px; }
+
+        .chart-controls { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; }
+        .control-btn { background: #161718; color: #fff; border: 1px solid #444; padding: 8px 15px; border-radius: 20px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
+        .control-btn:hover { background: #333; border-color: #ff5722; color: #ff5722; }
+
+        .music-list { width: 100%; border-collapse: collapse; }
+        .music-item { border-bottom: 1px solid #1a1b1c; }
+        .music-item td { padding: 15px 10px; vertical-align: middle; }
+        .check-col { width: 30px; text-align: center; }
+        .custom-checkbox { width: 18px; height: 18px; accent-color: #ff5722; cursor: pointer; }
+        .album-art { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
+        .song-title { font-size: 16px; font-weight: 600; display: block; margin-bottom: 4px; }
+        .singer { font-size: 13px; color: #aaa; }
+
+        /* 하단 고정 플레이어 */
+        .bottom-player-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #1a1c1e; border-top: 2px solid #ff5722; padding: 10px 40px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; z-index: 1000; }
+        .player-info { display: flex; align-items: center; gap: 15px; width: 300px; }
+        .player-cover { width: 50px; height: 50px; border-radius: 5px; background: #000; object-fit: cover; }
+        .player-text { display: flex; flex-direction: column; }
+        .player-title { font-size: 15px; font-weight: bold; color: #fff; }
+        .player-artist { font-size: 12px; color: #aaa; }
+        .main-audio-element { flex: 1; max-width: 600px; outline: none; accent-color: #ff5722; }
+        .main-audio-element::-webkit-media-controls-panel { background-color: #1a1c1e; }
+        .main-audio-element::-webkit-media-controls-play-button { filter: invert(40%) sepia(80%) saturate(300%) hue-rotate(330deg) brightness(110%); }
+
+        @media (max-width: 768px) {
+            .bottom-player-bar { padding: 10px; flex-direction: column; gap: 10px; }
+            .player-info { width: 100%; }
+            .main-audio-element { width: 100%; max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-top">
+            <div class="logo">RANKING AI</div>
+            <div class="auth-buttons">
+                <a href="/" class="btn-menu">🏠 메인 차트로 돌아가기</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-title">🎧 내 음악 보관함</div>
+        <div class="page-desc"><%= user.id %>님이 담아둔 소중한 곡들입니다.</div>
+
+        <div class="chart-controls">
+            <input type="checkbox" id="checkAll" class="custom-checkbox" onchange="toggleAll(this)">
+            <button class="control-btn" onclick="playAll()">▶ 전체듣기</button>
+            <button class="control-btn" onclick="playSelected()">▶ 선택듣기</button>
+        </div>
+
+        <table class="music-list">
+            <% if (artists && artists.length > 0) { %>
+                <% artists.forEach(function(music) { %>
+                <tr class="music-item" data-id="<%= music._id %>" data-title="<%= music.name %>" data-artist="<%= music.artist %>" data-cover="<%= music.imageUrl %>" data-audio="<%= music.audioUrl %>">
+                    <td class="check-col"><input type="checkbox" class="custom-checkbox song-check" value="<%= music._id %>"></td>
+                    <td style="width: 70px;"><img src="<%= music.imageUrl %>" class="album-art"></td>
+                    <td>
+                        <span class="song-title"><%= music.name %></span>
+                        <span class="singer"><%= music.artist %></span>
+                    </td>
+                    <td style="text-align:right;">
+                        <button class="control-btn" style="display:inline-block;" onclick="playSingleTrack(this)">▶ 듣기</button>
+                    </td>
+                </tr>
+                <% }); %>
+            <% } else { %>
+                <tr><td colspan="4" style="text-align:center; padding:100px; color:#555;">보관함이 텅 비어있습니다. 메인 차트에서 곡을 담아보세요!</td></tr>
+            <% } %>
+        </table>
+    </div>
+
+    <div class="bottom-player-bar">
+        <div class="player-info">
+            <img src="https://via.placeholder.com/50/222222/ff5722?text=Play" id="main-player-cover" class="player-cover">
+            <div class="player-text">
+                <span id="main-player-title" class="player-title">선택된 곡이 없습니다</span>
+                <span id="main-player-artist" class="player-artist">목록에서 음악을 선택해주세요</span>
+            </div>
+        </div>
+        <audio id="main-audio" class="main-audio-element" controls controlsList="nodownload"></audio>
+    </div>
+
+    <script>
+        let playlist = [];
+        let currentIndex = 0;
+        const mainAudio = document.getElementById('main-audio');
+
+        function toggleAll(source) {
+            const checkboxes = document.querySelectorAll('.song-check');
+            checkboxes.forEach(cb => cb.checked = source.checked);
+        }
+
+        function loadTrack(index) {
+            if(index >= 0 && index < playlist.length) {
+                const track = playlist[index];
+                if(!track.audio) { alert("음원 파일이 없는 곡입니다."); return; }
+                
+                document.getElementById('main-player-title').innerText = track.title;
+                document.getElementById('main-player-artist').innerText = track.artist;
+                document.getElementById('main-player-cover').src = track.cover;
+                
+                mainAudio.src = track.audio;
+                mainAudio.play();
+                currentIndex = index;
+            }
+        }
+
+        mainAudio.addEventListener('ended', function() {
+            if(currentIndex + 1 < playlist.length) loadTrack(currentIndex + 1);
+        });
+
+        function playSingleTrack(btnElement) {
+            const tr = btnElement.closest('.music-item');
+            playlist = [{ id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio }];
+            loadTrack(0);
+        }
+
+        function playAll() {
+            const rows = document.querySelectorAll('.music-item');
+            playlist = Array.from(rows).map(tr => ({ id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio })).filter(t => t.audio !== "");
+            if(playlist.length > 0) loadTrack(0); else alert("재생할 음원이 없습니다.");
+        }
+
+        function playSelected() {
+            const checkedBoxes = document.querySelectorAll('.song-check:checked');
+            if(checkedBoxes.length === 0) return alert("재생할 곡을 먼저 체크해주세요!");
+            
+            playlist = Array.from(checkedBoxes).map(cb => {
+                const tr = cb.closest('.music-item');
+                return { id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio };
+            }).filter(t => t.audio !== "");
+            
+            if(playlist.length > 0) loadTrack(0); else alert("재생 가능한 음원이 없습니다.");
+        }
+    </script>
+</body>
+</html>
