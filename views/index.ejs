@@ -11,6 +11,9 @@
         .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
         .logo { font-size: 26px; font-weight: 900; color: #00e5ff; letter-spacing: -1px; }
         .auth-buttons { display: flex; gap: 20px; align-items: center; }
+        /* 🌟 커뮤니티 메뉴 스타일 추가 */
+        .btn-menu { color: #fff; font-weight: bold; font-size: 15px; margin-right: 15px; transition: 0.2s; }
+        .btn-menu:hover { color: #00e5ff; }
         .btn-login { color: #bbb; font-size: 14px; transition: 0.2s; }
         .btn-login:hover { color: #fff; }
         .btn-signup { background: #00e5ff; color: #000; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 14px; }
@@ -38,31 +41,32 @@
         .rank { font-size: 22px; font-weight: bold; color: #00e5ff; width: 40px; text-align: center; }
         .album-art { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
         
-        .song-info { display: flex; flex-direction: column; gap: 4px; }
+        .song-info { display: flex; flex-direction: column; gap: 6px; }
         .song-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .singer { font-size: 14px; color: #888; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        
         .ai-badge { background: rgba(0, 229, 255, 0.1); border: 1px solid #00e5ff; color: #00e5ff; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
-        
         .private-info { font-size: 12px; color: #ff4a4a; margin-top: 4px; }
         .edit-btn { background: #333; color: #fff; font-size: 11px; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
-        
         .lyrics-box { display: none; background: #111; padding: 15px; border-radius: 8px; margin-top: 10px; font-size: 14px; color: #ccc; line-height: 1.6; border: 1px solid #222; }
-        .actions { display: flex; gap: 15px; font-size: 20px; cursor: pointer; color: #888; }
-        .actions span:hover { color: #00e5ff; transform: scale(1.1); transition: 0.2s; }
+        
+        /* 🌟 오디오 플레이어 스타일 */
+        audio { width: 100%; height: 35px; outline: none; margin-top: 5px; border-radius: 20px; }
+        audio::-webkit-media-controls-panel { background-color: #222; }
+        audio::-webkit-media-controls-current-time-display, audio::-webkit-media-controls-time-remaining-display { color: #fff; }
 
-        /* 🌟 스마트폰 화면용 디자인 (화면이 작아질 때 적용됨) */
+        .actions { display: flex; gap: 15px; font-size: 20px; cursor: pointer; color: #888; flex-direction: column; align-items: center;}
+        .actions-icons { display: flex; gap: 15px;}
+        .actions-icons span:hover { color: #00e5ff; transform: scale(1.1); transition: 0.2s; }
+
         @media (max-width: 768px) {
             .navbar { padding: 15px 20px; }
             .logo { font-size: 20px; }
             .container { padding: 20px 10px; }
-            .input-row { flex-direction: column; gap: 10px; } /* 입력칸을 세로로 배치 */
+            .input-row { flex-direction: column; gap: 10px; } 
             .chart-header { flex-direction: column; align-items: flex-start; gap: 15px; }
             .music-item td { padding: 10px 5px; }
             .rank { font-size: 18px; width: 25px; }
             .album-art { width: 50px; height: 50px; }
-            .song-title { font-size: 14px; }
-            .actions { gap: 10px; font-size: 16px; }
         }
     </style>
 </head>
@@ -70,6 +74,7 @@
     <nav class="navbar">
         <div class="logo">RANKING AI</div>
         <div class="auth-buttons">
+            <a href="/board" class="btn-menu">💬 커뮤니티</a>
             <a href="/login" class="btn-login">로그인</a>
             <a href="/signup" class="btn-signup">회원가입</a>
         </div>
@@ -124,18 +129,24 @@
                             <span class="ai-badge">🎵 <%= music.aiTool %></span>
                         </div>
                         
+                        <% if (music.audioUrl) { %>
+                            <audio controls>
+                                <source src="<%= music.audioUrl %>" type="audio/mpeg">
+                            </audio>
+                        <% } %>
+                        
                         <% if (user && (user.id === music.uploader || user.role === 'admin')) { %>
                             <div class="private-info">🔒 등록자 (비공개): <%= music.uploaderRealName %></div>
                         <% } %>
 
                         <div id="lyrics-<%= index %>" class="lyrics-box"><%= music.lyrics %></div>
                     </td>
-                    <td style="text-align: right;">
+                    <td style="text-align: right; vertical-align: middle;">
                         <div class="actions">
-                            <span title="음악 듣기">🎧</span>
-                            <span title="가사 보기" onclick="document.getElementById('lyrics-<%= index %>').style.display = (document.getElementById('lyrics-<%= index %>').style.display === 'block') ? 'none' : 'block';">📝</span>
-                            <span title="좋아요">❤️</span>
-                            <span title="댓글 쓰기">💬</span>
+                            <div class="actions-icons">
+                                <span title="가사 보기" onclick="document.getElementById('lyrics-<%= index %>').style.display = (document.getElementById('lyrics-<%= index %>').style.display === 'block') ? 'none' : 'block';">📝</span>
+                                <span title="좋아요">❤️</span>
+                            </div>
                         </div>
                     </td>
                 </tr>
