@@ -8,50 +8,51 @@
         body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
         .auth-container { background: #161718; padding: 40px; border-radius: 15px; border: 1px solid #222; width: 100%; max-width: 500px; box-sizing: border-box; }
         .logo { font-size: 28px; font-weight: 900; color: #00e5ff; margin-bottom: 20px; text-align: center; }
-        input { width: 100%; background: #222; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-sizing: border-box; }
         
-        /* 🌟 전문적인 약관 박스 디자인 */
+        input { width: 100%; background: #222; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-sizing: border-box; outline: none; transition: 0.2s; }
+        input:focus { border-color: #00e5ff; }
+        
+        /* 🌟 이메일 인증 영역 스타일 */
+        .verify-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        .verify-group input { margin-bottom: 0; flex: 1; }
+        .btn-verify { background: #333; color: #fff; border: 1px solid #444; padding: 0 20px; border-radius: 8px; cursor: pointer; font-weight: bold; white-space: nowrap; transition: 0.2s; font-size: 14px; }
+        .btn-verify:hover { background: #00e5ff; color: #000; border-color: #00e5ff; }
+        .btn-verify.success { background: #00cd3c; color: #000; border-color: #00cd3c; pointer-events: none; }
+
         .terms-box { background: #111; border: 1px solid #333; border-radius: 8px; padding: 20px; height: 160px; overflow-y: scroll; font-size: 13px; color: #aaa; margin-bottom: 15px; line-height: 1.6; }
         .terms-title { color: #fff; font-weight: bold; margin-top: 10px; margin-bottom: 5px; font-size: 14px; }
         .checkbox-group { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; font-size: 14px; cursor: pointer; }
         
-        .btn-submit { width: 100%; background: #00e5ff; color: #000; font-weight: bold; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        .btn-submit { width: 100%; background: #00e5ff; color: #000; font-weight: bold; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: 0.2s; }
         .btn-submit:hover { filter: brightness(1.1); }
         .back-link { display: block; text-align: center; margin-top: 20px; color: #888; text-decoration: none; font-size: 14px; }
-
-        /* 🌟 스마트폰용 좁은 화면 대응 */
-        @media (max-width: 480px) {
-            .auth-container { padding: 25px 20px; }
-            .logo { font-size: 24px; }
-            .terms-box { height: 120px; font-size: 12px; }
-        }
     </style>
 </head>
 <body>
     <div class="auth-container">
         <div class="logo">RANKING AI</div>
         
-        <form action="/" method="GET">
+        <form action="/" method="GET" id="signupForm" onsubmit="return checkEmailVerification()">
             <input type="text" name="id" placeholder="사용할 아이디" required>
             <input type="password" name="pw" placeholder="비밀번호" required>
-            <input type="text" name="realName" placeholder="본명 (철저히 비공개 처리됩니다)" required>
+            
+            <div class="verify-group">
+                <input type="email" id="emailInput" name="email" placeholder="이메일 주소 (예: user@gmail.com)" required>
+                <button type="button" class="btn-verify" onclick="sendVerificationCode()">인증번호 전송</button>
+            </div>
+
+            <div class="verify-group" id="codeGroup" style="display: none;">
+                <input type="text" id="codeInput" placeholder="인증번호 6자리 입력">
+                <button type="button" id="verifyBtn" class="btn-verify" onclick="verifyCode()">확인</button>
+            </div>
 
             <div class="terms-box">
                 <div class="terms-title">제 1 조 (목적)</div>
-                본 약관은 'RANKING AI'가 제공하는 인공지능 음악 차트 및 커뮤니티 서비스의 이용 조건 및 절차, 회원과 플랫폼 간의 권리와 의무를 규정함을 목적으로 합니다.
-                
-                <div class="terms-title">제 2 조 (개인정보 및 실명 보호)</div>
-                회원가입 시 수집되는 회원의 '실명'은 서비스의 신뢰도 유지를 위한 최소한의 장치입니다. 이는 시스템상 철저히 암호화 및 비공개 처리되며, 회원 본인과 시스템 관리자 외에는 절대 노출되지 않습니다.
-                
-                <div class="terms-title">제 3 조 (저작권 및 업로더의 책임)</div>
-                ① 회원이 플랫폼에 등록한 음원, 가사, 앨범 이미지 등의 모든 창작물에 대한 저작권 및 법적 책임은 업로드한 회원 본인에게 있습니다.<br>
-                ② 타인의 저작물을 무단으로 도용하거나 상업적으로 악용하는 경우, 경고 없이 계정이 영구 삭제될 수 있으며 관련 법적 분쟁 시 플랫폼은 책임지지 않습니다.
-                
-                <div class="terms-title">제 4 조 (AI 툴 활용 명시)</div>
-                본 플랫폼은 AI 기술을 활용한 창작을 지향합니다. 회원은 음악 등록 시 자신이 사용한 프로그램(예: Suno, Udio, 직접 작곡 등)을 투명하게 명시하여 건전한 음악 문화를 조성해야 합니다.
-
-                <div class="terms-title">제 5 조 (커뮤니티 이용 매너)</div>
-                모든 회원은 좋아요, 댓글 등을 통해 자유롭게 소통할 수 있습니다. 단, 차트 순위를 조작하는 어뷰징 행위나 타인을 비방하는 악성 댓글은 엄격히 금지됩니다.
+                본 약관은 'RANKING AI'가 제공하는 인공지능 음악 차트 및 커뮤니티 서비스의 이용 조건 및 절차를 규정합니다.
+                <div class="terms-title">제 2 조 (개인정보 및 이메일 보호)</div>
+                회원가입 시 본인 확인을 위해 수집되는 '이메일 주소'는 암호화되어 안전하게 보호되며, 비밀번호 찾기 및 중요 공지 목적으로만 사용됩니다.
+                <div class="terms-title">제 3 조 (저작권 및 커뮤니티 매너)</div>
+                회원이 플랫폼에 등록한 창작물에 대한 책임은 본인에게 있으며, 악성 댓글 및 어뷰징 적발 시 계정이 영구 삭제될 수 있습니다.
             </div>
 
             <label class="checkbox-group">
@@ -63,5 +64,59 @@
         </form>
         <a href="/" class="back-link">메인으로 돌아가기</a>
     </div>
+
+    <script>
+        let generatedCode = "";
+        let isEmailVerified = false;
+
+        // 1. 인증번호 전송 함수
+        function sendVerificationCode() {
+            const email = document.getElementById('emailInput').value;
+            
+            // 이메일에 @가 들어있는지 간단히 검사
+            if (!email.includes('@')) {
+                alert('올바른 이메일 주소 형식을 입력해주세요.');
+                return;
+            }
+            
+            // 임의의 6자리 인증번호 생성 (예: 492817)
+            generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+            // 🌟 테스트 모드: 실제 이메일 대신 팝업창으로 번호를 알려줍니다.
+            alert(`[테스트 모드 안내]\n'${email}'로 인증번호가 발송되었습니다.\n\n▶ 발송된 인증번호: [ ${generatedCode} ]\n\n(나중에 실제 메일 서버를 연결하면 이 창 대신 진짜 메일이 날아갑니다!)`);
+
+            // 숨겨뒀던 인증번호 입력칸을 화면에 보여줍니다.
+            document.getElementById('codeGroup').style.display = 'flex';
+        }
+
+        // 2. 인증번호 확인 함수
+        function verifyCode() {
+            const inputCode = document.getElementById('codeInput').value;
+            
+            if (inputCode === generatedCode) {
+                alert('✅ 이메일 인증이 완료되었습니다!');
+                isEmailVerified = true;
+                
+                // 인증 성공 시 입력칸을 수정 못하게 막고 버튼 색을 초록색으로 변경
+                document.getElementById('emailInput').readOnly = true;
+                document.getElementById('codeInput').readOnly = true;
+                
+                const btn = document.getElementById('verifyBtn');
+                btn.textContent = '인증완료';
+                btn.classList.add('success');
+            } else {
+                alert('❌ 인증번호가 일치하지 않습니다. 다시 확인해주세요.');
+            }
+        }
+
+        // 3. 최종 가입 버튼 누를 때 인증했는지 검사하는 함수
+        function checkEmailVerification() {
+            if (!isEmailVerified) {
+                alert('이메일 인증을 먼저 완료해주세요!');
+                return false; // 폼 전송 막기
+            }
+            return true; // 성공하면 메인으로 넘어감
+        }
+    </script>
 </body>
 </html>
