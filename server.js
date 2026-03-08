@@ -15,8 +15,8 @@ const translations = {
 };
 
 // 17번 줄부터 22번 줄까지를 아래 내용으로 덮어씌우세요.
-// 19번 줄을 아래의 긴 주소로 완전히 교체해 보세요!
-const DB_URI = "mongodb://kamm7476:ranking1234@cluster0-shard-00-00.y95nodi.mongodb.net:27017,cluster0-shard-00-01.y95nodi.mongodb.net:27017,cluster0-shard-00-02.y95nodi.mongodb.net:27017/RankingAI?ssl=true&replicaSet=atlas-13v68n-shard-0&authSource=admin&retryWrites=true&w=majority";
+// VS Code의 server.js 19번 줄을 이 코드로 '정확히' 교체하세요.
+const DB_URI = "mongodb+srv://kamm7476:ranking1234@cluster0.y95nodi.mongodb.net/RankingAI?retryWrites=true&w=majority";
 // 21번 줄 mongoose.connect 부분을 이걸로 교체!
 mongoose.connect(DB_URI, { serverSelectionTimeoutMS: 5000 })
   .then(() => console.log("✅ Global DB Connected Successfully!"))
@@ -60,3 +60,4 @@ const PORT = 4000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`✅ 서버가 http://localhost:${PORT} 에서 드디어 실행 중입니다!`);
 });
+
