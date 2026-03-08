@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 - RANKING AI</title>
+    <style>
+        body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        .auth-container { background: #161718; padding: 40px; border-radius: 15px; border: 1px solid #222; width: 100%; max-width: 500px; box-sizing: border-box; }
+        .logo { font-size: 28px; font-weight: 900; color: #00e5ff; margin-bottom: 20px; text-align: center; }
+        input { width: 100%; background: #222; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-sizing: border-box; }
+        
+        /* 🌟 전문적인 약관 박스 디자인 */
+        .terms-box { background: #111; border: 1px solid #333; border-radius: 8px; padding: 20px; height: 160px; overflow-y: scroll; font-size: 13px; color: #aaa; margin-bottom: 15px; line-height: 1.6; }
+        .terms-title { color: #fff; font-weight: bold; margin-top: 10px; margin-bottom: 5px; font-size: 14px; }
+        .checkbox-group { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; font-size: 14px; cursor: pointer; }
+        
+        .btn-submit { width: 100%; background: #00e5ff; color: #000; font-weight: bold; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        .btn-submit:hover { filter: brightness(1.1); }
+        .back-link { display: block; text-align: center; margin-top: 20px; color: #888; text-decoration: none; font-size: 14px; }
+
+        /* 🌟 스마트폰용 좁은 화면 대응 */
+        @media (max-width: 480px) {
+            .auth-container { padding: 25px 20px; }
+            .logo { font-size: 24px; }
+            .terms-box { height: 120px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="logo">RANKING AI</div>
+        
+        <form action="/" method="GET">
+            <input type="text" name="id" placeholder="사용할 아이디" required>
+            <input type="password" name="pw" placeholder="비밀번호" required>
+            <input type="text" name="realName" placeholder="본명 (철저히 비공개 처리됩니다)" required>
+
+            <div class="terms-box">
+                <div class="terms-title">제 1 조 (목적)</div>
+                본 약관은 'RANKING AI'가 제공하는 인공지능 음악 차트 및 커뮤니티 서비스의 이용 조건 및 절차, 회원과 플랫폼 간의 권리와 의무를 규정함을 목적으로 합니다.
+                
+                <div class="terms-title">제 2 조 (개인정보 및 실명 보호)</div>
+                회원가입 시 수집되는 회원의 '실명'은 서비스의 신뢰도 유지를 위한 최소한의 장치입니다. 이는 시스템상 철저히 암호화 및 비공개 처리되며, 회원 본인과 시스템 관리자 외에는 절대 노출되지 않습니다.
+                
+                <div class="terms-title">제 3 조 (저작권 및 업로더의 책임)</div>
+                ① 회원이 플랫폼에 등록한 음원, 가사, 앨범 이미지 등의 모든 창작물에 대한 저작권 및 법적 책임은 업로드한 회원 본인에게 있습니다.<br>
+                ② 타인의 저작물을 무단으로 도용하거나 상업적으로 악용하는 경우, 경고 없이 계정이 영구 삭제될 수 있으며 관련 법적 분쟁 시 플랫폼은 책임지지 않습니다.
+                
+                <div class="terms-title">제 4 조 (AI 툴 활용 명시)</div>
+                본 플랫폼은 AI 기술을 활용한 창작을 지향합니다. 회원은 음악 등록 시 자신이 사용한 프로그램(예: Suno, Udio, 직접 작곡 등)을 투명하게 명시하여 건전한 음악 문화를 조성해야 합니다.
+
+                <div class="terms-title">제 5 조 (커뮤니티 이용 매너)</div>
+                모든 회원은 좋아요, 댓글 등을 통해 자유롭게 소통할 수 있습니다. 단, 차트 순위를 조작하는 어뷰징 행위나 타인을 비방하는 악성 댓글은 엄격히 금지됩니다.
+            </div>
+
+            <label class="checkbox-group">
+                <input type="checkbox" required>
+                <span>위 RANKING AI 서비스 이용 약관에 동의합니다. (필수)</span>
+            </label>
+
+            <button type="submit" class="btn-submit">가입 완료하기</button>
+        </form>
+        <a href="/" class="back-link">메인으로 돌아가기</a>
+    </div>
+</body>
+</html>
