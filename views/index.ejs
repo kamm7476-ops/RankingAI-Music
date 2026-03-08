@@ -1,45 +1,138 @@
 <!DOCTYPE html>
-<html lang="<%= currentLang %>">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title><%= t.title %></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RANKING AI</title>
     <style>
-        body { background-color: #000; color: #fff; font-family: 'Noto Sans KR', sans-serif; margin: 0; }
-        .header { padding: 20px 40px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { color: #00cd3c; font-size: 24px; }
-        .upload-section { background: #111; padding: 30px; border-radius: 15px; margin: 20px auto; max-width: 500px; border: 1px solid #333; }
-        .input-field { background: #222; border: 1px solid #444; color: #fff; padding: 10px; width: 90%; margin-bottom: 10px; border-radius: 5px; }
-        .submit-btn { background: #00cd3c; color: #000; font-weight: bold; padding: 12px; border: none; width: 100%; border-radius: 5px; cursor: pointer; }
-        .ranking-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 25px; padding: 40px; }
-        .album-art { position: relative; width: 100%; padding-bottom: 100%; border-radius: 10px; overflow: hidden; background: #222; }
-        .album-art img { position: absolute; width: 100%; height: 100%; object-fit: cover; }
+        /* 프리미엄 블랙 & 네온 감성 (지니/멜론 스타일) */
+        body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; }
+        a { text-decoration: none; color: inherit; }
+
+        /* 우측 상단 로그인 포함된 헤더 */
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 26px; font-weight: 900; color: #00e5ff; letter-spacing: -1px; }
+        .auth-buttons { display: flex; gap: 20px; align-items: center; }
+        .btn-login { color: #bbb; font-size: 14px; transition: 0.2s; }
+        .btn-login:hover { color: #fff; }
+        .btn-signup { background: #00e5ff; color: #000; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+
+        /* 업로드 폼 (회원 전용) */
+        .upload-section { background: #161718; padding: 30px; border-radius: 15px; margin-bottom: 40px; border: 1px solid #222; }
+        .input-row { display: flex; gap: 15px; margin-bottom: 15px; }
+        input[type="text"] { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; }
+        textarea { width: 100%; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; height: 80px; margin-bottom: 15px; box-sizing: border-box; }
+        .file-upload { flex: 1; background: #222; padding: 10px; border-radius: 8px; color: #aaa; }
+        .btn-upload { background: #333; color: #fff; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-upload:hover { background: #00e5ff; color: #000; }
+
+        /* 차트 메뉴 (실시간, 일간 등) */
+        .chart-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; border-bottom: 2px solid #222; padding-bottom: 15px; }
+        .chart-title { font-size: 28px; font-weight: bold; }
+        .tabs { display: flex; gap: 25px; }
+        .tab { color: #777; cursor: pointer; font-weight: 600; font-size: 16px; padding-bottom: 10px; }
+        .tab.active { color: #00e5ff; border-bottom: 3px solid #00e5ff; }
+
+        /* 랭킹 리스트 */
+        .music-list { width: 100%; border-collapse: collapse; }
+        .music-item { border-bottom: 1px solid #1a1b1c; transition: 0.2s; }
+        .music-item:hover { background: #1a1c1e; }
+        .music-item td { padding: 15px; vertical-align: middle; }
+        .rank { font-size: 22px; font-weight: bold; color: #00e5ff; width: 40px; text-align: center; }
+        .album-art { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
+        
+        .song-info { display: flex; flex-direction: column; gap: 4px; }
+        .song-title { font-size: 16px; font-weight: 600; }
+        .singer { font-size: 14px; color: #888; }
+        
+        /* 비공개 정보 및 버튼 */
+        .private-info { font-size: 12px; color: #ff4a4a; margin-top: 4px; }
+        .edit-btn { background: #333; color: #fff; font-size: 12px; padding: 3px 8px; border-radius: 4px; margin-left: 10px; cursor: pointer; }
+        .lyrics-box { display: none; background: #111; padding: 15px; border-radius: 8px; margin-top: 10px; font-size: 14px; color: #ccc; line-height: 1.6; border: 1px solid #222; }
+        
+        /* 인터랙션 버튼 (듣기, 좋아요, 댓글) */
+        .actions { display: flex; gap: 15px; font-size: 20px; cursor: pointer; color: #888; }
+        .actions span:hover { color: #00e5ff; transform: scale(1.1); transition: 0.2s; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🍈 <%= t.title %></h1>
-        <div><a href="/change-lang/ko" style="color:#00cd3c; text-decoration:none;">KO</a> | <a href="/change-lang/en" style="color:#00cd3c; text-decoration:none;">EN</a></div>
-    </div>
-    <div class="upload-section">
-        <h3>✨ <%= t.upload %></h3>
-        <form action="/add-artist" method="POST" enctype="multipart/form-data">
-            <input type="text" name="name" class="input-field" placeholder="곡 제목 또는 아티스트 명" required>
-            <input type="text" name="genre" class="input-field" placeholder="장르">
-            <input type="file" name="image" class="input-field" accept="image/*" required>
-            <button type="submit" class="submit-btn">차트 등록하기</button>
-        </form>
-    </div>
-    <div class="ranking-grid">
-        <% if (artists && artists.length > 0) { %>
-            <% artists.forEach(function(artist, index) { %>
-                <div style="text-align:center;">
-                    <div class="album-art"><img src="<%= artist.imageUrl %>"></div>
-                    <p><%= artist.name %></p>
+
+    <nav class="navbar">
+        <div class="logo">RANKING AI</div>
+        <div class="auth-buttons">
+            <a href="/login" class="btn-login">로그인</a>
+            <a href="/signup" class="btn-signup">회원가입</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="upload-section">
+            <h3 style="margin-top:0; color:#00e5ff;">🎵 회원을 위한 음원 업로드</h3>
+            <form action="/add-music" method="POST" enctype="multipart/form-data">
+                <div class="input-row">
+                    <input type="text" name="name" placeholder="곡 제목" required>
+                    <input type="text" name="artist" placeholder="아티스트" required>
+                    <input type="text" name="genre" placeholder="장르 (예: 댄스, 발라드)">
                 </div>
-            <% }); %>
-        <% } else { %>
-            <p style="text-align: center; width:100%; color: #555;">실시간 차트 데이터가 없습니다.</p>
-        <% } %>
+                <textarea name="lyrics" placeholder="가사를 입력하세요. (예: [00:15] 싱크 가사)"></textarea>
+                <div class="input-row">
+                    <input type="text" name="realName" placeholder="업로더 실명 (본인과 관리자에게만 노출됩니다)" required>
+                    <input type="file" name="image" accept="image/*" class="file-upload" required>
+                    <button type="submit" class="btn-upload">차트 등록</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="chart-header">
+            <div class="chart-title">랭킹AI 100</div>
+            <div class="tabs">
+                <div class="tab active">실시간</div>
+                <div class="tab">일간</div>
+                <div class="tab">주간</div>
+                <div class="tab">월간</div>
+            </div>
+        </div>
+
+        <table class="music-list">
+            <% if (artists && artists.length > 0) { %>
+                <% artists.forEach(function(music, index) { %>
+                <tr class="music-item">
+                    <td class="rank"><%= index + 1 %></td>
+                    <td style="width: 70px;"><img src="<%= music.imageUrl %>" class="album-art"></td>
+                    <td class="song-info">
+                        <div class="song-title">
+                            <%= music.name %>
+                            <% if (user && (user.id === music.uploader || user.role === 'admin')) { %>
+                                <span class="edit-btn">곡 정보 수정</span>
+                            <% } %>
+                        </div>
+                        <div class="singer"><%= music.artist %> (<%= music.genre %>)</div>
+                        
+                        <% if (user && (user.id === music.uploader || user.role === 'admin')) { %>
+                            <div class="private-info">🔒 등록자 정보 (비공개): <%= music.uploaderRealName %></div>
+                        <% } %>
+
+                        <div id="lyrics-<%= index %>" class="lyrics-box"><%= music.lyrics %></div>
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <span title="음악 듣기">🎧</span>
+                            <span title="가사 보기" onclick="document.getElementById('lyrics-<%= index %>').style.display = (document.getElementById('lyrics-<%= index %>').style.display === 'block') ? 'none' : 'block';">📝</span>
+                            <span title="좋아요">❤️</span>
+                            <span title="댓글 쓰기">💬</span>
+                        </div>
+                    </td>
+                </tr>
+                <% }); %>
+            <% } else { %>
+                <tr>
+                    <td colspan="4" style="text-align:center; padding:100px; color:#555;">아직 등록된 곡이 없습니다.</td>
+                </tr>
+            <% } %>
+        </table>
     </div>
+
 </body>
 </html>
