@@ -22,17 +22,13 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(session({ secret: 'ranking-ai-secret', resave: false, saveUninitialized: true }));
 
+// 🌟 접속한 사람의 로그인 정보를 화면으로 전달 (이제 강제로 관리자를 만들지 않습니다!)
 app.use((req, res, next) => {
-    // 🌟 현재 테스트를 위해 접속하는 순간 '관리자' 권한을 부여해두었습니다.
-    // (나중에 진짜 로그인 기능이 붙으면 이 부분을 수정하게 됩니다.)
-    if (!req.session.user) {
-        req.session.user = { id: 'kamm7476', name: '관리자본명', role: 'admin' }; 
-    }
-    res.locals.user = req.session.user;
+    res.locals.user = req.session.user || null;
     next();
 });
 
-// 1. 메인 화면
+// 메인 화면
 app.get('/', (req, res) => {
     const artists = [
         { 
@@ -46,10 +42,34 @@ app.get('/', (req, res) => {
     res.render('index', { artists: artists }); 
 });
 
+// 로그인 화면 보여주기
 app.get('/login', (req, res) => res.render('login'));
+
+// 🌟 실제 로그인 처리 로직
+app.post('/login', (req, res) => {
+    const { id, pw } = req.body;
+
+    // 관리자 아이디(kamm7476)와 비밀번호(ranking2026)를 입력했을 때만 특별 권한 부여!
+    if (id === 'kamm7476' && pw === 'ranking2026') {
+        req.session.user = { id: id, name: '최고관리자', role: 'admin' };
+        console.log('👑 관리자 로그인 성공!');
+    } else {
+        // 그 외의 아이디로 로그인하면 일반 유저 권한 부여 (임시)
+        req.session.user = { id: id, name: '일반유저', role: 'user' };
+        console.log(`👤 일반 유저 로그인: ${id}`);
+    }
+    
+    res.redirect('/'); // 로그인 후 메인으로 이동
+});
+
+// 🌟 로그아웃 기능
+app.get('/logout', (req, res) => {
+    req.session.destroy(); // 로그인 기록 삭제
+    res.redirect('/');
+});
+
 app.get('/signup', (req, res) => res.render('signup'));
 
-// 2. 게시판 화면
 app.get('/board', (req, res) => {
     const posts = [
         { title: "Suno AI로 만든 곡 평가해주세요!", author: "음악초보", date: "2026-03-08" },
@@ -58,16 +78,12 @@ app.get('/board', (req, res) => {
     res.render('board', { posts: posts });
 });
 
-// 🌟 3. 관리자 전용 숨겨진 공간 (백오피스)
+// 관리자 전용 공간 보안 확인
 app.get('/admin', (req, res) => {
-    // 관리자(admin)가 아니면 경고창을 띄우고 메인으로 쫓아냅니다!
     if (!req.session.user || req.session.user.role !== 'admin') {
         return res.send("<script>alert('접근 권한이 없습니다! (관리자 전용)'); location.href='/';</script>");
     }
-
-    // 관리자 화면에 보여줄 가짜 통계 데이터
-    const stats = { users: 154, musics: 32, reports: 0 };
-    res.render('admin', { stats: stats });
+    res.render('admin', { stats: { users: 154, musics: 32, reports: 0 } });
 });
 
 app.post('/add-post', (req, res) => res.redirect('/board'));
