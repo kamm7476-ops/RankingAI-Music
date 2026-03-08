@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인 - RANKING AI</title>
+    <style>
+        body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .auth-container { background: #161718; padding: 40px; border-radius: 15px; border: 1px solid #222; width: 100%; max-width: 400px; text-align: center; }
+        .logo { font-size: 28px; font-weight: 900; color: #00e5ff; margin-bottom: 30px; }
+        input { width: 100%; background: #222; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-sizing: border-box; }
+        .btn-submit { width: 100%; background: #00e5ff; color: #000; font-weight: bold; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .btn-submit:hover { filter: brightness(1.1); }
+        .links { margin-top: 20px; font-size: 14px; color: #888; }
+        .links a { color: #00e5ff; text-decoration: none; margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="logo">RANKING AI</div>
+        <form action="/" method="GET">
+            <input type="text" name="id" placeholder="아이디" required>
+            <input type="password" name="pw" placeholder="비밀번호" required>
+            <button type="submit" class="btn-submit">로그인</button>
+        </form>
+        <div class="links">
+            아직 계정이 없으신가요? <a href="/signup">회원가입</a>
+        </div>
+    </div>
+</body>
+</html>
