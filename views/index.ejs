@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RANKING AI</title>
     <style>
         body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; }
@@ -18,10 +19,10 @@
 
         .upload-section { background: #161718; padding: 30px; border-radius: 15px; margin-bottom: 40px; border: 1px solid #222; }
         .input-row { display: flex; gap: 15px; margin-bottom: 15px; }
-        input[type="text"] { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; }
+        input[type="text"] { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; }
         textarea { width: 100%; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; height: 80px; margin-bottom: 15px; box-sizing: border-box; }
         .file-upload { flex: 1; background: #222; padding: 10px; border-radius: 8px; color: #aaa; }
-        .btn-upload { background: #333; color: #fff; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-upload { background: #333; color: #fff; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; white-space: nowrap; }
         .btn-upload:hover { background: #00e5ff; color: #000; }
 
         .chart-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; border-bottom: 2px solid #222; padding-bottom: 15px; }
@@ -38,23 +39,34 @@
         .album-art { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
         
         .song-info { display: flex; flex-direction: column; gap: 4px; }
-        .song-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
-        .singer { font-size: 14px; color: #888; display: flex; align-items: center; gap: 8px; }
+        .song-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .singer { font-size: 14px; color: #888; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         
-        /* 🌟 AI 프로그램 이름이 들어갈 예쁜 네온 배지 */
         .ai-badge { background: rgba(0, 229, 255, 0.1); border: 1px solid #00e5ff; color: #00e5ff; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
         
         .private-info { font-size: 12px; color: #ff4a4a; margin-top: 4px; }
         .edit-btn { background: #333; color: #fff; font-size: 11px; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
-        .edit-btn:hover { background: #444; }
         
         .lyrics-box { display: none; background: #111; padding: 15px; border-radius: 8px; margin-top: 10px; font-size: 14px; color: #ccc; line-height: 1.6; border: 1px solid #222; }
         .actions { display: flex; gap: 15px; font-size: 20px; cursor: pointer; color: #888; }
         .actions span:hover { color: #00e5ff; transform: scale(1.1); transition: 0.2s; }
+
+        /* 🌟 스마트폰 화면용 디자인 (화면이 작아질 때 적용됨) */
+        @media (max-width: 768px) {
+            .navbar { padding: 15px 20px; }
+            .logo { font-size: 20px; }
+            .container { padding: 20px 10px; }
+            .input-row { flex-direction: column; gap: 10px; } /* 입력칸을 세로로 배치 */
+            .chart-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .music-item td { padding: 10px 5px; }
+            .rank { font-size: 18px; width: 25px; }
+            .album-art { width: 50px; height: 50px; }
+            .song-title { font-size: 14px; }
+            .actions { gap: 10px; font-size: 16px; }
+        }
     </style>
 </head>
 <body>
-
     <nav class="navbar">
         <div class="logo">RANKING AI</div>
         <div class="auth-buttons">
@@ -73,7 +85,7 @@
                 </div>
                 <div class="input-row">
                     <input type="text" name="genre" placeholder="장르 (예: 댄스, 발라드)">
-                    <input type="text" name="aiTool" placeholder="사용 프로그램 (예: Suno, Udio, 직접 작곡)" required>
+                    <input type="text" name="aiTool" placeholder="사용 프로그램 (예: Suno, Udio)" required>
                 </div>
                 <textarea name="lyrics" placeholder="가사를 입력하세요. (예: [00:15] 싱크 가사)"></textarea>
                 <div class="input-row">
@@ -99,12 +111,12 @@
                 <% artists.forEach(function(music, index) { %>
                 <tr class="music-item">
                     <td class="rank"><%= index + 1 %></td>
-                    <td style="width: 70px;"><img src="<%= music.imageUrl %>" class="album-art"></td>
+                    <td style="width: 60px;"><img src="<%= music.imageUrl %>" class="album-art"></td>
                     <td class="song-info">
                         <div class="song-title">
                             <%= music.name %>
                             <% if (user && (user.id === music.uploader || user.role === 'admin')) { %>
-                                <span class="edit-btn">곡 정보 수정</span>
+                                <span class="edit-btn">수정</span>
                             <% } %>
                         </div>
                         <div class="singer">
@@ -113,12 +125,12 @@
                         </div>
                         
                         <% if (user && (user.id === music.uploader || user.role === 'admin')) { %>
-                            <div class="private-info">🔒 등록자 정보 (비공개): <%= music.uploaderRealName %></div>
+                            <div class="private-info">🔒 등록자 (비공개): <%= music.uploaderRealName %></div>
                         <% } %>
 
                         <div id="lyrics-<%= index %>" class="lyrics-box"><%= music.lyrics %></div>
                     </td>
-                    <td>
+                    <td style="text-align: right;">
                         <div class="actions">
                             <span title="음악 듣기">🎧</span>
                             <span title="가사 보기" onclick="document.getElementById('lyrics-<%= index %>').style.display = (document.getElementById('lyrics-<%= index %>').style.display === 'block') ? 'none' : 'block';">📝</span>
@@ -135,6 +147,5 @@
             <% } %>
         </table>
     </div>
-
 </body>
 </html>
