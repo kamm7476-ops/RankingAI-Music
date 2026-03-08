@@ -43,7 +43,8 @@
         input[type="text"] { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; }
         textarea { width: 100%; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; height: 80px; margin-bottom: 15px; }
         .file-upload { flex: 1; background: #222; padding: 10px; border-radius: 8px; color: #aaa; font-size: 13px; }
-        .btn-upload { background: #ff5722; color: #000; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        .btn-upload { background: #ff5722; color: #000; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; transition: 0.2s; }
+        .btn-upload:hover { filter: brightness(1.1); }
         
         .genre-selector { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
         .genre-btn { background: #222; color: #aaa; border: 1px solid #333; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; transition: 0.2s; }
@@ -103,8 +104,8 @@
             
             .music-list, .music-list tbody, .music-list tr, .music-list td { display: block; width: 100%; box-sizing: border-box; }
             .music-item { margin-bottom: 25px; background: #161718; border-radius: 15px; padding: 20px; border: 1px solid #333; position: relative; }
-            .music-item td { padding: 0; }
-            .check-col { position: absolute; top: 15px; right: 15px; z-index: 10; }
+            .music-item td { padding: 0; border: none; }
+            .check-col { position: absolute; top: 15px; right: 15px; z-index: 10; border: none !important;}
             .rank { position: absolute; top: -10px; left: 15px; background: #ff5722; color: black; border-radius: 8px; padding: 2px 10px; width: auto; font-size: 16px; z-index: 10; }
             .album-art { width: 100%; height: auto; aspect-ratio: 1; margin: 10px 0; }
             
@@ -188,8 +189,8 @@
                         </div>
                         <textarea name="lyrics" placeholder="가사를 시간과 함께 입력하세요. (예: [00:15] 첫 번째 가사)"></textarea>
                         <div class="input-row">
-                            <div style="flex:1;"><span style="font-size: 12px; color: #ff5722;">🖼️ 커버 이미지</span><input type="file" name="image" accept="image/*" class="file-upload" required></div>
-                            <div style="flex:1;"><span style="font-size: 12px; color: #ff5722;">🎵 MP3 음원</span><input type="file" name="audio" accept="audio/*" class="file-upload" required></div>
+                            <div style="flex:1;"><span style="font-size: 12px; color: #ff5722; display: block; margin-bottom: 5px;">🖼️ 커버 이미지</span><input type="file" name="image" accept="image/*" class="file-upload" required></div>
+                            <div style="flex:1;"><span style="font-size: 12px; color: #ff5722; display: block; margin-bottom: 5px;">🎵 MP3 음원</span><input type="file" name="audio" accept="audio/*" class="file-upload" required></div>
                         </div>
                         <button type="submit" class="btn-upload">차트 등록하기</button>
                     </form>
@@ -227,9 +228,11 @@
                             <td class="song-info">
                                 <div class="song-title">
                                     <%= music.name %>
+                                    
                                     <% if (user && (user.id === music.uploader || user.role === 'admin') && music._id !== "dummy") { %>
+                                        <button style="background:none; border:none; color:#00e5ff; cursor:pointer; font-size:12px; padding: 0 5px;" onclick="alert('곡 정보 수정 페이지는 추후 업데이트 예정입니다.')">✏️ 수정</button>
                                         <form action="/delete-music/<%= music._id %>" method="POST" style="display:inline;" onsubmit="return confirm('삭제하시겠습니까?');">
-                                            <button type="submit" style="background:none; border:none; color:#ff4a4a; cursor:pointer; font-size:12px;">🗑️ 삭제</button>
+                                            <button type="submit" style="background:none; border:none; color:#ff4a4a; cursor:pointer; font-size:12px; padding: 0;">🗑️ 삭제</button>
                                         </form>
                                     <% } %>
                                 </div>
