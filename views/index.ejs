@@ -21,20 +21,17 @@
 
         .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
         
-        /* 업로드 섹션 디자인 */
         .upload-section { background: #161718; padding: 30px; border-radius: 15px; margin-bottom: 40px; border: 1px solid #222; }
-        .input-row { display: flex; gap: 15px; margin-bottom: 15px; }
+        .input-row { display: flex; gap: 15px; margin-bottom: 15px; align-items: center; }
         input[type="text"] { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; }
         textarea { width: 100%; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; height: 80px; margin-bottom: 15px; box-sizing: border-box; }
-        .file-upload { flex: 1; background: #222; padding: 10px; border-radius: 8px; color: #aaa; }
+        .file-upload { flex: 1; background: #222; padding: 10px; border-radius: 8px; color: #aaa; font-size: 13px; }
         .btn-upload { background: #333; color: #fff; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; white-space: nowrap; }
         .btn-upload:hover { background: #00e5ff; color: #000; }
 
-        /* 🌟 새로 추가된 장르 버튼 스타일 */
         .genre-selector { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
         .genre-btn { background: #222; color: #aaa; border: 1px solid #333; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 13px; transition: 0.2s; outline: none; }
         .genre-btn:hover { background: #333; color: #fff; }
-        /* 버튼이 선택되었을 때의 화려한 모습 */
         .genre-btn.active { background: rgba(0, 229, 255, 0.15); color: #00e5ff; border-color: #00e5ff; font-weight: bold; box-shadow: 0 0 10px rgba(0, 229, 255, 0.2); }
 
         .chart-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; border-bottom: 2px solid #222; padding-bottom: 15px; }
@@ -46,35 +43,35 @@
         .music-list { width: 100%; border-collapse: collapse; }
         .music-item { border-bottom: 1px solid #1a1b1c; transition: 0.2s; }
         .music-item:hover { background: #1a1c1e; }
-        .music-item td { padding: 15px; vertical-align: middle; }
-        .rank { font-size: 22px; font-weight: bold; color: #00e5ff; width: 40px; text-align: center; }
-        .album-art { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
+        .music-item td { padding: 15px; vertical-align: top; }
+        .rank { font-size: 22px; font-weight: bold; color: #00e5ff; width: 40px; text-align: center; vertical-align: middle !important; }
+        .album-art { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; }
         
         .song-info { display: flex; flex-direction: column; gap: 6px; }
-        .song-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .song-title { font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .singer { font-size: 14px; color: #888; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .ai-badge { background: rgba(0, 229, 255, 0.1); border: 1px solid #00e5ff; color: #00e5ff; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
         .private-info { font-size: 12px; color: #ff4a4a; margin-top: 4px; }
         .edit-btn { background: #333; color: #fff; font-size: 11px; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
-        .lyrics-box { display: none; background: #111; padding: 15px; border-radius: 8px; margin-top: 10px; font-size: 14px; color: #ccc; line-height: 1.6; border: 1px solid #222; }
         
+        /* 숨겨진 가사 & 댓글창 공통 스타일 */
+        .hidden-box { display: none; background: #111; padding: 15px; border-radius: 8px; margin-top: 10px; font-size: 14px; color: #ccc; line-height: 1.6; border: 1px solid #222; }
+        
+        /* 🌟 오디오 플레이어 */
         audio { width: 100%; height: 35px; outline: none; margin-top: 5px; border-radius: 20px; }
         audio::-webkit-media-controls-panel { background-color: #222; }
         audio::-webkit-media-controls-current-time-display, audio::-webkit-media-controls-time-remaining-display { color: #fff; }
 
-        .actions { display: flex; gap: 15px; font-size: 20px; cursor: pointer; color: #888; flex-direction: column; align-items: center;}
-        .actions-icons { display: flex; gap: 15px;}
-        .actions-icons span:hover { color: #00e5ff; transform: scale(1.1); transition: 0.2s; }
+        .actions { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+        .actions-icons { display: flex; gap: 15px; font-size: 18px; color: #888; }
+        .actions-icons span { cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 5px; font-size: 14px; }
+        .actions-icons span:hover { color: #00e5ff; transform: scale(1.05); }
 
         @media (max-width: 768px) {
             .navbar { padding: 15px 20px; flex-wrap: wrap; gap: 10px; }
-            .logo { font-size: 20px; }
             .container { padding: 20px 10px; }
-            .input-row { flex-direction: column; gap: 10px; } 
-            .chart-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .input-row { flex-direction: column; gap: 10px; align-items: stretch; } 
             .music-item td { padding: 10px 5px; }
-            .rank { font-size: 18px; width: 25px; }
-            .album-art { width: 50px; height: 50px; }
         }
     </style>
 </head>
@@ -82,12 +79,8 @@
     <nav class="navbar">
         <div class="logo">RANKING AI</div>
         <div class="auth-buttons">
-            <% if (user && user.role === 'admin') { %>
-                <a href="/admin" class="btn-admin">👑 관리자</a>
-            <% } %>
-            
+            <% if (user && user.role === 'admin') { %><a href="/admin" class="btn-admin">👑 관리자</a><% } %>
             <a href="/board" class="btn-menu">💬 커뮤니티</a>
-
             <% if (user) { %>
                 <span style="color: #aaa; font-size: 14px; margin-right: 10px;"><%= user.id %>님</span>
                 <a href="/logout" class="btn-login">로그아웃</a>
@@ -114,33 +107,35 @@
                     <button type="button" class="genre-btn" data-genre="힙합">힙합</button>
                     <button type="button" class="genre-btn" data-genre="R&B/Soul">R&B/Soul</button>
                     <button type="button" class="genre-btn" data-genre="인디뮤직">인디뮤직</button>
-                    <button type="button" class="genre-btn" data-genre="록/메탈">록/메탈</button>
-                    <button type="button" class="genre-btn" data-genre="트로트">트로트</button>
                     <button type="button" class="genre-btn" data-genre="POP">POP</button>
                 </div>
                 <input type="hidden" name="genre" id="hiddenGenreInput" required>
 
                 <div class="input-row">
                     <input type="text" name="aiTool" placeholder="사용 프로그램 (예: Suno, Udio)" required>
-                    <input type="text" name="realName" placeholder="업로더 실명 (비공개 처리됨)" required>
+                    <input type="text" name="realName" placeholder="업로더 실명 (비공개)" required>
                 </div>
                 
                 <textarea name="lyrics" placeholder="가사를 입력하세요. (예: [00:15] 싱크 가사)"></textarea>
                 
                 <div class="input-row">
-                    <input type="file" name="image" accept="image/*" class="file-upload" required>
-                    <button type="submit" class="btn-upload" style="flex: 1;">차트 등록하기</button>
+                    <div style="flex:1;">
+                        <span style="font-size: 12px; color: #00e5ff; display: block; margin-bottom: 5px;">🖼️ 앨범 커버 (이미지)</span>
+                        <input type="file" name="image" accept="image/*" class="file-upload" required>
+                    </div>
+                    <div style="flex:1;">
+                        <span style="font-size: 12px; color: #00cd3c; display: block; margin-bottom: 5px;">🎵 실제 음원 (MP3 등)</span>
+                        <input type="file" name="audio" accept="audio/*" class="file-upload" required>
+                    </div>
                 </div>
+                <button type="submit" class="btn-upload" style="width: 100%; margin-top: 10px;">차트 등록하기</button>
             </form>
         </div>
 
         <div class="chart-header">
             <div class="chart-title">랭킹AI 100</div>
             <div class="tabs">
-                <div class="tab active">실시간</div>
-                <div class="tab">일간</div>
-                <div class="tab">주간</div>
-                <div class="tab">월간</div>
+                <div class="tab active">실시간</div><div class="tab">일간</div><div class="tab">주간</div>
             </div>
         </div>
 
@@ -149,7 +144,7 @@
                 <% artists.forEach(function(music, index) { %>
                 <tr class="music-item">
                     <td class="rank"><%= index + 1 %></td>
-                    <td style="width: 60px;"><img src="<%= music.imageUrl %>" class="album-art"></td>
+                    <td style="width: 70px;"><img src="<%= music.imageUrl %>" class="album-art"></td>
                     <td class="song-info">
                         <div class="song-title">
                             <%= music.name %>
@@ -163,20 +158,42 @@
                         </div>
                         
                         <% if (music.audioUrl) { %>
-                            <audio controls><source src="<%= music.audioUrl %>" type="audio/mpeg"></audio>
+                            <audio controls controlsList="nodownload"><source src="<%= music.audioUrl %>" type="audio/mpeg"></audio>
+                        <% } else { %>
+                            <span style="color:#666; font-size:12px;">🚫 음원 파일이 없습니다.</span>
                         <% } %>
                         
                         <% if (user && (user.id === music.uploader || user.role === 'admin')) { %>
                             <div class="private-info">🔒 등록자 (비공개): <%= music.uploaderRealName %></div>
                         <% } %>
 
-                        <div id="lyrics-<%= index %>" class="lyrics-box"><%= music.lyrics %></div>
+                        <div id="lyrics-<%= music._id %>" class="hidden-box"><%= music.lyrics %></div>
+                        
+                        <div id="comments-<%= music._id %>" class="hidden-box" style="background: #1a1c1e;">
+                            <h4 style="margin-top:0; color:#00e5ff; font-size: 15px;">💬 리스너 댓글</h4>
+                            <div style="max-height: 150px; overflow-y: auto; margin-bottom:15px; padding-right: 5px;">
+                                <% if(music.comments && music.comments.length > 0) { %>
+                                    <% music.comments.forEach(c => { %>
+                                        <div style="border-bottom: 1px solid #333; padding: 8px 0;">
+                                            <span style="color:#00e5ff; font-weight:bold; font-size:13px;"><%= c.author %></span>
+                                            <span style="font-size:14px; margin-left:8px; color:#ddd;"><%= c.text %></span>
+                                        </div>
+                                    <% }) %>
+                                <% } else { %>
+                                    <p style="font-size:13px; color:#777;">아직 작성된 댓글이 없습니다. 첫 번째 댓글을 남겨주세요!</p>
+                                <% } %>
+                            </div>
+                            <form action="/add-comment/<%= music._id %>" method="POST" style="display:flex; gap:10px;">
+                                <input type="text" name="commentText" placeholder="이 곡에 대한 감상평을 남겨주세요..." style="flex:1; padding:10px; border-radius:6px; border:1px solid #444; background:#222; color:white; outline:none;" required>
+                                <button type="submit" style="background:#00e5ff; color:black; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer;">등록</button>
+                            </form>
+                        </div>
                     </td>
-                    <td style="text-align: right; vertical-align: middle;">
+                    <td style="text-align: right; vertical-align: middle; width: 80px;">
                         <div class="actions">
                             <div class="actions-icons">
-                                <span title="가사 보기" onclick="document.getElementById('lyrics-<%= index %>').style.display = (document.getElementById('lyrics-<%= index %>').style.display === 'block') ? 'none' : 'block';">📝</span>
-                                <span title="좋아요">❤️</span>
+                                <span title="가사 보기" onclick="document.getElementById('lyrics-<%= music._id %>').style.display = (document.getElementById('lyrics-<%= index %>').style.display === 'block') ? 'none' : 'block';">📝 가사</span>
+                                <span title="댓글 달기" onclick="document.getElementById('comments-<%= music._id %>').style.display = (document.getElementById('comments-<%= music._id %>').style.display === 'block') ? 'none' : 'block';">💬 <%= music.comments ? music.comments.length : 0 %></span>
                             </div>
                         </div>
                     </td>
@@ -195,24 +212,17 @@
         const hiddenInput = document.getElementById('hiddenGenreInput');
         const form = document.getElementById('musicForm');
 
-        // 버튼을 누를 때마다 색깔을 바꾸고 몰래 데이터를 저장합니다.
         genreBtns.forEach(btn => {
             btn.addEventListener('click', function() {
-                // 1. 모든 버튼의 색을 원래대로 돌린다
                 genreBtns.forEach(b => b.classList.remove('active'));
-                
-                // 2. 지금 누른 버튼만 빛나게 만든다
                 this.classList.add('active');
-                
-                // 3. 누른 버튼의 글자(예: K-POP)를 서버로 보낼 몰래 주머니(hidden)에 넣는다
                 hiddenInput.value = this.getAttribute('data-genre');
             });
         });
 
-        // 제출하기 전에 장르를 안 골랐으면 경고창 띄우기
         form.addEventListener('submit', function(e) {
             if (!hiddenInput.value) {
-                e.preventDefault(); // 서버로 안 넘어가게 막음
+                e.preventDefault(); 
                 alert('장르를 하나 선택해주세요!');
             }
         });
