@@ -1,69 +1,61 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
-const multer = require('multer');
 const session = require('express-session');
 const app = express();
 
-// 1. 다국어 사전 (KO, EN, JP, ES, ZH)
+// 1. 번역 데이터 (메인 화면 글자 설정)
 const translations = {
-    ko: { logo: "RANKING AI", debut: "+ 아티스트 데뷔", chartTitle: "TOP 칩셋", community: "커뮤니티", login: "로그인", signup: "가입" },
-    en: { logo: "RANKING AI", debut: "+ DEBUT ARTIST", chartTitle: "TOP CHIPSETS", community: "Community", login: "Login", signup: "Join" },
-    jp: { logo: "ランキングAI", debut: "+ デビュー", chartTitle: "トップチップセット", community: "ラウンジ", login: "ログイン", signup: "登録" },
-    es: { logo: "RANKING AI", debut: "+ DEBUT", chartTitle: "TOP CHIPSETS", community: "Salón", login: "Acceso", signup: "Registro" },
-    zh: { logo: "RANKING AI", debut: "+ 艺术家出道", chartTitle: "顶级芯片组", community: "休息室", login: "登录", signup: "加入" }
+    ko: { title: "랭킹 AI", login: "로그인", signup: "회원가입", community: "커뮤니티" },
+    en: { title: "Ranking AI", login: "Login", signup: "Sign Up", community: "Community" },
+    jp: { title: "ランキングAI", login: "ログイン", signup: "登録", community: "라운지" }
 };
 
-// 17번 줄부터 22번 줄까지를 아래 내용으로 덮어씌우세요.
-// 깃허브 웹사이트의 server.js 19번 줄을 아래 내용으로 '정확히' 교체하세요.
-const DB_URI = "mongodb+srv://kamm7476:ranking2026@cluster0.y95nodi.mongodb.net/RankingAI?retryWrites=true&w=majority";
-// 21번 줄 mongoose.connect 부분을 이걸로 교체!
-mongoose.connect(DB_URI, { serverSelectionTimeoutMS: 5000 })
-  .then(() => console.log("✅ Global DB Connected Successfully!"))
-  .catch(err => console.log("❌ 연결 에러 내용:", err.message));
+// 2. 몽고DB 연결 주소 (비밀번호 ranking1234 포함)
+const DB_URI = "mongodb+srv://kamm7476:ranking1234@cluster0.y95nodi.mongodb.net/RankingAI?retryWrites=true&w=majority";
 
-// 3. 데이터 모델 설정
-const Artist = mongoose.model('Artist', new mongoose.Schema({
-    name: String, artist: String, url: String, image: String, lyrics: String,
-    pulse: { type: Number, default: 0 }, likedBy: [String], owner: String
+mongoose.connect(DB_URI)
+    .then(() => console.log('✅ Global DB Connected Successfully!'))
+    .catch(err => console.log('❌ DB 연결 에러:', err.message));
+
+// 3. 서버 설정 (화면 경로 및 세션)
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+    secret: 'ranking-secret-key',
+    resave: false,
+    saveUninitialized: true
 }));
 
-// 31~34번 줄 부근을 아래 내용으로 똑같이 수정하세요!
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views')); // path.join을 써야 Render 서버가 경로를 잘 찾습니다.
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
-app.use(session({ secret: 'cyber-secret', resave: false, saveUninitialized: true }));
-
-// 언어 설정 미들웨어
+// 4. 무한 뺑뺑이(리다이렉트) 방지 핵심 코드
 app.use((req, res, next) => {
-    req.session.lang = req.session.lang || 'en';
-    res.locals.t = translations[req.session.lang];
+    // 세션에 언어가 없으면 기본값을 'ko'로 고정해서 무한 루프를 막습니다.
+    if (!req.session.lang) {
+        req.session.lang = 'ko';
+    }
+    res.locals.t = translations[req.session.lang] || translations['ko'];
     res.locals.currentLang = req.session.lang;
     res.locals.user = req.session.user || null;
-    next();
+    next(); // 여기서 절대 redirect를 하지 않는 것이 성공의 열쇠입니다.
 });
 
-// 5. 기본 라우트
-app.get('/', async (req, res) => {
-    const artists = await Artist.find().sort({ pulse: -1 });
-    res.render('index', { artists });
+// 5. 페이지 주소 설정
+app.get('/', (req, res) => {
+    res.render('index');
 });
 
+// 언어 변경 주소
 app.get('/change-lang/:lang', (req, res) => {
-    req.session.lang = req.params.lang;
-    res.redirect('back');
+    const lang = req.params.lang;
+    if (translations[lang]) {
+        req.session.lang = lang;
+    }
+    res.redirect('/');
 });
 
-// 기존 58~63번 줄을 지우고 아래 내용만 남기세요!
-const PORT = 4000;
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`✅ 서버가 http://localhost:${PORT} 에서 드디어 실행 중입니다!`);
+// 6. 서버 실행 (Render 포트 대응)
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+    console.log(`✅ 서버가 포트 ${PORT}에서 정상 작동 중입니다!`);
 });
-
-
-
-
-
-
-
