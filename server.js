@@ -35,19 +35,23 @@ app.use((req, res, next) => {
     next();
 });
 
-// 🌟 아티스트 검색 엔진 적용
 app.get('/', async (req, res) => {
     try {
-        const searchQuery = req.query.artist || ''; // 검색어 받기
+        const searchQuery = req.query.artist || '';
         let filter = {};
-        
-        // 검색어가 있으면 해당 아티스트가 포함된 곡만 필터링 (대소문자 무시)
-        if (searchQuery) {
-            filter.artist = { $regex: searchQuery, $options: 'i' };
-        }
+        if (searchQuery) filter.artist = { $regex: searchQuery, $options: 'i' };
 
+        // 1. 차트 음악 가져오기
         let artists = await Music.find(filter).sort({ createdAt: -1 });
         
+        // 🌟 2. 인기 아티스트 통계 내기 (곡이 가장 많은 순서대로 10명 추출)
+        let popularArtists = await Music.aggregate([
+            { $group: { _id: "$artist", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: 10 }
+        ]);
+
+        // 데이터가 아예 없을 때 보여줄 안내용 더미 데이터 세팅
         if (artists.length === 0 && !searchQuery) {
             artists = [{
                 _id: "dummy", name: "첫 곡의 주인공이 되어보세요!", artist: "RANKING AI", genre: "안내", aiTool: "시스템",
@@ -55,8 +59,12 @@ app.get('/', async (req, res) => {
                 uploader: "admin", uploaderRealName: "관리자", audioUrl: "",
                 imageUrl: "https://via.placeholder.com/150/222222/ff5722?text=No+Music"
             }];
+            popularArtists = [
+                { _id: "비비(BIBI)", count: 12 }, { _id: "Suno AI 아티스트", count: 8 }, { _id: "Udio 메이커", count: 5 }
+            ];
         }
-        res.render('index', { artists: artists, searchQuery: searchQuery }); 
+
+        res.render('index', { artists: artists, searchQuery: searchQuery, popularArtists: popularArtists }); 
     } catch (err) {
         console.log("DB 에러:", err);
         res.send("<h1>데이터를 불러오는 중 에러가 발생했습니다.</h1>");
