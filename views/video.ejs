@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %> - RANKING AI</title>
+    <style>
+        body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; }
+        a { text-decoration: none; color: inherit; }
+        .main-header { background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; border-bottom: 1px solid #1a1b1c; }
+        .logo { font-size: 28px; font-weight: 900; color: #ff5722; letter-spacing: -1px; } 
+        .auth-buttons { display: flex; gap: 20px; align-items: center; }
+        .btn-menu { color: #fff; font-weight: bold; font-size: 15px; }
+        .header-nav { display: flex; justify-content: center; gap: 40px; padding: 12px 0; background: #0b0c0d; }
+        .nav-item { color: #aaa; font-weight: 600; font-size: 16px; transition: 0.2s; position: relative; }
+        .nav-item:hover, .nav-item.active { color: #ff5722; }
+        .nav-item.active::after { content: ''; position: absolute; bottom: -12px; left: 0; width: 100%; height: 3px; background: #ff5722; }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+        .page-title { font-size: 32px; font-weight: bold; color: #ff5722; margin-bottom: 30px; text-align: center; }
+        
+        /* 영상 등록 폼 */
+        .upload-section { background: #161718; padding: 30px; border-radius: 15px; margin-bottom: 40px; border: 1px solid #333; text-align: center; }
+        .input-row { display: flex; gap: 10px; margin-top: 20px; }
+        input[type="text"] { flex: 1; background: #222; border: 1px solid #444; color: #fff; padding: 15px; border-radius: 8px; font-size: 15px; outline: none; }
+        .btn-upload { background: #ff5722; color: #000; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 15px; white-space: nowrap; }
+
+        /* 비디오 그리드 (쇼츠는 세로, 유튜브는 가로 비율 맞춤) */
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(<%= pageType === 'shorts' ? '250px' : '300px' %>, 1fr)); gap: 20px; }
+        .video-card { background: #161718; border: 1px solid #333; border-radius: 12px; overflow: hidden; padding: 15px; }
+        .video-wrapper { position: relative; width: 100%; padding-bottom: <%= pageType === 'shorts' ? '177.77%' : '56.25%' %>; height: 0; background: #000; border-radius: 8px; overflow: hidden; }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        .video-title { font-size: 16px; font-weight: bold; margin-top: 15px; line-height: 1.4; color: #fff; }
+        .video-uploader { font-size: 13px; color: #888; margin-top: 5px; }
+
+        @media (max-width: 768px) {
+            .header-top { flex-direction: column; gap: 15px; padding: 15px; }
+            .header-nav { overflow-x: auto; justify-content: flex-start; padding: 12px 20px; gap: 20px; white-space: nowrap; }
+            .input-row { flex-direction: column; }
+            .video-grid { grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-top">
+            <div class="logo">RANKING AI</div>
+            <div class="auth-buttons">
+                <a href="/" class="btn-menu">🏠 홈으로</a>
+            </div>
+        </div>
+        <div class="header-nav">
+            <a href="/" class="nav-item">RANKING AI 챠트</a>
+            <a href="/youtube" class="nav-item <%= pageType === 'youtube' ? 'active' : '' %>">유튜브</a>
+            <a href="/shorts" class="nav-item <%= pageType === 'shorts' ? 'active' : '' %>">쇼츠</a>
+            <a href="/board" class="nav-item">커뮤니티</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-title"><%= pageTitle %></div>
+        
+        <div class="upload-section">
+            <h3 style="margin:0; color:#fff;">내 음악을 <%= pageType === 'youtube' ? '유튜브' : '쇼츠' %> 영상으로 홍보해보세요!</h3>
+            <p style="color:#aaa; font-size:14px; margin-top:10px;">유튜브 링크(URL)를 아래에 붙여넣기만 하면 자동으로 영상이 등록됩니다.</p>
+            <form action="/add-video" method="POST" class="input-row">
+                <input type="hidden" name="type" value="<%= pageType %>">
+                <input type="text" name="title" placeholder="홍보할 영상 제목" required style="max-width: 250px;">
+                <input type="text" name="url" placeholder="유튜브 링크 (예: https://youtu.be/abcd123)" required>
+                <button type="submit" class="btn-upload">영상 등록하기</button>
+            </form>
+        </div>
+
+        <div class="video-grid">
+            <% if (videos && videos.length > 0) { %>
+                <% videos.forEach(video => { 
+                    // 유튜브 링크를 플레이어용 Embed 링크로 자동 변환하는 마법
+                    let embedUrl = video.url;
+                    let videoId = "";
+                    if (video.url.includes("youtu.be/")) videoId = video.url.split("youtu.be/")[1]?.split("?")[0];
+                    else if (video.url.includes("youtube.com/watch?v=")) videoId = video.url.split("v=")[1]?.split("&")[0];
+                    else if (video.url.includes("youtube.com/shorts/")) videoId = video.url.split("shorts/")[1]?.split("?")[0];
+                    
+                    if(videoId) embedUrl = "https://www.youtube.com/embed/" + videoId;
+                %>
+                <div class="video-card">
+                    <div class="video-wrapper">
+                        <iframe src="<%= embedUrl %>" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-title"><%= video.title %></div>
+                    <div class="video-uploader">업로더: <%= video.uploader %></div>
+                </div>
+                <% }) %>
+            <% } else { %>
+                <div style="grid-column: 1 / -1; text-align: center; padding: 50px; color: #666;">
+                    아직 등록된 영상이 없습니다. 첫 번째로 등록해보세요!
+                </div>
+            <% } %>
+        </div>
+    </div>
+</body>
+</html>
