@@ -35,18 +35,28 @@ app.use((req, res, next) => {
     next();
 });
 
+// 🌟 아티스트 검색 엔진 적용
 app.get('/', async (req, res) => {
     try {
-        let artists = await Music.find().sort({ createdAt: -1 });
-        if (artists.length === 0) {
+        const searchQuery = req.query.artist || ''; // 검색어 받기
+        let filter = {};
+        
+        // 검색어가 있으면 해당 아티스트가 포함된 곡만 필터링 (대소문자 무시)
+        if (searchQuery) {
+            filter.artist = { $regex: searchQuery, $options: 'i' };
+        }
+
+        let artists = await Music.find(filter).sort({ createdAt: -1 });
+        
+        if (artists.length === 0 && !searchQuery) {
             artists = [{
                 _id: "dummy", name: "첫 곡의 주인공이 되어보세요!", artist: "RANKING AI", genre: "안내", aiTool: "시스템",
                 lyrics: "아직 등록된 곡이 없습니다. 위에서 음원을 업로드 해주세요.", 
                 uploader: "admin", uploaderRealName: "관리자", audioUrl: "",
-                imageUrl: "https://via.placeholder.com/150/222222/00e5ff?text=No+Music"
+                imageUrl: "https://via.placeholder.com/150/222222/ff5722?text=No+Music"
             }];
         }
-        res.render('index', { artists: artists }); 
+        res.render('index', { artists: artists, searchQuery: searchQuery }); 
     } catch (err) {
         console.log("DB 에러:", err);
         res.send("<h1>데이터를 불러오는 중 에러가 발생했습니다.</h1>");
@@ -77,8 +87,7 @@ app.post('/add-music', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'a
     try {
         const { name, artist, genre, aiTool, lyrics, realName } = req.body;
         const uploader = req.session.user ? req.session.user.id : 'guest';
-        
-        const imageUrl = req.files && req.files['image'] ? `/uploads/${req.files['image'][0].filename}` : 'https://via.placeholder.com/150/111111/00e5ff?text=Album';
+        const imageUrl = req.files && req.files['image'] ? `/uploads/${req.files['image'][0].filename}` : 'https://via.placeholder.com/150/111111/ff5722?text=Album';
         const audioUrl = req.files && req.files['audio'] ? `/uploads/${req.files['audio'][0].filename}` : '';
 
         const newMusic = new Music({
@@ -88,7 +97,6 @@ app.post('/add-music', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'a
         await newMusic.save();
         res.redirect('/'); 
     } catch (err) {
-        console.log("저장 실패:", err);
         res.send("<script>alert('음원 등록 실패!'); location.href='/';</script>");
     }
 });
@@ -106,31 +114,26 @@ app.post('/add-comment/:id', async (req, res) => {
         }
         res.redirect('/'); 
     } catch (err) {
-        console.log("댓글 에러:", err);
         res.redirect('/');
     }
 });
 
-// 🌟 곡 삭제 기능 추가 (본인이거나 관리자일 때만 삭제 허용)
 app.post('/delete-music/:id', async (req, res) => {
     try {
         if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/';</script>");
-
         const musicId = req.params.id;
-        const music = await Music.findById(musicId);
-        
-        if (!music) return res.send("<script>alert('이미 삭제되었거나 존재하지 않는 곡입니다.'); location.href='/';</script>");
+        if(musicId === "dummy") return res.redirect('/');
 
-        // 권한 확인: 'admin' 이거나 이 곡을 올린 'uploader' 본인일 때만!
+        const music = await Music.findById(musicId);
+        if (!music) return res.send("<script>alert('존재하지 않는 곡입니다.'); location.href='/';</script>");
+
         if (req.session.user.role === 'admin' || req.session.user.id === music.uploader) {
             await Music.findByIdAndDelete(musicId);
-            console.log(`🗑️ 음악 삭제 완료: ${music.name}`);
-            res.redirect('/'); // 삭제 후 메인화면으로
+            res.redirect('/'); 
         } else {
-            res.send("<script>alert('삭제 권한이 없습니다! (본인 곡만 삭제 가능)'); location.href='/';</script>");
+            res.send("<script>alert('삭제 권한이 없습니다!'); location.href='/';</script>");
         }
     } catch (err) {
-        console.log("삭제 에러:", err);
         res.send("<script>alert('삭제 중 오류가 발생했습니다.'); location.href='/';</script>");
     }
 });
