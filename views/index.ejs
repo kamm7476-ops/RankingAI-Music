@@ -1,132 +1,45 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="<%= currentLang %>">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RankingAI 플랫폼</title>
+    <title><%= t.title %></title>
     <style>
-        body { font-family: 'Arial', sans-serif; background-color: #f4f4f9; color: #333; padding: 10px; margin: 0; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        h1, h2 { color: #2c3e50; font-size: 1.5rem; text-align: center; }
-        .box { background: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-        label { font-weight: bold; display: block; margin-top: 10px; margin-bottom: 5px; font-size: 14px; }
-        input[type="text"], input[type="password"], input[type="number"], select { padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 14px; }
-        input[type="file"] { margin-bottom: 15px; width: 100%; font-size: 14px; }
-        button { background: #3498db; color: white; border: none; padding: 12px; border-radius: 6px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 5px; }
-        button:hover { background: #2980b9; }
-        .btn-signup { background: #2ecc71; }
-        .btn-signup:hover { background: #27ae60; }
-        .btn-logout { background: #e74c3c; width: auto; padding: 8px 15px; font-size: 14px; }
-        
-        .artist-card { background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .card-header { display: flex; align-items: center; margin-bottom: 15px; }
-        .artist-img { width: 60px; height: 60px; object-fit: cover; border-radius: 10px; margin-right: 15px; }
-        .artist-info { flex-grow: 1; }
-        .rank-number { font-size: 20px; font-weight: bold; color: #7f8c8d; margin-right: 15px; width: 25px; text-align: center; }
-        .pulse-badge { background: #ff4757; color: white; padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 12px; white-space: nowrap; }
-        
-        /* 미디어 플레이어 전용 디자인 */
-        .media-container { width: 100%; margin-top: 10px; text-align: center; }
-        audio { width: 100%; height: 40px; outline: none; }
-        .video-player { width: 100%; border-radius: 8px; background: #000; }
-        /* Pulse(쇼츠) 전용 세로형 디자인 */
-        .pulse-player { width: 100%; max-width: 320px; aspect-ratio: 9/16; object-fit: cover; border-radius: 12px; background: #000; display: inline-block; }
+        /* 2일 전 우리가 만든 블랙 & 골드 테마 */
+        body { background: #121212; color: #ffffff; font-family: 'Pretendard', sans-serif; }
+        .header { padding: 30px; border-bottom: 2px solid #ffd700; display: flex; justify-content: space-between; }
+        .upload-form { background: #1e1e1e; padding: 25px; border-radius: 15px; margin: 30px auto; max-width: 500px; border: 1px solid #333; }
+        .input-style { background: #2a2a2a; border: 1px solid #444; color: white; padding: 12px; margin-bottom: 10px; width: 90%; border-radius: 8px; }
+        .gold-btn { background: linear-gradient(45deg, #ffd700, #ffae00); color: black; font-weight: bold; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; width: 100%; }
+        .gold-btn:hover { filter: brightness(1.1); }
+        .artist-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; padding: 40px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🏆 RankingAI 플랫폼</h1>
+    <div class="header">
+        <h1>👑 <%= t.title %></h1>
+        <div><a href="/change-lang/ko" style="color:#ffd700">KO</a> | <a href="/change-lang/en" style="color:#ffd700">EN</a></div>
+    </div>
 
-        <% if (!user) { %>
-            <div class="box">
-                <h2>🔐 로그인 / 회원가입</h2>
-                <form action="/login" method="POST" style="margin-bottom: 10px;">
-                    <input type="text" name="username" placeholder="아이디" required>
-                    <input type="password" name="password" placeholder="비밀번호" required>
-                    <button type="submit">로그인</button>
-                </form>
-                <hr style="border: 0; border-top: 1px solid #ddd; margin: 15px 0;">
-                <form action="/signup" method="POST">
-                    <input type="text" name="username" placeholder="새 아이디" required>
-                    <input type="password" name="password" placeholder="새 비밀번호" required>
-                    <button type="submit" class="btn-signup">회원가입</button>
-                </form>
-            </div>
-        <% } else { %>
-            <div class="box" style="display: flex; justify-content: space-between; align-items: center;">
-                <h2 style="margin: 0; font-size: 1.2rem;">환영합니다, <%= user.username %>님!</h2>
-                <button onclick="location.href='/logout'" class="btn-logout">로그아웃</button>
-            </div>
+    <div class="upload-form">
+        <h3>✨ <%= t.upload %></h3>
+        <form action="/add-artist" method="POST" enctype="multipart/form-data">
+            <input type="text" name="name" class="input-style" placeholder="이름" required>
+            <input type="text" name="genre" class="input-style" placeholder="장르">
+            <input type="file" name="image" class="input-style" accept="image/*" required>
+            <button type="submit" class="gold-btn">등록하기</button>
+        </form>
+    </div>
 
-            <div class="box">
-                <h2>🎵 새로운 콘텐츠 등록</h2>
-                <form action="/upload" method="POST" enctype="multipart/form-data">
-                    <input type="text" name="title" placeholder="제목 및 아티스트명" required>
-                    
-                    <select name="type" required>
-                        <option value="Music">음악 (Music)</option>
-                        <option value="Video">비디오 (Video)</option>
-                        <option value="Pulse">펄스 (Pulse - 세로영상)</option>
-                    </select>
-
-                    <select name="genre" required>
-                        <option value="" disabled selected>장르 선택</option>
-                        <option value="K-Pop">K-Pop</option>
-                        <option value="Pop">Pop</option>
-                        <option value="Hip-Hop">Hip-Hop</option>
-                        <option value="기타">기타</option>
-                    </select>
-
-                    <input type="number" name="pulse" placeholder="시작 Pulse 점수 (예: 100)" value="0" required>
-                    
-                    <label>📸 앨범 이미지 (선택)</label>
-                    <input type="file" name="imageFile" accept="image/*">
-                    
-                    <label>🎵 미디어 파일 (MP3, MP4 등)</label>
-                    <input type="file" name="mediaFile" accept="audio/*,video/*">
-
-                    <button type="submit">업로드 하기</button>
-                </form>
-            </div>
-        <% } %>
-
-        <h2>🔥 실시간 랭킹</h2>
-        <% if (artists.length === 0) { %>
-            <p style="text-align: center; color: #7f8c8d;">등록된 콘텐츠가 없습니다.</p>
-        <% } else { %>
-            <% artists.forEach(function(artist, index) { %>
-                <div class="artist-card">
-                    <div class="card-header">
-                        <div class="rank-number"><%= index + 1 %></div>
-                        <img src="<%= artist.image %>" alt="커버 이미지" class="artist-img">
-                        <div class="artist-info">
-                            <h3 style="margin: 0 0 5px 0; font-size: 18px;"><%= artist.name %></h3>
-                            <p style="margin: 0; color: #7f8c8d; font-size: 13px;">
-                                [<%= artist.type %>] <%= artist.genre %>
-                            </p>
-                        </div>
-                        <div class="pulse-badge">❤️ <%= artist.pulse %></div>
-                    </div>
-
-                    <% if (artist.url !== "#") { %>
-                        <div class="media-container">
-                            <% if (artist.type === 'Music') { %>
-                                <audio controls>
-                                    <source src="<%= artist.url %>" type="audio/mpeg">
-                                </audio>
-                            <% } else if (artist.type === 'Video') { %>
-                                <video controls class="video-player">
-                                    <source src="<%= artist.url %>" type="video/mp4">
-                                </video>
-                            <% } else if (artist.type === 'Pulse') { %>
-                                <video controls class="pulse-player">
-                                    <source src="<%= artist.url %>" type="video/mp4">
-                                </video>
-                            <% } %>
-                        </div>
-                    <% } %>
+    <div class="artist-list">
+        <% if (artists.length > 0) { %>
+            <% artists.forEach(function(artist) { %>
+                <div style="background:#222; border-radius:10px; padding:15px; text-align:center;">
+                    <img src="<%= artist.imageUrl %>" style="width:100%; border-radius:5px;">
+                    <h4><%= artist.name %></h4>
                 </div>
-            <% }) %>
+            <% }); %>
+        <% } else { %>
+            <p style="text-align:center; width:100%; color:#888;">아직 등록된 아티스트가 없네요. 사진을 올려보세요!</p>
         <% } %>
     </div>
 </body>
