@@ -39,9 +39,9 @@ app.use((req, res, next) => {
     next(); 
 });
 
-// 5. 페이지 주소 설정
 app.get('/', (req, res) => {
-    res.render('index');
+    // artists라는 빈 박스([])를 같이 보내줘야 에러가 안 납니다!
+    res.render('index', { artists: [] }); 
 });
 
 app.get('/change-lang/:lang', (req, res) => {
@@ -57,3 +57,4 @@ const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
     console.log(`✅ 서버 오픈! 포트번호: ${PORT}`);
 });
+
