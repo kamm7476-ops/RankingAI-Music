@@ -8,13 +8,11 @@
         body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; }
         a { text-decoration: none; color: inherit; }
 
-        /* 🌟 멜론 스타일의 고급스러운 2단 헤더 구조 */
         .main-header { background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
         
         .header-top { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; border-bottom: 1px solid #1a1b1c; }
         .logo { font-size: 28px; font-weight: 900; color: #ff5722; letter-spacing: -1px; } 
         
-        /* 🌟 상단으로 올라온 통합 검색창 */
         .top-search-form { display: flex; align-items: center; background: #222; border: 2px solid #ff5722; border-radius: 25px; padding: 5px 15px; width: 400px; }
         .top-search-input { background: none; border: none; color: white; outline: none; flex: 1; font-size: 15px; padding: 5px; }
         .top-search-btn { background: none; border: none; color: #ff5722; font-weight: bold; cursor: pointer; font-size: 16px; padding: 0 10px; }
@@ -24,7 +22,6 @@
         .btn-login { color: #bbb; font-size: 14px; }
         .btn-signup { background: #ff5722; color: #000; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 14px; }
 
-        /* 🌟 추가하신 6개 메뉴 일렬 배치 (멜론 스타일) */
         .header-nav { display: flex; justify-content: center; gap: 40px; padding: 12px 0; background: #0b0c0d; }
         .nav-item { color: #aaa; font-weight: 600; font-size: 16px; transition: 0.2s; position: relative; }
         .nav-item:hover, .nav-item.active { color: #ff5722; }
@@ -34,7 +31,6 @@
         .main-layout { display: flex; gap: 30px; align-items: flex-start; }
         .content-left { flex: 1; min-width: 0; }
         
-        /* 사이드바 */
         .sidebar-right { width: 300px; background: #161718; padding: 25px; border-radius: 15px; border: 1px solid #333; position: sticky; top: 150px; }
         .sidebar-title { color: #fff; font-size: 18px; font-weight: bold; margin-top: 0; border-bottom: 2px solid #ff5722; padding-bottom: 12px; margin-bottom: 15px; }
         .artist-list { list-style: none; padding: 0; margin: 0; }
@@ -44,7 +40,6 @@
         .artist-name:hover { color: #ff5722; }
         .artist-count { font-size: 12px; color: #777; background: #222; padding: 3px 8px; border-radius: 12px; }
 
-        /* 폼, 버튼 디자인 */
         .upload-section { background: #161718; padding: 30px; border-radius: 15px; margin-bottom: 40px; border: 1px solid #333; }
         .input-row { display: flex; gap: 15px; margin-bottom: 15px; align-items: center; }
         input[type="text"] { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; }
@@ -52,6 +47,7 @@
         .file-upload { flex: 1; background: #222; padding: 10px; border-radius: 8px; color: #aaa; font-size: 13px; }
         .btn-upload { background: #ff5722; color: #000; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
         
+        /* 장르 버튼 스타일 */
         .genre-selector { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
         .genre-btn { background: #222; color: #aaa; border: 1px solid #333; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; }
         .genre-btn.active { background: rgba(255, 87, 34, 0.15); color: #ff5722; border-color: #ff5722; font-weight: bold; }
@@ -62,7 +58,6 @@
         .tab { color: #777; cursor: pointer; font-weight: 600; font-size: 16px; padding-bottom: 10px; }
         .tab.active { color: #ff5722; border-bottom: 3px solid #ff5722; }
 
-        /* 음악 리스트 */
         .music-list { width: 100%; border-collapse: collapse; }
         .music-item { border-bottom: 1px solid #1a1b1c; }
         .music-item td { padding: 20px 15px; vertical-align: top; }
@@ -138,12 +133,31 @@
                     <h3 style="margin-top:0; color:#ff5722;">🎵 회원을 위한 음원 업로드</h3>
                     <form action="/add-music" method="POST" enctype="multipart/form-data" id="musicForm">
                         <div class="input-row"><input type="text" name="name" placeholder="곡 제목" required><input type="text" name="artist" placeholder="아티스트" required></div>
+                        
                         <div class="genre-selector">
-                            <button type="button" class="genre-btn" data-genre="발라드">발라드</button><button type="button" class="genre-btn" data-genre="댄스">댄스</button>
-                            <button type="button" class="genre-btn" data-genre="랩/힙합">랩/힙합</button><button type="button" class="genre-btn" data-genre="R&B/Soul">R&B/Soul</button>
-                            <button type="button" class="genre-btn" data-genre="인디">인디</button><button type="button" class="genre-btn" data-genre="트로트">트로트</button>
+                            <button type="button" class="genre-btn" data-genre="발라드">발라드</button>
+                            <button type="button" class="genre-btn" data-genre="댄스">댄스</button>
+                            <button type="button" class="genre-btn" data-genre="랩/힙합">랩/힙합</button>
+                            <button type="button" class="genre-btn" data-genre="R&B/Soul">R&B/Soul</button>
+                            <button type="button" class="genre-btn" data-genre="인디음악">인디음악</button>
+                            <button type="button" class="genre-btn" data-genre="록/메탈">록/메탈</button>
+                            <button type="button" class="genre-btn" data-genre="트로트">트로트</button>
+                            <button type="button" class="genre-btn" data-genre="포크/블루스">포크/블루스</button>
+                            <button type="button" class="genre-btn" data-genre="일렉트로니카">일렉트로니카</button>
+                            <button type="button" class="genre-btn" data-genre="OST">OST</button>
+                            <button type="button" class="genre-btn" data-genre="POP">POP</button>
+                            <button type="button" class="genre-btn" data-genre="J-POP">J-POP</button>
+                            <button type="button" class="genre-btn" data-genre="클래식">클래식</button>
+                            <button type="button" class="genre-btn" data-genre="재즈">재즈</button>
+                            <button type="button" class="genre-btn" data-genre="뉴에이지">뉴에이지</button>
+                            <button type="button" class="genre-btn" data-genre="국악">국악</button>
+                            <button type="button" class="genre-btn" data-genre="CCM/종교">CCM/종교</button>
+                            <button type="button" class="genre-btn" data-genre="동요/태교">동요/태교</button>
+                            <button type="button" class="genre-btn" data-genre="뮤지컬/연극">뮤지컬/연극</button>
+                            <button type="button" class="genre-btn" data-genre="기타장르">기타장르</button>
                         </div>
                         <input type="hidden" name="genre" id="hiddenGenreInput" required>
+                        
                         <div class="input-row"><input type="text" name="aiTool" placeholder="사용 프로그램 (예: Suno)" required><input type="text" name="realName" placeholder="업로더 실명 (비공개)" required></div>
                         <textarea name="lyrics" placeholder="가사를 시간과 함께 입력하세요. (예: [00:15] 첫 번째 가사)"></textarea>
                         <div class="input-row">
