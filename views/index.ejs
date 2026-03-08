@@ -29,8 +29,9 @@
         .btn-upload { background: #333; color: #fff; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; white-space: nowrap; }
         .btn-upload:hover { background: #00e5ff; color: #000; }
 
+        /* 장르 버튼 묶음 스타일 (자동 줄바꿈 됨) */
         .genre-selector { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
-        .genre-btn { background: #222; color: #aaa; border: 1px solid #333; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 13px; transition: 0.2s; outline: none; }
+        .genre-btn { background: #222; color: #aaa; border: 1px solid #333; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; transition: 0.2s; outline: none; }
         .genre-btn:hover { background: #333; color: #fff; }
         .genre-btn.active { background: rgba(0, 229, 255, 0.15); color: #00e5ff; border-color: #00e5ff; font-weight: bold; box-shadow: 0 0 10px rgba(0, 229, 255, 0.2); }
 
@@ -54,10 +55,8 @@
         .private-info { font-size: 12px; color: #ff4a4a; margin-top: 4px; }
         .edit-btn { background: #333; color: #fff; font-size: 11px; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
         
-        /* 숨겨진 가사 & 댓글창 공통 스타일 */
         .hidden-box { display: none; background: #111; padding: 15px; border-radius: 8px; margin-top: 10px; font-size: 14px; color: #ccc; line-height: 1.6; border: 1px solid #222; }
         
-        /* 🌟 오디오 플레이어 */
         audio { width: 100%; height: 35px; outline: none; margin-top: 5px; border-radius: 20px; }
         audio::-webkit-media-controls-panel { background-color: #222; }
         audio::-webkit-media-controls-current-time-display, audio::-webkit-media-controls-time-remaining-display { color: #fff; }
@@ -101,13 +100,24 @@
                 </div>
                 
                 <div class="genre-selector">
-                    <button type="button" class="genre-btn" data-genre="K-POP">K-POP</button>
                     <button type="button" class="genre-btn" data-genre="발라드">발라드</button>
                     <button type="button" class="genre-btn" data-genre="댄스">댄스</button>
-                    <button type="button" class="genre-btn" data-genre="힙합">힙합</button>
+                    <button type="button" class="genre-btn" data-genre="랩/힙합">랩/힙합</button>
                     <button type="button" class="genre-btn" data-genre="R&B/Soul">R&B/Soul</button>
-                    <button type="button" class="genre-btn" data-genre="인디뮤직">인디뮤직</button>
+                    <button type="button" class="genre-btn" data-genre="인디음악">인디음악</button>
+                    <button type="button" class="genre-btn" data-genre="록/메탈">록/메탈</button>
+                    <button type="button" class="genre-btn" data-genre="트로트">트로트</button>
+                    <button type="button" class="genre-btn" data-genre="포크/블루스">포크/블루스</button>
+                    <button type="button" class="genre-btn" data-genre="OST">OST</button>
                     <button type="button" class="genre-btn" data-genre="POP">POP</button>
+                    <button type="button" class="genre-btn" data-genre="J-POP">J-POP</button>
+                    <button type="button" class="genre-btn" data-genre="클래식">클래식</button>
+                    <button type="button" class="genre-btn" data-genre="재즈">재즈</button>
+                    <button type="button" class="genre-btn" data-genre="뉴에이지">뉴에이지</button>
+                    <button type="button" class="genre-btn" data-genre="CCM/종교">CCM/종교</button>
+                    <button type="button" class="genre-btn" data-genre="국악">국악</button>
+                    <button type="button" class="genre-btn" data-genre="월드뮤직">월드뮤직</button>
+                    <button type="button" class="genre-btn" data-genre="기타장르">기타장르</button>
                 </div>
                 <input type="hidden" name="genre" id="hiddenGenreInput" required>
 
@@ -192,7 +202,7 @@
                     <td style="text-align: right; vertical-align: middle; width: 80px;">
                         <div class="actions">
                             <div class="actions-icons">
-                                <span title="가사 보기" onclick="document.getElementById('lyrics-<%= music._id %>').style.display = (document.getElementById('lyrics-<%= index %>').style.display === 'block') ? 'none' : 'block';">📝 가사</span>
+                                <span title="가사 보기" onclick="document.getElementById('lyrics-<%= music._id %>').style.display = (document.getElementById('lyrics-<%= music._id %>').style.display === 'block') ? 'none' : 'block';">📝 가사</span>
                                 <span title="댓글 달기" onclick="document.getElementById('comments-<%= music._id %>').style.display = (document.getElementById('comments-<%= music._id %>').style.display === 'block') ? 'none' : 'block';">💬 <%= music.comments ? music.comments.length : 0 %></span>
                             </div>
                         </div>
