@@ -237,7 +237,7 @@
                                     <%= music.name %>
                                     
                                     <% if (user && (user.id === music.uploader || user.role === 'admin') && music._id !== "dummy") { %>
-                                        <button style="background:none; border:none; color:#00e5ff; cursor:pointer; font-size:12px; padding: 0 5px;" onclick="alert('곡 정보 수정 페이지는 추후 업데이트 예정입니다.')">✏️ 수정</button>
+                                       <button style="background:none; border:none; color:#00e5ff; cursor:pointer; font-size:12px; padding: 0 5px;" onclick="location.href='/edit/<%= music._id %>'">✏️ 수정</button>
                                         <form action="/delete-music/<%= music._id %>" method="POST" style="display:inline;" onsubmit="return confirm('삭제하시겠습니까?');">
                                             <button type="submit" style="background:none; border:none; color:#ff4a4a; cursor:pointer; font-size:12px; padding: 0;">🗑️ 삭제</button>
                                         </form>
@@ -426,4 +426,5 @@
     </script>
 </body>
 </html>
+
 
