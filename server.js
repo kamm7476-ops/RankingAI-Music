@@ -60,7 +60,11 @@ app.use((req, res, next) => {
 app.get('/', async (req, res) => {
     try {
         const searchQuery = req.query.search || ''; 
+        const genreQuery = req.query.genre || ''; // 장르 검색 추가
+        
         let filter = {};
+        if (searchQuery) filter.artist = { $regex: searchQuery, $options: 'i' };
+        if (genreQuery) filter.genre = genreQuery; // 장르 필터링 적용
         if (searchQuery) filter.artist = { $regex: searchQuery, $options: 'i' };
 
         let artists = await Music.find(filter).sort({ createdAt: -1 });
@@ -139,7 +143,7 @@ app.post('/login', (req, res) => {
 });
 app.get('/logout', (req, res) => { req.session.destroy(); res.redirect('/'); });
 app.get('/signup', (req, res) => res.render('signup'));
-app.get('/board', (req, res) => res.render('board', { posts: [] }));
+
 app.get('/admin', (req, res) => {
     if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
     res.render('admin', { stats: { users: 0, musics: 0, reports: 0 } });
@@ -208,7 +212,38 @@ app.post('/edit/:id', async (req, res) => {
         res.send("<script>alert('수정 중 오류가 발생했습니다.'); location.href='/';</script>");
     }
 });
+// 🌟 커뮤니티 게시판 열기 및 글쓰기/삭제
+app.get('/board', async (req, res) => {
+    const posts = await Post.find().sort({ createdAt: -1 });
+    res.render('board', { posts: posts });
+});
+app.post('/add-post', async (req, res) => {
+    if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
+    await new Post({ title: req.body.title, content: req.body.content, author: req.session.user.id }).save();
+    res.redirect('/board');
+});
+app.post('/delete-post/:id', async (req, res) => {
+    if (!req.session.user) return res.redirect('/board');
+    const post = await Post.findById(req.params.id);
+    if (req.session.user.role === 'admin' || req.session.user.id === post.author) await Post.findByIdAndDelete(req.params.id);
+    res.redirect('/board');
+});
+
+// 🌟 내 음악 보관함에서 삭제하기
+app.post('/delete-mymusic/:id', async (req, res) => {
+    if (req.session.user) await MyMusic.findOneAndDelete({ userId: req.session.user.id, musicId: req.params.id });
+    res.redirect('/mymusic');
+});
+
+// 🌟 유튜브/쇼츠 영상 삭제하기
+app.post('/delete-video/:id', async (req, res) => {
+    if (!req.session.user) return res.redirect('back');
+    const video = await Video.findById(req.params.id);
+    if (req.session.user.role === 'admin' || req.session.user.id === video.uploader) await Video.findByIdAndDelete(req.params.id);
+    res.redirect('back');
+});
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
+
 
 
