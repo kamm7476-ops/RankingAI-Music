@@ -90,6 +90,11 @@
                     </div>
                     <div class="video-title"><%= video.title %></div>
                     <div class="video-uploader">업로더: <%= video.uploader %></div>
+                    <% if (user && (user.id === video.uploader || user.role === 'admin')) { %>
+    <form action="/delete-video/<%= video._id %>" method="POST" style="margin-top: 5px;" onsubmit="return confirm('영상을 삭제하시겠습니까?');">
+        <button type="submit" style="background:none; border:none; color:#ff4a4a; cursor:pointer; font-size:12px; padding:0;">🗑️ 영상 삭제</button>
+    </form>
+<% } %>
                 </div>
                 <% }) %>
             <% } else { %>
