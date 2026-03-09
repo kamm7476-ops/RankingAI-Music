@@ -31,7 +31,11 @@ const videoSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 const Video = mongoose.model('Video', videoSchema);
-
+// 🌟 커뮤니티 게시판 DB 설계도
+const postSchema = new mongoose.Schema({
+    title: String, content: String, author: String, createdAt: { type: Date, default: Date.now }
+});
+const Post = mongoose.model('Post', postSchema);
 // 🌟 내 음악(담기) DB 설계도 추가!
 const myMusicSchema = new mongoose.Schema({
     userId: String,
@@ -206,4 +210,5 @@ app.post('/edit/:id', async (req, res) => {
 });
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
+
 
