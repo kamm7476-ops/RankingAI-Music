@@ -7,88 +7,59 @@
     <style>
         body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; }
         a { text-decoration: none; color: inherit; }
-
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
-        .logo { font-size: 26px; font-weight: 900; color: #00e5ff; letter-spacing: -1px; }
-        .auth-buttons { display: flex; gap: 20px; align-items: center; }
-        .btn-menu { color: #fff; font-weight: bold; font-size: 15px; margin-right: 15px; transition: 0.2s; }
-        .btn-menu:hover { color: #00e5ff; }
-
-        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        .header-top { display: flex; justify-content: space-between; padding: 15px 40px; border-bottom: 1px solid #222; background: #121314; }
+        .logo { font-size: 28px; font-weight: 900; color: #ff5722; }
+        .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
         
-        .board-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #00e5ff; padding-bottom: 15px; }
-        .board-title { font-size: 28px; font-weight: bold; }
-        .btn-write { background: #00e5ff; color: #000; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; }
-        .btn-write:hover { filter: brightness(1.1); }
-
-        .board-table { width: 100%; border-collapse: collapse; text-align: left; }
-        .board-table th { background: #161718; padding: 15px; border-bottom: 1px solid #333; color: #aaa; }
-        .board-table td { padding: 15px; border-bottom: 1px solid #222; }
-        .board-item:hover { background: #111; cursor: pointer; }
+        .write-box { background: #161718; padding: 25px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #333; }
+        input[type="text"], textarea { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; }
+        textarea { height: 100px; resize: vertical; }
+        .btn-submit { background: #ff5722; color: #000; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; float: right; }
         
-        .post-title { font-size: 16px; font-weight: 500; }
-        .post-author { color: #888; font-size: 14px; }
-        .post-date { color: #666; font-size: 14px; text-align: right; }
-
-        /* 글쓰기 폼 (기본 숨김) */
-        .write-form { display: none; background: #161718; padding: 25px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #333; }
-        .write-form input, .write-form textarea { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 6px; margin-bottom: 15px; box-sizing: border-box; }
-        .write-form textarea { height: 150px; resize: vertical; }
-
-        @media (max-width: 768px) {
-            .navbar { padding: 15px 20px; }
-            .container { padding: 20px 10px; }
-            .board-title { font-size: 24px; }
-        }
+        .post-list { clear: both; padding-top: 20px; }
+        .post-card { background: #161718; padding: 20px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #222; }
+        .post-title { font-size: 18px; font-weight: bold; color: #ff5722; margin-bottom: 10px; }
+        .post-author { font-size: 13px; color: #888; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 10px; }
+        .post-content { font-size: 15px; line-height: 1.6; color: #ddd; white-space: pre-wrap; }
+        .btn-delete { background: none; border: none; color: #ff4a4a; cursor: pointer; font-size: 12px; float: right; }
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="logo"><a href="/">RANKING AI</a></div>
-        <div class="auth-buttons">
-            <a href="/" class="btn-menu">🏠 홈으로</a>
-        </div>
-    </nav>
+    <div class="header-top">
+        <div class="logo">RANKING AI 커뮤니티</div>
+        <a href="/" style="color:#aaa; font-weight:bold;">🏠 메인 차트로 돌아가기</a>
+    </div>
 
     <div class="container">
-        <div class="board-header">
-            <div class="board-title">💬 소통 커뮤니티</div>
-            <button class="btn-write" onclick="document.getElementById('writeForm').style.display='block'">글쓰기</button>
-        </div>
-
-        <div id="writeForm" class="write-form">
-            <h3>새 게시글 작성</h3>
+        <div class="write-box">
+            <h3 style="margin-top:0;">✏️ 자유롭게 글을 남겨보세요</h3>
             <form action="/add-post" method="POST">
-                <input type="text" name="title" placeholder="제목을 입력하세요" required>
-                <textarea name="content" placeholder="내용을 자유롭게 적어주세요!" required></textarea>
-                <button type="submit" class="btn-write" style="width: 100%;">등록하기</button>
+                <input type="text" name="title" placeholder="글 제목을 입력하세요" required>
+                <textarea name="content" placeholder="내용을 입력하세요..." required></textarea>
+                <button type="submit" class="btn-submit">게시글 등록</button>
             </form>
         </div>
 
-        <table class="board-table">
-            <thead>
-                <tr>
-                    <th>제목</th>
-                    <th style="width: 120px;">작성자</th>
-                    <th style="width: 100px; text-align: right;">작성일</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% if (posts && posts.length > 0) { %>
-                    <% posts.forEach(function(post) { %>
-                    <tr class="board-item">
-                        <td class="post-title"><%= post.title %></td>
-                        <td class="post-author"><%= post.author %></td>
-                        <td class="post-date"><%= post.date %></td>
-                    </tr>
-                    <% }); %>
-                <% } else { %>
-                    <tr>
-                        <td colspan="3" style="text-align: center; padding: 50px; color: #666;">첫 번째 글을 남겨주세요!</td>
-                    </tr>
-                <% } %>
-            </tbody>
-        </table>
+        <div class="post-list">
+            <% if (posts && posts.length > 0) { %>
+                <% posts.forEach(post => { %>
+                    <div class="post-card">
+                        <div class="post-title">
+                            <%= post.title %>
+                            <% if (user && (user.id === post.author || user.role === 'admin')) { %>
+                                <form action="/delete-post/<%= post._id %>" method="POST" style="display:inline;" onsubmit="return confirm('삭제하시겠습니까?');">
+                                    <button type="submit" class="btn-delete">🗑️ 삭제</button>
+                                </form>
+                            <% } %>
+                        </div>
+                        <div class="post-author">작성자: <%= post.author %> | 작성일: <%= post.createdAt.toLocaleDateString() %></div>
+                        <div class="post-content"><%= post.content %></div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p style="text-align:center; color:#666; padding: 50px;">아직 작성된 글이 없습니다. 첫 번째 글을 남겨주세요!</p>
+            <% } %>
+        </div>
     </div>
 </body>
 </html>
