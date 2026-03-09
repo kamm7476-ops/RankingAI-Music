@@ -80,6 +80,9 @@
                     </td>
                     <td style="text-align:right;">
                         <button class="control-btn" style="display:inline-block;" onclick="playSingleTrack(this)">▶ 듣기</button>
+                        <form action="/delete-mymusic/<%= music._id %>" method="POST" style="display:inline;">
+                        <button type="submit" class="control-btn" style="display:inline-block; border-color:#ff4a4a; color:#ff4a4a;" onclick="return confirm('보관함에서 지우시겠습니까?');">🗑️ 삭제</button>
+                        </form>
                     </td>
                 </tr>
                 <% }); %>
