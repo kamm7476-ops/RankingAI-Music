@@ -168,6 +168,42 @@ app.post('/delete-music/:id', async (req, res) => {
         res.redirect('/'); 
     } catch (err) { res.redirect('/'); }
 });
+// 🌟 곡 정보 수정 페이지 열기
+app.get('/edit/:id', async (req, res) => {
+    if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/';</script>");
+    try {
+        const music = await Music.findById(req.params.id);
+        if (!music) return res.send("<script>alert('존재하지 않는 곡입니다.'); location.href='/';</script>");
+        
+        // 권한 체크: 최고관리자이거나, 자기가 올린 곡일 때만 수정 페이지 접속 허용
+        if (req.session.user.role === 'admin' || req.session.user.id === music.uploader) {
+            res.render('edit', { music: music });
+        } else {
+            res.send("<script>alert('수정 권한이 없습니다!'); location.href='/';</script>");
+        }
+    } catch (err) {
+        res.redirect('/');
+    }
+});
 
+// 🌟 곡 정보 수정 내용 저장하기
+app.post('/edit/:id', async (req, res) => {
+    if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/';</script>");
+    try {
+        const { name, artist, genre, aiTool, lyrics } = req.body;
+        const music = await Music.findById(req.params.id);
+        
+        if (req.session.user.role === 'admin' || req.session.user.id === music.uploader) {
+            // 전달받은 새 정보로 업데이트
+            await Music.findByIdAndUpdate(req.params.id, { name, artist, genre, aiTool, lyrics });
+            res.redirect('/');
+        } else {
+            res.send("<script>alert('수정 권한이 없습니다!'); location.href='/';</script>");
+        }
+    } catch (err) {
+        res.send("<script>alert('수정 중 오류가 발생했습니다.'); location.href='/';</script>");
+    }
+});
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
+
