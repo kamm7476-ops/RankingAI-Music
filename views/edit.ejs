@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>곡 정보 수정 - RANKING AI</title>
+    <style>
+        body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .edit-container { background: #161718; padding: 40px; border-radius: 15px; border: 1px solid #333; width: 100%; max-width: 600px; box-sizing: border-box; }
+        h2 { color: #ff5722; margin-top: 0; text-align: center; margin-bottom: 30px; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 13px; color: #aaa; margin-bottom: 5px; }
+        input[type="text"], textarea { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; outline: none; }
+        input[type="text"]:focus, textarea:focus { border-color: #ff5722; }
+        textarea { height: 120px; resize: vertical; }
+        .btn-group { display: flex; gap: 10px; margin-top: 30px; }
+        .btn-save { flex: 1; background: #ff5722; color: #000; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-save:hover { filter: brightness(1.2); }
+        .btn-cancel { flex: 1; background: #333; color: #fff; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; line-height: 1.2; display: flex; align-items: center; justify-content: center;}
+        .btn-cancel:hover { background: #444; }
+    </style>
+</head>
+<body>
+    <div class="edit-container">
+        <h2>✏️ 곡 정보 수정</h2>
+        <form action="/edit/<%= music._id %>" method="POST">
+            <div class="input-group">
+                <label>곡 제목</label>
+                <input type="text" name="name" value="<%= music.name %>" required>
+            </div>
+            <div class="input-group">
+                <label>아티스트</label>
+                <input type="text" name="artist" value="<%= music.artist %>" required>
+            </div>
+            <div class="input-group">
+                <label>장르 (직접 입력 또는 수정)</label>
+                <input type="text" name="genre" value="<%= music.genre %>" required>
+            </div>
+            <div class="input-group">
+                <label>사용 프로그램 (AI Tool)</label>
+                <input type="text" name="aiTool" value="<%= music.aiTool %>" required>
+            </div>
+            <div class="input-group">
+                <label>가사 (시간 싱크 포함 가능)</label>
+                <textarea name="lyrics"><%= music.lyrics %></textarea>
+            </div>
+            <div class="btn-group">
+                <a href="/" class="btn-cancel">취소하기</a>
+                <button type="submit" class="btn-save">수정 내용 저장</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
