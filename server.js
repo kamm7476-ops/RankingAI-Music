@@ -82,10 +82,7 @@ app.get('/', async (req, res) => {
             }];
             popularArtists = [{ _id: "비비(BIBI)", count: 1 }];
         }
-        res.render('index', { artists: artists, searchQuery: searchQuery, popularArtists: popularArtists }); 
-    } catch (err) { res.send("<h1>에러가 발생했습니다.</h1>"); }
-});
-
+        res.render('index', { artists: artists, searchQuery: searchQuery, genreQuery: genreQuery, popularArtists: popularArtists });
 // 🌟 담기 기능 (선택된 곡들을 내 보관함에 저장)
 app.post('/add-to-mymusic', async (req, res) => {
     try {
@@ -244,6 +241,7 @@ app.post('/delete-video/:id', async (req, res) => {
 });
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
+
 
 
 
