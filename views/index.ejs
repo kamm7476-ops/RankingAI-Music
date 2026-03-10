@@ -104,10 +104,18 @@
         .progress-area { width: 100%; display: flex; align-items: center; gap: 10px; font-size: 12px; color: #aaa; }
         #progress-bar { flex: 1; height: 4px; border-radius: 2px; -webkit-appearance: none; background: #444; outline: none; cursor: pointer; accent-color: #ff5722; }
         #progress-bar::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #ff5722; }
+       /* 🌟 새로 추가한 번역기 디자인 */
+        .logo-wrap { display: flex; align-items: center; gap: 15px; }
+        .lang-select { padding: 6px 12px; background: #222; color: #fff; border: 1px solid #ff5722; border-radius: 20px; font-weight: bold; font-size: 13px; outline: none; cursor: pointer; }
+
+        /* 📱 모바일(스마트폰) 최적화 디자인 */
         @media (max-width: 900px) {
-            .header-top { flex-direction: column; gap: 15px; padding: 15px; }
+            .header-top { flex-direction: column; align-items: stretch; gap: 15px; padding: 15px; }
+            .logo-wrap { justify-content: space-between; width: 100%; }
             .top-search-form { width: 100%; box-sizing: border-box; }
+            .auth-buttons { justify-content: center; width: 100%; flex-wrap: wrap; gap: 15px; }
             .header-nav { overflow-x: auto; justify-content: flex-start; padding: 12px 20px; gap: 20px; white-space: nowrap; }
+            
             .main-layout { flex-direction: column; }
             .sidebar-right { width: 100%; position: static; }
             
@@ -118,9 +126,11 @@
             .rank { position: absolute; top: -10px; left: 15px; background: #ff5722; color: black; border-radius: 8px; padding: 2px 10px; width: auto; font-size: 16px; z-index: 10; }
             .album-art { width: 100%; height: auto; aspect-ratio: 1; margin: 10px 0; }
             
-            .bottom-player-bar { padding: 10px; flex-direction: column; gap: 10px; }
-            .player-info { width: 100%; }
-            .main-audio-element { width: 100%; max-width: 100%; }
+            /* 모바일 하단 플레이어 예쁘게 정렬 */
+            .bottom-player-bar { padding: 10px 15px; flex-direction: column; gap: 12px; }
+            .player-info { width: 100%; justify-content: flex-start; }
+            .player-controls-wrapper { width: 100%; }
+            .player-buttons { gap: 30px; }
         }
     </style>
 </head>
@@ -597,6 +607,7 @@
        </script>
 </body>
 </html>
+
 
 
 
