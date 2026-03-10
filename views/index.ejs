@@ -127,17 +127,39 @@
 <body>
     <header class="main-header">
         <div class="header-top">
-           <div style="display: flex; align-items: center;">
+          <div style="display: flex; align-items: center;">
     <div class="logo">RANKING AI</div>
     
-    <div id="google_translate_element" style="margin-left: 20px;"></div>
+    <div id="google_translate_element" style="display:none;"></div>
+    
+    <select id="custom-translate-select" onchange="changeLanguage(this.value)" style="margin-left: 20px; padding: 6px 12px; background: #222; color: #fff; border: 1px solid #ff5722; border-radius: 20px; font-weight: bold; font-size: 13px; outline: none; cursor: pointer;">
+        <option value="ko">🇰🇷 한국어</option>
+        <option value="en">🇺🇸 English</option>
+        <option value="zh-CN">🇨🇳 中文 (简体)</option>
+        <option value="zh-TW">🇹🇼 中文 (繁體)</option>
+        <option value="ja">🇯🇵 日本語</option>
+    </select>
+
     <script type="text/javascript">
+        // 구글 번역기 엔진 준비
         function googleTranslateElementInit() {
             new google.translate.TranslateElement({
                 pageLanguage: 'ko',
                 includedLanguages: 'en,ko,zh-CN,zh-TW,ja',
-                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+                autoDisplay: false
             }, 'google_translate_element');
+        }
+
+        // 🌟 내 커스텀 선택기와 구글 번역기를 몰래 연결해 주는 마법 코드
+        function changeLanguage(langCode) {
+            const googleSelect = document.querySelector('.goog-te-combo');
+            if (googleSelect) {
+                googleSelect.value = langCode;
+                googleSelect.dispatchEvent(new Event('change'));
+            } else {
+                // 번역기가 아직 안 불러와졌을 때 안전장치
+                setTimeout(() => changeLanguage(langCode), 500);
+            }
         }
     </script>
     <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
@@ -581,6 +603,7 @@
        </script>
 </body>
 </html>
+
 
 
 
