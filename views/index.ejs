@@ -189,9 +189,8 @@
         </div>
         
         <div class="header-nav">
-            <a href="/" class="nav-item active">RANKING AI 챠트</a>
-            <a href="/" class="nav-item">최신음악</a>
-            <a href="/" class="nav-item">장르별</a>
+            <a href="/" class="nav-item <%= (typeof genreQuery !== 'undefined' && !genreQuery && !searchQuery) ? 'active' : '' %>">RANKING AI 챠트 / 최신음악</a>
+            <a href="/?genre=발라드" class="nav-item <%= (typeof genreQuery !== 'undefined' && genreQuery) ? 'active' : '' %>">장르별</a>
             <a href="/youtube" class="nav-item">유튜브</a>
             <a href="/shorts" class="nav-item">쇼츠</a>
             <a href="/board" class="nav-item">커뮤니티</a>
@@ -256,7 +255,14 @@
                         <div class="tab" onclick="switchTab(this)">월간</div>
                     </div>
                 </div>
-
+<% if (typeof genreQuery !== 'undefined' && genreQuery) { %>
+                    <div style="background: #161718; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; display: flex; gap: 8px; flex-wrap: wrap;">
+                        <% const displayGenres = ['발라드','댄스','랩/힙합','R&B/Soul','인디음악','록/메탈','트로트','포크/블루스','일렉트로니카','POP','클래식','재즈','뉴에이지','국악','CCM/종교','동요/태교','기타장르']; %>
+                        <% displayGenres.forEach(g => { %>
+                            <a href="/?genre=<%= g %>" style="padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; border: 1px solid <%= genreQuery === g ? '#ff5722' : '#444' %>; background: <%= genreQuery === g ? '#ff5722' : '#222' %>; color: <%= genreQuery === g ? '#000' : '#aaa' %>; transition: 0.2s;"><%= g %></a>
+                        <% }) %>
+                    </div>
+                <% } %>
                 <div class="chart-controls">
                     <input type="checkbox" id="checkAll" class="custom-checkbox" onchange="toggleAll(this)">
                     <button class="control-btn" onclick="playAll()">▶ 전체듣기</button>
@@ -604,6 +610,7 @@
        </script>
 </body>
 </html>
+
 
 
 
