@@ -60,12 +60,11 @@ app.use((req, res, next) => {
 app.get('/', async (req, res) => {
     try {
         const searchQuery = req.query.search || ''; 
-        const genreQuery = req.query.genre || ''; // 장르 검색 추가
+        const genreQuery = req.query.genre || ''; // 🌟 장르 검색 추가
         
         let filter = {};
         if (searchQuery) filter.artist = { $regex: searchQuery, $options: 'i' };
-        if (genreQuery) filter.genre = genreQuery; // 장르 필터링 적용
-        if (searchQuery) filter.artist = { $regex: searchQuery, $options: 'i' };
+        if (genreQuery) filter.genre = genreQuery; // 🌟 장르 필터링 적용
 
         let artists = await Music.find(filter).sort({ createdAt: -1 });
         let popularArtists = await Music.aggregate([
@@ -74,7 +73,7 @@ app.get('/', async (req, res) => {
             { $limit: 10 }
         ]);
 
-        if (artists.length === 0 && !searchQuery) {
+        if (artists.length === 0 && !searchQuery && !genreQuery) {
             artists = [{
                 _id: "dummy", name: "첫 곡의 주인공이 되어보세요!", artist: "RANKING AI", genre: "안내", aiTool: "시스템",
                 lyrics: "아직 등록된 곡이 없습니다.", uploader: "admin", uploaderRealName: "관리자", audioUrl: "",
@@ -83,6 +82,13 @@ app.get('/', async (req, res) => {
             popularArtists = [{ _id: "비비(BIBI)", count: 1 }];
         }
         res.render('index', { artists: artists, searchQuery: searchQuery, genreQuery: genreQuery, popularArtists: popularArtists });
+    } catch (err) {
+        console.log("DB 에러:", err);
+        res.send("<h1>데이터를 불러오는 중 에러가 발생했습니다.</h1>");
+    } // 👈 이 부분(에러 처리 및 괄호 닫기)이 통째로 빠져있어서 에러가 났던 겁니다!
+});
+
+// 🌟 담기 기능 (선택된 곡들을 내 보관함에 저장)
 // 🌟 담기 기능 (선택된 곡들을 내 보관함에 저장)
 app.post('/add-to-mymusic', async (req, res) => {
     try {
@@ -241,6 +247,7 @@ app.post('/delete-video/:id', async (req, res) => {
 });
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
+
 
 
 
