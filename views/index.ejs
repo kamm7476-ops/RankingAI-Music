@@ -94,7 +94,16 @@
         .main-audio-element::-webkit-media-controls-panel { background-color: #1a1c1e; }
         .main-audio-element::-webkit-media-controls-play-button { filter: invert(40%) sepia(80%) saturate(300%) hue-rotate(330deg) brightness(110%); }
         .main-audio-element::-webkit-media-controls-current-time-display, .main-audio-element::-webkit-media-controls-time-remaining-display { color: #fff; }
-
+/* 🌟 멜론 스타일 플레이어 CSS 추가 */
+        .player-controls-wrapper { flex: 1; max-width: 600px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .player-buttons { display: flex; align-items: center; gap: 20px; }
+        .player-buttons button { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; transition: 0.2s; padding: 0; }
+        .player-buttons button:hover { color: #ff5722; }
+        .player-buttons .play-btn { font-size: 32px; color: #ff5722; }
+        
+        .progress-area { width: 100%; display: flex; align-items: center; gap: 10px; font-size: 12px; color: #aaa; }
+        #progress-bar { flex: 1; height: 4px; border-radius: 2px; -webkit-appearance: none; background: #444; outline: none; cursor: pointer; accent-color: #ff5722; }
+        #progress-bar::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #ff5722; }
         @media (max-width: 900px) {
             .header-top { flex-direction: column; gap: 15px; padding: 15px; }
             .top-search-form { width: 100%; box-sizing: border-box; }
@@ -440,6 +449,7 @@
     </script>
 </body>
 </html>
+
 
 
 
