@@ -20,6 +20,7 @@ mongoose.connect(DB_URI)
 const musicSchema = new mongoose.Schema({
     name: String, artist: String, genre: String, aiTool: String, lyrics: String,
     uploader: String, uploaderRealName: String, imageUrl: String, audioUrl: String,
+    views: { type: Number, default: 0 }, // 🌟 새로 추가된 조회수 기억 장치!
     comments: [{ author: String, text: String, date: { type: Date, default: Date.now } }],
     createdAt: { type: Date, default: Date.now }
 });
@@ -57,21 +58,46 @@ app.use((req, res, next) => {
 });
 
 // 메인 화면
+// 메인 화면 (차트 & 최신음악 분리 엔진)
 app.get('/', async (req, res) => {
     try {
         const searchQuery = req.query.search || ''; 
-        const genreQuery = req.query.genre || ''; // 🌟 장르 검색 추가
+        const genreQuery = req.query.genre || ''; 
+        const sortQuery = req.query.sort || 'views'; // 🌟 기본값은 조회수 랭킹 차트
         
         let filter = {};
         if (searchQuery) filter.artist = { $regex: searchQuery, $options: 'i' };
-        if (genreQuery) filter.genre = genreQuery; // 🌟 장르 필터링 적용
+        if (genreQuery) filter.genre = genreQuery;
 
-        let artists = await Music.find(filter).sort({ createdAt: -1 });
+        // 🌟 정렬 기준 분리 (조회수순 vs 최신순)
+        let sortOption = { views: -1 }; // RANKING 챠트 (조회수 1위부터)
+        if (sortQuery === 'latest') sortOption = { createdAt: -1 }; // 최신음악 (최근 시간순)
+
+        let artists = await Music.find(filter).sort(sortOption);
         let popularArtists = await Music.aggregate([
             { $group: { _id: "$artist", count: { $sum: 1 } } },
             { $sort: { count: -1 } },
             { $limit: 10 }
         ]);
+
+        res.render('index', { 
+            artists: artists, searchQuery: searchQuery, 
+            genreQuery: genreQuery, sortQuery: sortQuery, // sortQuery 추가
+            popularArtists: popularArtists 
+        });
+    } catch (err) {
+        console.log("DB 에러:", err);
+        res.send("<h1>데이터를 불러오는 중 에러가 발생했습니다.</h1>");
+    }
+});
+
+// 🌟 재생할 때마다 조회수 1씩 올려주는 투명 라우터
+app.post('/play-count/:id', async (req, res) => {
+    try {
+        await Music.findByIdAndUpdate(req.params.id, { $inc: { views: 1 } });
+        res.sendStatus(200);
+    } catch(err) { res.sendStatus(500); }
+});
 
         if (artists.length === 0 && !searchQuery && !genreQuery) {
             artists = [{
@@ -247,6 +273,7 @@ app.post('/delete-video/:id', async (req, res) => {
 });
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
+
 
 
 
