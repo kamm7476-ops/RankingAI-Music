@@ -480,9 +480,100 @@
             .then(data => alert(data.message))
             .catch(err => alert("에러가 발생했습니다. 다시 시도해주세요."));
         }
-    </script>
+// =========================================================
+        // 🌟 음악 끊김 방지 마법 엔진 (부분 화면 교체 - PJAX)
+        // =========================================================
+        
+        // 1. 링크(메뉴) 클릭 시 화면 전체가 새로고침되는 것을 막습니다.
+        document.addEventListener('click', async (e) => {
+            const link = e.target.closest('a');
+            if (!link) return;
+
+            const href = link.getAttribute('href');
+            
+            // 삭제, 로그아웃 등 특수 기능이 아닌 일반 메뉴 이동일 때만 가로챕니다.
+            if (href && href.startsWith('/') && !href.includes('delete') && !href.includes('logout')) {
+                e.preventDefault(); // 기본 새로고침 방지! (음악 살리기)
+                navigateTo(href);
+            }
+        });
+
+        // 2. 검색창(GET 폼)에서 검색할 때도 새로고침을 막습니다.
+        document.addEventListener('submit', async (e) => {
+            const form = e.target;
+            if (form.method.toLowerCase() === 'get') {
+                e.preventDefault(); // 검색 시 새로고침 방지!
+                const formData = new FormData(form);
+                const searchParams = new URLSearchParams(formData).toString();
+                const href = form.getAttribute('action') + '?' + searchParams;
+                navigateTo(href);
+            }
+        });
+
+        // 3. 핵심 엔진: 백그라운드에서 새 화면을 몰래 가져와서 가운데만 바꿔치기!
+        async function navigateTo(href) {
+            try {
+                const response = await fetch(href);
+                const html = await response.text();
+                
+                // 가져온 새 화면을 투명한 상자에 담아 파싱합니다.
+                const parser = new DOMParser();
+                const newDoc = parser.parseFromString(html, 'text/html');
+                
+                // 🌟 가운데 내용물(.container)만 쏙 빼서 교체합니다. (플레이어는 냅둠!)
+                const currentContainer = document.querySelector('.container');
+                const newContainer = newDoc.querySelector('.container');
+                if (currentContainer && newContainer) {
+                    currentContainer.innerHTML = newContainer.innerHTML;
+                }
+                
+                // 상단 메뉴바의 색상(활성화 상태)도 바꿔줍니다.
+                const currentNav = document.querySelector('.header-nav');
+                const newNav = newDoc.querySelector('.header-nav');
+                if (currentNav && newNav) currentNav.innerHTML = newNav.innerHTML;
+                
+                // 주소창 URL과 탭 제목을 새 페이지로 자연스럽게 바꿉니다.
+                history.pushState(null, '', href);
+                document.title = newDoc.title;
+                
+                // 화면이 바뀌면서 풀려버린 장르 버튼 이벤트를 다시 묶어줍니다.
+                reattachEvents();
+                window.scrollTo(0, 0); // 화면 맨 위로 부드럽게 올리기
+                
+            } catch (err) {
+                console.log("화면 교체 에러:", err);
+                location.href = href; // 에러가 나면 원래 방식대로 이동시킵니다.
+            }
+        }
+
+        // 4. 스마트폰이나 PC에서 '뒤로 가기' 버튼을 눌렀을 때도 안 끊기게 방어!
+        window.addEventListener('popstate', async () => {
+            navigateTo(location.pathname + location.search);
+        });
+
+        // 5. 화면 교체 후 부품 조립(이벤트 리스너 재부착)
+        function reattachEvents() {
+            const genreBtns = document.querySelectorAll('.genre-btn');
+            const hiddenInput = document.getElementById('hiddenGenreInput');
+            genreBtns.forEach(btn => {
+                btn.addEventListener('click', function() { 
+                    genreBtns.forEach(b => b.classList.remove('active')); 
+                    this.classList.add('active'); 
+                    if(hiddenInput) hiddenInput.value = this.getAttribute('data-genre'); 
+                });
+            });
+            const musicForm = document.getElementById('musicForm');
+            if(musicForm) {
+                musicForm.addEventListener('submit', function(e) { 
+                    if (hiddenInput && !hiddenInput.value) { e.preventDefault(); alert('장르를 선택해주세요!'); } 
+                });
+            }
+        }
+        // =========================================================
+       </script>
 </body>
 </html>
+
 
 
 
