@@ -532,8 +532,8 @@
 
             const href = link.getAttribute('href');
             
-            // 삭제, 로그아웃 등 특수 기능이 아닌 일반 메뉴 이동일 때만 가로챕니다.
-            if (href && href.startsWith('/') && !href.includes('delete') && !href.includes('logout')) {
+            // 🌟 로그인, 회원가입, 로그아웃, 삭제 버튼은 마법에서 제외하고 정상적으로 이동시킵니다!
+            if (href && href.startsWith('/') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup')) {
                 e.preventDefault(); // 기본 새로고침 방지! (음악 살리기)
                 navigateTo(href);
             }
@@ -614,6 +614,7 @@
        </script>
 </body>
 </html>
+
 
 
 
