@@ -189,7 +189,8 @@
         </div>
         
         <div class="header-nav">
-            <a href="/" class="nav-item <%= (typeof genreQuery !== 'undefined' && !genreQuery && !searchQuery) ? 'active' : '' %>">RANKING AI 챠트 / 최신음악</a>
+            <a href="/?sort=views" class="nav-item <%= (typeof sortQuery !== 'undefined' && sortQuery === 'views' && !genreQuery) ? 'active' : '' %>">RANKING AI 챠트</a>
+            <a href="/?sort=latest" class="nav-item <%= (typeof sortQuery !== 'undefined' && sortQuery === 'latest') ? 'active' : '' %>">최신음악</a>
             <a href="/?genre=발라드" class="nav-item <%= (typeof genreQuery !== 'undefined' && genreQuery) ? 'active' : '' %>">장르별</a>
             <a href="/youtube" class="nav-item">유튜브</a>
             <a href="/shorts" class="nav-item">쇼츠</a>
@@ -289,7 +290,7 @@
                                         </form>
                                     <% } %>
                                 </div>
-                                <div class="singer"><%= music.artist %> (<%= music.genre %>) <span class="ai-badge">🎵 <%= music.aiTool %></span></div>
+                                <div class="singer"><%= music.artist %> (<%= music.genre %>) <span class="ai-badge">🎵 <%= music.aiTool %></span> <span style="margin-left:10px; color:#ff5722; font-size:12px;">🎧 재생 <%= music.views || 0 %>회</span></div>
                                 
                                 <div class="action-row">
                                     <div class="action-btn" onclick="playSingleTrack(this)">▶ 듣기</div>
@@ -416,7 +417,7 @@
             }
         }
 
-        function loadTrack(index) {
+       function loadTrack(index) {
             if(index >= 0 && index < playlist.length) {
                 const track = playlist[index];
                 if(!track.audio) return alert("음원 파일이 없는 곡입니다.");
@@ -430,6 +431,9 @@
                 isPlaying = true;
                 if(btnPlay) btnPlay.innerText = "⏸";
                 currentIndex = index;
+
+                // 🌟 노래가 재생될 때 서버에 조회수 증가 신호 쏘기!
+                fetch('/play-count/' + track.id, { method: 'POST' }).catch(err => console.log(err));
             }
         }
 
@@ -610,6 +614,7 @@
        </script>
 </body>
 </html>
+
 
 
 
