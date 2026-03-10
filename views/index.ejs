@@ -350,7 +350,7 @@
             if (!hiddenInput.value) { e.preventDefault(); alert('장르를 선택해주세요!'); } 
         });
 
-       // 🌟 커스텀 플레이어 엔진
+      // 🌟 커스텀 플레이어 엔진
         let playlist = [];
         let currentIndex = 0;
         let isPlaying = false;
@@ -371,11 +371,11 @@
             if (mainAudio.paused) {
                 mainAudio.play();
                 isPlaying = true;
-                btnPlay.innerText = "⏸";
+                if(btnPlay) btnPlay.innerText = "⏸";
             } else {
                 mainAudio.pause();
                 isPlaying = false;
-                btnPlay.innerText = "▶";
+                if(btnPlay) btnPlay.innerText = "▶";
             }
         }
 
@@ -391,7 +391,7 @@
                 mainAudio.src = track.audio;
                 mainAudio.play();
                 isPlaying = true;
-                btnPlay.innerText = "⏸";
+                if(btnPlay) btnPlay.innerText = "⏸";
                 currentIndex = index;
             }
         }
@@ -403,17 +403,21 @@
         }
         function playNextTrack() {
             if (currentIndex < playlist.length - 1) loadTrack(currentIndex + 1);
-            else { mainAudio.pause(); btnPlay.innerText = "▶"; alert("마지막 곡입니다."); }
+            else { 
+                mainAudio.pause(); 
+                isPlaying = false;
+                if(btnPlay) btnPlay.innerText = "▶"; 
+                alert("마지막 곡입니다."); 
+            }
         }
 
         // 오디오 진행 바 연동 로직
         mainAudio.addEventListener('timeupdate', () => {
             const current = mainAudio.currentTime;
             const duration = mainAudio.duration;
-            if (duration) {
+            if (duration && !isNaN(duration)) {
                 progressBar.value = (current / duration) * 100;
                 
-                // 시간 텍스트 변환 (분:초)
                 let minC = Math.floor(current / 60); let secC = Math.floor(current % 60);
                 if(secC < 10) secC = "0" + secC;
                 timeCurrent.innerText = minC + ":" + secC;
@@ -433,8 +437,53 @@
 
         // 곡이 끝나면 다음 곡 자동 이동
         mainAudio.addEventListener('ended', playNextTrack);
+
+
+        // 👇 여기서부터가 어제 제가 실수로 빠뜨렸던 핵심 버튼 연결고리들입니다! 👇
+
+        function playSingleTrack(btnElement) {
+            const tr = btnElement.closest('.music-item');
+            playlist = [{ id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio }];
+            loadTrack(0);
+        }
+
+        function playAll() {
+            const rows = document.querySelectorAll('.music-item');
+            playlist = Array.from(rows).map(tr => ({ id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio })).filter(t => t.audio !== "");
+            if(playlist.length > 0) loadTrack(0); else alert("재생할 음원이 없습니다.");
+        }
+
+        function playSelected() {
+            const checkedBoxes = document.querySelectorAll('.song-check:checked');
+            if(checkedBoxes.length === 0) return alert("재생할 곡을 먼저 체크해주세요!");
+            
+            playlist = Array.from(checkedBoxes).map(cb => {
+                const tr = cb.closest('.music-item');
+                return { id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio };
+            }).filter(t => t.audio !== "");
+            
+            if(playlist.length > 0) loadTrack(0); else alert("재생 가능한 음원이 없습니다.");
+        }
+
+        function addSelectedToMyMusic() {
+            const checkedBoxes = document.querySelectorAll('.song-check:checked');
+            if(checkedBoxes.length === 0) return alert("담을 곡을 체크해주세요!");
+
+            const musicIds = Array.from(checkedBoxes).map(cb => cb.value);
+
+            fetch('/add-to-mymusic', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ musicIds: musicIds })
+            })
+            .then(res => res.json())
+            .then(data => alert(data.message))
+            .catch(err => alert("에러가 발생했습니다. 다시 시도해주세요."));
+        }
+    </script>
 </body>
 </html>
+
 
 
 
