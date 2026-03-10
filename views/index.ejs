@@ -309,7 +309,21 @@
                 <span id="main-player-artist" class="player-artist">목록에서 음악을 선택해주세요</span>
             </div>
         </div>
-        <audio id="main-audio" class="main-audio-element" controls controlsList="nodownload"></audio>
+        
+        <div class="player-controls-wrapper">
+            <div class="player-buttons">
+                <button id="btn-prev" onclick="playPrevTrack()">⏮</button>
+                <button id="btn-play" onclick="togglePlayPause()" class="play-btn">▶</button>
+                <button id="btn-next" onclick="playNextTrack()">⏭</button>
+            </div>
+            <div class="progress-area">
+                <span id="time-current">00:00</span>
+                <input type="range" id="progress-bar" value="0" min="0" max="100" step="1">
+                <span id="time-total">00:00</span>
+            </div>
+        </div>
+        
+        <audio id="main-audio" style="display:none;"></audio>
     </div>
 
     <script>
@@ -426,5 +440,6 @@
     </script>
 </body>
 </html>
+
 
 
