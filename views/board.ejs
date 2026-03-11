@@ -115,9 +115,12 @@
         
         <div class="board-header">
             <h2 class="board-title">💬 커뮤니티 <span style="font-size: 14px; font-weight: normal; color: #777;">자유롭게 이야기를 나눠보세요!</span></h2>
+            
             <% if (user) { %>
                 <button class="btn-write-toggle" onclick="const box = document.getElementById('writeBox'); box.style.display = (box.style.display === 'block') ? 'none' : 'block'; window.scrollBy({ top: 100, behavior: 'smooth' });">✍️ 글쓰기</button>
             <% } else { %>
+                <button class="btn-write-toggle" onclick="location.href='/login'" style="background:#444; color:#fff;">🔒 로그인 후 글쓰기</button>
+            <% } %>
         </div>
 
         <% if (user) { %>
@@ -164,7 +167,5 @@
 
     </div>
 
-    <script>
-        function toggleWriteBox() {
-            const box = document.getElementById('writeBox');
-            if (
+</body>
+</html>
