@@ -284,7 +284,13 @@
                             <input type="text" name="artist" placeholder="아티스트" required>
                         </div>
                         
-                      <div class="genre-selector">
+                     <div class="genre-selector">
+                            <button type="button" class="genre-btn" data-genre="K-POP">K-POP</button>
+                            <button type="button" class="genre-btn" data-genre="POP">POP</button>
+                            <button type="button" class="genre-btn" data-genre="J-POP">J-POP</button>
+                            <button type="button" class="genre-btn" data-genre="C-POP">C-POP</button>
+                            <button type="button" class="genre-btn" data-genre="V-POP">V-POP</button>
+                            <button type="button" class="genre-btn" data-genre="T-POP">T-POP</button>
                             <button type="button" class="genre-btn" data-genre="발라드">발라드</button>
                             <button type="button" class="genre-btn" data-genre="댄스">댄스</button>
                             <button type="button" class="genre-btn" data-genre="랩/힙합">랩/힙합</button>
@@ -292,15 +298,8 @@
                             <button type="button" class="genre-btn" data-genre="인디음악">인디음악</button>
                             <button type="button" class="genre-btn" data-genre="록/메탈">록/메탈</button>
                             <button type="button" class="genre-btn" data-genre="트로트">트로트</button>
-                            <button type="button" class="genre-btn" data-genre="포크/블루스">포크/블루스</button>
                             <button type="button" class="genre-btn" data-genre="일렉트로니카">일렉트로니카</button>
-                            <button type="button" class="genre-btn" data-genre="POP">POP</button>
-                            <button type="button" class="genre-btn" data-genre="클래식">클래식</button>
-                            <button type="button" class="genre-btn" data-genre="재즈">재즈</button>
-                            <button type="button" class="genre-btn" data-genre="뉴에이지">뉴에이지</button>
-                            <button type="button" class="genre-btn" data-genre="국악">국악</button>
-                            <button type="button" class="genre-btn" data-genre="CCM/종교">CCM/종교</button>
-                            <button type="button" class="genre-btn" data-genre="동요/태교">동요/태교</button>
+                            <button type="button" class="genre-btn" data-genre="클래식/재즈">클래식/재즈</button>
                             <button type="button" class="genre-btn" data-genre="기타장르">기타장르</button>
                         </div>
                         <input type="hidden" name="genre" id="hiddenGenreInput" required>
@@ -333,7 +332,7 @@
                 </div>
 <% if (typeof genreQuery !== 'undefined' && genreQuery) { %>
                     <div style="background: #161718; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; display: flex; gap: 8px; flex-wrap: wrap;">
-                        <% const displayGenres = ['발라드','댄스','랩/힙합','R&B/Soul','인디음악','록/메탈','트로트','포크/블루스','일렉트로니카','POP','클래식','재즈','뉴에이지','국악','CCM/종교','동요/태교','기타장르']; %>
+                       <% const displayGenres = ['K-POP','POP','J-POP','C-POP','V-POP','T-POP','발라드','댄스','랩/힙합','R&B/Soul','인디음악','록/메탈','트로트','일렉트로니카','클래식/재즈','기타장르']; %>
                         <% displayGenres.forEach(g => { %>
                             <a href="/?genre=<%= g %>" style="padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; border: 1px solid <%= genreQuery === g ? '#ff5722' : '#444' %>; background: <%= genreQuery === g ? '#ff5722' : '#222' %>; color: <%= genreQuery === g ? '#000' : '#aaa' %>; transition: 0.2s;"><%= g %></a>
                         <% }) %>
@@ -700,6 +699,7 @@
        </script>
 </body>
 </html>
+
 
 
 
