@@ -29,11 +29,11 @@ const musicSchema = new mongoose.Schema({
 const Music = mongoose.models.Music || mongoose.model('Music', musicSchema);
 
 // =========================================
-// 🌟 2. 유튜브/쇼츠 DB 주머니
+// 🌟 2. 유튜브/쇼츠 DB 주머니 (썸네일 포함)
 // =========================================
 const videoSchema = new mongoose.Schema({
     title: String, url: String, type: String, uploader: String,
-    thumbnail: String, // 🌟 이 줄을 추가해야 사진이 저장됩니다!
+    thumbnail: String, 
     createdAt: { type: Date, default: Date.now }
 });
 const Video = mongoose.models.Video || mongoose.model('Video', videoSchema);
@@ -149,7 +149,7 @@ app.post('/delete-mymusic/:id', async (req, res) => {
 });
 
 // =========================================
-// 🌟 유튜브 / 쇼츠 기능
+// 🌟 유튜브 / 쇼츠 기능 (삭제 기능 추가!)
 // =========================================
 app.get('/youtube', async (req, res) => {
     const videos = await Video.find({ type: 'youtube' }).sort({ createdAt: -1 });
@@ -174,6 +174,20 @@ app.post('/add-shorts', async (req, res) => {
     const thumbnail = videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : 'https://via.placeholder.com/320x568/222/ff5722?text=No+Thumb';
     await new Video({ title: req.body.title, url: req.body.youtubeLink, thumbnail: thumbnail, type: 'shorts', uploader: req.session.user.id }).save();
     res.redirect('/shorts');
+});
+
+// 🌟 추가된 유튜브/쇼츠 삭제 라우터
+app.post('/delete-video/:id', async (req, res) => {
+    if (!req.session || !req.session.user) return res.redirect('back');
+    try {
+        const video = await Video.findById(req.params.id);
+        if (video && (req.session.user.role === 'admin' || req.session.user.id === video.uploader)) {
+            await Video.findByIdAndDelete(req.params.id);
+        }
+        res.redirect('back');
+    } catch (err) {
+        res.redirect('back');
+    }
 });
 
 // =========================================
@@ -228,7 +242,6 @@ app.post('/add-board-comment/:id', async (req, res) => {
 app.get('/login', (req, res) => res.render('login'));
 app.post('/login', (req, res) => {
     const { id, pw } = req.body;
-    // 🔐 렌더(Render) 금고에 숨겨둔 환경변수를 가져와서 검사합니다!
     if (id === process.env.ADMIN_ID && pw === process.env.ADMIN_PW) {
         req.session.user = { id, name: '최고관리자', role: 'admin' };
     } else {
@@ -297,4 +310,3 @@ app.post('/edit/:id', async (req, res) => {
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
-
