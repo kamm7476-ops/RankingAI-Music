@@ -16,42 +16,54 @@ mongoose.connect(DB_URI)
     .then(() => console.log('✅ DB 연결 성공! (비밀번호 숨김 모드)'))
     .catch(err => console.log('❌ DB 에러:', err.message));
 
-// 음악 DB
+// =========================================
+// 🌟 1. 음악 DB 주머니
+// =========================================
 const musicSchema = new mongoose.Schema({
     name: String, artist: String, genre: String, aiTool: String, lyrics: String,
     uploader: String, uploaderRealName: String, imageUrl: String, audioUrl: String,
-    views: { type: Number, default: 0 }, // 🌟 조회수 추가
+    views: { type: Number, default: 0 },
     comments: [{ author: String, text: String, date: { type: Date, default: Date.now } }],
     createdAt: { type: Date, default: Date.now }
 });
-const Music = mongoose.model('Music', musicSchema);
+const Music = mongoose.models.Music || mongoose.model('Music', musicSchema);
 
-// 유튜브/쇼츠 DB
+// =========================================
+// 🌟 2. 유튜브/쇼츠 DB 주머니
+// =========================================
 const videoSchema = new mongoose.Schema({
     title: String, url: String, type: String, uploader: String,
     createdAt: { type: Date, default: Date.now }
 });
-const Video = mongoose.model('Video', videoSchema);
+const Video = mongoose.models.Video || mongoose.model('Video', videoSchema);
 
+// =========================================
+// 🌟 3. 커뮤니티 게시판 DB 주머니
+// =========================================
 const postSchema = new mongoose.Schema({
     title: String,
     content: String,
     author: String,
     createdAt: { type: Date, default: Date.now },
-    // 🌟 댓글을 담을 주머니 추가!
     comments: [{ 
         author: String, 
         text: String, 
         createdAt: { type: Date, default: Date.now } 
     }]
 });
+const Post = mongoose.models.Post || mongoose.model('Post', postSchema);
 
-// 내 음악(담기) DB
+// =========================================
+// 🌟 4. 내 음악(담기) DB 주머니
+// =========================================
 const myMusicSchema = new mongoose.Schema({
     userId: String, musicId: String, createdAt: { type: Date, default: Date.now }
 });
-const MyMusic = mongoose.model('MyMusic', myMusicSchema);
+const MyMusic = mongoose.models.MyMusic || mongoose.model('MyMusic', myMusicSchema);
 
+// =========================================
+// 🌟 서버 기본 설정
+// =========================================
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static('public'));
@@ -64,7 +76,9 @@ app.use((req, res, next) => {
     next();
 });
 
-// 🌟 메인 화면 (차트 & 최신음악 분리 + 장르 검색 완벽 적용)
+// =========================================
+// 🌟 메인 화면 (차트 & 최신음악)
+// =========================================
 app.get('/', async (req, res) => {
     try {
         const searchQuery = req.query.search || ''; 
@@ -75,8 +89,8 @@ app.get('/', async (req, res) => {
         if (searchQuery) filter.artist = { $regex: searchQuery, $options: 'i' };
         if (genreQuery) filter.genre = genreQuery;
 
-        let sortOption = { views: -1 }; // 기본: 조회수순
-        if (sortQuery === 'latest') sortOption = { createdAt: -1 }; // 최신음악: 시간순
+        let sortOption = { views: -1 }; 
+        if (sortQuery === 'latest') sortOption = { createdAt: -1 }; 
 
         let artists = await Music.find(filter).sort(sortOption);
         let popularArtists = await Music.aggregate([
@@ -100,15 +114,14 @@ app.get('/', async (req, res) => {
     }
 });
 
-// 🌟 조회수 증가 라우터
 app.post('/play-count/:id', async (req, res) => {
-    try {
-        await Music.findByIdAndUpdate(req.params.id, { $inc: { views: 1 } });
-        res.sendStatus(200);
-    } catch(err) { res.sendStatus(500); }
+    try { await Music.findByIdAndUpdate(req.params.id, { $inc: { views: 1 } }); res.sendStatus(200); } 
+    catch(err) { res.sendStatus(500); }
 });
 
-// 담기 기능
+// =========================================
+// 🌟 내 음악 보관함
+// =========================================
 app.post('/add-to-mymusic', async (req, res) => {
     try {
         if (!req.session.user) return res.status(401).json({ message: "로그인이 필요합니다." });
@@ -122,7 +135,6 @@ app.post('/add-to-mymusic', async (req, res) => {
     } catch (err) { res.status(500).json({ message: "담기에 실패했습니다." }); }
 });
 
-// 내 음악 페이지 보기 & 삭제
 app.get('/mymusic', async (req, res) => {
     if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
     const mySaved = await MyMusic.find({ userId: req.session.user.id }).sort({ createdAt: -1 });
@@ -135,32 +147,40 @@ app.post('/delete-mymusic/:id', async (req, res) => {
     res.redirect('/mymusic');
 });
 
-// 유튜브/쇼츠 기능
+// =========================================
+// 🌟 유튜브 / 쇼츠 기능
+// =========================================
 app.get('/youtube', async (req, res) => {
     const videos = await Video.find({ type: 'youtube' }).sort({ createdAt: -1 });
-    res.render('video', { videos: videos, pageType: 'youtube', pageTitle: '📺 유튜브 홍보관' });
+    res.render('youtube', { videos: videos });
 });
 app.get('/shorts', async (req, res) => {
-    const videos = await Video.find({ type: 'shorts' }).sort({ createdAt: -1 });
-    res.render('video', { videos: videos, pageType: 'shorts', pageTitle: '📱 쇼츠 홍보관' });
+    const shorts = await Video.find({ type: 'shorts' }).sort({ createdAt: -1 });
+    res.render('shorts', { shorts: shorts });
 });
-app.post('/add-video', async (req, res) => {
+app.post('/add-youtube', async (req, res) => {
     if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
-    await new Video({ title: req.body.title, url: req.body.url, type: req.body.type, uploader: req.session.user.id }).save();
-    res.redirect('/' + req.body.type);
+    const videoIdMatch = req.body.youtubeLink.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^"&?\/\s]{11})/);
+    const videoId = videoIdMatch ? videoIdMatch[1] : null;
+    const thumbnail = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : 'https://via.placeholder.com/320x180/222/ff5722?text=No+Thumb';
+    await new Video({ title: req.body.title, url: req.body.youtubeLink, thumbnail: thumbnail, type: 'youtube', uploader: req.session.user.id }).save();
+    res.redirect('/youtube');
 });
-app.post('/delete-video/:id', async (req, res) => {
-    if (!req.session.user) return res.redirect('back');
-    const video = await Video.findById(req.params.id);
-    if (req.session.user.role === 'admin' || req.session.user.id === video.uploader) await Video.findByIdAndDelete(req.params.id);
-    res.redirect('back');
+app.post('/add-shorts', async (req, res) => {
+    if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
+    const videoIdMatch = req.body.youtubeLink.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/|watch\?.+&v=))([^"&?\/\s]{11})/);
+    const videoId = videoIdMatch ? videoIdMatch[1] : null;
+    const thumbnail = videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : 'https://via.placeholder.com/320x568/222/ff5722?text=No+Thumb';
+    await new Video({ title: req.body.title, url: req.body.youtubeLink, thumbnail: thumbnail, type: 'shorts', uploader: req.session.user.id }).save();
+    res.redirect('/shorts');
 });
 
-// 커뮤니티 게시판 기능 (완벽 수정본)
+// =========================================
+// 🌟 커뮤니티 게시판 (게시글 & 댓글 완벽 지원)
+// =========================================
 app.get('/board', async (req, res) => {
     try {
         const posts = await Post.find().sort({ createdAt: -1 });
-        // 🌟 여기가 핵심! 화면에 로그인한 유저(user) 정보도 같이 넘겨줍니다!
         const currentUser = req.session ? req.session.user : null;
         res.render('board', { user: currentUser, posts: posts });
     } catch (err) {
@@ -170,69 +190,59 @@ app.get('/board', async (req, res) => {
 });
 
 app.post('/add-post', async (req, res) => {
-    if (!req.session || !req.session.user) {
-        return res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
-    }
-    
+    if (!req.session || !req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
     try {
-        await new Post({
-            title: req.body.title,
-            content: req.body.content,
-            author: req.session.user.id
-        }).save();
+        await new Post({ title: req.body.title, content: req.body.content, author: req.session.user.id }).save();
         res.redirect('/board');
-    } catch (err) {
-        console.log("글 등록 에러:", err);
-    }
+    } catch (err) { console.log(err); }
 });
 
 app.post('/delete-post/:id', async (req, res) => {
     if (!req.session || !req.session.user) return res.redirect('/board');
-    
     try {
         const post = await Post.findById(req.params.id);
-        if (req.session.user.role === 'admin' || req.session.user.id === post.author) {
-            await Post.findByIdAndDelete(req.params.id);
-        }
+        if (req.session.user.role === 'admin' || req.session.user.id === post.author) await Post.findByIdAndDelete(req.params.id);
         res.redirect('/board');
-    } catch (err) {
-        console.log("글 삭제 에러:", err);
-    }
+    } catch (err) { console.log(err); }
 });
-// 4. 커뮤니티 게시글에 댓글 달기 (새로 뚫은 통로!)
+
 app.post('/add-board-comment/:id', async (req, res) => {
-    if (!req.session || !req.session.user) {
-        return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
-    }
+    if (!req.session || !req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
     try {
         const post = await Post.findById(req.params.id);
         if (post) {
-            post.comments.push({ // 주머니에 댓글 쏙 넣기!
-                author: req.session.user.id,
-                text: req.body.commentText
-            });
+            post.comments.push({ author: req.session.user.id, text: req.body.commentText });
             await post.save();
         }
-        res.redirect('/board'); // 댓글 달고 다시 게시판 새로고침
+        res.redirect('/board');
     } catch (err) {
         console.log("댓글 등록 에러:", err);
         res.status(500).send("댓글 등록 에러");
     }
 });
-// 사용자 및 관리자, 음원 업로드/삭제
+
+// =========================================
+// 🌟 기타 기능 (로그인 보안패치 적용 완료!)
+// =========================================
 app.get('/login', (req, res) => res.render('login'));
 app.post('/login', (req, res) => {
     const { id, pw } = req.body;
-    if (id === 'kamm7476' && pw === 'ranking2026') req.session.user = { id, name: '최고관리자', role: 'admin' };
-    else req.session.user = { id, name: '일반유저', role: 'user' };
+    // 🔐 렌더(Render) 금고에 숨겨둔 환경변수를 가져와서 검사합니다!
+    if (id === process.env.ADMIN_ID && pw === process.env.ADMIN_PW) {
+        req.session.user = { id, name: '최고관리자', role: 'admin' };
+    } else {
+        req.session.user = { id, name: '일반유저', role: 'user' };
+    }
     res.redirect('/');
 });
+
 app.get('/logout', (req, res) => { req.session.destroy(); res.redirect('/'); });
 app.get('/signup', (req, res) => res.render('signup'));
 app.get('/admin', (req, res) => {
     if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
     res.render('admin', { stats: { users: 0, musics: 0, reports: 0 } });
 });
+
 app.post('/add-music', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'audio', maxCount: 1 }]), async (req, res) => {
     try {
         const { name, artist, genre, aiTool, lyrics, realName } = req.body;
@@ -243,6 +253,7 @@ app.post('/add-music', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'a
         res.redirect('/'); 
     } catch (err) { res.redirect('/'); }
 });
+
 app.post('/add-comment/:id', async (req, res) => {
     try {
         const music = await Music.findById(req.params.id);
@@ -250,6 +261,7 @@ app.post('/add-comment/:id', async (req, res) => {
         res.redirect('/'); 
     } catch (err) { res.redirect('/'); }
 });
+
 app.post('/delete-music/:id', async (req, res) => {
     try {
         if (!req.session.user) return res.redirect('/');
@@ -260,7 +272,6 @@ app.post('/delete-music/:id', async (req, res) => {
     } catch (err) { res.redirect('/'); }
 });
 
-// 곡 정보 수정 기능
 app.get('/edit/:id', async (req, res) => {
     if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/';</script>");
     try {
@@ -270,6 +281,7 @@ app.get('/edit/:id', async (req, res) => {
         else res.send("<script>alert('수정 권한이 없습니다!'); location.href='/';</script>");
     } catch (err) { res.redirect('/'); }
 });
+
 app.post('/edit/:id', async (req, res) => {
     if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/';</script>");
     try {
@@ -284,5 +296,3 @@ app.post('/edit/:id', async (req, res) => {
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
-
-
