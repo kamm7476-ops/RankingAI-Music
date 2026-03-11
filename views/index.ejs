@@ -94,7 +94,6 @@
         .main-audio-element::-webkit-media-controls-panel { background-color: #1a1c1e; }
         .main-audio-element::-webkit-media-controls-play-button { filter: invert(40%) sepia(80%) saturate(300%) hue-rotate(330deg) brightness(110%); }
         .main-audio-element::-webkit-media-controls-current-time-display, .main-audio-element::-webkit-media-controls-time-remaining-display { color: #fff; }
-/* 🌟 멜론 스타일 플레이어 CSS 추가 */
         .player-controls-wrapper { flex: 1; max-width: 600px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
         .player-buttons { display: flex; align-items: center; gap: 20px; }
         .player-buttons button { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; transition: 0.2s; padding: 0; }
@@ -104,26 +103,18 @@
         .progress-area { width: 100%; display: flex; align-items: center; gap: 10px; font-size: 12px; color: #aaa; }
         #progress-bar { flex: 1; height: 4px; border-radius: 2px; -webkit-appearance: none; background: #444; outline: none; cursor: pointer; accent-color: #ff5722; }
         #progress-bar::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #ff5722; }
-       /* 🌟 새로 추가한 번역기 디자인 */
+        
         .logo-wrap { display: flex; align-items: center; gap: 15px; }
         .lang-select { padding: 6px 12px; background: #222; color: #fff; border: 1px solid #ff5722; border-radius: 20px; font-weight: bold; font-size: 13px; outline: none; cursor: pointer; }
-/* ========================================= */
-        /* 🌟 메인 화면 프리미엄 디테일 업그레이드 🌟 */
-        /* ========================================= */
-        
-        /* 1. 로고 고급 그라데이션 */
-        .logo { background: linear-gradient(45deg, #ff5722, #ffb300); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 2px 10px rgba(255, 87, 34, 0.2); }
 
-        /* 2. 검색창 클릭 시 은은한 네온 빛 */
+        .logo { background: linear-gradient(45deg, #ff5722, #ffb300); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 2px 10px rgba(255, 87, 34, 0.2); }
         .top-search-form { transition: all 0.3s ease; }
         .top-search-form:focus-within { box-shadow: 0 0 15px rgba(255, 87, 34, 0.4); border-color: #ffb300; }
 
-        /* 3. 차트 1, 2, 3위 금, 은, 동 색상 효과 */
         .music-item:nth-child(1) .rank { color: #ffd700 !important; text-shadow: 0 0 10px rgba(255, 215, 0, 0.6); font-size: 26px; }
         .music-item:nth-child(2) .rank { color: #c0c0c0 !important; text-shadow: 0 0 10px rgba(192, 192, 192, 0.6); font-size: 24px; }
         .music-item:nth-child(3) .rank { color: #cd7f32 !important; text-shadow: 0 0 10px rgba(205, 127, 50, 0.6); font-size: 24px; }
 
-        /* 4. 리스트 호버(Hover) & 스크롤바 디자인 */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #0b0c0d; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
@@ -133,80 +124,50 @@
         .album-art { transition: all 0.3s ease; }
         .music-item:hover .album-art { transform: scale(1.08); box-shadow: 0 8px 15px rgba(255, 87, 34, 0.4); }
 
-
-
-       /* 📱 모바일(스마트폰) 최적화 디자인 완벽 정리 */
         @media (max-width: 900px) {
-            /* 🌟 모바일에서 음원 업로드 칸(입력창, 파일첨부) 삐져나감 방지 (세로 정렬) */
             .input-row { flex-direction: column; align-items: stretch; gap: 12px; }
             .input-row > div { width: 100%; box-sizing: border-box; }
-            /* 1. 상단바 및 검색창 깔끔하게 정렬 */
             .header-top { flex-direction: column; align-items: center; padding: 15px; gap: 15px; }
             .logo-wrap { width: 100%; justify-content: space-between; }
             .top-search-form { width: 100%; box-sizing: border-box; }
             .auth-buttons { width: 100%; justify-content: center; }
 
-            /* 2. 가로 스크롤 메뉴바 (스포티파이/넷플릭스 스타일) */
             .header-nav { justify-content: flex-start; overflow-x: auto; white-space: nowrap; padding: 12px 15px; gap: 20px; border-bottom: 1px solid #222; }
-            .header-nav::-webkit-scrollbar { display: none; } /* 지저분한 스크롤바 숨김 */
+            .header-nav::-webkit-scrollbar { display: none; }
 
-            /* 3. 본문 레이아웃을 세로로 (오른쪽 사이드바를 밑으로 내림) */
             .main-layout { flex-direction: column; gap: 20px; }
-            .content-left { width: 100%; }
+            .content-left { width: 100%; max-width: 100%; overflow-x: hidden; }
             .sidebar-right { width: 100%; position: static; box-sizing: border-box; margin-top: 10px; }
 
-            /* 4. 차트 리스트를 세련된 '카드(Card)' 형태로 변신! */
             .music-list, .music-list tbody, .music-item, .music-item td { display: block; width: 100%; box-sizing: border-box; }
             .music-item { position: relative; background: #161718; border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px solid #222; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
             .music-item td { padding: 0; border: none; }
 
-            /* 5. 체크박스와 1,2,3위 순위 뱃지 예쁘게 위치 잡기 */
             .check-col { position: absolute; top: 15px; right: 15px; z-index: 10; width: auto !important; }
             .rank { position: absolute; top: -12px; left: 15px; background: #ff5722; color: #000; border-radius: 6px; padding: 4px 12px; font-size: 14px; font-weight: 900; width: auto; z-index: 10; box-shadow: 0 2px 5px rgba(255,87,34,0.4); }
 
-            /* 6. 앨범 커버와 곡 정보 레이아웃 맞추기 */
             .music-item td:nth-child(3) { float: left; width: 75px; margin-right: 15px; margin-top: 10px; }
             .song-info { margin-top: 12px; overflow: hidden; } 
             
-            /* 7. 기능 버튼들(듣기, 가사, 댓글) 모바일 크기에 맞게 꽉 채우기 */
             .action-row { flex-wrap: wrap; gap: 6px; margin-top: 15px; clear: both; }
             .action-btn { padding: 8px 5px; font-size: 12px; flex: 1; text-align: center; justify-content: center; }
 
-            /* 8. 하단 플레이어 콤팩트하게 압축 */
             .bottom-player-bar { padding: 12px 15px; flex-direction: column; gap: 12px; bottom: 0; border-top-width: 3px; }
             .player-info { width: 100%; justify-content: flex-start; }
             .player-controls-wrapper { width: 100%; }
-            .player-buttons { gap: 40px; } /* 버튼 사이 간격 넓혀서 터치하기 쉽게 */
+            .player-buttons { gap: 40px; }
             
-            body { padding-bottom: 160px; } /* 모바일 플레이어 공간 확보 (잘리지 않게) */
-         /* 🌟 부모 상자가 폰 화면 밖으로 탈출하는 것 원천 차단! */
-            .content-left { width: 100%; max-width: 100%; overflow-x: hidden; }
+            body { padding-bottom: 160px; } 
 
-            /* 9. 차트 컨트롤 스와이프 완벽 고정 (궁극의 마법) */
-            .chart-controls { 
-                display: flex !important; 
-                width: 100%; 
-                overflow-x: auto !important; 
-                flex-wrap: nowrap !important; 
-                gap: 10px; 
-                padding-bottom: 10px; 
-                -webkit-overflow-scrolling: touch; 
-            }
+            .chart-controls { display: flex !important; width: 100%; overflow-x: auto !important; flex-wrap: nowrap !important; gap: 10px; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
             .chart-controls::-webkit-scrollbar { display: none; }
-            
-            /* flex: 0 0 auto; 👈 이 한 줄이 찌그러짐을 막고 스와이프를 강제합니다! */
-            .control-btn { 
-                flex: 0 0 auto !important; 
-                white-space: nowrap !important; 
-                font-size: 13px; 
-                padding: 8px 15px; 
-            }
+            .control-btn { flex: 0 0 auto !important; white-space: nowrap !important; font-size: 13px; padding: 8px 15px; }
 
-            /* 10. 일간/주간/월간 탭 겹침 및 찌그러짐 방지 */
             .chart-header { flex-direction: column; align-items: flex-start; gap: 15px; }
             .tabs { display: flex; width: 100%; overflow-x: auto; gap: 20px; padding-bottom: 5px; -webkit-overflow-scrolling: touch; }
             .tabs::-webkit-scrollbar { display: none; }
             .tab { flex: 0 0 auto; white-space: nowrap; font-size: 15px; }
+        }
     </style>
 </head>
 <body>
@@ -214,9 +175,7 @@
        <div class="header-top">
             <div class="logo-wrap">
                 <div class="logo">RANKING AI</div>
-                
                 <div id="google_translate_element" style="display:none;"></div>
-                
                 <select id="custom-translate-select" class="lang-select" onchange="changeLanguage(this.value)">
                     <option value="ko">🇰🇷 한국어</option>
                     <option value="en">🇺🇸 English</option>
@@ -224,7 +183,6 @@
                     <option value="zh-TW">🇹🇼 中文 (繁體)</option>
                     <option value="ja">🇯🇵 日本語</option>
                 </select>
-
                 <script type="text/javascript">
                     function googleTranslateElementInit() {
                         new google.translate.TranslateElement({
@@ -353,15 +311,20 @@
                             <td class="check-col"><input type="checkbox" class="custom-checkbox song-check" value="<%= music._id %>"></td>
                             <td class="rank"><%= index + 1 %></td>
                             <td style="width: 80px;"><img src="<%= music.imageUrl %>" class="album-art"></td>
+                            
                             <td class="song-info">
                                 <div class="song-title">
                                     <%= music.name %>
                                     
-                                    <% if (user && (user.id === music.uploader || user.role === 'admin') && music._id !== "dummy") { %>
-                                       <button style="background:none; border:none; color:#00e5ff; cursor:pointer; font-size:12px; padding: 0 5px;" onclick="location.href='/edit/<%= music._id %>'">✏️ 수정</button>
-                                        <form action="/delete-music/<%= music._id %>" method="POST" style="display:inline;" onsubmit="return confirm('삭제하시겠습니까?');">
-                                            <button type="submit" style="background:none; border:none; color:#ff4a4a; cursor:pointer; font-size:12px; padding: 0;">🗑️ 삭제</button>
-                                        </form>
+                                    <% if (user && (user.role === 'admin' || user.id === music.uploader) && music._id !== "dummy") { %>
+                                        <div style="margin-left: 10px; display: inline-flex; gap: 8px; align-items: center; background: rgba(0,0,0,0.5); padding: 3px 10px; border-radius: 6px; border: 1px solid #444;">
+                                            <% if (user.role === 'admin') { %><span title="관리자 권한" style="font-size: 10px;">👑</span><% } %>
+                                            <a href="/edit/<%= music._id %>" style="color: #00e5ff; font-size: 11px; font-weight: bold; text-decoration: none; cursor: pointer;">수정</a>
+                                            <span style="color: #555; font-size: 10px;">|</span>
+                                            <form action="/delete-music/<%= music._id %>" method="POST" onsubmit="return confirm('이 음원을 차트에서 정말 삭제하시겠습니까?');" style="display: flex; align-items: center; margin: 0;">
+                                                <button type="submit" style="background: none; border: none; color: #ff4a4a; font-size: 11px; font-weight: bold; cursor: pointer; padding: 0; font-family: inherit;">삭제</button>
+                                            </form>
+                                        </div>
                                     <% } %>
                                 </div>
                                 <div class="singer"><%= music.artist %> (<%= music.genre %>) <span class="ai-badge">🎵 <%= music.aiTool %></span> <span style="margin-left:10px; color:#ff5722; font-size:12px;">🎧 재생 <%= music.views || 0 %>회</span></div>
@@ -462,7 +425,7 @@
             if (!hiddenInput.value) { e.preventDefault(); alert('장르를 선택해주세요!'); } 
         });
 
-      // 🌟 커스텀 플레이어 엔진
+      // 커스텀 플레이어 엔진
         let playlist = [];
         let currentIndex = 0;
         let isPlaying = false;
@@ -506,12 +469,10 @@
                 if(btnPlay) btnPlay.innerText = "⏸";
                 currentIndex = index;
 
-                // 🌟 노래가 재생될 때 서버에 조회수 증가 신호 쏘기!
                 fetch('/play-count/' + track.id, { method: 'POST' }).catch(err => console.log(err));
             }
         }
 
-        // 이전/다음 곡 버튼
         function playPrevTrack() {
             if (currentIndex > 0) loadTrack(currentIndex - 1);
             else alert("첫 번째 곡입니다.");
@@ -526,7 +487,6 @@
             }
         }
 
-        // 오디오 진행 바 연동 로직
         mainAudio.addEventListener('timeupdate', () => {
             const current = mainAudio.currentTime;
             const duration = mainAudio.duration;
@@ -543,18 +503,13 @@
             }
         });
 
-        // 진행 바 마우스 클릭 시 이동
         progressBar.addEventListener('input', () => {
             if (mainAudio.duration) {
                 mainAudio.currentTime = (progressBar.value / 100) * mainAudio.duration;
             }
         });
 
-        // 곡이 끝나면 다음 곡 자동 이동
         mainAudio.addEventListener('ended', playNextTrack);
-
-
-        // 👇 여기서부터가 어제 제가 실수로 빠뜨렸던 핵심 버튼 연결고리들입니다! 👇
 
         function playSingleTrack(btnElement) {
             const tr = btnElement.closest('.music-item');
@@ -595,29 +550,25 @@
             .then(data => alert(data.message))
             .catch(err => alert("에러가 발생했습니다. 다시 시도해주세요."));
         }
-// =========================================================
-        // 🌟 음악 끊김 방지 마법 엔진 (부분 화면 교체 - PJAX)
-        // =========================================================
-        
-       // 1. 링크(메뉴) 클릭 시 화면 전체가 새로고침되는 것을 막습니다.
+
+       // 음악 끊김 방지 마법 엔진 (부분 화면 교체 - PJAX)
         document.addEventListener('click', async (e) => {
             const link = e.target.closest('a');
             if (!link) return;
 
             const href = link.getAttribute('href');
             
-            // 🌟 커뮤니티(board) 추가! 마법에서 제외하고 정상적으로 찐 에러를 띄웁니다!
-            if (href && href.startsWith('/') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('board')) {
+            // 🌟 커뮤니티(board) 예외 처리
+            if (href && href.startsWith('/') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('board') && !href.includes('edit')) {
                 e.preventDefault(); 
                 navigateTo(href);
             }
         });
 
-        // 2. 검색창(GET 폼)에서 검색할 때도 새로고침을 막습니다.
         document.addEventListener('submit', async (e) => {
             const form = e.target;
             if (form.method.toLowerCase() === 'get') {
-                e.preventDefault(); // 검색 시 새로고침 방지!
+                e.preventDefault(); 
                 const formData = new FormData(form);
                 const searchParams = new URLSearchParams(formData).toString();
                 const href = form.getAttribute('action') + '?' + searchParams;
@@ -625,48 +576,40 @@
             }
         });
 
-        // 3. 핵심 엔진: 백그라운드에서 새 화면을 몰래 가져와서 가운데만 바꿔치기!
         async function navigateTo(href) {
             try {
                 const response = await fetch(href);
                 const html = await response.text();
                 
-                // 가져온 새 화면을 투명한 상자에 담아 파싱합니다.
                 const parser = new DOMParser();
                 const newDoc = parser.parseFromString(html, 'text/html');
                 
-                // 🌟 가운데 내용물(.container)만 쏙 빼서 교체합니다. (플레이어는 냅둠!)
                 const currentContainer = document.querySelector('.container');
                 const newContainer = newDoc.querySelector('.container');
                 if (currentContainer && newContainer) {
                     currentContainer.innerHTML = newContainer.innerHTML;
                 }
                 
-                // 상단 메뉴바의 색상(활성화 상태)도 바꿔줍니다.
                 const currentNav = document.querySelector('.header-nav');
                 const newNav = newDoc.querySelector('.header-nav');
                 if (currentNav && newNav) currentNav.innerHTML = newNav.innerHTML;
                 
-                // 주소창 URL과 탭 제목을 새 페이지로 자연스럽게 바꿉니다.
                 history.pushState(null, '', href);
                 document.title = newDoc.title;
                 
-                // 화면이 바뀌면서 풀려버린 장르 버튼 이벤트를 다시 묶어줍니다.
                 reattachEvents();
-                window.scrollTo(0, 0); // 화면 맨 위로 부드럽게 올리기
+                window.scrollTo(0, 0); 
                 
             } catch (err) {
                 console.log("화면 교체 에러:", err);
-                location.href = href; // 에러가 나면 원래 방식대로 이동시킵니다.
+                location.href = href; 
             }
         }
 
-        // 4. 스마트폰이나 PC에서 '뒤로 가기' 버튼을 눌렀을 때도 안 끊기게 방어!
         window.addEventListener('popstate', async () => {
             navigateTo(location.pathname + location.search);
         });
 
-        // 5. 화면 교체 후 부품 조립(이벤트 리스너 재부착)
         function reattachEvents() {
             const genreBtns = document.querySelectorAll('.genre-btn');
             const hiddenInput = document.getElementById('hiddenGenreInput');
@@ -684,43 +627,12 @@
                 });
             }
         }
-        // =========================================================
-        // 🌟 일간/주간/월간 탭 클릭 애니메이션 엔진
-        // =========================================================
+
         function switchTab(clickedTab) {
-            // 1. 모든 탭에서 주황색 불(active)을 끕니다.
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            // 2. 방금 클릭한 탭에만 주황색 불을 켭니다.
             clickedTab.classList.add('active');
-            
-            // (안내: 실제 데이터 필터링은 추후 백엔드 고도화 때 연결됩니다!)
             console.log(clickedTab.innerText + " 탭 클릭됨!");
         }
        </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
