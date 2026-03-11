@@ -149,21 +149,48 @@ app.post('/delete-video/:id', async (req, res) => {
     res.redirect('back');
 });
 
-// 커뮤니티 게시판 기능
+// 커뮤니티 게시판 기능 (완벽 수정본)
 app.get('/board', async (req, res) => {
-    const posts = await Post.find().sort({ createdAt: -1 });
-    res.render('board', { posts: posts });
+    try {
+        const posts = await Post.find().sort({ createdAt: -1 });
+        // 🌟 여기가 핵심! 화면에 로그인한 유저(user) 정보도 같이 넘겨줍니다!
+        const currentUser = req.session ? req.session.user : null;
+        res.render('board', { user: currentUser, posts: posts });
+    } catch (err) {
+        console.log("게시판 로딩 에러:", err);
+        res.status(500).send("게시판 에러");
+    }
 });
+
 app.post('/add-post', async (req, res) => {
-    if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
-    await new Post({ title: req.body.title, content: req.body.content, author: req.session.user.id }).save();
-    res.redirect('/board');
+    if (!req.session || !req.session.user) {
+        return res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
+    }
+    
+    try {
+        await new Post({
+            title: req.body.title,
+            content: req.body.content,
+            author: req.session.user.id
+        }).save();
+        res.redirect('/board');
+    } catch (err) {
+        console.log("글 등록 에러:", err);
+    }
 });
+
 app.post('/delete-post/:id', async (req, res) => {
-    if (!req.session.user) return res.redirect('/board');
-    const post = await Post.findById(req.params.id);
-    if (req.session.user.role === 'admin' || req.session.user.id === post.author) await Post.findByIdAndDelete(req.params.id);
-    res.redirect('/board');
+    if (!req.session || !req.session.user) return res.redirect('/board');
+    
+    try {
+        const post = await Post.findById(req.params.id);
+        if (req.session.user.role === 'admin' || req.session.user.id === post.author) {
+            await Post.findByIdAndDelete(req.params.id);
+        }
+        res.redirect('/board');
+    } catch (err) {
+        console.log("글 삭제 에러:", err);
+    }
 });
 
 // 사용자 및 관리자, 음원 업로드/삭제
@@ -231,3 +258,4 @@ app.post('/edit/:id', async (req, res) => {
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
+
