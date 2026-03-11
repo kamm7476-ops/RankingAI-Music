@@ -139,20 +139,28 @@
         <div class="video-grid">
             <% if (typeof shorts !== 'undefined' && shorts.length > 0) { %>
                 <% shorts.forEach(video => { %>
-                    <a href="<%= video.link %>" target="_blank" class="video-card">
-                        <div class="shorts-badge">Shorts</div>
-                        <div class="thumb-wrapper">
-                            <img src="<%= video.thumbnail %>" class="thumb-img" alt="썸네일">
-                            <div class="play-icon">▶</div>
-                        </div>
-                        <div class="video-info">
-                            <h3 class="video-title"><%= video.title %></h3>
-                            <div class="video-meta">
-                                <span class="video-author">@<%= video.author %></span>
-                                <span><%= new Date(video.createdAt).toLocaleDateString() %></span>
+                    <div style="position: relative;">
+                        <a href="<%= video.url %>" target="_blank" class="video-card">
+                            <div class="shorts-badge" style="left: 10px; right: auto;">Shorts</div>
+                            <div class="thumb-wrapper">
+                                <img src="<%= video.thumbnail %>" class="thumb-img" alt="썸네일">
+                                <div class="play-icon">▶</div>
                             </div>
-                        </div>
-                    </a>
+                            <div class="video-info">
+                                <h3 class="video-title"><%= video.title %></h3>
+                                <div class="video-meta">
+                                    <span class="video-author">@<%= video.uploader %></span>
+                                    <span><%= new Date(video.createdAt).toLocaleDateString() %></span>
+                                </div>
+                            </div>
+                        </a>
+                        
+                        <% if (typeof user !== 'undefined' && user && (user.role === 'admin' || user.id === video.uploader)) { %>
+                            <form action="/delete-video/<%= video._id %>" method="POST" style="position: absolute; top: 10px; right: 10px; z-index: 20;" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                                <button type="submit" style="background: rgba(0,0,0,0.8); color: #ff4a4a; border: 1px solid #ff4a4a; padding: 4px 8px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold;">🗑️ 삭제</button>
+                            </form>
+                        <% } %>
+                    </div>
                 <% }) %>
             <% } else { %>
                 <div style="grid-column: 1 / -1; text-align: center; padding: 100px 0; background: #161718; border-radius: 12px; border: 1px dashed #333; color: #555;">
