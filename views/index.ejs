@@ -149,10 +149,16 @@
             .player-buttons { gap: 40px; } /* 버튼 사이 간격 넓혀서 터치하기 쉽게 */
             
             body { padding-bottom: 160px; } /* 모바일 플레이어 공간 확보 (잘리지 않게) */
-            /* 9. 차트 컨트롤(전체듣기, 담기 등) 한 줄 고정 및 가로 스와이프 (완벽판) */
-            .chart-controls { display: flex; width: 100%; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 10px; justify-content: flex-start; -webkit-overflow-scrolling: touch; }
+           /* 9. 차트 컨트롤 스와이프 완벽 고정 (화면 밖 탈출 방지!) */
+            .chart-controls { display: flex !important; max-width: 100%; overflow-x: auto !important; flex-wrap: nowrap !important; gap: 10px; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
             .chart-controls::-webkit-scrollbar { display: none; }
-            .control-btn { white-space: nowrap; flex-shrink: 0; font-size: 13px; padding: 8px 14px; }
+            .control-btn { white-space: nowrap !important; flex-shrink: 0 !important; font-size: 13px; padding: 8px 15px; }
+
+            /* 10. 일간/주간/월간 탭 겹침 및 찌그러짐 방지 */
+            .chart-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .tabs { display: flex; width: 100%; overflow-x: auto; gap: 20px; padding-bottom: 5px; -webkit-overflow-scrolling: touch; }
+            .tabs::-webkit-scrollbar { display: none; }
+            .tab { white-space: nowrap; flex-shrink: 0; font-size: 15px; }
         }
     </style>
 </head>
@@ -633,9 +639,21 @@
             }
         }
         // =========================================================
+        // 🌟 일간/주간/월간 탭 클릭 애니메이션 엔진
+        // =========================================================
+        function switchTab(clickedTab) {
+            // 1. 모든 탭에서 주황색 불(active)을 끕니다.
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            // 2. 방금 클릭한 탭에만 주황색 불을 켭니다.
+            clickedTab.classList.add('active');
+            
+            // (안내: 실제 데이터 필터링은 추후 백엔드 고도화 때 연결됩니다!)
+            console.log(clickedTab.innerText + " 탭 클릭됨!");
+        }
        </script>
 </body>
 </html>
+
 
 
 
