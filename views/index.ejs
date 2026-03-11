@@ -108,29 +108,47 @@
         .logo-wrap { display: flex; align-items: center; gap: 15px; }
         .lang-select { padding: 6px 12px; background: #222; color: #fff; border: 1px solid #ff5722; border-radius: 20px; font-weight: bold; font-size: 13px; outline: none; cursor: pointer; }
 
-        /* 📱 모바일(스마트폰) 최적화 디자인 */
+       /* 📱 모바일(스마트폰) 최적화 디자인 완벽 정리 */
         @media (max-width: 900px) {
-            .header-top { flex-direction: column; align-items: stretch; gap: 15px; padding: 15px; }
-            .logo-wrap { justify-content: space-between; width: 100%; }
+            /* 1. 상단바 및 검색창 깔끔하게 정렬 */
+            .header-top { flex-direction: column; align-items: center; padding: 15px; gap: 15px; }
+            .logo-wrap { width: 100%; justify-content: space-between; }
             .top-search-form { width: 100%; box-sizing: border-box; }
-            .auth-buttons { justify-content: center; width: 100%; flex-wrap: wrap; gap: 15px; }
-            .header-nav { overflow-x: auto; justify-content: flex-start; padding: 12px 20px; gap: 20px; white-space: nowrap; }
-            
-            .main-layout { flex-direction: column; }
-            .sidebar-right { width: 100%; position: static; }
-            
-            .music-list, .music-list tbody, .music-list tr, .music-list td { display: block; width: 100%; box-sizing: border-box; }
-            .music-item { margin-bottom: 25px; background: #161718; border-radius: 15px; padding: 20px; border: 1px solid #333; position: relative; }
+            .auth-buttons { width: 100%; justify-content: center; }
+
+            /* 2. 가로 스크롤 메뉴바 (스포티파이/넷플릭스 스타일) */
+            .header-nav { justify-content: flex-start; overflow-x: auto; white-space: nowrap; padding: 12px 15px; gap: 20px; border-bottom: 1px solid #222; }
+            .header-nav::-webkit-scrollbar { display: none; } /* 지저분한 스크롤바 숨김 */
+
+            /* 3. 본문 레이아웃을 세로로 (오른쪽 사이드바를 밑으로 내림) */
+            .main-layout { flex-direction: column; gap: 20px; }
+            .content-left { width: 100%; }
+            .sidebar-right { width: 100%; position: static; box-sizing: border-box; margin-top: 10px; }
+
+            /* 4. 차트 리스트를 세련된 '카드(Card)' 형태로 변신! */
+            .music-list, .music-list tbody, .music-item, .music-item td { display: block; width: 100%; box-sizing: border-box; }
+            .music-item { position: relative; background: #161718; border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px solid #222; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
             .music-item td { padding: 0; border: none; }
-            .check-col { position: absolute; top: 15px; right: 15px; z-index: 10; border: none !important;}
-            .rank { position: absolute; top: -10px; left: 15px; background: #ff5722; color: black; border-radius: 8px; padding: 2px 10px; width: auto; font-size: 16px; z-index: 10; }
-            .album-art { width: 100%; height: auto; aspect-ratio: 1; margin: 10px 0; }
+
+            /* 5. 체크박스와 1,2,3위 순위 뱃지 예쁘게 위치 잡기 */
+            .check-col { position: absolute; top: 15px; right: 15px; z-index: 10; width: auto !important; }
+            .rank { position: absolute; top: -12px; left: 15px; background: #ff5722; color: #000; border-radius: 6px; padding: 4px 12px; font-size: 14px; font-weight: 900; width: auto; z-index: 10; box-shadow: 0 2px 5px rgba(255,87,34,0.4); }
+
+            /* 6. 앨범 커버와 곡 정보 레이아웃 맞추기 */
+            .music-item td:nth-child(3) { float: left; width: 75px; margin-right: 15px; margin-top: 10px; }
+            .song-info { margin-top: 12px; overflow: hidden; } 
             
-            /* 모바일 하단 플레이어 예쁘게 정렬 */
-            .bottom-player-bar { padding: 10px 15px; flex-direction: column; gap: 12px; }
+            /* 7. 기능 버튼들(듣기, 가사, 댓글) 모바일 크기에 맞게 꽉 채우기 */
+            .action-row { flex-wrap: wrap; gap: 6px; margin-top: 15px; clear: both; }
+            .action-btn { padding: 8px 5px; font-size: 12px; flex: 1; text-align: center; justify-content: center; }
+
+            /* 8. 하단 플레이어 콤팩트하게 압축 */
+            .bottom-player-bar { padding: 12px 15px; flex-direction: column; gap: 12px; bottom: 0; border-top-width: 3px; }
             .player-info { width: 100%; justify-content: flex-start; }
             .player-controls-wrapper { width: 100%; }
-            .player-buttons { gap: 30px; }
+            .player-buttons { gap: 40px; } /* 버튼 사이 간격 넓혀서 터치하기 쉽게 */
+            
+            body { padding-bottom: 160px; } /* 모바일 플레이어 공간 확보 (잘리지 않게) */
         }
     </style>
 </head>
@@ -614,6 +632,7 @@
        </script>
 </body>
 </html>
+
 
 
 
