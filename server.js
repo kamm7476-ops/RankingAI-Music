@@ -276,37 +276,64 @@ app.post('/add-comment/:id', async (req, res) => {
     } catch (err) { res.redirect('/'); }
 });
 
+// --- 음원 삭제 실행 (관리자 프리패스 적용) ---
 app.post('/delete-music/:id', async (req, res) => {
+    if (!req.session.user) return res.redirect('/');
+
     try {
-        if (!req.session.user) return res.redirect('/');
         const music = await Music.findById(req.params.id);
-        if (req.session.user.role === 'admin' || req.session.user.id === music.uploader) await Music.findByIdAndDelete(req.params.id);
-        await MyMusic.deleteMany({ musicId: req.params.id });
-        res.redirect('/'); 
+        if (!music) return res.redirect('/');
+
+        const isAdmin = req.session.user.role === 'admin';
+        const isOwner = req.session.user.id === music.uploader;
+
+        if (isAdmin || isOwner) {
+            await Music.findByIdAndDelete(req.params.id);
+            await MyMusic.deleteMany({ musicId: req.params.id }); // 보관함에서도 자동 삭제
+            res.redirect('/');
+        } else {
+            res.send("<script>alert('삭제 권한이 없습니다.'); location.href='/';</script>");
+        }
     } catch (err) { res.redirect('/'); }
 });
 
+// --- 음원 수정 페이지 보기 (권한 체크 강화) ---
 app.get('/edit/:id', async (req, res) => {
-    if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/';</script>");
+    if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
+
     try {
         const music = await Music.findById(req.params.id);
         if (!music) return res.send("<script>alert('존재하지 않는 곡입니다.'); location.href='/';</script>");
-        if (req.session.user.role === 'admin' || req.session.user.id === music.uploader) res.render('edit', { music: music });
-        else res.send("<script>alert('수정 권한이 없습니다!'); location.href='/';</script>");
+
+        // 🌟 핵심: 관리자거나 본인인 경우만 통과!
+        const isAdmin = req.session.user.role === 'admin';
+        const isOwner = req.session.user.id === music.uploader;
+
+        if (isAdmin || isOwner) {
+            res.render('edit', { music: music });
+        } else {
+            res.send("<script>alert('수정 권한이 없습니다.'); location.href='/';</script>");
+        }
     } catch (err) { res.redirect('/'); }
 });
-
+// --- 음원 수정 실행 (서버에서 한 번 더 체크) ---
 app.post('/edit/:id', async (req, res) => {
-    if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/';</script>");
+    if (!req.session.user) return res.status(401).send("로그인 필요");
+
     try {
-        const { name, artist, genre, aiTool, lyrics } = req.body;
         const music = await Music.findById(req.params.id);
-        if (req.session.user.role === 'admin' || req.session.user.id === music.uploader) {
+        const isAdmin = req.session.user.role === 'admin';
+        const isOwner = req.session.user.id === music.uploader;
+
+        if (isAdmin || isOwner) {
+            const { name, artist, genre, aiTool, lyrics } = req.body;
             await Music.findByIdAndUpdate(req.params.id, { name, artist, genre, aiTool, lyrics });
             res.redirect('/');
-        } else res.send("<script>alert('수정 권한이 없습니다!'); location.href='/';</script>");
-    } catch (err) { res.send("<script>alert('수정 중 오류가 발생했습니다.'); location.href='/';</script>"); }
+        } else {
+            res.send("<script>alert('권한이 없습니다.'); location.href='/';</script>");
+        }
+    } catch (err) { res.redirect('/'); }
 });
-
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
+
