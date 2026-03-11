@@ -137,6 +137,9 @@
 
        /* 📱 모바일(스마트폰) 최적화 디자인 완벽 정리 */
         @media (max-width: 900px) {
+            /* 🌟 모바일에서 음원 업로드 칸(입력창, 파일첨부) 삐져나감 방지 (세로 정렬) */
+            .input-row { flex-direction: column; align-items: stretch; gap: 12px; }
+            .input-row > div { width: 100%; box-sizing: border-box; }
             /* 1. 상단바 및 검색창 깔끔하게 정렬 */
             .header-top { flex-direction: column; align-items: center; padding: 15px; gap: 15px; }
             .logo-wrap { width: 100%; justify-content: space-between; }
@@ -697,6 +700,7 @@
        </script>
 </body>
 </html>
+
 
 
 
