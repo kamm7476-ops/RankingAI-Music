@@ -149,17 +149,34 @@
             .player-buttons { gap: 40px; } /* 버튼 사이 간격 넓혀서 터치하기 쉽게 */
             
             body { padding-bottom: 160px; } /* 모바일 플레이어 공간 확보 (잘리지 않게) */
-           /* 9. 차트 컨트롤 스와이프 완벽 고정 (화면 밖 탈출 방지!) */
-            .chart-controls { display: flex !important; max-width: 100%; overflow-x: auto !important; flex-wrap: nowrap !important; gap: 10px; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
+         /* 🌟 부모 상자가 폰 화면 밖으로 탈출하는 것 원천 차단! */
+            .content-left { width: 100%; max-width: 100%; overflow-x: hidden; }
+
+            /* 9. 차트 컨트롤 스와이프 완벽 고정 (궁극의 마법) */
+            .chart-controls { 
+                display: flex !important; 
+                width: 100%; 
+                overflow-x: auto !important; 
+                flex-wrap: nowrap !important; 
+                gap: 10px; 
+                padding-bottom: 10px; 
+                -webkit-overflow-scrolling: touch; 
+            }
             .chart-controls::-webkit-scrollbar { display: none; }
-            .control-btn { white-space: nowrap !important; flex-shrink: 0 !important; font-size: 13px; padding: 8px 15px; }
+            
+            /* flex: 0 0 auto; 👈 이 한 줄이 찌그러짐을 막고 스와이프를 강제합니다! */
+            .control-btn { 
+                flex: 0 0 auto !important; 
+                white-space: nowrap !important; 
+                font-size: 13px; 
+                padding: 8px 15px; 
+            }
 
             /* 10. 일간/주간/월간 탭 겹침 및 찌그러짐 방지 */
             .chart-header { flex-direction: column; align-items: flex-start; gap: 15px; }
             .tabs { display: flex; width: 100%; overflow-x: auto; gap: 20px; padding-bottom: 5px; -webkit-overflow-scrolling: touch; }
             .tabs::-webkit-scrollbar { display: none; }
-            .tab { white-space: nowrap; flex-shrink: 0; font-size: 15px; }
-        }
+            .tab { flex: 0 0 auto; white-space: nowrap; font-size: 15px; }
     </style>
 </head>
 <body>
@@ -653,6 +670,7 @@
        </script>
 </body>
 </html>
+
 
 
 
