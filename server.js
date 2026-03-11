@@ -33,6 +33,7 @@ const Music = mongoose.models.Music || mongoose.model('Music', musicSchema);
 // =========================================
 const videoSchema = new mongoose.Schema({
     title: String, url: String, type: String, uploader: String,
+    thumbnail: String, // 🌟 이 줄을 추가해야 사진이 저장됩니다!
     createdAt: { type: Date, default: Date.now }
 });
 const Video = mongoose.models.Video || mongoose.model('Video', videoSchema);
@@ -296,3 +297,4 @@ app.post('/edit/:id', async (req, res) => {
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
+
