@@ -33,11 +33,18 @@ const videoSchema = new mongoose.Schema({
 });
 const Video = mongoose.model('Video', videoSchema);
 
-// 커뮤니티 게시판 DB
 const postSchema = new mongoose.Schema({
-    title: String, content: String, author: String, createdAt: { type: Date, default: Date.now }
+    title: String,
+    content: String,
+    author: String,
+    createdAt: { type: Date, default: Date.now },
+    // 🌟 댓글을 담을 주머니 추가!
+    comments: [{ 
+        author: String, 
+        text: String, 
+        createdAt: { type: Date, default: Date.now } 
+    }]
 });
-const Post = mongoose.model('Post', postSchema);
 
 // 내 음악(담기) DB
 const myMusicSchema = new mongoose.Schema({
@@ -192,7 +199,26 @@ app.post('/delete-post/:id', async (req, res) => {
         console.log("글 삭제 에러:", err);
     }
 });
-
+// 4. 커뮤니티 게시글에 댓글 달기 (새로 뚫은 통로!)
+app.post('/add-board-comment/:id', async (req, res) => {
+    if (!req.session || !req.session.user) {
+        return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
+    }
+    try {
+        const post = await Post.findById(req.params.id);
+        if (post) {
+            post.comments.push({ // 주머니에 댓글 쏙 넣기!
+                author: req.session.user.id,
+                text: req.body.commentText
+            });
+            await post.save();
+        }
+        res.redirect('/board'); // 댓글 달고 다시 게시판 새로고침
+    } catch (err) {
+        console.log("댓글 등록 에러:", err);
+        res.status(500).send("댓글 등록 에러");
+    }
+});
 // 사용자 및 관리자, 음원 업로드/삭제
 app.get('/login', (req, res) => res.render('login'));
 app.post('/login', (req, res) => {
@@ -258,4 +284,5 @@ app.post('/edit/:id', async (req, res) => {
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
+
 
