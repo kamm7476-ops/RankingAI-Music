@@ -149,6 +149,10 @@
             .player-buttons { gap: 40px; } /* 버튼 사이 간격 넓혀서 터치하기 쉽게 */
             
             body { padding-bottom: 160px; } /* 모바일 플레이어 공간 확보 (잘리지 않게) */
+            /* 9. 차트 컨트롤(전체듣기, 담기 등) 한 줄 고정 및 가로 스와이프 */
+            .chart-controls { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 5px; justify-content: flex-start; }
+            .chart-controls::-webkit-scrollbar { display: none; } /* 지저분한 스크롤바 숨김 */
+            .control-btn { white-space: nowrap; flex-shrink: 0; font-size: 12px; padding: 8px 14px; }
         }
     </style>
 </head>
@@ -632,6 +636,7 @@
        </script>
 </body>
 </html>
+
 
 
 
