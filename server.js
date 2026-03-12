@@ -54,13 +54,17 @@ const postSchema = new mongoose.Schema({
 });
 const Post = mongoose.models.Post || mongoose.model('Post', postSchema);
 
+
 // =========================================
-// 🌟 4. 내 음악(담기) DB 주머니
+// 🌟 4. 내 음악(담기) DB 주머니 (폴더 기능 추가!)
 // =========================================
 const myMusicSchema = new mongoose.Schema({
-    userId: String, musicId: String, createdAt: { type: Date, default: Date.now }
+    userId: String, 
+    musicId: String, 
+    folderName: { type: String, default: '기본 보관함' }, // 🌟 새로 추가된 칸막이!
+    createdAt: { type: Date, default: Date.now }
 });
-const MyMusic = mongoose.models.MyMusic || mongoose.model('MyMusic', myMusicSchema);
+const MyMusic = mongoose.models.MyMusic || mongoose.model('MyMusic', myMusicSchema);;
 
 // =========================================
 // 🌟 서버 기본 설정
@@ -121,8 +125,10 @@ app.post('/play-count/:id', async (req, res) => {
 });
 
 // =========================================
-// 🌟 내 음악 보관함
+// 🌟 내 음악 보관함 (폴더 기능 완벽 지원)
 // =========================================
+
+// 1. 음악 담기 (기본 보관함으로 들어감)
 app.post('/add-to-mymusic', async (req, res) => {
     try {
         if (!req.session.user) return res.status(401).json({ message: "로그인이 필요합니다." });
@@ -130,24 +136,74 @@ app.post('/add-to-mymusic', async (req, res) => {
         const userId = req.session.user.id;
         for (let id of musicIds) {
             const exists = await MyMusic.findOne({ userId: userId, musicId: id });
-            if (!exists && id !== "dummy") await new MyMusic({ userId: userId, musicId: id }).save();
+            if (!exists && id !== "dummy") {
+                await new MyMusic({ userId: userId, musicId: id, folderName: '기본 보관함' }).save();
+            }
         }
-        res.json({ message: "내 음악에 성공적으로 담겼습니다!" });
+        res.json({ message: "기본 보관함에 성공적으로 담겼습니다!" });
     } catch (err) { res.status(500).json({ message: "담기에 실패했습니다." }); }
 });
 
+// 2. 내 음악 화면 열기 (폴더별로 묶어서 보내주기)
 app.get('/mymusic', async (req, res) => {
     if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
+    
+    // 내가 담은 모든 곡 가져오기
     const mySaved = await MyMusic.find({ userId: req.session.user.id }).sort({ createdAt: -1 });
     const musicIds = mySaved.map(item => item.musicId);
     const myArtists = await Music.find({ _id: { $in: musicIds } });
-    res.render('mymusic', { artists: myArtists });
+
+    // 🌟 폴더별로 곡 분류하기 (마법의 분류기)
+    let folders = {};
+    mySaved.forEach(savedItem => {
+        const folder = savedItem.folderName || '기본 보관함';
+        if (!folders[folder]) folders[folder] = []; // 폴더가 없으면 새로 만듦
+        
+        const musicData = myArtists.find(m => m._id.toString() === savedItem.musicId.toString());
+        if (musicData) folders[folder].push({ savedId: savedItem._id, music: musicData });
+    });
+
+    res.render('mymusic', { folders: folders }); // 분류된 폴더 데이터를 화면으로 전송!
 });
+
+// 3. 곡 삭제하기
 app.post('/delete-mymusic/:id', async (req, res) => {
-    if (req.session.user) await MyMusic.findOneAndDelete({ userId: req.session.user.id, musicId: req.params.id });
+    if (req.session.user) await MyMusic.findByIdAndDelete(req.params.id);
     res.redirect('/mymusic');
 });
 
+// 4. 🌟 곡을 다른 폴더로 이동하기
+app.post('/move-mymusic/:id', async (req, res) => {
+    if (!req.session.user) return res.redirect('/mymusic');
+    const targetFolder = req.body.targetFolder || '기본 보관함';
+    await MyMusic.findOneAndUpdate(
+        { _id: req.params.id, userId: req.session.user.id },
+        { folderName: targetFolder }
+    );
+    res.redirect('/mymusic');
+});
+
+// 5. 🌟 폴더 이름 바꾸기
+app.post('/rename-folder', async (req, res) => {
+    if (!req.session.user) return res.redirect('/mymusic');
+    const { oldName, newName } = req.body;
+    if (newName && newName.trim() !== '') {
+        // 기존 폴더 이름을 가진 모든 곡의 이름표를 새 이름으로 싹 다 교체!
+        await MyMusic.updateMany(
+            { userId: req.session.user.id, folderName: oldName },
+            { $set: { folderName: newName.trim() } }
+        );
+    }
+    res.redirect('/mymusic');
+});
+
+// 6. 🌟 폴더 통째로 삭제하기
+app.post('/delete-folder', async (req, res) => {
+    if (!req.session.user) return res.redirect('/mymusic');
+    const { folderName } = req.body;
+    await MyMusic.deleteMany({ userId: req.session.user.id, folderName: folderName });
+    res.redirect('/mymusic');
+});
 // =========================================
 // 🌟 유튜브 / 쇼츠 기능 (삭제 기능 추가!)
 // =========================================
@@ -336,4 +392,5 @@ app.post('/edit/:id', async (req, res) => {
 });
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
+
 
