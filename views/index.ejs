@@ -84,16 +84,34 @@
         .lyrics-line { padding: 5px 0; display: flex; gap: 8px; cursor: pointer; }
         .lyrics-time { color: #ff5722; font-weight: bold; width: 45px; text-align: right; }
 
-        .bottom-player-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #1a1c1e; border-top: 2px solid #ff5722; padding: 10px 40px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); }
+        /* 🌟 하단 플레이어 및 애니메이션 CSS 🌟 */
+        .bottom-player-bar { 
+            position: fixed; bottom: 0; left: 0; width: 100%; 
+            background: #1a1c1e; border-top: 2px solid #ff5722; 
+            padding: 10px 40px; box-sizing: border-box; 
+            display: flex; align-items: center; justify-content: space-between; 
+            z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); 
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); 
+        }
+        .bottom-player-bar.collapsed {
+            transform: translateY(100%);
+        }
+        .player-toggle-tab {
+            position: absolute; top: -32px; right: 40px;
+            background: #1a1c1e; color: #ff5722;
+            border: 2px solid #ff5722; border-bottom: none;
+            padding: 6px 18px; border-radius: 12px 12px 0 0;
+            cursor: pointer; font-size: 13px; font-weight: bold;
+            z-index: 1001; box-shadow: 0 -4px 10px rgba(0,0,0,0.4);
+            transition: 0.2s;
+        }
+        .player-toggle-tab:hover { background: #ff5722; color: #000; }
+
         .player-info { display: flex; align-items: center; gap: 15px; width: 300px; }
         .player-cover { width: 50px; height: 50px; border-radius: 5px; background: #000; object-fit: cover; }
         .player-text { display: flex; flex-direction: column; }
         .player-title { font-size: 15px; font-weight: bold; color: #fff; }
         .player-artist { font-size: 12px; color: #aaa; }
-        .main-audio-element { flex: 1; max-width: 600px; outline: none; accent-color: #ff5722; }
-        .main-audio-element::-webkit-media-controls-panel { background-color: #1a1c1e; }
-        .main-audio-element::-webkit-media-controls-play-button { filter: invert(40%) sepia(80%) saturate(300%) hue-rotate(330deg) brightness(110%); }
-        .main-audio-element::-webkit-media-controls-current-time-display, .main-audio-element::-webkit-media-controls-time-remaining-display { color: #fff; }
         .player-controls-wrapper { flex: 1; max-width: 600px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
         .player-buttons { display: flex; align-items: center; gap: 20px; }
         .player-buttons button { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; transition: 0.2s; padding: 0; }
@@ -167,42 +185,14 @@
             .tabs { display: flex; width: 100%; overflow-x: auto; gap: 20px; padding-bottom: 5px; -webkit-overflow-scrolling: touch; }
             .tabs::-webkit-scrollbar { display: none; }
             .tab { flex: 0 0 auto; white-space: nowrap; font-size: 15px; }
-            /* 🌟 플레이어 숨김/열기 애니메이션 및 탭 디자인 */
-        .bottom-player-bar {
-            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); /* 부드럽게 오르내리는 애니메이션 */
         }
-        .bottom-player-bar.collapsed {
-            transform: translateY(100%); /* 플레이어 전체 높이만큼 화면 아래로 숨김! */
-        }
-        .player-toggle-tab {
-            position: absolute;
-            top: -32px; /* 플레이어 위로 쏙 튀어나오게 설정 */
-            right: 40px;
-            background: #1a1c1e;
-            color: #ff5722;
-            border: 2px solid #ff5722;
-            border-bottom: none;
-            padding: 6px 18px;
-            border-radius: 12px 12px 0 0;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: bold;
-            z-index: 1001;
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.4);
-            transition: 0.2s;
-        }
-        .player-toggle-tab:hover {
-            background: #ff5722;
-            color: #000;
-        }
-}
     </style>
 </head>
 <body>
     <header class="main-header">
        <div class="header-top">
             <div class="logo-wrap">
-                <div class="logo">RANKING AI</div>
+                <div class="logo" style="cursor:pointer;" onclick="window.location.href='/?sort=views'">RANKING AI</div>
                 <div id="google_translate_element" style="display:none;"></div>
                 <select id="custom-translate-select" class="lang-select" onchange="changeLanguage(this.value)">
                     <option value="ko">🇰🇷 한국어</option>
@@ -413,9 +403,10 @@
         </div>
     </div>
 
-    <div class="bottom-player-bar">
-         <div class="player-toggle-tab" onclick="togglePlayerVisibility()">▼ 숨기기</div>
-         <div class="player-info">
+    <div class="bottom-player-bar" id="bottomPlayerBar">
+        <div class="player-toggle-tab" onclick="togglePlayerVisibility()">▼ 숨기기</div>
+        
+        <div class="player-info">
             <img src="https://via.placeholder.com/50/222222/ff5722?text=Play" id="main-player-cover" class="player-cover">
             <div class="player-text">
                 <span id="main-player-title" class="player-title">선택된 곡이 없습니다</span>
@@ -440,6 +431,20 @@
     </div>
 
     <script>
+        // 🌟 플레이어 숨기기/보이기 기능 🌟
+        function togglePlayerVisibility() {
+            const playerBar = document.getElementById('bottomPlayerBar');
+            const toggleTab = document.querySelector('.player-toggle-tab');
+            
+            playerBar.classList.toggle('collapsed');
+            
+            if (playerBar.classList.contains('collapsed')) {
+                toggleTab.innerText = '▲ 열기';
+            } else {
+                toggleTab.innerText = '▼ 숨기기';
+            }
+        }
+
         const genreBtns = document.querySelectorAll('.genre-btn');
         const hiddenInput = document.getElementById('hiddenGenreInput');
         genreBtns.forEach(btn => {
@@ -454,22 +459,7 @@
             if (!hiddenInput.value) { e.preventDefault(); alert('장르를 선택해주세요!'); } 
         });
 
-// 🌟 플레이어 접기/펼치기 기능
-        function togglePlayerVisibility() {
-            const playerBar = document.querySelector('.bottom-player-bar');
-            const toggleTab = document.querySelector('.player-toggle-tab');
-            
-            // collapsed 클래스를 껐다 켰다 함
-            playerBar.classList.toggle('collapsed');
-            
-            // 상태에 따라 버튼 글자 바꾸기
-            if (playerBar.classList.contains('collapsed')) {
-                toggleTab.innerText = '▲ 플레이어 열기';
-            } else {
-                toggleTab.innerText = '▼ 숨기기';
-            }
-        }
-      // 커스텀 플레이어 엔진
+        // 🌟 커스텀 플레이어 엔진 (에러 방어막 강화!) 🌟
         let playlist = [];
         let currentIndex = 0;
         let isPlaying = false;
@@ -484,7 +474,6 @@
             document.querySelectorAll('.song-check').forEach(cb => cb.checked = source.checked);
         }
 
-        // 재생/일시정지 토글
         function togglePlayPause() {
             if (playlist.length === 0) return alert("재생할 곡을 선택해주세요!");
             if (mainAudio.paused) {
@@ -498,17 +487,23 @@
             }
         }
 
-       function loadTrack(index) {
+        // 재생 시 빈 파일 건너뛰기
+        function loadTrack(index) {
             if(index >= 0 && index < playlist.length) {
                 const track = playlist[index];
-                if(!track.audio) return alert("음원 파일이 없는 곡입니다.");
+                
+                if(!track.audio || track.audio.trim() === "" || track.audio === "undefined") {
+                    console.log("음원이 없는 곡 패스:", track.title);
+                    playNextTrack(); 
+                    return; 
+                }
                 
                 document.getElementById('main-player-title').innerText = track.title;
                 document.getElementById('main-player-artist').innerText = track.artist;
                 document.getElementById('main-player-cover').src = track.cover;
                 
                 mainAudio.src = track.audio;
-                mainAudio.play();
+                mainAudio.play().catch(e => console.log("재생 대기중..."));
                 isPlaying = true;
                 if(btnPlay) btnPlay.innerText = "⏸";
                 currentIndex = index;
@@ -536,7 +531,6 @@
             const duration = mainAudio.duration;
             if (duration && !isNaN(duration)) {
                 progressBar.value = (current / duration) * 100;
-                
                 let minC = Math.floor(current / 60); let secC = Math.floor(current % 60);
                 if(secC < 10) secC = "0" + secC;
                 timeCurrent.innerText = minC + ":" + secC;
@@ -563,8 +557,8 @@
 
         function playAll() {
             const rows = document.querySelectorAll('.music-item');
-            playlist = Array.from(rows).map(tr => ({ id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio })).filter(t => t.audio !== "");
-            if(playlist.length > 0) loadTrack(0); else alert("재생할 음원이 없습니다.");
+            playlist = Array.from(rows).map(tr => ({ id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio })).filter(t => t.audio && t.audio.trim() !== "" && t.audio !== "undefined");
+            if(playlist.length > 0) loadTrack(0); else alert("재생 가능한 음원이 없습니다.");
         }
 
         function playSelected() {
@@ -574,7 +568,7 @@
             playlist = Array.from(checkedBoxes).map(cb => {
                 const tr = cb.closest('.music-item');
                 return { id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio };
-            }).filter(t => t.audio !== "");
+            }).filter(t => t.audio && t.audio.trim() !== "" && t.audio !== "undefined");
             
             if(playlist.length > 0) loadTrack(0); else alert("재생 가능한 음원이 없습니다.");
         }
@@ -595,14 +589,12 @@
             .catch(err => alert("에러가 발생했습니다. 다시 시도해주세요."));
         }
 
-       // 음악 끊김 방지 마법 엔진 (부분 화면 교체 - PJAX)
+       // 🌟 음악 끊김 방지 마법 엔진 (PJAX) 🌟
         document.addEventListener('click', async (e) => {
             const link = e.target.closest('a');
             if (!link) return;
 
             const href = link.getAttribute('href');
-            
-            // 🌟 커뮤니티(board) 예외 처리
             if (href && href.startsWith('/') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('board') && !href.includes('edit')) {
                 e.preventDefault(); 
                 navigateTo(href);
@@ -641,6 +633,16 @@
                 history.pushState(null, '', href);
                 document.title = newDoc.title;
                 
+                // 🌟 유튜브, 쇼츠, 커뮤니티 클릭 시 플레이어 자동 숨김!
+                const playerBar = document.getElementById('bottomPlayerBar');
+                if (playerBar) {
+                    if (href.includes('/youtube') || href.includes('/shorts') || href.includes('/board')) {
+                        playerBar.style.display = 'none';
+                    } else {
+                        playerBar.style.display = 'flex';
+                    }
+                }
+
                 reattachEvents();
                 window.scrollTo(0, 0); 
                 
@@ -648,17 +650,7 @@
                 console.log("화면 교체 에러:", err);
                 location.href = href; 
             }
-       // 🌟 추가할 핵심 코드: 유튜브/쇼츠/커뮤니티로 가면 플레이어 숨기기!
-                const playerBar = document.querySelector('.bottom-player-bar');
-                if (playerBar) {
-                    if (href.includes('/youtube') || href.includes('/shorts') || href.includes('/board')) {
-                        playerBar.style.display = 'none'; // 플레이어 감추기
-                    } else {
-                        playerBar.style.display = 'flex'; // 메인 화면(차트)으로 오면 다시 보여주기
-                    }
-                }
-
-    
+        }
 
         window.addEventListener('popstate', async () => {
             navigateTo(location.pathname + location.search);
@@ -685,11 +677,7 @@
         function switchTab(clickedTab) {
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             clickedTab.classList.add('active');
-            console.log(clickedTab.innerText + " 탭 클릭됨!");
         }
-       </script>
+    </script>
 </body>
 </html>
-
-
-
