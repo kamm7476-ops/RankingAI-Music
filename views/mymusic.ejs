@@ -8,6 +8,7 @@
         body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; padding-bottom: 120px; }
         a { text-decoration: none; color: inherit; }
 
+        /* 공통 헤더 디자인 */
         .main-header { background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
         .header-top { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; border-bottom: 1px solid #1a1b1c; }
         .logo { font-size: 28px; font-weight: 900; color: #ff5722; cursor: pointer; background: linear-gradient(45deg, #ff5722, #ffb300); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -15,10 +16,10 @@
         .header-nav { display: flex; justify-content: flex-start; gap: 25px; padding: 12px 15px; background: #0b0c0d; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; border-bottom: 1px solid #222; }
         .header-nav::-webkit-scrollbar { display: none; }
         .nav-item { color: #aaa; font-weight: 600; font-size: 16px; transition: 0.2s; position: relative; cursor: pointer; flex-shrink: 0; white-space: nowrap; }
-        .nav-item:hover { color: #ff5722; }
+        .nav-item:hover, .nav-item.active { color: #ff5722; }
 
         .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
-        .page-title { font-size: 32px; font-weight: 900; margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
+        .page-title { font-size: 28px; font-weight: 900; margin-bottom: 30px; display: flex; align-items: center; gap: 10px; color: #fff; }
         
         /* 🌟 폴더 탭 (가로 스크롤) */
         .folder-tabs { display: flex; gap: 15px; margin-bottom: 30px; overflow-x: auto; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
@@ -48,9 +49,9 @@
         
         .song-actions { display: flex; gap: 8px; justify-content: flex-end; }
         .song-btn { background: #222; color: #aaa; border: 1px solid #444; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .song-btn:hover { color: #fff; border-color: #ff5722; background: #ff5722; color: #000; }
+        .song-btn:hover { border-color: #ff5722; background: #ff5722; color: #000; }
 
-        /* 하단 플레이어 (메인 화면과 동일) */
+        /* 하단 플레이어 */
         .bottom-player-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #1a1c1e; border-top: 2px solid #ff5722; padding: 10px 40px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); }
         .player-info { display: flex; align-items: center; gap: 15px; width: 300px; }
         .player-cover { width: 50px; height: 50px; border-radius: 5px; background: #000; object-fit: cover; }
@@ -77,6 +78,7 @@
             .bottom-player-bar { padding: 12px 15px; flex-direction: column; gap: 12px; }
             .player-info { width: 100%; justify-content: flex-start; }
             .player-controls-wrapper { width: 100%; }
+            .header-top { flex-direction: column; gap: 15px; }
         }
     </style>
 </head>
@@ -84,7 +86,7 @@
     <header class="main-header">
         <div class="header-top">
              <div class="logo" onclick="window.location.href='/?sort=views'">RANKING AI</div>
-             <div style="color: #aaa; font-size: 14px;"><%= user.id %>님의 보관함</div>
+             <div style="color: #aaa; font-size: 14px; font-weight: bold;">🎧 <%= user.id %>님의 보관함</div>
          </div>
          <div class="header-nav">
              <a href="/?sort=views" class="nav-item">← 차트로 돌아가기</a>
@@ -92,7 +94,7 @@
      </header>
 
      <div class="container">
-        <div class="page-title">🎵 내 음악 보관함</div>
+        <div class="page-title">내 음악 보관함</div>
         
         <% const folderNames = Object.keys(folders); %>
         
@@ -100,7 +102,7 @@
             <div style="text-align: center; padding: 100px 0; background: #161718; border-radius: 15px; border: 1px solid #333;">
                 <h2 style="color: #777;">보관함이 비어있습니다.</h2>
                 <p style="color: #555;">메인 차트에서 마음에 드는 곡을 '+ 담기' 해보세요!</p>
-                <button class="action-btn" style="margin-top: 20px;" onclick="location.href='/'">차트 구경가기</button>
+                <button class="action-btn" style="margin-top: 20px; background: #ff5722; color: #000; padding: 10px 20px;" onclick="location.href='/'">차트 구경가기</button>
             </div>
         <% } else { %>
 
@@ -117,14 +119,15 @@
                         <h2 class="folder-name-title">📁 <%= folder %></h2>
                         <div class="folder-actions">
                             <button class="action-btn" onclick="renameFolder('<%= folder %>')">✏️ 이름 변경</button>
-                            <button class="action-btn btn-delete" onclick="deleteFolder('<%= folder %>')">🗑️ 폴더 통째로 비우기</button>
+                            <button class="action-btn btn-delete" onclick="deleteFolder('<%= folder %>')">🗑️ 폴더 비우기</button>
                         </div>
                     </div>
 
                     <table class="music-list">
                         <% folders[folder].forEach(item => { %>
-                            <% if(item.music) { %> <tr class="music-item" data-title="<%= item.music.name %>" data-artist="<%= item.music.artist %>" data-cover="<%= item.music.imageUrl %>" data-audio="<%= item.music.audioUrl %>">
-                                <td><img src="<%= item.music.imageUrl %>" class="album-art"></td>
+                            <% if(item.music) { %>
+                            <tr class="music-item" data-title="<%= item.music.name %>" data-artist="<%= item.music.artist %>" data-cover="<%= item.music.imageUrl %>" data-audio="<%= item.music.audioUrl %>">
+                                <td style="width: 70px;"><img src="<%= item.music.imageUrl %>" class="album-art"></td>
                                 <td class="song-info-col">
                                     <div class="song-title"><%= item.music.name %></div>
                                     <div class="singer"><%= item.music.artist %></div>
@@ -181,16 +184,13 @@
     </div>
 
      <script>
-         // 🌟 1. 폴더 탭 전환 마법
          function showFolder(folderName, btnElement) {
              document.querySelectorAll('.folder-section').forEach(sec => sec.style.display = 'none');
              document.querySelectorAll('.folder-tab').forEach(tab => tab.classList.remove('active'));
-             
              document.querySelector(`.folder-section[data-folder="${folderName}"]`).style.display = 'block';
              btnElement.classList.add('active');
          }
 
-         // 🌟 2. 폴더 이름 변경 기능 (이름만 쳐도 싹 바뀜!)
          function renameFolder(oldName) {
              const newName = prompt(`'${oldName}'의 새로운 폴더 이름을 입력하세요.`, oldName);
              if (newName && newName.trim() !== '' && newName !== oldName) {
@@ -200,7 +200,6 @@
              }
          }
 
-         // 🌟 3. 폴더 통째로 폭파
          function deleteFolder(folderName) {
              if (confirm(`진짜로 '${folderName}' 폴더를 지우시겠습니까?\n(안에 들어있는 곡들도 보관함에서 싹 다 사라집니다!)`)) {
                  document.getElementById('deleteFolderName').value = folderName;
@@ -208,7 +207,6 @@
              }
          }
 
-         // 🌟 4. 곡을 다른 폴더로 옮기기 (새 이름 치면 새 폴더가 뿅 생김!)
          function moveSong(savedId, currentFolder) {
              const target = prompt(`어느 폴더로 이동할까요?\n(원하시는 '새 폴더 이름'을 적으시면 폴더가 새로 만들어집니다!)`, currentFolder);
              if (target && target.trim() !== '' && target !== currentFolder) {
@@ -219,7 +217,6 @@
              }
          }
 
-         // 🌟 5. 하단 플레이어 (간소화 버전)
          const mainAudio = document.getElementById('main-audio');
          const btnPlay = document.getElementById('btn-play');
          const progressBar = document.getElementById('progress-bar');
