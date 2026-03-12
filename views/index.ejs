@@ -648,7 +648,17 @@
                 console.log("화면 교체 에러:", err);
                 location.href = href; 
             }
-        }
+       // 🌟 추가할 핵심 코드: 유튜브/쇼츠/커뮤니티로 가면 플레이어 숨기기!
+                const playerBar = document.querySelector('.bottom-player-bar');
+                if (playerBar) {
+                    if (href.includes('/youtube') || href.includes('/shorts') || href.includes('/board')) {
+                        playerBar.style.display = 'none'; // 플레이어 감추기
+                    } else {
+                        playerBar.style.display = 'flex'; // 메인 화면(차트)으로 오면 다시 보여주기
+                    }
+                }
+
+    
 
         window.addEventListener('popstate', async () => {
             navigateTo(location.pathname + location.search);
@@ -680,5 +690,6 @@
        </script>
 </body>
 </html>
+
 
 
