@@ -3,158 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>마이뮤직 - RANKING AI</title>
+    <title>내 음악 보관함 - RANKING AI</title>
     <style>
-        body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; padding-bottom: 100px; }
+        body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; padding-bottom: 120px; }
         a { text-decoration: none; color: inherit; }
+
         .main-header { background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
         .header-top { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; border-bottom: 1px solid #1a1b1c; }
-        .logo { font-size: 28px; font-weight: 900; color: #ff5722; letter-spacing: -1px; } 
-        .auth-buttons { display: flex; gap: 20px; align-items: center; }
-        .btn-menu { color: #fff; font-weight: bold; font-size: 15px; }
+        .logo { font-size: 28px; font-weight: 900; color: #ff5722; cursor: pointer; background: linear-gradient(45deg, #ff5722, #ffb300); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .header-nav { display: flex; justify-content: flex-start; gap: 25px; padding: 12px 15px; background: #0b0c0d; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; border-bottom: 1px solid #222; }
+        .header-nav::-webkit-scrollbar { display: none; }
+        .nav-item { color: #aaa; font-weight: 600; font-size: 16px; transition: 0.2s; position: relative; cursor: pointer; flex-shrink: 0; white-space: nowrap; }
+        .nav-item:hover { color: #ff5722; }
 
         .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
-        .page-title { font-size: 32px; font-weight: bold; color: #ff5722; margin-bottom: 10px; }
-        .page-desc { color: #aaa; margin-bottom: 30px; }
+        .page-title { font-size: 32px; font-weight: 900; margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
+        
+        /* 🌟 폴더 탭 (가로 스크롤) */
+        .folder-tabs { display: flex; gap: 15px; margin-bottom: 30px; overflow-x: auto; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
+        .folder-tabs::-webkit-scrollbar { height: 6px; }
+        .folder-tabs::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+        .folder-tab { background: #222; color: #aaa; border: 1px solid #444; padding: 10px 25px; border-radius: 30px; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.3s; white-space: nowrap; flex-shrink: 0; }
+        .folder-tab:hover { background: #333; color: #fff; border-color: #ff5722; }
+        .folder-tab.active { background: #ff5722; color: #000; border-color: #ff5722; box-shadow: 0 4px 15px rgba(255,87,34,0.4); }
 
-        .chart-controls { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; }
-        .control-btn { background: #161718; color: #fff; border: 1px solid #444; padding: 8px 15px; border-radius: 20px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
-        .control-btn:hover { background: #333; border-color: #ff5722; color: #ff5722; }
+        /* 🌟 폴더 액션 버튼 구역 */
+        .folder-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #161718; padding: 20px; border-radius: 12px; border: 1px solid #333; }
+        .folder-name-title { font-size: 24px; font-weight: bold; color: #ff5722; margin: 0; }
+        .folder-actions { display: flex; gap: 10px; }
+        .action-btn { background: #222; color: #fff; border: 1px solid #444; padding: 8px 15px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .action-btn:hover { background: #444; border-color: #fff; }
+        .action-btn.btn-delete { color: #ff4a4a; border-color: #ff4a4a; background: rgba(255, 74, 74, 0.1); }
+        .action-btn.btn-delete:hover { background: #ff4a4a; color: #000; }
 
+        /* 🌟 곡 리스트 디자인 */
         .music-list { width: 100%; border-collapse: collapse; }
-        .music-item { border-bottom: 1px solid #1a1b1c; }
+        .music-item { border-bottom: 1px solid #222; transition: 0.2s; }
+        .music-item:hover { background: rgba(255,87,34,0.05); }
         .music-item td { padding: 15px 10px; vertical-align: middle; }
-        .check-col { width: 30px; text-align: center; }
-        .custom-checkbox { width: 18px; height: 18px; accent-color: #ff5722; cursor: pointer; }
-        .album-art { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
-        .song-title { font-size: 16px; font-weight: 600; display: block; margin-bottom: 4px; }
+        .album-art { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .song-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; color: #fff; }
         .singer { font-size: 13px; color: #aaa; }
+        
+        .song-actions { display: flex; gap: 8px; justify-content: flex-end; }
+        .song-btn { background: #222; color: #aaa; border: 1px solid #444; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .song-btn:hover { color: #fff; border-color: #ff5722; background: #ff5722; color: #000; }
 
-        /* 하단 고정 플레이어 */
-        .bottom-player-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #1a1c1e; border-top: 2px solid #ff5722; padding: 10px 40px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; z-index: 1000; }
+        /* 하단 플레이어 (메인 화면과 동일) */
+        .bottom-player-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #1a1c1e; border-top: 2px solid #ff5722; padding: 10px 40px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); }
         .player-info { display: flex; align-items: center; gap: 15px; width: 300px; }
         .player-cover { width: 50px; height: 50px; border-radius: 5px; background: #000; object-fit: cover; }
         .player-text { display: flex; flex-direction: column; }
         .player-title { font-size: 15px; font-weight: bold; color: #fff; }
         .player-artist { font-size: 12px; color: #aaa; }
-        .main-audio-element { flex: 1; max-width: 600px; outline: none; accent-color: #ff5722; }
-        .main-audio-element::-webkit-media-controls-panel { background-color: #1a1c1e; }
-        .main-audio-element::-webkit-media-controls-play-button { filter: invert(40%) sepia(80%) saturate(300%) hue-rotate(330deg) brightness(110%); }
+        .player-controls-wrapper { flex: 1; max-width: 600px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .player-buttons { display: flex; align-items: center; gap: 20px; }
+        .player-buttons button { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; padding: 0; }
+        .player-buttons button:hover { color: #ff5722; }
+        .player-buttons .play-btn { font-size: 32px; color: #ff5722; }
+        .progress-area { width: 100%; display: flex; align-items: center; gap: 10px; font-size: 12px; color: #aaa; }
+        #progress-bar { flex: 1; height: 4px; border-radius: 2px; -webkit-appearance: none; background: #444; outline: none; cursor: pointer; accent-color: #ff5722; }
+        #progress-bar::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #ff5722; }
 
-        @media (max-width: 768px) {
-            .bottom-player-bar { padding: 10px; flex-direction: column; gap: 10px; }
-            .player-info { width: 100%; }
-            .main-audio-element { width: 100%; max-width: 100%; }
+        @media (max-width: 900px) {
+            .music-item, .music-item td, .music-list, .music-list tbody { display: block; width: 100%; box-sizing: border-box; }
+            .music-item { background: #161718; border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #333; position: relative; }
+            .music-item td { padding: 0; border: none; }
+            .music-item td:nth-child(1) { float: left; width: 65px; margin-right: 15px; }
+            .song-info-col { margin-top: 5px; }
+            .song-actions { justify-content: flex-start; margin-top: 15px; clear: both; }
+            .folder-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .bottom-player-bar { padding: 12px 15px; flex-direction: column; gap: 12px; }
+            .player-info { width: 100%; justify-content: flex-start; }
+            .player-controls-wrapper { width: 100%; }
         }
     </style>
 </head>
 <body>
     <header class="main-header">
         <div class="header-top">
-            <div class="logo">RANKING AI</div>
-            <div class="auth-buttons">
-                <a href="/" class="btn-menu">🏠 메인 차트로 돌아가기</a>
+             <div class="logo" onclick="window.location.href='/?sort=views'">RANKING AI</div>
+             <div style="color: #aaa; font-size: 14px;"><%= user.id %>님의 보관함</div>
+         </div>
+         <div class="header-nav">
+             <a href="/?sort=views" class="nav-item">← 차트로 돌아가기</a>
+         </div>
+     </header>
+
+     <div class="container">
+        <div class="page-title">🎵 내 음악 보관함</div>
+        
+        <% const folderNames = Object.keys(folders); %>
+        
+        <% if (folderNames.length === 0) { %>
+            <div style="text-align: center; padding: 100px 0; background: #161718; border-radius: 15px; border: 1px solid #333;">
+                <h2 style="color: #777;">보관함이 비어있습니다.</h2>
+                <p style="color: #555;">메인 차트에서 마음에 드는 곡을 '+ 담기' 해보세요!</p>
+                <button class="action-btn" style="margin-top: 20px;" onclick="location.href='/'">차트 구경가기</button>
             </div>
-        </div>
-    </header>
+        <% } else { %>
 
-    <div class="container">
-        <div class="page-title">🎧 내 음악 보관함</div>
-        <div class="page-desc"><%= user.id %>님이 담아둔 소중한 곡들입니다.</div>
+            <div class="folder-tabs">
+                <% folderNames.forEach((folder, index) => { %>
+                    <div class="folder-tab <%= index === 0 ? 'active' : '' %>" onclick="showFolder('<%= folder %>', this)"><%= folder %> (<%= folders[folder].length %>)</div>
+                <% }) %>
+            </div>
 
-        <div class="chart-controls">
-            <input type="checkbox" id="checkAll" class="custom-checkbox" onchange="toggleAll(this)">
-            <button class="control-btn" onclick="playAll()">▶ 전체듣기</button>
-            <button class="control-btn" onclick="playSelected()">▶ 선택듣기</button>
-        </div>
+            <% folderNames.forEach((folder, index) => { %>
+                <div class="folder-section" data-folder="<%= folder %>" style="display: <%= index === 0 ? 'block' : 'none' %>;">
+                    
+                    <div class="folder-header">
+                        <h2 class="folder-name-title">📁 <%= folder %></h2>
+                        <div class="folder-actions">
+                            <button class="action-btn" onclick="renameFolder('<%= folder %>')">✏️ 이름 변경</button>
+                            <button class="action-btn btn-delete" onclick="deleteFolder('<%= folder %>')">🗑️ 폴더 통째로 비우기</button>
+                        </div>
+                    </div>
 
-        <table class="music-list">
-            <% if (artists && artists.length > 0) { %>
-                <% artists.forEach(function(music) { %>
-                <tr class="music-item" data-id="<%= music._id %>" data-title="<%= music.name %>" data-artist="<%= music.artist %>" data-cover="<%= music.imageUrl %>" data-audio="<%= music.audioUrl %>">
-                    <td class="check-col"><input type="checkbox" class="custom-checkbox song-check" value="<%= music._id %>"></td>
-                    <td style="width: 70px;"><img src="<%= music.imageUrl %>" class="album-art"></td>
-                    <td>
-                        <span class="song-title"><%= music.name %></span>
-                        <span class="singer"><%= music.artist %></span>
-                    </td>
-                    <td style="text-align:right;">
-                        <button class="control-btn" style="display:inline-block;" onclick="playSingleTrack(this)">▶ 듣기</button>
-                        <form action="/delete-mymusic/<%= music._id %>" method="POST" style="display:inline;">
-                        <button type="submit" class="control-btn" style="display:inline-block; border-color:#ff4a4a; color:#ff4a4a;" onclick="return confirm('보관함에서 지우시겠습니까?');">🗑️ 삭제</button>
-                        </form>
-                    </td>
-                </tr>
-                <% }); %>
-            <% } else { %>
-                <tr><td colspan="4" style="text-align:center; padding:100px; color:#555;">보관함이 텅 비어있습니다. 메인 차트에서 곡을 담아보세요!</td></tr>
-            <% } %>
-        </table>
-    </div>
+                    <table class="music-list">
+                        <% folders[folder].forEach(item => { %>
+                            <% if(item.music) { %> <tr class="music-item" data-title="<%= item.music.name %>" data-artist="<%= item.music.artist %>" data-cover="<%= item.music.imageUrl %>" data-audio="<%= item.music.audioUrl %>">
+                                <td><img src="<%= item.music.imageUrl %>" class="album-art"></td>
+                                <td class="song-info-col">
+                                    <div class="song-title"><%= item.music.name %></div>
+                                    <div class="singer"><%= item.music.artist %></div>
+                                </td>
+                                <td>
+                                    <div class="song-actions">
+                                        <button class="song-btn" onclick="playSingleTrack(this)">▶ 듣기</button>
+                                        <button class="song-btn" onclick="moveSong('<%= item.savedId %>', '<%= folder %>')">📂 이동</button>
+                                        <form action="/delete-mymusic/<%= item.savedId %>" method="POST" style="margin:0;" onsubmit="return confirm('이 곡을 보관함에서 지우시겠습니까?');">
+                                            <button type="submit" class="song-btn" style="color:#ff4a4a; border-color:#ff4a4a; background:none;">X 빼기</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% } %>
+                        <% }) %>
+                    </table>
+                </div>
+            <% }) %>
 
-    <div class="bottom-player-bar">
+        <% } %>
+     </div>
+
+     <form id="renameForm" action="/rename-folder" method="POST" style="display:none;">
+         <input type="hidden" name="oldName" id="renameOld">
+         <input type="hidden" name="newName" id="renameNew">
+     </form>
+     <form id="deleteFolderForm" action="/delete-folder" method="POST" style="display:none;">
+         <input type="hidden" name="folderName" id="deleteFolderName">
+     </form>
+     <form id="moveSongForm" action="" method="POST" style="display:none;">
+         <input type="hidden" name="targetFolder" id="moveTargetFolder">
+     </form>
+
+     <div class="bottom-player-bar">
         <div class="player-info">
             <img src="https://via.placeholder.com/50/222222/ff5722?text=Play" id="main-player-cover" class="player-cover">
             <div class="player-text">
                 <span id="main-player-title" class="player-title">선택된 곡이 없습니다</span>
-                <span id="main-player-artist" class="player-artist">목록에서 음악을 선택해주세요</span>
+                <span id="main-player-artist" class="player-artist">재생 버튼을 눌러주세요</span>
             </div>
         </div>
-        <audio id="main-audio" class="main-audio-element" controls controlsList="nodownload"></audio>
+        <div class="player-controls-wrapper">
+            <div class="player-buttons">
+                <button id="btn-play" onclick="togglePlayPause()" class="play-btn">▶</button>
+            </div>
+            <div class="progress-area">
+                <span id="time-current">00:00</span>
+                <input type="range" id="progress-bar" value="0" min="0" max="100" step="1">
+                <span id="time-total">00:00</span>
+            </div>
+        </div>
+        <audio id="main-audio" style="display:none;"></audio>
     </div>
 
-    <script>
-        let playlist = [];
-        let currentIndex = 0;
-        const mainAudio = document.getElementById('main-audio');
+     <script>
+         // 🌟 1. 폴더 탭 전환 마법
+         function showFolder(folderName, btnElement) {
+             document.querySelectorAll('.folder-section').forEach(sec => sec.style.display = 'none');
+             document.querySelectorAll('.folder-tab').forEach(tab => tab.classList.remove('active'));
+             
+             document.querySelector(`.folder-section[data-folder="${folderName}"]`).style.display = 'block';
+             btnElement.classList.add('active');
+         }
 
-        function toggleAll(source) {
-            const checkboxes = document.querySelectorAll('.song-check');
-            checkboxes.forEach(cb => cb.checked = source.checked);
-        }
+         // 🌟 2. 폴더 이름 변경 기능 (이름만 쳐도 싹 바뀜!)
+         function renameFolder(oldName) {
+             const newName = prompt(`'${oldName}'의 새로운 폴더 이름을 입력하세요.`, oldName);
+             if (newName && newName.trim() !== '' && newName !== oldName) {
+                 document.getElementById('renameOld').value = oldName;
+                 document.getElementById('renameNew').value = newName;
+                 document.getElementById('renameForm').submit();
+             }
+         }
 
-        function loadTrack(index) {
-            if(index >= 0 && index < playlist.length) {
-                const track = playlist[index];
-                if(!track.audio) { alert("음원 파일이 없는 곡입니다."); return; }
-                
-                document.getElementById('main-player-title').innerText = track.title;
-                document.getElementById('main-player-artist').innerText = track.artist;
-                document.getElementById('main-player-cover').src = track.cover;
-                
-                mainAudio.src = track.audio;
-                mainAudio.play();
-                currentIndex = index;
-            }
-        }
+         // 🌟 3. 폴더 통째로 폭파
+         function deleteFolder(folderName) {
+             if (confirm(`진짜로 '${folderName}' 폴더를 지우시겠습니까?\n(안에 들어있는 곡들도 보관함에서 싹 다 사라집니다!)`)) {
+                 document.getElementById('deleteFolderName').value = folderName;
+                 document.getElementById('deleteFolderForm').submit();
+             }
+         }
 
-        mainAudio.addEventListener('ended', function() {
-            if(currentIndex + 1 < playlist.length) loadTrack(currentIndex + 1);
-        });
+         // 🌟 4. 곡을 다른 폴더로 옮기기 (새 이름 치면 새 폴더가 뿅 생김!)
+         function moveSong(savedId, currentFolder) {
+             const target = prompt(`어느 폴더로 이동할까요?\n(원하시는 '새 폴더 이름'을 적으시면 폴더가 새로 만들어집니다!)`, currentFolder);
+             if (target && target.trim() !== '' && target !== currentFolder) {
+                 const form = document.getElementById('moveSongForm');
+                 form.action = '/move-mymusic/' + savedId;
+                 document.getElementById('moveTargetFolder').value = target;
+                 form.submit();
+             }
+         }
 
-        function playSingleTrack(btnElement) {
-            const tr = btnElement.closest('.music-item');
-            playlist = [{ id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio }];
-            loadTrack(0);
-        }
+         // 🌟 5. 하단 플레이어 (간소화 버전)
+         const mainAudio = document.getElementById('main-audio');
+         const btnPlay = document.getElementById('btn-play');
+         const progressBar = document.getElementById('progress-bar');
+         const timeCurrent = document.getElementById('time-current');
+         const timeTotal = document.getElementById('time-total');
+         let isPlaying = false;
 
-        function playAll() {
-            const rows = document.querySelectorAll('.music-item');
-            playlist = Array.from(rows).map(tr => ({ id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio })).filter(t => t.audio !== "");
-            if(playlist.length > 0) loadTrack(0); else alert("재생할 음원이 없습니다.");
-        }
+         function playSingleTrack(btn) {
+             const tr = btn.closest('.music-item');
+             if(!tr.dataset.audio) return alert('음원 파일이 없습니다.');
+             
+             document.getElementById('main-player-title').innerText = tr.dataset.title;
+             document.getElementById('main-player-artist').innerText = tr.dataset.artist;
+             document.getElementById('main-player-cover').src = tr.dataset.cover;
+             
+             mainAudio.src = tr.dataset.audio;
+             mainAudio.play();
+             isPlaying = true;
+             btnPlay.innerText = "⏸";
+         }
 
-        function playSelected() {
-            const checkedBoxes = document.querySelectorAll('.song-check:checked');
-            if(checkedBoxes.length === 0) return alert("재생할 곡을 먼저 체크해주세요!");
-            
-            playlist = Array.from(checkedBoxes).map(cb => {
-                const tr = cb.closest('.music-item');
-                return { id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio };
-            }).filter(t => t.audio !== "");
-            
-            if(playlist.length > 0) loadTrack(0); else alert("재생 가능한 음원이 없습니다.");
-        }
-    </script>
+         function togglePlayPause() {
+             if (!mainAudio.src) return alert("곡을 먼저 선택해주세요.");
+             if (mainAudio.paused) { mainAudio.play(); isPlaying = true; btnPlay.innerText = "⏸"; } 
+             else { mainAudio.pause(); isPlaying = false; btnPlay.innerText = "▶"; }
+         }
+
+         mainAudio.addEventListener('timeupdate', () => {
+             if (mainAudio.duration) {
+                 progressBar.value = (mainAudio.currentTime / mainAudio.duration) * 100;
+                 let mc = Math.floor(mainAudio.currentTime / 60); let sc = Math.floor(mainAudio.currentTime % 60);
+                 timeCurrent.innerText = mc + ":" + (sc < 10 ? "0"+sc : sc);
+                 let md = Math.floor(mainAudio.duration / 60); let sd = Math.floor(mainAudio.duration % 60);
+                 timeTotal.innerText = md + ":" + (sd < 10 ? "0"+sd : sd);
+             }
+         });
+         progressBar.addEventListener('input', () => mainAudio.currentTime = (progressBar.value / 100) * mainAudio.duration);
+     </script>
 </body>
 </html>
