@@ -42,16 +42,19 @@
         .video-meta { display: flex; justify-content: space-between; font-size: 12px; color: #aaa; }
         .video-author { color: #ff5722; font-weight: bold; }
 
-        /* 팝업 모달 (쇼츠 전용 세로형) */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; }
-        .modal-content { position: relative; height: 85vh; aspect-ratio: 9/16; background: #000; border-radius: 12px; }
+        /* 팝업 모달 (쇼츠 전용 세로형 완벽 비율) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .modal-content { position: relative; height: 80vh; max-height: 800px; aspect-ratio: 9/16; background: #000; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); max-width: 100%; margin: 0 auto; margin-top: 20px; }
         .modal-content iframe { width: 100%; height: 100%; border: none; border-radius: 12px; }
-        .close-btn { position: absolute; top: -45px; right: 0; color: #fff; font-size: 40px; cursor: pointer; }
+        .close-btn { position: absolute; top: -35px; right: -10px; color: #fff; font-size: 35px; cursor: pointer; line-height: 1; text-shadow: 0 2px 4px rgba(0,0,0,0.5); z-index: 10000; }
 
         @media (max-width: 900px) {
             .video-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-            .modal-content { width: 90%; height: auto; }
+            /* 모바일에서 닫기 버튼이 짤리지 않도록 쇼츠 높이를 화면의 70%로 안전하게 줄임 */
+            .modal-content { height: 70vh; width: auto; max-width: 90vw; aspect-ratio: 9/16; margin-top: 15px; }
+            .close-btn { right: 0; top: -30px; font-size: 30px; }
         }
+
     </style>
 </head>
 <body>
