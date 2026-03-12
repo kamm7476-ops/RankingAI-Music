@@ -167,7 +167,35 @@
             .tabs { display: flex; width: 100%; overflow-x: auto; gap: 20px; padding-bottom: 5px; -webkit-overflow-scrolling: touch; }
             .tabs::-webkit-scrollbar { display: none; }
             .tab { flex: 0 0 auto; white-space: nowrap; font-size: 15px; }
+            /* 🌟 플레이어 숨김/열기 애니메이션 및 탭 디자인 */
+        .bottom-player-bar {
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); /* 부드럽게 오르내리는 애니메이션 */
         }
+        .bottom-player-bar.collapsed {
+            transform: translateY(100%); /* 플레이어 전체 높이만큼 화면 아래로 숨김! */
+        }
+        .player-toggle-tab {
+            position: absolute;
+            top: -32px; /* 플레이어 위로 쏙 튀어나오게 설정 */
+            right: 40px;
+            background: #1a1c1e;
+            color: #ff5722;
+            border: 2px solid #ff5722;
+            border-bottom: none;
+            padding: 6px 18px;
+            border-radius: 12px 12px 0 0;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            z-index: 1001;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.4);
+            transition: 0.2s;
+        }
+        .player-toggle-tab:hover {
+            background: #ff5722;
+            color: #000;
+        }
+}
     </style>
 </head>
 <body>
@@ -636,3 +664,4 @@
        </script>
 </body>
 </html>
+
