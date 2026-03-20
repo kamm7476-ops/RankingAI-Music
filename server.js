@@ -1,21 +1,36 @@
+require('dotenv').config(); // 🌟 .env 파일 읽어오는 핵심 마법!
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
-const session = require('express-session');
 const multer = require('multer');
-const app = express();
+const session = require('express-session');
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, 'public/uploads/'),
-    filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+// 🌟 클라우디너리 영구 금고 세팅
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'ranking-ai',
+        resource_type: 'auto',
+        allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'mp3', 'wav']
+    }
 });
 const upload = multer({ storage: storage });
 
-const DB_URI = process.env.DB_URI;
-mongoose.connect(DB_URI)
-    .then(() => console.log('✅ DB 연결 성공! (비밀번호 숨김 모드)'))
-    .catch(err => console.log('❌ DB 에러:', err.message));
+const app = express();
 
+// 🌟 3. DB 연결 (영어를 숫자로 바꾼 완벽 버전!)
+mongoose.connect(process.env.DB_URI)
+  .then(() => console.log("☁️ 진짜 인터넷 창고(Cloud DB) 연결 완료!! ☁️"))
+  .catch((err) => console.log("🔥 DB 연결 에러:", err));
 // =========================================
 // 🌟 1. 음악 DB 주머니
 // =========================================
@@ -112,7 +127,8 @@ app.get('/', async (req, res) => {
         res.render('index', { artists: artists, searchQuery: searchQuery, genreQuery: genreQuery, sortQuery: sortQuery, popularArtists: popularArtists });
     } catch (err) {
         console.log("DB 에러:", err);
-        res.send("<h1>데이터를 불러오는 중 에러가 발생했습니다.</h1>");
+        // ✨ 이렇게 바꿉니다! (진짜 에러의 이름을 화면에 띄우는 마법!)
+        res.send("<h1>진짜 에러 원인: " + err.message + "</h1>")
     }
 });
 
@@ -258,23 +274,31 @@ app.get('/admin', (req, res) => {
     res.render('admin', { stats: { users: 0, musics: 0, reports: 0 } });
 });
 
-app.post('/add-music', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'audio', maxCount: 1 }]), async (req, res) => {
+app.post('/add-music', (req, res, next) => {
+    // 1단계: 문지기(Multer/Cloudinary) 에러 강제 포획망
+    const uploadMiddleware = upload.fields([{ name: 'image', maxCount: 1 }, { name: 'audio', maxCount: 1 }]);
+    uploadMiddleware(req, res, (err) => {
+        if (err) {
+            console.error("🔥 파일 업로드 문지기 에러 터짐!!:", err);
+            return res.send(`<h1>파일 업로드 실패 이유: ${err.message || 'Cloudinary 설정이나 파일 문제'}</h1>`);
+        }
+        next(); // 무사히 통과하면 2단계로!
+    });
+}, async (req, res) => {
+    // 2단계: DB 저장 단계
     try {
         const { name, artist, genre, aiTool, lyrics, realName } = req.body;
         const uploader = req.session.user ? req.session.user.id : 'guest';
-        const imageUrl = req.files && req.files['image'] ? `/uploads/${req.files['image'][0].filename}` : 'https://via.placeholder.com/150/111111/ff5722?text=Album';
-        const audioUrl = req.files && req.files['audio'] ? `/uploads/${req.files['audio'][0].filename}` : '';
-        await new Music({ name, artist, genre, aiTool, lyrics, uploaderRealName: realName, uploader, imageUrl, audioUrl }).save(); 
-        res.redirect('/'); 
-    } catch (err) { res.redirect('/'); }
-});
-
-app.post('/add-comment/:id', async (req, res) => {
-    try {
-        const music = await Music.findById(req.params.id);
-        if(music) { music.comments.push({ author: req.session.user ? req.session.user.id : '익명', text: req.body.commentText }); await music.save(); }
-        res.redirect('/'); 
-    } catch (err) { res.redirect('/'); }
+        const imageUrl = req.files && req.files['image'] ? req.files['image'][0].path : 'https://via.placeholder.com/150';
+        const audioUrl = req.files && req.files['audio'] ? req.files['audio'][0].path : '';
+        
+        const newMusic = new Music({ name, artist, genre, aiTool, lyrics, uploaderRealName: realName, uploader, imageUrl, audioUrl });
+        await newMusic.save();
+        res.redirect('/');
+    } catch (err) {
+        console.error("🔥 DB 저장 에러 터짐!!:", err);
+        res.status(500).send("<h1>DB 저장 실패 이유: " + err.message + "</h1>");
+    }
 });
 
 // --- 음원 삭제 실행 (관리자 프리패스 적용) ---
