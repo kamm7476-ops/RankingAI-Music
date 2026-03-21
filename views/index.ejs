@@ -626,7 +626,16 @@
                 if(btnPlay) btnPlay.innerText = "⏸";
                 currentIndex = index;
 
-                fetch('/play-count/' + track.id, { method: 'POST' }).catch(err => console.log(err));
+                // 🌟 재생 시작 시 서버에 신호 보내기
+if (track.id && track.id !== "dummy") {
+    fetch('/play-count/' + track.id, { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(data => console.log("재생수 업데이트 완료:", data))
+    .catch(err => console.error("재생수 업데이트 실패:", err));
+}
             }
         }
 

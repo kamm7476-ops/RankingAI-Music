@@ -553,6 +553,17 @@ app.post('/add-comment/:id', async (req, res) => {
         res.redirect('/');
     }
 });
-
+// 🌟 재생수 업데이트 API (서버용)
+app.post('/play-count/:id', async (req, res) => {
+    try {
+        const musicId = req.params.id;
+        // DB에서 음악을 찾아 조회수(views)를 1 올림
+        await Music.findByIdAndUpdate(musicId, { $inc: { views: 1 } });
+        res.json({ success: true });
+    } catch (err) {
+        console.error("재생수 업데이트 에러:", err);
+        res.status(500).json({ success: false });
+    }
+});
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
