@@ -273,14 +273,14 @@ app.post('/add-shorts', async (req, res) => {
 });
 
 app.post('/delete-video/:id', async (req, res) => {
-    if (!req.session || !req.session.user) return res.redirect('back');
+    if (!req.session || !req.session.user) return res.redirect('/youtube');
     try {
         const video = await Video.findById(req.params.id);
         if (video && (req.session.user.role === 'admin' || req.session.user.id === video.uploader)) {
             await Video.findByIdAndDelete(req.params.id);
         }
-        res.redirect('back');
-    } catch (err) { res.redirect('back'); }
+        res.redirect('/youtube');
+    } catch (err) { res.redirect('/youtube'); }
 });
 
 // =========================================
@@ -457,28 +457,27 @@ app.post('/admin/popup', async (req, res) => {
     } catch (err) { res.send("<script>alert('팝업 설정 에러!'); window.history.back();</script>"); }
 });
 
-
 // =========================================
-// 🌟 새로 추가된 파이프들 (댓글 삭제 & 커뮤니티 좋아요 방어) 🌟
+// 🌟 1. 음원 댓글 ❌ 삭제 기능 (본인/관리자 전용)
 // =========================================
-
-// 1. 음원 댓글 ❌ 삭제 기능 (본인/관리자 전용)
 app.post('/delete-music-comment/:musicId/:commentId', async (req, res) => {
     if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
     try {
         const music = await Music.findById(req.params.musicId);
-        if (!music) return res.redirect('back');
+        if (!music) return res.redirect('/'); // 🌟 안전하게 메인으로!
 
         const comment = music.comments.id(req.params.commentId);
         if (comment && (req.session.user.role === 'admin' || req.session.user.id === comment.author)) {
             music.comments.pull(req.params.commentId); // 댓글 쏙 빼서 버리기!
             await music.save();
         }
-        res.redirect('back');
-    } catch (err) { res.redirect('back'); }
+        res.redirect('/'); // 🌟 안전하게 메인으로!
+    } catch (err) { res.redirect('/'); }
 });
 
-// 2. 커뮤니티 게시글 & 댓글 좋아요 (1인 1회 방어막!)
+// =========================================
+// 🌟 2. 커뮤니티 게시글 & 댓글 좋아요 (1인 1회 방어막!)
+// =========================================
 app.post('/like-board-comment/:postId/:commentId', async (req, res) => {
     if (!req.session.user) return res.json({ success: false, message: "로그인 필요" });
     try {
@@ -506,7 +505,7 @@ app.post('/like-board-comment/:postId/:commentId', async (req, res) => {
 });
 
 // =========================================
-// 🌟 메인 화면 음원 댓글 달기 파이프
+// 🌟 3. 메인 화면 음원 댓글 달기 파이프
 // =========================================
 app.post('/add-comment/:id', async (req, res) => {
     // 1. 로그인 안 한 사람 튕겨내기
@@ -526,17 +525,14 @@ app.post('/add-comment/:id', async (req, res) => {
             });
             await music.save(); // 장부 저장!
         }
-        // 4. 저장 완료 후 원래 있던 화면으로 자연스럽게 돌아가기
-        res.redirect('back'); 
+        // 4. 에러 방지를 위해 메인 화면('/')으로 바로 쏴주기!
+        res.redirect('/'); 
         
     } catch (err) {
         console.error("음원 댓글 등록 에러:", err);
-        res.redirect('back');
+        res.redirect('/');
     }
 });
-
-
-
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
