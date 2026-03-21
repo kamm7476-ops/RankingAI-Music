@@ -694,7 +694,21 @@ if (track.id && track.id !== "dummy") {
 
         function playSingleTrack(btnElement) {
             const tr = btnElement.closest('.music-item');
-            playlist = [{ id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio }];
+            const audioUrl = tr.dataset.audio;
+
+            // 🌟 방어막: 오디오 주소가 비어있으면 경고창 띄우고 멈춤!
+            if (!audioUrl || audioUrl === "undefined" || audioUrl.trim() === "") {
+                alert("아직 음원이 제대로 업로드되지 않은 곡입니다!");
+                return; 
+            }
+
+            playlist = [{ 
+                id: tr.dataset.id, 
+                title: tr.dataset.title, 
+                artist: tr.dataset.artist, 
+                cover: tr.dataset.cover, 
+                audio: audioUrl 
+            }];
             loadTrack(0);
         }
 
