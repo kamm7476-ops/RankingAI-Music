@@ -340,6 +340,11 @@ app.get('/admin', (req, res) => {
 });
 
 app.post('/add-music', (req, res, next) => {
+    // 🌟 1. 문지기 출동! 로그인 안 한 사람은 여기서 바로 튕겨냅니다!
+    if (!req.session || !req.session.user) {
+        return res.send("<script>alert('회원만 음원을 업로드할 수 있습니다! 로그인해주세요.'); location.href='/login';</script>");
+    }
+
     const uploadMiddleware = upload.fields([{ name: 'image', maxCount: 1 }, { name: 'audio', maxCount: 1 }]);
     uploadMiddleware(req, res, (err) => {
         if (err) return res.send(`<h1>파일 업로드 실패 이유: ${err.message || 'Cloudinary 문제'}</h1>`);
@@ -348,7 +353,8 @@ app.post('/add-music', (req, res, next) => {
 }, async (req, res) => {
     try {
         const { name, artist, genre, aiTool, lyrics, realName } = req.body;
-        const uploader = req.session.user ? req.session.user.id : 'guest';
+        // 🌟 2. 이제 무조건 로그인한 사람(user.id) 이름으로만 저장됨!
+        const uploader = req.session.user.id; 
         const imageUrl = req.files && req.files['image'] ? req.files['image'][0].path : 'https://via.placeholder.com/150';
         const audioUrl = req.files && req.files['audio'] ? req.files['audio'][0].path : '';
         
@@ -357,7 +363,6 @@ app.post('/add-music', (req, res, next) => {
         res.redirect('/');
     } catch (err) { res.status(500).send("<h1>DB 저장 실패 이유: " + err.message + "</h1>"); }
 });
-
 app.post('/delete-music/:id', async (req, res) => {
     if (!req.session.user) return res.redirect('/');
     try {
