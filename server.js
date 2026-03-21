@@ -505,5 +505,38 @@ app.post('/like-board-comment/:postId/:commentId', async (req, res) => {
     } catch (err) { res.status(500).json({ success: false }); }
 });
 
+// =========================================
+// 🌟 메인 화면 음원 댓글 달기 파이프
+// =========================================
+app.post('/add-comment/:id', async (req, res) => {
+    // 1. 로그인 안 한 사람 튕겨내기
+    if (!req.session || !req.session.user) {
+        return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
+    }
+
+    try {
+        // 2. 어떤 노래에 댓글을 달았는지 찾기
+        const music = await Music.findById(req.params.id);
+        
+        if (music) {
+            // 3. 노래 장부의 comments 칸에 내 이름과 댓글 내용 쏙 넣기
+            music.comments.push({ 
+                author: req.session.user.id, 
+                text: req.body.commentText 
+            });
+            await music.save(); // 장부 저장!
+        }
+        // 4. 저장 완료 후 원래 있던 화면으로 자연스럽게 돌아가기
+        res.redirect('back'); 
+        
+    } catch (err) {
+        console.error("음원 댓글 등록 에러:", err);
+        res.redirect('back');
+    }
+});
+
+
+
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
