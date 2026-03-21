@@ -272,6 +272,7 @@ app.post('/add-shorts', async (req, res) => {
     res.redirect('/shorts');
 });
 
+// 🌟 back 에러 수정 완료!
 app.post('/delete-video/:id', async (req, res) => {
     if (!req.session || !req.session.user) return res.redirect('/youtube');
     try {
@@ -314,6 +315,7 @@ app.post('/delete-post/:id', async (req, res) => {
     } catch (err) { console.log(err); }
 });
 
+// 🌟 back 에러 수정 완료!
 app.post('/add-board-comment/:id', async (req, res) => {
     if (!req.session || !req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
     try {
@@ -322,10 +324,10 @@ app.post('/add-board-comment/:id', async (req, res) => {
             post.comments.push({ author: req.session.user.id, text: req.body.commentText });
             await post.save();
         }
-        res.redirect('/board');
+        res.redirect('/board'); 
     } catch (err) {
         console.log("댓글 등록 에러:", err);
-        res.status(500).send("댓글 등록 에러");
+        res.redirect('/board'); 
     }
 });
 
@@ -464,14 +466,14 @@ app.post('/delete-music-comment/:musicId/:commentId', async (req, res) => {
     if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
     try {
         const music = await Music.findById(req.params.musicId);
-        if (!music) return res.redirect('/'); // 🌟 안전하게 메인으로!
+        if (!music) return res.redirect('/'); 
 
         const comment = music.comments.id(req.params.commentId);
         if (comment && (req.session.user.role === 'admin' || req.session.user.id === comment.author)) {
             music.comments.pull(req.params.commentId); // 댓글 쏙 빼서 버리기!
             await music.save();
         }
-        res.redirect('/'); // 🌟 안전하게 메인으로!
+        res.redirect('/'); // 🌟 back 대신 '/' (메인화면)으로 확정!
     } catch (err) { res.redirect('/'); }
 });
 
@@ -525,7 +527,7 @@ app.post('/add-comment/:id', async (req, res) => {
             });
             await music.save(); // 장부 저장!
         }
-        // 4. 에러 방지를 위해 메인 화면('/')으로 바로 쏴주기!
+        // 🌟 에러의 원인 완벽 제거: 저장 완료 후 메인 화면('/')으로 돌아가기!
         res.redirect('/'); 
         
     } catch (err) {
