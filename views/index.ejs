@@ -406,6 +406,7 @@
                                 <div class="action-row">
                                     <div class="action-btn" onclick="playSingleTrack(this)">▶ 듣기</div>
                                     <div class="action-btn" onclick="parseAndShowLyrics('<%= music._id %>', `<%= music.lyrics %>`)">📝 가사</div>
+                                    <div class="action-btn" onclick="copyMusicLink('<%= music._id %>')">🔗 공유</div>
                                     <div class="action-btn" onclick="document.getElementById('comments-<%= music._id %>').style.display = (document.getElementById('comments-<%= music._id %>').style.display === 'block') ? 'none' : 'block';">💬 댓글 <%= music.comments ? music.comments.length : 0 %></div>
         
                                     <% 
@@ -834,6 +835,21 @@ if (track.id && track.id !== "dummy") {
                 console.error("좋아요 통신 에러:", err);
                 alert("에러가 발생했습니다.");
             }
+// 🔗 노래 링크 복사 기능
+function copyMusicLink(musicId) {
+    // 현재 사이트 주소와 곡 ID를 합쳐서 링크를 만듭니다.
+    // 예: https://rankingaimusic.com/?search=곡아이디
+    const shareUrl = window.location.origin + '/?search=' + musicId;
+    
+    // 복사하기 마법!
+    navigator.clipboard.writeText(shareUrl).then(() => {
+        alert("노래 공유 링크가 복사되었습니다! 친구들에게 자랑해보세요. 🔗");
+    }).catch(err => {
+        console.error('복사 실패:', err);
+    });
+}
+
+
         }    
     </script>
 </body>
