@@ -92,7 +92,9 @@
                             <% if(u.role === 'admin') { %>
                                 <span class="badge-admin">관리자</span>
                             <% } else { %>
-                                <button class="btn-delete" onclick="alert('<%= u.id %> 유저 관리 기능을 구현 중입니다.')">관리</button>
+                                <form action="/admin/delete-user/<%= u.id %>" method="POST" onsubmit="return confirm('<%= u.id %> 유저를 정말 강제 탈퇴시키고 모든 음원을 삭제하시겠습니까? (복구 불가)');" style="margin: 0;">
+    <button type="submit" class="btn-delete">강제탈퇴</button>
+</form>
                             <% } %>
                         </td>
                     </tr>

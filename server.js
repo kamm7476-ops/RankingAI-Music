@@ -27,6 +27,7 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage: storage });
 
 const app = express();
+let currentPopup = { isActive: false, title: '', content: '' };
 
 // 🌟 DB 연결 (영어를 숫자로 바꾼 완벽 버전!)
 mongoose.connect(process.env.DB_URI)
@@ -167,6 +168,7 @@ app.get('/', async (req, res) => {
             sortQuery: sortQuery, 
             periodQuery: periodQuery, // 🌟 화면에 어떤 탭인지 알려주기
             popularArtists: popularArtists,
+            popup: currentPopup, // 
             popup: activePopup
         });
     } catch (err) {
@@ -603,5 +605,47 @@ app.post('/play-count/:id', async (req, res) => {
         res.status(500).json({ success: false });
     }
 });
+
+// 📢 [권력 1] 공지사항 팝업 등록/수정
+app.post('/admin/popup', (req, res) => {
+    // 관리자가 아니면 쫓아냄
+    if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
+    
+    currentPopup = {
+        isActive: req.body.isActive === 'on', // 체크박스 ON/OFF
+        title: req.body.title,
+        content: req.body.content
+    };
+    res.redirect('/'); // 등록 후 메인 화면으로 가서 확인!
+});
+
+// ⚡ [권력 2] 유저 강제 탈퇴 (DB에서 영구 삭제)
+app.post('/admin/delete-user/:id', async (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
+    try {
+        const userId = req.params.id;
+        await User.findOneAndDelete({ id: userId }); // 유저 삭제
+        await Music.deleteMany({ uploader: userId }); // 덤으로 그 유저가 올린 음악도 싹 삭제!
+        res.redirect('/admin');
+    } catch (err) {
+        res.status(500).send("강제 탈퇴 중 에러가 발생했습니다.");
+    }
+});
+
+// 🗑️ [권력 3] 관리자 전용 음원 강제 삭제 (메인 페이지 차트용)
+app.post('/delete-music/:id', async (req, res) => {
+    if (!req.session.user) return res.redirect('/');
+    try {
+        const music = await Music.findById(req.params.id);
+        // 올린 본인이거나, '관리자(admin)'일 때만 삭제 허용!
+        if (music.uploader === req.session.user.id || req.session.user.role === 'admin') {
+            await Music.findByIdAndDelete(req.params.id);
+        }
+        res.redirect('/');
+    } catch (err) {
+        res.status(500).send("음원 삭제 중 에러가 발생했습니다.");
+    }
+});
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
