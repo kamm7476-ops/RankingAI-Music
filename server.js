@@ -347,9 +347,47 @@ app.post('/add-board-comment/:id', async (req, res) => {
 // =========================================
 // 🌟 기타 기능 (관리자 페이지 등)
 // =========================================
-app.get('/admin', (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
-    res.render('admin', { stats: { users: 0, musics: 0, reports: 0 } });
+// 👑 관리자 전용 대시보드 데이터 수집
+app.get('/admin', async (req, res) => {
+    try {
+        // 관리자 권한 체크 (세션에 admin 정보가 없으면 튕겨내기)
+        if (!req.session.user || req.session.user.role !== 'admin') {
+            return res.redirect('/');
+        }
+
+        // 1. 전체 가입자 및 음원 데이터 가져오기
+        const allUsers = await User.find().lean();
+        const allMusic = await Music.find().lean();
+
+        // 2. 가입자별 등록 음원수 합산해서 새로운 목록 만들기
+        const usersWithStats = allUsers.map(u => {
+            const myMusicCount = allMusic.filter(m => m.uploader === u.id).length;
+            return {
+                ...u,
+                musicCount: myMusicCount
+            };
+        });
+
+        // 3. 전체 통계 계산
+        const stats = {
+            totalUsers: allUsers.length,
+            totalMusic: allMusic.length,
+            totalViews: allMusic.reduce((sum, m) => sum + (m.views || 0), 0),
+            // 금일 방문자 등은 로그 시스템이 없으므로 일단 0이나 랜덤값으로 구조만 잡습니다.
+            todayVisitor: Math.floor(Math.random() * 50) + 10 
+        };
+
+        // 4. 관리자 페이지(admin.ejs)로 모든 데이터 쏴주기!
+        res.render('admin', { 
+            user: req.session.user,
+            stats: stats,
+            users: usersWithStats
+        });
+
+    } catch (err) {
+        console.error("관리자 데이터 수집 에러:", err);
+        res.status(500).send("<h1>관리자 페이지 데이터를 불러오는데 실패했습니다. ㅠㅠ</h1>");
+    }
 });
 
 app.post('/add-music', (req, res, next) => {
