@@ -520,7 +520,32 @@
                 btnLoop.innerText = "🔁";
             }
         }
-        // --- 여기까지 복사해서 붙여넣기 ---
+        // --- 여기서부터 아래 내용을 복사해서 붙여넣으세요! ---
+        function parseAndShowLyrics(musicId, rawLyrics) {
+            const lyricsBox = document.getElementById('lyrics-' + musicId);
+            const lyricsContent = document.getElementById('lyrics-content-' + musicId);
+            
+            if (!lyricsBox || !lyricsContent) return;
+
+            // 이미 열려있으면 닫기
+            if (lyricsBox.style.display === 'block') {
+                lyricsBox.style.display = 'none';
+                return;
+            }
+
+            // 가사 내용 넣기
+            if (!rawLyrics || rawLyrics.trim() === "" || rawLyrics === "undefined" || rawLyrics === "null") {
+                lyricsContent.innerHTML = "<p style='color:#777; text-align:center;'>등록된 가사가 없습니다.</p>";
+            } else {
+                // 줄바꿈 보존 처리 및 백틱 안전 처리
+                const formattedLyrics = rawLyrics.split('\n').join('<br>');
+                lyricsContent.innerHTML = `<div style="line-height:1.8; padding:10px;">${formattedLyrics}</div>`;
+            }
+
+            lyricsBox.style.display = 'block';
+        }
+        // --- 여기까지 ---
+
 
         // 🌟 플레이어 숨기기/보이기 기능 🌟
         function togglePlayerVisibility() {
