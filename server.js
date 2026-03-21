@@ -122,10 +122,22 @@ app.get('/', async (req, res) => {
         const searchQuery = req.query.search || ''; 
         const genreQuery = req.query.genre || ''; 
         const sortQuery = req.query.sort || 'views'; 
+        const periodQuery = req.query.period || ''; // 🌟 기간 탭 필터 추가!
         
         let filter = {};
         if (searchQuery) filter.artist = { $regex: searchQuery, $options: 'i' };
         if (genreQuery) filter.genre = genreQuery;
+
+        // 🌟 기간별 필터링 마법 (일간/주간/월간)
+        if (periodQuery) {
+            const now = new Date();
+            let pastDate = new Date();
+            if (periodQuery === 'daily') pastDate.setDate(now.getDate() - 1); // 1일 전
+            else if (periodQuery === 'weekly') pastDate.setDate(now.getDate() - 7); // 7일 전
+            else if (periodQuery === 'monthly') pastDate.setMonth(now.getMonth() - 1); // 한 달 전
+            
+            filter.createdAt = { $gte: pastDate }; // 이 날짜 이후에 등록된 곡만 가져와라!
+        }
 
         let sortOption = { views: -1 }; 
         if (sortQuery === 'latest') sortOption = { createdAt: -1 }; 
@@ -139,7 +151,7 @@ app.get('/', async (req, res) => {
 
         const activePopup = await Popup.findOne({ isActive: true }).sort({ updatedAt: -1 });
 
-        if (artists.length === 0 && !searchQuery && !genreQuery) {
+        if (artists.length === 0 && !searchQuery && !genreQuery && !periodQuery) {
             artists = [{
                 _id: "dummy", name: "첫 곡의 주인공이 되어보세요!", artist: "RANKING AI", genre: "안내", aiTool: "시스템",
                 lyrics: "아직 등록된 곡이 없습니다.", uploader: "admin", uploaderRealName: "관리자", audioUrl: "", views: 0,
@@ -153,6 +165,7 @@ app.get('/', async (req, res) => {
             searchQuery: searchQuery, 
             genreQuery: genreQuery, 
             sortQuery: sortQuery, 
+            periodQuery: periodQuery, // 🌟 화면에 어떤 탭인지 알려주기
             popularArtists: popularArtists,
             popup: activePopup
         });

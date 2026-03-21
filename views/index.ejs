@@ -330,6 +330,7 @@
                     <button onclick="location.href='/login'" class="btn-upload" style="width: auto; padding: 10px 40px;">로그인하러 가기</button>
                 </div>
                 <% } %>
+
                 <% if (user && user.role === 'admin') { %>
                 <div class="upload-section" style="border-color: #ff4a4a; background: #1a1111;">
                     <h3 style="margin-top:0; color:#ff4a4a;">👑 관리자 팝업 공지 설정</h3>
@@ -355,10 +356,10 @@
                         <% } %>
                     </div>
                     <div class="tabs">
-                        <div class="tab active" onclick="switchTab(this)">실시간</div>
-                        <div class="tab" onclick="switchTab(this)">일간</div>
-                        <div class="tab" onclick="switchTab(this)">주간</div>
-                        <div class="tab" onclick="switchTab(this)">월간</div>
+                        <a href="/?sort=views" class="tab <%= (typeof periodQuery === 'undefined' || !periodQuery) ? 'active' : '' %>">실시간(전체)</a>
+                        <a href="/?period=daily" class="tab <%= (typeof periodQuery !== 'undefined' && periodQuery === 'daily') ? 'active' : '' %>">일간</a>
+                        <a href="/?period=weekly" class="tab <%= (typeof periodQuery !== 'undefined' && periodQuery === 'weekly') ? 'active' : '' %>">주간</a>
+                        <a href="/?period=monthly" class="tab <%= (typeof periodQuery !== 'undefined' && periodQuery === 'monthly') ? 'active' : '' %>">월간</a>
                     </div>
                 </div>
 <% if (typeof genreQuery !== 'undefined' && genreQuery) { %>
@@ -745,11 +746,6 @@
             }
         }
 
-        function switchTab(clickedTab) {
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            clickedTab.classList.add('active');
-        }
-
         // 🌟 진짜 좋아요 기능 (서버랑 통신함!) 🌟
         async function likeMusic(musicId) {
             try {
@@ -764,4 +760,19 @@
                     
                     // 하트 색상 빨간색으로 변경
                     const btn = document.getElementById('like-btn-' + musicId);
-                    btn.innerHTML = '❤️ 좋아요 <span id="like-count-' + musicId + '">' + countSpan.innerText + '
+                    btn.innerHTML = '❤️ 좋아요 <span id="like-count-' + musicId + '">' + countSpan.innerText + '</span>';
+                    btn.style.color = '#ff4a4a';
+                    btn.style.borderColor = '#ff4a4a';
+                    
+                } else {
+                    // 서버가 거절했다면? (로그인 안함, 이미 누름 등) 알림창 띄우기
+                    alert(data.message);
+                }
+            } catch (err) {
+                console.error("좋아요 통신 에러:", err);
+                alert("에러가 발생했습니다.");
+            }
+        }    
+    </script>
+</body>
+</html>
