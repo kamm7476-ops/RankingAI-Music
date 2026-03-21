@@ -487,11 +487,13 @@
         </div>
         
         <div class="player-controls-wrapper">
-            <div class="player-buttons">
-                <button id="btn-prev" onclick="playPrevTrack()">⏮</button>
-                <button id="btn-play" onclick="togglePlayPause()" class="play-btn">▶</button>
-                <button id="btn-next" onclick="playNextTrack()">⏭</button>
-            </div>
+           <div class="player-buttons">
+                <button id="id-btn-loop" onclick="toggleLoop()" title="한곡 반복" style="font-size: 16px; margin-right: 10px; color: #777; background:none; border:none; cursor:pointer;">🔁</button>
+    
+           <button id="btn-prev" onclick="playPrevTrack()">⏮</button>
+           <button id="btn-play" onclick="togglePlayPause()" class="play-btn">▶</button>
+           <button id="btn-next" onclick="playNextTrack()">⏭</button>
+        </div>
             <div class="progress-area">
                 <span id="time-current">00:00</span>
                 <input type="range" id="progress-bar" value="0" min="0" max="100" step="1">
@@ -503,6 +505,23 @@
     </div>
 
     <script>
+
+        // --- 여기서부터 복사하세요 ---
+        let isLoop = false; 
+
+        function toggleLoop() {
+            const btnLoop = document.getElementById('id-btn-loop');
+            isLoop = !isLoop;
+            if (isLoop) {
+                btnLoop.style.color = "#ff5722"; // 켜지면 주황색
+                btnLoop.innerText = "🔂"; 
+            } else {
+                btnLoop.style.color = "#777"; // 꺼지면 회색
+                btnLoop.innerText = "🔁";
+            }
+        }
+        // --- 여기까지 복사해서 붙여넣기 ---
+
         // 🌟 플레이어 숨기기/보이기 기능 🌟
         function togglePlayerVisibility() {
             const playerBar = document.getElementById('bottomPlayerBar');
@@ -530,6 +549,8 @@
         document.getElementById('musicForm').addEventListener('submit', function(e) { 
             if (!hiddenInput.value) { e.preventDefault(); alert('장르를 선택해주세요!'); } 
         });
+
+
 
         // 🌟 커스텀 플레이어 엔진 (에러 방어막 강화!) 🌟
         let playlist = [];
@@ -619,7 +640,14 @@
             }
         });
 
-        mainAudio.addEventListener('ended', playNextTrack);
+        mainAudio.addEventListener('ended', () => {
+            if (isLoop) {
+        mainAudio.currentTime = 0;
+        mainAudio.play();
+            } else {
+        playNextTrack();
+         }
+          });
 
         function playSingleTrack(btnElement) {
             const tr = btnElement.closest('.music-item');
@@ -667,7 +695,7 @@
             if (!link) return;
 
             const href = link.getAttribute('href');
-            if (href && href.startsWith('/') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('board') && !href.includes('edit')) {
+            if (href && href.startsWith('/') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('edit')) {
                 e.preventDefault(); 
                 navigateTo(href);
             }
