@@ -843,15 +843,17 @@ if (track.id && track.id !== "dummy") {
                 console.error("좋아요 통신 에러:", err);
                 alert("에러가 발생했습니다.");
             }
-// 🔗 노래 링크 복사 기능 (함수 밖으로 독립!)
-    function copyMusicLink(musicId) {
-        const shareUrl = window.location.origin + '/?search=' + encodeURIComponent(musicId);
-        navigator.clipboard.writeText(shareUrl).then(() => {
-            alert("노래 공유 링크가 복사되었습니다! 친구들에게 자랑해보세요. 🔗");
-        }).catch(err => {
-            console.error('복사 실패:', err);
-        });
-    }  
+        } // 👈 🌟 범인 검거!! 이 괄호가 빠져있어서 모든 기능이 멈췄던 겁니다!! 🌟
+
+        // 🔗 노래 링크 복사 기능 (함수 밖으로 안전하게 독립!)
+        function copyMusicLink(musicId) {
+            const shareUrl = window.location.origin + '/?search=' + encodeURIComponent(musicId);
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                alert("노래 공유 링크가 복사되었습니다! 친구들에게 자랑해보세요. 🔗");
+            }).catch(err => {
+                console.error('복사 실패:', err);
+            });
+        }  
     </script>
 </body>
 </html>
