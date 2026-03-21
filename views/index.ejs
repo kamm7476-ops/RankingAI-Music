@@ -572,17 +572,23 @@
 
         const genreBtns = document.querySelectorAll('.genre-btn');
         const hiddenInput = document.getElementById('hiddenGenreInput');
+        
+        // 🌟 방어막 1: 장르 버튼 기능 (hiddenInput이 있을 때만 작동)
         genreBtns.forEach(btn => {
             btn.addEventListener('click', function() { 
                 genreBtns.forEach(b => b.classList.remove('active')); 
                 this.classList.add('active'); 
-                hiddenInput.value = this.getAttribute('data-genre'); 
+                if(hiddenInput) hiddenInput.value = this.getAttribute('data-genre'); 
             });
         });
         
-        document.getElementById('musicForm').addEventListener('submit', function(e) { 
-            if (!hiddenInput.value) { e.preventDefault(); alert('장르를 선택해주세요!'); } 
-        });
+        // 🌟 방어막 2: 폼이 화면에 존재할 때만(회원일 때만) 감시하기!
+        const musicForm = document.getElementById('musicForm');
+        if (musicForm) {
+            musicForm.addEventListener('submit', function(e) { 
+                if (hiddenInput && !hiddenInput.value) { e.preventDefault(); alert('장르를 선택해주세요!'); } 
+            });
+        }
 
 
 
