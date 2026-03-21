@@ -64,14 +64,14 @@
     <div class="signup-box">
         <div class="logo">RANKING AI</div>
         
-        <form action="/" method="GET" onsubmit="alert('환영합니다! 회원가입이 완료되었습니다.'); return true;">
+        <form action="/signup" method="POST">
             <div class="input-group">
                 <label>아이디</label>
-                <input type="text" name="id" placeholder="사용할 아이디를 입력하세요" required>
+                <input type="text" name="username" placeholder="사용할 아이디를 입력하세요" required>
             </div>
             <div class="input-group">
                 <label>비밀번호</label>
-                <input type="password" name="pw" placeholder="비밀번호를 입력하세요" required>
+                <input type="password" name="password" placeholder="비밀번호를 입력하세요" required>
             </div>
             <div class="input-group">
                 <label>비밀번호 확인</label>
@@ -104,6 +104,12 @@
 
             <button type="submit" class="btn-submit">회원가입 완료</button>
         </form>
+        ```
+
+*(💡 참고: `login.ejs` 화면도 혹시 예쁘게 만들어 두셨다면, 똑같이 `<form action="/login" method="POST">` 로 바꿔주시고, `name="username"`, `name="password"` 로 이름표만 수정해 주시면 됩니다!)*
+
+**요렇게 부분 수정 딱 마치시고 `Ctrl + S` 누르신 다음 저한테 알려주세요!**
+이제 진짜로 이 폼에서 날아온 데이터를 서버에서 받아서 몽고DB 창고에 쏙! 넣는 **'3단계: 서버 조립'**으로 넘어가겠습니다!! 🔥😎 멋진 화면에 생명을 불어넣어 봅시다!
         
         <div class="extra-links">
             이미 계정이 있으신가요? <a href="/login">로그인하기</a><br><br>

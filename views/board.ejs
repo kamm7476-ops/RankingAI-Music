@@ -85,7 +85,7 @@
 <body>
     <header class="main-header">
        <div class="header-top">
-            <div class="logo">RANKING AI</div>
+            <div class="logo" style="cursor:pointer;" onclick="location.href='/'">RANKING AI</div>
             <form action="/" method="GET" class="top-search-form">
                 <input type="text" name="search" class="top-search-input" placeholder="아티스트 검색...">
                 <button type="submit" class="top-search-btn">🔍</button>
@@ -146,7 +146,15 @@
                         <p class="post-content"><%= post.content %></p>
                         
                         <div class="post-actions">
-                            <button class="action-btn" onclick="this.innerHTML = '❤️ 좋아요 ' + (parseInt(this.innerText.replace(/[^0-9]/g, '')) + 1); this.style.color='#ff4a4a';">🤍 좋아요 <%= Math.floor(Math.random() * 20) %></button>
+                            <% 
+                                let isPostLiked = false;
+                                if (user && post.likedBy && post.likedBy.includes(user.id)) {
+                                    isPostLiked = true;
+                                }
+                            %>
+                            <button class="action-btn" id="like-post-btn-<%= post._id %>" onclick="likePost('<%= post._id %>')" style="<%= isPostLiked ? 'color:#ff4a4a;' : '' %>">
+                                <%= isPostLiked ? '❤️' : '🤍' %> 좋아요 <span id="like-post-count-<%= post._id %>"><%= post.likes || 0 %></span>
+                            </button>
                             
                             <button class="action-btn" onclick="const box = document.getElementById('board-comments-<%= post._id %>'); box.style.display = (box.style.display === 'block') ? 'none' : 'block';">💬 댓글 <%= post.comments ? post.comments.length : 0 %></button>
                             
@@ -161,10 +169,17 @@
                             <div style="max-height: 200px; overflow-y: auto; margin-bottom: 15px;">
                                 <% if (post.comments && post.comments.length > 0) { %>
                                     <% post.comments.forEach(function(c) { %>
-                                        <div style="border-bottom: 1px solid #333; padding: 10px 0;">
-                                            <span style="color:#ff5722; font-weight:bold; font-size:13px;">@<%= c.author %></span>
-                                            <span style="font-size:14px; margin-left:8px; color:#ddd;"><%= c.text %></span>
-                                            <div style="font-size:11px; color:#555; margin-top:4px;"><%= new Date(c.createdAt).toLocaleString() %></div>
+                                        <div style="border-bottom: 1px solid #333; padding: 10px 0; display: flex; justify-content: space-between; align-items: center;">
+                                            <div>
+                                                <span style="color:#ff5722; font-weight:bold; font-size:13px;">@<%= c.author %></span>
+                                                <span style="font-size:14px; margin-left:8px; color:#ddd;"><%= c.text %></span>
+                                                <div style="font-size:11px; color:#555; margin-top:4px;"><%= new Date(c.createdAt).toLocaleString() %></div>
+                                            </div>
+                                            <% if (user && (user.role === 'admin' || user.id === c.author)) { %>
+                                                <form action="/delete-board-comment/<%= post._id %>/<%= c._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('이 댓글을 삭제할까요?');">
+                                                    <button type="submit" style="background: none; border: none; color: #ff4a4a; font-size: 11px; cursor: pointer;">❌삭제</button>
+                                                </form>
+                                            <% } %>
                                         </div>
                                     <% }); %>
                                 <% } else { %>
@@ -194,5 +209,28 @@
 
     </div>
 
+    <script>
+        async function likePost(postId) {
+            try {
+                // 게시글 좋아요 주소로 요청 쏘기!
+                const response = await fetch('/like-post/' + postId, { method: 'POST' });
+                const data = await response.json();
+
+                if (data.success) {
+                    const countSpan = document.getElementById('like-post-count-' + postId);
+                    countSpan.innerText = parseInt(countSpan.innerText) + 1;
+                    
+                    const btn = document.getElementById('like-post-btn-' + postId);
+                    btn.innerHTML = '❤️ 좋아요 <span id="like-post-count-' + postId + '">' + countSpan.innerText + '</span>';
+                    btn.style.color = '#ff4a4a';
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) {
+                console.error("좋아요 에러:", err);
+                alert("통신 중 에러가 발생했습니다.");
+            }
+        }
+    </script>
 </body>
 </html>

@@ -40,8 +40,8 @@
 
         .upload-section { background: #161718; padding: 30px; border-radius: 15px; margin-bottom: 40px; border: 1px solid #333; }
         .input-row { display: flex; gap: 15px; margin-bottom: 15px; align-items: center; }
-        input[type="text"] { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; }
-        textarea { width: 100%; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; height: 80px; margin-bottom: 15px; }
+        .input-row > input[type="text"] { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; }
+        textarea { width: 100%; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; height: 80px; margin-bottom: 15px; box-sizing: border-box; }
         .file-upload { flex: 1; background: #222; padding: 10px; border-radius: 8px; color: #aaa; font-size: 13px; }
         .btn-upload { background: #ff5722; color: #000; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; transition: 0.2s; }
         .btn-upload:hover { filter: brightness(1.1); }
@@ -186,9 +186,37 @@
             .tabs::-webkit-scrollbar { display: none; }
             .tab { flex: 0 0 auto; white-space: nowrap; font-size: 15px; }
         }
+
+        /* 🌟 팝업창 디자인 🌟 */
+        .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .popup-box { background: #161718; border: 2px solid #ff5722; border-radius: 15px; padding: 30px; width: 400px; max-width: 90%; box-shadow: 0 10px 30px rgba(255,87,34,0.3); text-align: center; position: relative; }
+        .popup-title { color: #fff; font-size: 22px; font-weight: 900; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 15px; }
+        .popup-content { color: #ccc; font-size: 15px; line-height: 1.6; margin-bottom: 25px; white-space: pre-wrap; }
+        .popup-close-btn { background: #ff5722; color: #000; font-weight: bold; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; }
+        .popup-close-today { background: none; border: none; color: #888; text-decoration: underline; margin-top: 15px; cursor: pointer; font-size: 13px; }
     </style>
 </head>
 <body>
+    <% if (typeof popup !== 'undefined' && popup && popup.isActive) { %>
+        <div class="popup-overlay" id="mainPopup">
+            <div class="popup-box">
+                <h2 class="popup-title">📢 <%= popup.title %></h2>
+                <div class="popup-content"><%= popup.content %></div>
+                <button class="popup-close-btn" onclick="document.getElementById('mainPopup').style.display='none'">확인</button>
+                <button class="popup-close-today" onclick="closePopupForToday()">오늘 하루 보지 않기</button>
+            </div>
+        </div>
+        <script>
+            if (localStorage.getItem('hidePopupToday') === new Date().toDateString()) {
+                document.getElementById('mainPopup').style.display = 'none';
+            }
+            function closePopupForToday() {
+                localStorage.setItem('hidePopupToday', new Date().toDateString());
+                document.getElementById('mainPopup').style.display = 'none';
+            }
+        </script>
+    <% } %>
+
     <header class="main-header">
        <div class="header-top">
             <div class="logo-wrap">
@@ -293,6 +321,24 @@
                     </form>
                 </div>
 
+                <% if (user && user.role === 'admin') { %>
+                <div class="upload-section" style="border-color: #ff4a4a; background: #1a1111;">
+                    <h3 style="margin-top:0; color:#ff4a4a;">👑 관리자 팝업 공지 설정</h3>
+                    <form action="/admin/popup" method="POST">
+                        <input type="text" name="title" placeholder="팝업 제목 (예: 긴급 서버 점검 안내)" required style="width: 100%; box-sizing: border-box; margin-bottom: 10px; border: 1px solid #ff4a4a; padding: 12px; border-radius: 8px; background: #222; color: #fff;">
+                        <textarea name="content" placeholder="팝업 내용을 적어주세요!" required style="border: 1px solid #ff4a4a; width: 100%; box-sizing: border-box; padding: 12px; border-radius: 8px; background: #222; color: #fff; height: 80px; margin-bottom: 15px;"></textarea>
+                        
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <label style="color: #fff; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" name="isActive" checked style="width: 20px; height: 20px; accent-color: #ff4a4a;"> 
+                                메인 화면에 팝업 띄우기 (ON/OFF)
+                            </label>
+                            <button type="submit" class="btn-upload" style="background: #ff4a4a; width: auto; margin-top: 0; padding: 10px 30px;">적용하기</button>
+                        </div>
+                    </form>
+                </div>
+                <% } %>
+
                 <div class="chart-header">
                     <div class="chart-title">랭킹AI 100 
                         <% if (typeof searchQuery !== 'undefined' && searchQuery) { %>
@@ -351,7 +397,16 @@
                                     <div class="action-btn" onclick="playSingleTrack(this)">▶ 듣기</div>
                                     <div class="action-btn" onclick="parseAndShowLyrics('<%= music._id %>', `<%= music.lyrics %>`)">📝 가사</div>
                                     <div class="action-btn" onclick="document.getElementById('comments-<%= music._id %>').style.display = (document.getElementById('comments-<%= music._id %>').style.display === 'block') ? 'none' : 'block';">💬 댓글 <%= music.comments ? music.comments.length : 0 %></div>
-                                    <div class="action-btn" onclick="this.innerHTML = '❤️ 좋아요 ' + (parseInt(this.innerText.replace(/[^0-9]/g, '')) + 1); this.style.color='#ff4a4a'; this.style.borderColor='#ff4a4a';">🤍 좋아요 <%= Math.floor(Math.random() * 50) + 1 %></div>
+        
+                                    <% 
+                                        let isLiked = false;
+                                        if (user && music.likedBy && music.likedBy.includes(user.id)) {
+                                            isLiked = true;
+                                        }
+                                    %>
+                                    <div class="action-btn" id="like-btn-<%= music._id %>" onclick="likeMusic('<%= music._id %>')" style="<%= isLiked ? 'color:#ff4a4a; border-color:#ff4a4a;' : '' %>">
+                                        <%= isLiked ? '❤️' : '🤍' %> 좋아요 <span id="like-count-<%= music._id %>"><%= music.views || 0 %></span>
+                                    </div>
                                 </div>
 
                                 <div id="lyrics-<%= music._id %>" class="hidden-box lyrics-window"><div id="lyrics-content-<%= music._id %>"></div></div>
@@ -360,9 +415,16 @@
                                     <div style="max-height: 150px; overflow-y: auto; margin-bottom:15px;">
                                         <% if (music.comments && music.comments.length > 0) { %>
                                             <% music.comments.forEach(function(c) { %>
-                                                <div style="border-bottom: 1px solid #333; padding: 8px 0;">
-                                                    <span style="color:#ff5722; font-weight:bold; font-size:13px;"><%= c.author %></span>
-                                                    <span style="font-size:14px; margin-left:8px; color:#ddd;"><%= c.text %></span>
+                                                <div style="border-bottom: 1px solid #333; padding: 8px 0; display: flex; justify-content: space-between; align-items: center;">
+                                                    <div>
+                                                        <span style="color:#ff5722; font-weight:bold; font-size:13px;"><%= c.author %></span>
+                                                        <span style="font-size:14px; margin-left:8px; color:#ddd;"><%= c.text %></span>
+                                                    </div>
+                                                    <% if (user && (user.role === 'admin' || user.id === c.author)) { %>
+                                                        <form action="/delete-music-comment/<%= music._id %>/<%= c._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('이 댓글을 삭제할까요?');">
+                                                            <button type="submit" style="background: none; border: none; color: #ff4a4a; font-size: 11px; cursor: pointer;">❌삭제</button>
+                                                        </form>
+                                                    <% } %>
                                                 </div>
                                             <% }); %>
                                         <% } else { %>
@@ -678,6 +740,34 @@
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             clickedTab.classList.add('active');
         }
+
+        // 🌟 진짜 좋아요 기능 (서버랑 통신함!) 🌟
+        async function likeMusic(musicId) {
+            try {
+                // 서버의 '/like/아이디' 주소로 좋아요 요청을 보냅니다!
+                const response = await fetch('/like/' + musicId, { method: 'POST' });
+                const data = await response.json();
+
+                if (data.success) {
+                    // 서버가 허락했다면? 화면 숫자 +1 올리기
+                    const countSpan = document.getElementById('like-count-' + musicId);
+                    countSpan.innerText = parseInt(countSpan.innerText) + 1;
+                    
+                    // 하트 색상 빨간색으로 변경
+                    const btn = document.getElementById('like-btn-' + musicId);
+                    btn.innerHTML = '❤️ 좋아요 <span id="like-count-' + musicId + '">' + countSpan.innerText + '</span>';
+                    btn.style.color = '#ff4a4a';
+                    btn.style.borderColor = '#ff4a4a';
+                    
+                } else {
+                    // 서버가 거절했다면? (로그인 안함, 이미 누름 등) 알림창 띄우기
+                    alert(data.message);
+                }
+            } catch (err) {
+                console.error("좋아요 통신 에러:", err);
+                alert("에러가 발생했습니다.");
+            }
+        }    
     </script>
 </body>
 </html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>관리자 - 유저 관리</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: white; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #1e1e1e; }
+        th, td { border: 1px solid #333; padding: 12px; text-align: left; }
+        th { background: #ff5722; color: white; }
+        tr:hover { background: #2a2a2a; }
+        .back-btn { display: inline-block; margin-bottom: 20px; color: #aaa; text-decoration: none; }
+    </title>
+</head>
+<body>
+    <a href="/" class="back-btn">← 메인으로 돌아가기</a>
+    <h1>👑 유저 관리 센터</h1>
+    <p>현재 가입된 모든 유저의 목록입니다.</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>번호</th>
+                <th>아이디</th>
+                <th>가입일</th>
+                <th>권한</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% users.forEach(function(user, index) { %>
+            <tr>
+                <td><%= index + 1 %></td>
+                <td><%= user.username %></td>
+                <td><%= user.createdAt ? user.createdAt.toLocaleDateString() : '날짜정보없음' %></td>
+                <td><%= user.role || '일반유저' %></td>
+            </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</body>
+</html>

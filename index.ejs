@@ -12,12 +12,32 @@
     </style>
 </head>
 <body>
-    <nav class="nav">
-        <a href="/" class="logo"><%= t.logo %></a>
-        <div>
-            <a href="/change-lang/ko">KO</a> | <a href="/change-lang/en">EN</a>
+   <nav class="nav" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: #1a1a1a; border-bottom: 1px solid #333;">
+    <a href="/" class="logo" style="font-size: 1.5rem; font-weight: bold; color: #ff5722; text-decoration: none;"><%= t.logo %></a>
+
+    <div style="display: flex; align-items: center; gap: 20px;">
+        <div style="font-size: 0.9rem;">
+            <a href="/change-lang/ko" style="color: #bbb; text-decoration: none;">KO</a> 
+            <span style="color: #444;">|</span> 
+            <a href="/change-lang/en" style="color: #bbb; text-decoration: none;">EN</a>
         </div>
-    </nav>
+
+        <% if (user) { %>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span style="font-weight: bold; color: #fff;">
+                    <%= user.role === 'admin' ? '👑 관리자' : '👤 회원' %> 
+                    <span style="color: #ff5722;"><%= user.name %></span>님 환영합니다!
+                </span>
+                <a href="/logout" style="padding: 5px 10px; background-color: #333; color: #fff; text-decoration: none; border-radius: 4px; font-size: 0.9rem;">로그아웃</a>
+            </div>
+        <% } else { %>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <a href="/login" style="color: #fff; text-decoration: none; font-size: 0.9rem;">로그인</a>
+                <a href="/signup" style="padding: 5px 10px; background-color: #ff5722; color: #fff; text-decoration: none; border-radius: 4px; font-size: 0.9rem;">회원가입</a>
+            </div>
+        <% } %>
+    </div>
+</nav>
     <div style="padding: 20px;">
         <h2><%= t.chartTitle %></h2>
         <% artists.forEach((song, i) => { %>
@@ -30,6 +50,11 @@
                 </div>
             </div>
         <% }) %>
+        <% if (user && user.role === 'admin') { %>
+    <form action="/delete-music/<%= song._id %> method="POST" onsubmit="return confirm('관리자 권한으로 삭제하시겠습니까?');" style="margin-top:10px;">
+        <button type="submit" style="color: #ff4d4d; border: 1px solid #ff4d4d; background: none; cursor: pointer; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;">강제 삭제</button>
+    </form>
+        <% } %>
     </div>
 </body>
 </html>

@@ -4,10 +4,11 @@ const mongoose = require('mongoose');
 const path = require('path');
 const multer = require('multer');
 const session = require('express-session');
-
 // 🌟 클라우디너리 영구 금고 세팅
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const User = require('./user'); // (models 폴더에 있다면 './models/User' 로 수정!)
+const bcrypt = require('bcrypt'); // 암호화 믹서기
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -27,10 +28,11 @@ const upload = multer({ storage: storage });
 
 const app = express();
 
-// 🌟 3. DB 연결 (영어를 숫자로 바꾼 완벽 버전!)
+// 🌟 DB 연결 (영어를 숫자로 바꾼 완벽 버전!)
 mongoose.connect(process.env.DB_URI)
   .then(() => console.log("☁️ 진짜 인터넷 창고(Cloud DB) 연결 완료!! ☁️"))
   .catch((err) => console.log("🔥 DB 연결 에러:", err));
+
 // =========================================
 // 🌟 1. 음악 DB 주머니
 // =========================================
@@ -38,6 +40,7 @@ const musicSchema = new mongoose.Schema({
     name: String, artist: String, genre: String, aiTool: String, lyrics: String,
     uploader: String, uploaderRealName: String, imageUrl: String, audioUrl: String,
     views: { type: Number, default: 0 },
+    likedBy: [String], // 🌟🌟🌟 명단 적는 칸
     comments: [{ author: String, text: String, date: { type: Date, default: Date.now } }],
     createdAt: { type: Date, default: Date.now }
 });
@@ -54,29 +57,43 @@ const videoSchema = new mongoose.Schema({
 const Video = mongoose.models.Video || mongoose.model('Video', videoSchema);
 
 // =========================================
-// 🌟 3. 커뮤니티 게시판 DB 주머니
+// 🌟 3. 커뮤니티 게시판 DB 주머니 (명단 추가 완료!)
 // =========================================
 const postSchema = new mongoose.Schema({
     title: String,
     content: String,
     author: String,
+    likes: { type: Number, default: 0 },
+    likedBy: [String], // 🌟 게시글 좋아요 명단
     createdAt: { type: Date, default: Date.now },
     comments: [{ 
         author: String, 
         text: String, 
+        likes: { type: Number, default: 0 },
+        likedBy: [String], // 🌟 댓글 좋아요 명단
         createdAt: { type: Date, default: Date.now } 
     }]
 });
 const Post = mongoose.models.Post || mongoose.model('Post', postSchema);
 
-
 // =========================================
-// 🌟 4. 내 음악(담기) DB 주머니 (원상복귀!)
+// 🌟 4. 내 음악(담기) DB 주머니
 // =========================================
 const myMusicSchema = new mongoose.Schema({
     userId: String, musicId: String, createdAt: { type: Date, default: Date.now }
 });
 const MyMusic = mongoose.models.MyMusic || mongoose.model('MyMusic', myMusicSchema);
+
+// =========================================
+// 🌟 5. 팝업 공지 DB 주머니
+// =========================================
+const popupSchema = new mongoose.Schema({
+    title: String,
+    content: String,
+    isActive: { type: Boolean, default: false },
+    updatedAt: { type: Date, default: Date.now }
+});
+const Popup = mongoose.models.Popup || mongoose.model('Popup', popupSchema);
 
 // =========================================
 // 🌟 서버 기본 설정
@@ -86,15 +103,19 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(session({ secret: 'ranking-ai-secret', resave: false, saveUninitialized: true }));
 
+app.use(session({
+  secret: 'ranking_secret_key_1234', 
+  resave: false,
+  saveUninitialized: false
+}));
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
     next();
 });
 
 // =========================================
-// 🌟 메인 화면 (차트 & 최신음악)
+// 🌟 메인 화면 (차트 & 최신음악 & 팝업)
 // =========================================
 app.get('/', async (req, res) => {
     try {
@@ -116,6 +137,8 @@ app.get('/', async (req, res) => {
             { $limit: 10 }
         ]);
 
+        const activePopup = await Popup.findOne({ isActive: true }).sort({ updatedAt: -1 });
+
         if (artists.length === 0 && !searchQuery && !genreQuery) {
             artists = [{
                 _id: "dummy", name: "첫 곡의 주인공이 되어보세요!", artist: "RANKING AI", genre: "안내", aiTool: "시스템",
@@ -124,21 +147,81 @@ app.get('/', async (req, res) => {
             }];
             popularArtists = [{ _id: "비비(BIBI)", count: 1 }];
         }
-        res.render('index', { artists: artists, searchQuery: searchQuery, genreQuery: genreQuery, sortQuery: sortQuery, popularArtists: popularArtists });
+        
+        res.render('index', { 
+            artists: artists, 
+            searchQuery: searchQuery, 
+            genreQuery: genreQuery, 
+            sortQuery: sortQuery, 
+            popularArtists: popularArtists,
+            popup: activePopup
+        });
     } catch (err) {
         console.log("DB 에러:", err);
-        // ✨ 이렇게 바꿉니다! (진짜 에러의 이름을 화면에 띄우는 마법!)
         res.send("<h1>진짜 에러 원인: " + err.message + "</h1>")
     }
 });
 
-app.post('/play-count/:id', async (req, res) => {
-    try { await Music.findByIdAndUpdate(req.params.id, { $inc: { views: 1 } }); res.sendStatus(200); } 
-    catch(err) { res.sendStatus(500); }
+// ==========================================
+// 🚪 1. 화면 보여주는 파이프 (GET)
+// ==========================================
+app.get('/signup', (req, res) => res.render('signup'));
+app.get('/login', (req, res) => res.render('login'));
+
+// ==========================================
+// 📝 2. 데이터 처리하는 파이프 (POST)
+// ==========================================
+app.post('/signup', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.send("<script>alert('이미 있는 아이디입니다!'); window.history.back();</script>");
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ username: username, password: hashedPassword });
+    await newUser.save();
+    res.send("<script>alert('회원가입 성공! 로그인해주세요.'); window.location.href='/login';</script>");
+  } catch (error) {
+    console.error("가입 에러:", error);
+    res.send("<script>alert('가입 실패! 내용을 확인해주세요.'); window.history.back();</script>");
+  }
+});
+
+app.post('/login', async (req, res) => {
+  try {
+    const { username, password } = req.body; 
+    const user = await User.findOne({ username: username });
+    if (!user) {
+      return res.send("<script>alert('없는 아이디입니다!'); window.history.back();</script>");
+    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.send("<script>alert('비밀번호가 틀렸습니다!'); window.history.back();</script>");
+    }
+    let userRole = 'user'; 
+    if (user.username === 'kamm7476') { 
+        userRole = 'admin'; 
+    }
+    req.session.user = { id: user.username, name: user.username, role: userRole }; 
+    
+    if (userRole === 'admin') {
+         res.send("<script>alert('👑 관리자님 환영합니다!'); window.location.href='/';</script>");
+    } else {
+         res.send("<script>alert('반갑습니다, " + user.username + "님!'); window.location.href='/';</script>");
+    }
+  } catch (error) {
+    console.error("로그인 에러:", error);
+    res.send("<script>alert('로그인 처리 중 에러가 났어요.'); window.history.back();</script>");
+  }
+});
+
+app.get('/logout', (req, res) => {
+  req.session.destroy(() => { res.redirect('/'); });
 });
 
 // =========================================
-// 🌟 내 음악 보관함 라우터 (원상복귀!)
+// 🌟 내 음악 보관함 라우터
 // =========================================
 app.post('/add-to-mymusic', async (req, res) => {
     try {
@@ -161,12 +244,8 @@ app.get('/mymusic', async (req, res) => {
     res.render('mymusic', { artists: myArtists });
 });
 
-app.post('/delete-mymusic/:id', async (req, res) => {
-    if (req.session.user) await MyMusic.findOneAndDelete({ userId: req.session.user.id, musicId: req.params.id });
-    res.redirect('/mymusic');
-});
 // =========================================
-// 🌟 유튜브 / 쇼츠 기능 (삭제 기능 추가!)
+// 🌟 유튜브 / 쇼츠 기능
 // =========================================
 app.get('/youtube', async (req, res) => {
     const videos = await Video.find({ type: 'youtube' }).sort({ createdAt: -1 });
@@ -193,7 +272,6 @@ app.post('/add-shorts', async (req, res) => {
     res.redirect('/shorts');
 });
 
-// 🌟 추가된 유튜브/쇼츠 삭제 라우터
 app.post('/delete-video/:id', async (req, res) => {
     if (!req.session || !req.session.user) return res.redirect('back');
     try {
@@ -202,13 +280,11 @@ app.post('/delete-video/:id', async (req, res) => {
             await Video.findByIdAndDelete(req.params.id);
         }
         res.redirect('back');
-    } catch (err) {
-        res.redirect('back');
-    }
+    } catch (err) { res.redirect('back'); }
 });
 
 // =========================================
-// 🌟 커뮤니티 게시판 (게시글 & 댓글 완벽 지원)
+// 🌟 커뮤니티 게시판 
 // =========================================
 app.get('/board', async (req, res) => {
     try {
@@ -254,38 +330,20 @@ app.post('/add-board-comment/:id', async (req, res) => {
 });
 
 // =========================================
-// 🌟 기타 기능 (로그인 보안패치 적용 완료!)
+// 🌟 기타 기능 (관리자 페이지 등)
 // =========================================
-app.get('/login', (req, res) => res.render('login'));
-app.post('/login', (req, res) => {
-    const { id, pw } = req.body;
-    if (id === process.env.ADMIN_ID && pw === process.env.ADMIN_PW) {
-        req.session.user = { id, name: '최고관리자', role: 'admin' };
-    } else {
-        req.session.user = { id, name: '일반유저', role: 'user' };
-    }
-    res.redirect('/');
-});
-
-app.get('/logout', (req, res) => { req.session.destroy(); res.redirect('/'); });
-app.get('/signup', (req, res) => res.render('signup'));
 app.get('/admin', (req, res) => {
     if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
     res.render('admin', { stats: { users: 0, musics: 0, reports: 0 } });
 });
 
 app.post('/add-music', (req, res, next) => {
-    // 1단계: 문지기(Multer/Cloudinary) 에러 강제 포획망
     const uploadMiddleware = upload.fields([{ name: 'image', maxCount: 1 }, { name: 'audio', maxCount: 1 }]);
     uploadMiddleware(req, res, (err) => {
-        if (err) {
-            console.error("🔥 파일 업로드 문지기 에러 터짐!!:", err);
-            return res.send(`<h1>파일 업로드 실패 이유: ${err.message || 'Cloudinary 설정이나 파일 문제'}</h1>`);
-        }
-        next(); // 무사히 통과하면 2단계로!
+        if (err) return res.send(`<h1>파일 업로드 실패 이유: ${err.message || 'Cloudinary 문제'}</h1>`);
+        next();
     });
 }, async (req, res) => {
-    // 2단계: DB 저장 단계
     try {
         const { name, artist, genre, aiTool, lyrics, realName } = req.body;
         const uploader = req.session.user ? req.session.user.id : 'guest';
@@ -295,26 +353,19 @@ app.post('/add-music', (req, res, next) => {
         const newMusic = new Music({ name, artist, genre, aiTool, lyrics, uploaderRealName: realName, uploader, imageUrl, audioUrl });
         await newMusic.save();
         res.redirect('/');
-    } catch (err) {
-        console.error("🔥 DB 저장 에러 터짐!!:", err);
-        res.status(500).send("<h1>DB 저장 실패 이유: " + err.message + "</h1>");
-    }
+    } catch (err) { res.status(500).send("<h1>DB 저장 실패 이유: " + err.message + "</h1>"); }
 });
 
-// --- 음원 삭제 실행 (관리자 프리패스 적용) ---
 app.post('/delete-music/:id', async (req, res) => {
     if (!req.session.user) return res.redirect('/');
-
     try {
         const music = await Music.findById(req.params.id);
         if (!music) return res.redirect('/');
-
         const isAdmin = req.session.user.role === 'admin';
         const isOwner = req.session.user.id === music.uploader;
-
         if (isAdmin || isOwner) {
             await Music.findByIdAndDelete(req.params.id);
-            await MyMusic.deleteMany({ musicId: req.params.id }); // 보관함에서도 자동 삭제
+            await MyMusic.deleteMany({ musicId: req.params.id }); 
             res.redirect('/');
         } else {
             res.send("<script>alert('삭제 권한이 없습니다.'); location.href='/';</script>");
@@ -322,18 +373,13 @@ app.post('/delete-music/:id', async (req, res) => {
     } catch (err) { res.redirect('/'); }
 });
 
-// --- 음원 수정 페이지 보기 (권한 체크 강화) ---
 app.get('/edit/:id', async (req, res) => {
     if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
-
     try {
         const music = await Music.findById(req.params.id);
         if (!music) return res.send("<script>alert('존재하지 않는 곡입니다.'); location.href='/';</script>");
-
-        // 🌟 핵심: 관리자거나 본인인 경우만 통과!
         const isAdmin = req.session.user.role === 'admin';
         const isOwner = req.session.user.id === music.uploader;
-
         if (isAdmin || isOwner) {
             res.render('edit', { music: music });
         } else {
@@ -341,15 +387,13 @@ app.get('/edit/:id', async (req, res) => {
         }
     } catch (err) { res.redirect('/'); }
 });
-// --- 음원 수정 실행 (서버에서 한 번 더 체크) ---
+
 app.post('/edit/:id', async (req, res) => {
     if (!req.session.user) return res.status(401).send("로그인 필요");
-
     try {
         const music = await Music.findById(req.params.id);
         const isAdmin = req.session.user.role === 'admin';
         const isOwner = req.session.user.id === music.uploader;
-
         if (isAdmin || isOwner) {
             const { name, artist, genre, aiTool, lyrics } = req.body;
             await Music.findByIdAndUpdate(req.params.id, { name, artist, genre, aiTool, lyrics });
@@ -359,8 +403,107 @@ app.post('/edit/:id', async (req, res) => {
         }
     } catch (err) { res.redirect('/'); }
 });
+
+// =========================================
+// 🌟 음원 좋아요 기능
+// =========================================
+app.post('/like/:id', async (req, res) => {
+    if (!req.session.user) return res.json({ success: false, message: "로그인이 필요합니다." });
+    try {
+        const musicId = req.params.id;
+        const username = req.session.user.id;
+        const isAdmin = req.session.user.role === 'admin';
+        const music = await Music.findById(musicId);
+        if (!music) return res.json({ success: false, message: "노래를 찾을 수 없습니다." });
+
+        if (isAdmin) {
+            music.views += 1; 
+            await music.save();
+            return res.json({ success: true, message: "👑 관리자 무제한 좋아요 완료!" });
+        } else {
+            if (!music.likedBy) music.likedBy = [];
+            if (music.likedBy.includes(username)) {
+                return res.json({ success: false, message: "이미 좋아요를 누르셨습니다! (1인 1회 제한)" });
+            } else {
+                music.views += 1; 
+                music.likedBy.push(username);
+                await music.save();
+                return res.json({ success: true });
+            }
+        }
+    } catch (err) { res.status(500).json({ success: false, message: "서버 에러가 발생했습니다." }); }
+});
+
+app.get('/admin/users', async (req, res) => {
+    try {
+        if (!req.session.user || req.session.user.role !== 'admin') {
+            return res.send("<script>alert('관리자만 접근 가능합니다!'); location.href='/';</script>");
+        }
+        const users = await User.find().sort({ createdAt: -1 }); 
+        res.render('admin_users', { users: users });
+    } catch (err) { res.status(500).send("유저 목록 에러"); }
+});
+
+app.post('/admin/popup', async (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'admin') {
+        return res.send("<script>alert('관리자만 설정할 수 있습니다!'); window.history.back();</script>");
+    }
+    try {
+        const { title, content, isActive } = req.body;
+        await Popup.deleteMany({}); 
+        const newPopup = new Popup({ title, content, isActive: isActive === 'on' });
+        await newPopup.save();
+        res.send("<script>alert('팝업 설정이 완료되었습니다!'); window.location.href='/';</script>");
+    } catch (err) { res.send("<script>alert('팝업 설정 에러!'); window.history.back();</script>"); }
+});
+
+
+// =========================================
+// 🌟 새로 추가된 파이프들 (댓글 삭제 & 커뮤니티 좋아요 방어) 🌟
+// =========================================
+
+// 1. 음원 댓글 ❌ 삭제 기능 (본인/관리자 전용)
+app.post('/delete-music-comment/:musicId/:commentId', async (req, res) => {
+    if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
+    try {
+        const music = await Music.findById(req.params.musicId);
+        if (!music) return res.redirect('back');
+
+        const comment = music.comments.id(req.params.commentId);
+        if (comment && (req.session.user.role === 'admin' || req.session.user.id === comment.author)) {
+            music.comments.pull(req.params.commentId); // 댓글 쏙 빼서 버리기!
+            await music.save();
+        }
+        res.redirect('back');
+    } catch (err) { res.redirect('back'); }
+});
+
+// 2. 커뮤니티 게시글 & 댓글 좋아요 (1인 1회 방어막!)
+app.post('/like-board-comment/:postId/:commentId', async (req, res) => {
+    if (!req.session.user) return res.json({ success: false, message: "로그인 필요" });
+    try {
+        const post = await Post.findById(req.params.postId);
+        const comment = post.comments.id(req.params.commentId);
+        const username = req.session.user.id;
+        const isAdmin = req.session.user.role === 'admin';
+
+        if (isAdmin) {
+            comment.likes = (comment.likes || 0) + 1; // 관리자는 무한 광클!
+            await post.save();
+            return res.json({ success: true, message: "👑 관리자 권한!" });
+        } else {
+            if (!comment.likedBy) comment.likedBy = [];
+            if (comment.likedBy.includes(username)) {
+                return res.json({ success: false, message: "이미 좋아요를 누르셨습니다!" });
+            } else {
+                comment.likes = (comment.likes || 0) + 1;
+                comment.likedBy.push(username);
+                await post.save();
+                return res.json({ success: true });
+            }
+        }
+    } catch (err) { res.status(500).json({ success: false }); }
+});
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
-
-
-
