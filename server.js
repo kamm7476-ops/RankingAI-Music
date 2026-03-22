@@ -258,7 +258,28 @@ app.get('/mymusic', async (req, res) => {
     const myArtists = await Music.find({ _id: { $in: musicIds } });
     res.render('mymusic', { artists: myArtists });
 });
+// =========================================
+// 🌟 내 음악 보관함 - 곡 삭제 기능 (추가됨!)
+// =========================================
+app.post('/remove-from-mymusic/:musicId', async (req, res) => {
+    // 1. 로그인 안 되어 있으면 거부
+    if (!req.session || !req.session.user) {
+        return res.status(401).json({ success: false, message: "로그인이 필요합니다." });
+    }
 
+    try {
+        const userId = req.session.user.id;
+        const musicId = req.params.musicId;
+
+        // 2. 내 아이디(userId)와 곡 아이디(musicId)가 일치하는 데이터만 찾아서 삭제!
+        await MyMusic.findOneAndDelete({ userId: userId, musicId: musicId });
+        
+        res.json({ success: true, message: "보관함에서 삭제되었습니다." });
+    } catch (err) {
+        console.error("보관함 삭제 에러:", err);
+        res.status(500).json({ success: false, message: "삭제 중 서버 에러 발생" });
+    }
+});
 // =========================================
 // 🌟 유튜브 / 쇼츠 기능
 // =========================================
