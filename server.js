@@ -692,5 +692,51 @@ app.post('/delete-music/:id', async (req, res) => {
     }
 });
 
+// =========================================
+// 🌟 1:1 관리자 DM (제휴/문의) 기능 DB 및 파이프
+// =========================================
+const dmSchema = new mongoose.Schema({
+    userId: String,
+    message: String,
+    reply: { type: String, default: '' }, // 관리자 답변칸
+    createdAt: { type: Date, default: Date.now }
+});
+const DM = mongoose.models.DM || mongoose.model('DM', dmSchema);
+
+// 1. DM 화면 보여주기 (유저는 자기것만, 관리자는 전부 다!)
+app.get('/contact', async (req, res) => {
+    if (!req.session || !req.session.user) {
+        return res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
+    }
+    
+    let dms = [];
+    if (req.session.user.role === 'admin') {
+        // 관리자는 모든 유저의 DM을 최신순으로 봅니다.
+        dms = await DM.find().sort({ createdAt: -1 });
+    } else {
+        // 일반 유저는 '내 아이디'로 보낸 DM만 봅니다.
+        dms = await DM.find({ userId: req.session.user.id }).sort({ createdAt: -1 });
+    }
+    res.render('contact', { user: req.session.user, dms: dms });
+});
+
+// 2. 유저가 관리자에게 메세지 보내기
+app.post('/contact/send', async (req, res) => {
+    if (!req.session || !req.session.user) return res.redirect('/login');
+    await new DM({ userId: req.session.user.id, message: req.body.message }).save();
+    res.redirect('/contact');
+});
+
+// 3. 관리자가 답변 달기
+app.post('/contact/reply/:id', async (req, res) => {
+    // 관리자만 답변할 수 있는 강력한 방어막!
+    if (!req.session || !req.session.user || req.session.user.role !== 'admin') {
+        return res.redirect('/');
+    }
+    await DM.findByIdAndUpdate(req.params.id, { reply: req.body.reply });
+    res.redirect('/contact');
+});
+
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));

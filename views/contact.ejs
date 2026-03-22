@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1:1 관리자 문의 - RANKING AI</title>
+    <style>
+        body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; padding: 40px 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ff5722; padding-bottom: 15px; margin-bottom: 30px; }
+        .title { color: #ff5722; margin: 0; font-size: 24px; }
+        .btn-home { color: #aaa; text-decoration: none; border: 1px solid #444; padding: 8px 15px; border-radius: 8px; }
+        
+        .chat-box { background: #161718; border: 1px solid #333; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .msg-user { margin-bottom: 15px; }
+        .msg-user strong { color: #00e5ff; font-size: 14px; }
+        .msg-content { background: #222; padding: 15px; border-radius: 8px; margin-top: 5px; white-space: pre-wrap; line-height: 1.6; }
+        
+        .msg-admin { margin-top: 15px; padding-top: 15px; border-top: 1px dashed #333; }
+        .msg-admin strong { color: #ff4a4a; font-size: 14px; }
+        .admin-reply-content { background: rgba(255, 74, 74, 0.1); border: 1px solid #ff4a4a; padding: 15px; border-radius: 8px; margin-top: 5px; white-space: pre-wrap; line-height: 1.6; color: #ffd1d1; }
+        
+        .send-form { background: #161718; padding: 20px; border-radius: 12px; border: 1px solid #ff5722; margin-bottom: 40px; }
+        textarea { width: 100%; background: #0b0c0d; border: 1px solid #444; color: #fff; padding: 15px; border-radius: 8px; height: 100px; resize: vertical; box-sizing: border-box; margin-bottom: 10px; font-family: inherit; }
+        textarea:focus { outline: none; border-color: #ff5722; }
+        .btn-send { background: #ff5722; color: #000; font-weight: bold; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; float: right; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2 class="title">💬 1:1 문의 및 제휴 (DM)</h2>
+            <a href="/" class="btn-home">돌아가기</a>
+        </div>
+
+        <% if (user.role !== 'admin') { %>
+            <div class="send-form">
+                <form action="/contact/send" method="POST">
+                    <textarea name="message" placeholder="관리자에게 보낼 메세지를 입력해주세요! (제휴 문의, 건의사항 등)" required></textarea>
+                    <div style="overflow: hidden;">
+                        <button type="submit" class="btn-send">메세지 보내기</button>
+                    </div>
+                </form>
+            </div>
+        <% } else { %>
+            <div style="background: rgba(255, 74, 74, 0.1); color: #ff4a4a; padding: 15px; border-radius: 8px; margin-bottom: 30px; text-align: center; border: 1px solid #ff4a4a;">
+                <strong>👑 관리자 모드:</strong> 모든 유저의 메세지를 확인하고 답변할 수 있습니다.
+            </div>
+        <% } %>
+
+        <% if (dms && dms.length > 0) { %>
+            <% dms.forEach(function(dm) { %>
+                <div class="chat-box">
+                    <div class="msg-user">
+                        <strong>👤 <%= dm.userId %>님의 메세지</strong>
+                        <div class="msg-content"><%= dm.message %></div>
+                    </div>
+                    
+                    <% if (dm.reply) { %>
+                        <div class="msg-admin">
+                            <strong>👑 관리자 답변</strong>
+                            <div class="admin-reply-content"><%= dm.reply %></div>
+                        </div>
+                    <% } else if (user.role === 'admin') { %>
+                        <div class="msg-admin" style="border-top: none;">
+                            <form action="/contact/reply/<%= dm._id %>" method="POST">
+                                <textarea name="reply" placeholder="이 유저에게 남길 답변을 적어주세요!" style="height: 60px; border-color: #ff4a4a;" required></textarea>
+                                <div style="overflow: hidden;">
+                                    <button type="submit" class="btn-send" style="background: #ff4a4a; color: #fff;">답변 남기기</button>
+                                </div>
+                            </form>
+                        </div>
+                    <% } else { %>
+                        <div class="msg-admin">
+                            <span style="color: #777; font-size: 13px;">⏳ 관리자의 답변을 기다리고 있습니다...</span>
+                        </div>
+                    <% } %>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <div style="text-align: center; padding: 50px; color: #777; border: 1px dashed #444; border-radius: 12px;">
+                아직 주고받은 메세지가 없습니다!
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>
