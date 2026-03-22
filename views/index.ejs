@@ -606,7 +606,7 @@
 
 
 
-        // 🌟 커스텀 플레이어 엔진 (에러 방어막 강화!) 🌟
+        // 🌟 연속 재생 강화 엔진 (수정본) 🌟
         let playlist = [];
         let currentIndex = 0;
         let isPlaying = false;
@@ -634,13 +634,14 @@
             }
         }
 
-        // 재생 시 빈 파일 건너뛰기
+        // 🌟 핵심: 다음 곡으로 바톤 터치하는 로드 함수
         function loadTrack(index) {
             if(index >= 0 && index < playlist.length) {
                 const track = playlist[index];
+                currentIndex = index; // 현재 인덱스 업데이트
                 
                 if(!track.audio || track.audio.trim() === "" || track.audio === "undefined") {
-                    console.log("음원이 없는 곡 패스:", track.title);
+                    console.log("음원 없음, 다음 곡으로:", track.title);
                     playNextTrack(); 
                     return; 
                 }
@@ -650,21 +651,23 @@
                 document.getElementById('main-player-cover').src = track.cover;
                 
                 mainAudio.src = track.audio;
-                mainAudio.play().catch(e => console.log("재생 대기중..."));
-                isPlaying = true;
-                if(btnPlay) btnPlay.innerText = "⏸";
-                currentIndex = index;
+                mainAudio.load(); // 👈 새 음원 장전
+                
+                const playPromise = mainAudio.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        isPlaying = true;
+                        if(btnPlay) btnPlay.innerText = "⏸";
+                    }).catch(e => {
+                        console.log("자동 재생 차단됨 (사용자 클릭 필요)");
+                        isPlaying = false;
+                        if(btnPlay) btnPlay.innerText = "▶";
+                    });
+                }
 
-                // 🌟 재생 시작 시 서버에 신호 보내기
-if (track.id && track.id !== "dummy") {
-    fetch('/play-count/' + track.id, { 
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-    })
-    .then(res => res.json())
-    .then(data => console.log("재생수 업데이트 완료:", data))
-    .catch(err => console.error("재생수 업데이트 실패:", err));
-}
+                if (track.id && track.id !== "dummy") {
+                    fetch('/play-count/' + track.id, { method: 'POST' }).catch(err => {});
+                }
             }
         }
 
@@ -672,13 +675,15 @@ if (track.id && track.id !== "dummy") {
             if (currentIndex > 0) loadTrack(currentIndex - 1);
             else alert("첫 번째 곡입니다.");
         }
+
         function playNextTrack() {
-            if (currentIndex < playlist.length - 1) loadTrack(currentIndex + 1);
-            else { 
+            if (currentIndex < playlist.length - 1) {
+                loadTrack(currentIndex + 1);
+            } else { 
                 mainAudio.pause(); 
                 isPlaying = false;
                 if(btnPlay) btnPlay.innerText = "▶"; 
-                alert("마지막 곡입니다."); 
+                alert("마지막 곡입니다. 🎶"); 
             }
         }
 
@@ -703,39 +708,45 @@ if (track.id && track.id !== "dummy") {
             }
         });
 
+        // 🌟 곡이 끝나면 무조건 다음 곡으로 이동!
         mainAudio.addEventListener('ended', () => {
             if (isLoop) {
-        mainAudio.currentTime = 0;
-        mainAudio.play();
+                mainAudio.currentTime = 0;
+                mainAudio.play();
             } else {
-        playNextTrack();
-         }
-          });
+                playNextTrack(); // 👈 여기서 끊김 없이 넘겨줍니다.
+            }
+        });
 
         function playSingleTrack(btnElement) {
             const tr = btnElement.closest('.music-item');
             const audioUrl = tr.dataset.audio;
 
-            // 🌟 방어막: 오디오 주소가 비어있으면 경고창 띄우고 멈춤!
             if (!audioUrl || audioUrl === "undefined" || audioUrl.trim() === "") {
                 alert("아직 음원이 제대로 업로드되지 않은 곡입니다!");
                 return; 
             }
 
-            playlist = [{ 
-                id: tr.dataset.id, 
-                title: tr.dataset.title, 
-                artist: tr.dataset.artist, 
-                cover: tr.dataset.cover, 
-                audio: audioUrl 
-            }];
+            playlist = [{ id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: audioUrl }];
             loadTrack(0);
         }
 
         function playAll() {
             const rows = document.querySelectorAll('.music-item');
-            playlist = Array.from(rows).map(tr => ({ id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio })).filter(t => t.audio && t.audio.trim() !== "" && t.audio !== "undefined");
-            if(playlist.length > 0) loadTrack(0); else alert("재생 가능한 음원이 없습니다.");
+            playlist = Array.from(rows).map(tr => ({ 
+                id: tr.dataset.id, 
+                title: tr.dataset.title, 
+                artist: tr.dataset.artist, 
+                cover: tr.dataset.cover, 
+                audio: tr.dataset.audio 
+            })).filter(t => t.audio && t.audio.trim() !== "" && t.audio !== "undefined");
+            
+            if(playlist.length > 0) {
+                currentIndex = 0;
+                loadTrack(0);
+            } else {
+                alert("재생 가능한 음원이 없습니다.");
+            }
         }
 
         function playSelected() {
@@ -744,10 +755,21 @@ if (track.id && track.id !== "dummy") {
             
             playlist = Array.from(checkedBoxes).map(cb => {
                 const tr = cb.closest('.music-item');
-                return { id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio };
+                return { 
+                    id: tr.dataset.id, 
+                    title: tr.dataset.title, 
+                    artist: tr.dataset.artist, 
+                    cover: tr.dataset.cover, 
+                    audio: tr.dataset.audio 
+                };
             }).filter(t => t.audio && t.audio.trim() !== "" && t.audio !== "undefined");
             
-            if(playlist.length > 0) loadTrack(0); else alert("재생 가능한 음원이 없습니다.");
+            if(playlist.length > 0) {
+                currentIndex = 0;
+                loadTrack(0);
+            } else {
+                alert("선택한 곡 중에 재생 가능한 음원이 없습니다.");
+            }
         }
 
         function addSelectedToMyMusic() {
