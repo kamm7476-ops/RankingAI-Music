@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시글 수정 - RANKING AI</title>
+    <style>
+        body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; padding: 40px 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: #161718; padding: 30px; border-radius: 15px; border: 1px solid #333; }
+        .page-title { color: #ff5722; margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid #222; padding-bottom: 15px; }
+        
+        .input-title { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 15px; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 15px; }
+        .input-title:focus { border-color: #ff5722; outline: none; }
+        
+        .input-content { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 15px; border-radius: 8px; font-size: 15px; box-sizing: border-box; height: 300px; margin-bottom: 20px; resize: vertical; }
+        .input-content:focus { border-color: #ff5722; outline: none; }
+        
+        .btn-group { display: flex; gap: 15px; justify-content: flex-end; }
+        .btn-cancel { background: #333; color: #fff; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-submit { background: #ff5722; color: #000; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="page-title">✏️ 게시글 수정</h2>
+        
+        <form action="/edit-post/<%= post._id %>" method="POST">
+            <input type="text" name="title" class="input-title" value="<%= post.title %>" required>
+            
+            <textarea name="content" class="input-content" required><%= post.content %></textarea>
+            
+            <div class="btn-group">
+                <a href="/board" class="btn-cancel">취소</a>
+                <button type="submit" class="btn-submit">수정 완료</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

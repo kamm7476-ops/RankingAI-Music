@@ -159,10 +159,14 @@
                             <button class="action-btn" onclick="const box = document.getElementById('board-comments-<%= post._id %>'); box.style.display = (box.style.display === 'block') ? 'none' : 'block';">💬 댓글 <%= post.comments ? post.comments.length : 0 %></button>
                             
                             <% if (user && (user.id === post.author || user.role === 'admin')) { %>
-                                <form action="/delete-post/<%= post._id %>" method="POST" style="margin-left: auto;" onsubmit="return confirm('정말 삭제하시겠습니까?');">
-                                    <button type="submit" class="action-btn" style="color:#ff4a4a;">🗑️ 삭제</button>
-                                </form>
-                            <% } %>
+    <div style="display: flex; gap: 10px; margin-left: auto; align-items: center;">
+        <button onclick="location.href='/edit-post/<%= post._id %>'" class="action-btn" style="color: #00e5ff; background: none; border: none; cursor: pointer; padding: 0;">✏️ 수정</button>
+        
+        <form action="/delete-post/<%= post._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('정말 삭제할까요?');">
+            <button type="submit" class="action-btn" style="color: #ff4a4a; background: none; border: none; cursor: pointer; padding: 0;">🗑 삭제</button>
+        </form>
+    </div>
+<% } %>
                         </div>
 
                         <div id="board-comments-<%= post._id %>" style="display: none; background: #111; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #222;">
