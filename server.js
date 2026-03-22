@@ -168,6 +168,7 @@ app.get('/', async (req, res) => {
             sortQuery: sortQuery, 
             periodQuery: periodQuery, // 🌟 화면에 어떤 탭인지 알려주기
             popularArtists: popularArtists,
+            popup: currentPopup, // 
             popup: activePopup
         });
     } catch (err) {
@@ -257,30 +258,7 @@ app.get('/mymusic', async (req, res) => {
     const myArtists = await Music.find({ _id: { $in: musicIds } });
     res.render('mymusic', { artists: myArtists });
 });
-
-// =========================================
-// 🌟 내 음악 보관함 - 곡 삭제 기능 (추가됨!)
-// =========================================
-app.post('/remove-from-mymusic/:musicId', async (req, res) => {
-    // 1. 로그인 안 되어 있으면 거부
-    if (!req.session || !req.session.user) {
-        return res.status(401).json({ success: false, message: "로그인이 필요합니다." });
-    }
-
-    try {
-        const userId = req.session.user.id;
-        const musicId = req.params.musicId;
-
-        // 2. 내 아이디(userId)와 곡 아이디(musicId)가 일치하는 데이터만 찾아서 삭제!
-        await MyMusic.findOneAndDelete({ userId: userId, musicId: musicId });
-        
-        res.json({ success: true, message: "보관함에서 삭제되었습니다." });
-    } catch (err) {
-        console.error("보관함 삭제 에러:", err);
-        res.status(500).json({ success: false, message: "삭제 중 서버 에러 발생" });
-    }
-});
-
+z
 // =========================================
 // 🌟 유튜브 / 쇼츠 기능
 // =========================================
@@ -352,6 +330,52 @@ app.post('/delete-post/:id', async (req, res) => {
     } catch (err) { console.log(err); }
 });
 
+// 🌟🌟🌟 [여기에 추가됨!] 커뮤니티 게시글 수정 파이프 🌟🌟🌟
+app.get('/edit-post/:id', async (req, res) => {
+    if (!req.session || !req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
+    try {
+        const post = await Post.findById(req.params.id);
+        if (!post) return res.send("<script>alert('존재하지 않는 게시글입니다.'); location.href='/board';</script>");
+        
+        const isAdmin = req.session.user.role === 'admin';
+        const isOwner = req.session.user.id === post.author;
+        
+        if (isAdmin || isOwner) {
+            res.render('edit-post', { user: req.session.user, post: post });
+        } else {
+            res.send("<script>alert('수정 권한이 없습니다.'); location.href='/board';</script>");
+        }
+    } catch (err) { 
+        console.log("게시글 수정 화면 에러:", err);
+        res.redirect('/board'); 
+    }
+});
+
+app.post('/edit-post/:id', async (req, res) => {
+    if (!req.session || !req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
+    try {
+        const post = await Post.findById(req.params.id);
+        const isAdmin = req.session.user.role === 'admin';
+        const isOwner = req.session.user.id === post.author;
+        
+        if (isAdmin || isOwner) {
+            await Post.findByIdAndUpdate(req.params.id, { 
+                title: req.body.title, 
+                content: req.body.content 
+            });
+            res.redirect('/board');
+        } else {
+            res.send("<script>alert('권한이 없습니다.'); location.href='/board';</script>");
+        }
+    } catch (err) { 
+        console.log("게시글 수정 DB 저장 에러:", err);
+        res.redirect('/board'); 
+    }
+});
+// 🌟🌟🌟 여기까지 🌟🌟🌟
+
+
+// 🌟 back 에러 수정 완료!
 app.post('/add-board-comment/:id', async (req, res) => {
     if (!req.session || !req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
     try {
@@ -370,15 +394,19 @@ app.post('/add-board-comment/:id', async (req, res) => {
 // =========================================
 // 🌟 기타 기능 (관리자 페이지 등)
 // =========================================
+// 👑 관리자 전용 대시보드 데이터 수집
 app.get('/admin', async (req, res) => {
     try {
+        // 관리자 권한 체크 (세션에 admin 정보가 없으면 튕겨내기)
         if (!req.session.user || req.session.user.role !== 'admin') {
             return res.redirect('/');
         }
 
+        // 1. 전체 가입자 및 음원 데이터 가져오기
         const allUsers = await User.find().lean();
         const allMusic = await Music.find().lean();
 
+        // 2. 가입자별 등록 음원수 합산해서 새로운 목록 만들기
         const usersWithStats = allUsers.map(u => {
             const myMusicCount = allMusic.filter(m => m.uploader === u.id).length;
             return {
@@ -387,13 +415,16 @@ app.get('/admin', async (req, res) => {
             };
         });
 
+        // 3. 전체 통계 계산
         const stats = {
             totalUsers: allUsers.length,
             totalMusic: allMusic.length,
             totalViews: allMusic.reduce((sum, m) => sum + (m.views || 0), 0),
+            // 금일 방문자 등은 로그 시스템이 없으므로 일단 0이나 랜덤값으로 구조만 잡습니다.
             todayVisitor: Math.floor(Math.random() * 50) + 10 
         };
 
+        // 4. 관리자 페이지(admin.ejs)로 모든 데이터 쏴주기!
         res.render('admin', { 
             user: req.session.user,
             stats: stats,
@@ -407,6 +438,7 @@ app.get('/admin', async (req, res) => {
 });
 
 app.post('/add-music', (req, res, next) => {
+    // 🌟 1. 문지기 출동! 로그인 안 한 사람은 여기서 바로 튕겨냅니다!
     if (!req.session || !req.session.user) {
         return res.send("<script>alert('회원만 음원을 업로드할 수 있습니다! 로그인해주세요.'); location.href='/login';</script>");
     }
@@ -419,6 +451,7 @@ app.post('/add-music', (req, res, next) => {
 }, async (req, res) => {
     try {
         const { name, artist, genre, aiTool, lyrics, realName } = req.body;
+        // 🌟 2. 이제 무조건 로그인한 사람(user.id) 이름으로만 저장됨!
         const uploader = req.session.user.id; 
         const imageUrl = req.files && req.files['image'] ? req.files['image'][0].path : 'https://via.placeholder.com/150';
         const audioUrl = req.files && req.files['audio'] ? req.files['audio'][0].path : '';
@@ -428,7 +461,6 @@ app.post('/add-music', (req, res, next) => {
         res.redirect('/');
     } catch (err) { res.status(500).send("<h1>DB 저장 실패 이유: " + err.message + "</h1>"); }
 });
-
 app.post('/delete-music/:id', async (req, res) => {
     if (!req.session.user) return res.redirect('/');
     try {
@@ -531,7 +563,7 @@ app.post('/admin/popup', async (req, res) => {
 });
 
 // =========================================
-// 🌟 1. 음원 댓글 ❌ 삭제 기능
+// 🌟 1. 음원 댓글 ❌ 삭제 기능 (본인/관리자 전용)
 // =========================================
 app.post('/delete-music-comment/:musicId/:commentId', async (req, res) => {
     if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
@@ -541,15 +573,15 @@ app.post('/delete-music-comment/:musicId/:commentId', async (req, res) => {
 
         const comment = music.comments.id(req.params.commentId);
         if (comment && (req.session.user.role === 'admin' || req.session.user.id === comment.author)) {
-            music.comments.pull(req.params.commentId); 
+            music.comments.pull(req.params.commentId); // 댓글 쏙 빼서 버리기!
             await music.save();
         }
-        res.redirect('/'); 
+        res.redirect('/'); // 🌟 back 대신 '/' (메인화면)으로 확정!
     } catch (err) { res.redirect('/'); }
 });
 
 // =========================================
-// 🌟 2. 커뮤니티 게시글 & 댓글 좋아요
+// 🌟 2. 커뮤니티 게시글 & 댓글 좋아요 (1인 1회 방어막!)
 // =========================================
 app.post('/like-board-comment/:postId/:commentId', async (req, res) => {
     if (!req.session.user) return res.json({ success: false, message: "로그인 필요" });
@@ -560,7 +592,7 @@ app.post('/like-board-comment/:postId/:commentId', async (req, res) => {
         const isAdmin = req.session.user.role === 'admin';
 
         if (isAdmin) {
-            comment.likes = (comment.likes || 0) + 1; 
+            comment.likes = (comment.likes || 0) + 1; // 관리자는 무한 광클!
             await post.save();
             return res.json({ success: true, message: "👑 관리자 권한!" });
         } else {
@@ -578,32 +610,39 @@ app.post('/like-board-comment/:postId/:commentId', async (req, res) => {
 });
 
 // =========================================
-// 🌟 3. 메인 화면 음원 댓글 달기
+// 🌟 3. 메인 화면 음원 댓글 달기 파이프
 // =========================================
 app.post('/add-comment/:id', async (req, res) => {
+    // 1. 로그인 안 한 사람 튕겨내기
     if (!req.session || !req.session.user) {
         return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
     }
+
     try {
+        // 2. 어떤 노래에 댓글을 달았는지 찾기
         const music = await Music.findById(req.params.id);
+        
         if (music) {
+            // 3. 노래 장부의 comments 칸에 내 이름과 댓글 내용 쏙 넣기
             music.comments.push({ 
                 author: req.session.user.id, 
                 text: req.body.commentText 
             });
-            await music.save(); 
+            await music.save(); // 장부 저장!
         }
+        // 🌟 에러의 원인 완벽 제거: 저장 완료 후 메인 화면('/')으로 돌아가기!
         res.redirect('/'); 
+        
     } catch (err) {
         console.error("음원 댓글 등록 에러:", err);
         res.redirect('/');
     }
 });
-
 // 🌟 재생수 업데이트 API (서버용)
 app.post('/play-count/:id', async (req, res) => {
     try {
         const musicId = req.params.id;
+        // DB에서 음악을 찾아 조회수(views)를 1 올림
         await Music.findByIdAndUpdate(musicId, { $inc: { views: 1 } });
         res.json({ success: true });
     } catch (err) {
@@ -612,16 +651,44 @@ app.post('/play-count/:id', async (req, res) => {
     }
 });
 
+// 📢 [권력 1] 공지사항 팝업 등록/수정
+app.post('/admin/popup', (req, res) => {
+    // 관리자가 아니면 쫓아냄
+    if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
+    
+    currentPopup = {
+        isActive: req.body.isActive === 'on', // 체크박스 ON/OFF
+        title: req.body.title,
+        content: req.body.content
+    };
+    res.redirect('/'); // 등록 후 메인 화면으로 가서 확인!
+});
+
 // ⚡ [권력 2] 유저 강제 탈퇴 (DB에서 영구 삭제)
 app.post('/admin/delete-user/:id', async (req, res) => {
     if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
     try {
         const userId = req.params.id;
-        await User.findOneAndDelete({ id: userId }); 
-        await Music.deleteMany({ uploader: userId }); 
+        await User.findOneAndDelete({ id: userId }); // 유저 삭제
+        await Music.deleteMany({ uploader: userId }); // 덤으로 그 유저가 올린 음악도 싹 삭제!
         res.redirect('/admin');
     } catch (err) {
         res.status(500).send("강제 탈퇴 중 에러가 발생했습니다.");
+    }
+});
+
+// 🗑️ [권력 3] 관리자 전용 음원 강제 삭제 (메인 페이지 차트용)
+app.post('/delete-music/:id', async (req, res) => {
+    if (!req.session.user) return res.redirect('/');
+    try {
+        const music = await Music.findById(req.params.id);
+        // 올린 본인이거나, '관리자(admin)'일 때만 삭제 허용!
+        if (music.uploader === req.session.user.id || req.session.user.role === 'admin') {
+            await Music.findByIdAndDelete(req.params.id);
+        }
+        res.redirect('/');
+    } catch (err) {
+        res.status(500).send("음원 삭제 중 에러가 발생했습니다.");
     }
 });
 
