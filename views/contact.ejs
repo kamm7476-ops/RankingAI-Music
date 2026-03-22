@@ -52,9 +52,17 @@
             <% dms.forEach(function(dm) { %>
                 <div class="chat-box">
                     <div class="msg-user">
-                        <strong>👤 <%= dm.userId %>님의 메세지</strong>
-                        <div class="msg-content"><%= dm.message %></div>
-                    </div>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <strong>👤 <%= dm.userId %>님의 메세지</strong>
+        
+        <% if (user.role === 'admin' || user.id === dm.userId) { %>
+            <form action="/contact/delete/<%= dm._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('이 메세지를 정말 지우시겠습니까?');">
+                <button type="submit" style="background: none; border: 1px solid #ff4a4a; color: #ff4a4a; padding: 3px 8px; border-radius: 6px; font-size: 11px; cursor: pointer;">❌ 삭제</button>
+            </form>
+        <% } %>
+    </div>
+    <div class="msg-content"><%= dm.message %></div>
+</div>
                     
                     <% if (dm.reply) { %>
                         <div class="msg-admin">

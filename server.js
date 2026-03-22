@@ -738,5 +738,20 @@ app.post('/contact/reply/:id', async (req, res) => {
 });
 
 
+// 4. DM 삭제 기능 (유저는 본인 것만, 관리자는 전부 다 지울 수 있음!)
+app.post('/contact/delete/:id', async (req, res) => {
+    if (!req.session || !req.session.user) return res.redirect('/login');
+    try {
+        const dm = await DM.findById(req.params.id);
+        if (dm && (req.session.user.role === 'admin' || req.session.user.id === dm.userId)) {
+            await DM.findByIdAndDelete(req.params.id);
+        }
+        res.redirect('/contact');
+    } catch (err) {
+        console.log("DM 삭제 에러:", err);
+        res.redirect('/contact');
+    }
+});
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
