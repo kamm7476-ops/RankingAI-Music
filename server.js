@@ -258,7 +258,7 @@ app.get('/mymusic', async (req, res) => {
     const myArtists = await Music.find({ _id: { $in: musicIds } });
     res.render('mymusic', { artists: myArtists });
 });
-z
+
 // =========================================
 // 🌟 유튜브 / 쇼츠 기능
 // =========================================
