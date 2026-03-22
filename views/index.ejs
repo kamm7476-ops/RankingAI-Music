@@ -16,6 +16,8 @@
         body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; padding-bottom: 100px; }
         a { text-decoration: none; color: inherit; }
 
+        <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
         .main-header { background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
         .header-top { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; border-bottom: 1px solid #1a1b1c; }
         .logo { font-size: 28px; font-weight: 900; color: #ff5722; letter-spacing: -1px; } 
@@ -511,8 +513,11 @@
         
         <div class="player-controls-wrapper">
            <div class="player-buttons">
-                <button id="id-btn-loop" onclick="toggleLoop()" title="한곡 반복" style="font-size: 16px; margin-right: 10px; color: #777; background:none; border:none; cursor:pointer;">🔁</button>
-    
+            <button id="id-btn-loop" class="btn-ctrl" onclick="toggleLoop()" title="반복 안함" style="background:none; border:none; cursor:pointer; color:#666; font-size:24px; margin-right:15px; position:relative; display:flex; align-items:center; justify-content:center;">
+    <i class='bx bx-repeat'></i>
+    <span class="loop-num" style="position:absolute; font-size:9px; font-weight:900; bottom:2px; right:-2px; color:#ff5722; display:none;">1</span>
+</button>
+
            <button id="btn-prev" onclick="playPrevTrack()">⏮</button>
            <button id="btn-play" onclick="togglePlayPause()" class="play-btn">▶</button>
            <button id="btn-next" onclick="playNextTrack()">⏭</button>
@@ -529,45 +534,44 @@
 
     <script>
 
-        // --- 여기서부터 복사하세요 ---
-        let isLoop = false; 
+        let loopMode = 0; // 0:안함, 1:한곡, 2:전체
 
         function toggleLoop() {
             const btnLoop = document.getElementById('id-btn-loop');
-            isLoop = !isLoop;
-            if (isLoop) {
-                btnLoop.style.color = "#ff5722"; // 켜지면 주황색
-                btnLoop.innerText = "🔂"; 
-            } else {
-                btnLoop.style.color = "#777"; // 꺼지면 회색
-                btnLoop.innerText = "🔁";
-            }
-        }
-        // --- 여기서부터 아래 내용을 복사해서 붙여넣으세요! ---
-        function parseAndShowLyrics(musicId, rawLyrics) {
-            const lyricsBox = document.getElementById('lyrics-' + musicId);
-            const lyricsContent = document.getElementById('lyrics-content-' + musicId);
+            const loopNum = btnLoop.querySelector('.loop-num');
             
-            if (!lyricsBox || !lyricsContent) return;
+            loopMode = (loopMode + 1) % 3;
 
-            // 이미 열려있으면 닫기
-            if (lyricsBox.style.display === 'block') {
-                lyricsBox.style.display = 'none';
-                return;
+            if (loopMode === 0) { // 반복 안함
+                btnLoop.style.color = "#666";
+                loopNum.style.display = "none";
+                btnLoop.title = "반복 안함";
+            } else if (loopMode === 1) { // 한곡 반복
+                btnLoop.style.color = "#ff5722"; // 주황색
+                loopNum.style.display = "block"; // 숫자 1 등장
+                btnLoop.title = "한곡 반복";
+            } else if (loopMode === 2) { // 전체 반복
+                btnLoop.style.color = "#ff5722"; // 주황색 유지
+                loopNum.style.display = "none"; // 숫자만 사라짐
+                btnLoop.title = "전체 반복";
             }
-
-            // 가사 내용 넣기
-            if (!rawLyrics || rawLyrics.trim() === "" || rawLyrics === "undefined" || rawLyrics === "null") {
-                lyricsContent.innerHTML = "<p style='color:#777; text-align:center;'>등록된 가사가 없습니다.</p>";
-            } else {
-                // 줄바꿈 보존 처리 및 백틱 안전 처리
-                const formattedLyrics = rawLyrics.split('\n').join('<br>');
-                lyricsContent.innerHTML = `<div style="line-height:1.8; padding:10px;">${formattedLyrics}</div>`;
-            }
-
-            lyricsBox.style.display = 'block';
         }
-        // --- 여기까지 ---
+
+        // 🌟 playNextTrack 함수도 루프 모드에 맞춰 살짝 수정!
+        function playNextTrack() {
+            if (loopMode === 1) {
+                loadTrack(currentIndex); // 현재 곡 다시
+            } else if (currentIndex < playlist.length - 1) {
+                loadTrack(currentIndex + 1); // 다음 곡
+            } else if (loopMode === 2) {
+                loadTrack(0); // 전체반복이면 다시 처음으로
+            } else {
+                mainAudio.pause();
+                isPlaying = false;
+                if(btnPlay) btnPlay.innerText = "▶";
+                alert("마지막 곡입니다.");
+            }
+        }
 
 
         // 🌟 플레이어 숨기기/보이기 기능 🌟
