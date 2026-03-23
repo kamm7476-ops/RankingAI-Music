@@ -56,5 +56,85 @@
     </form>
         <% } %>
     </div>
+
+<audio id="mainAudio" preload="auto"></audio>
+
+<script>
+    const audio = document.getElementById('mainAudio');
+    // 서버에서 받은 노래 리스트를 자바스크립트 배열로 변환
+    const playlist = <%- JSON.stringify(artists) %>;
+    let currentIdx = 0;
+
+    // 🌟 [함수] 노래 재생하기
+    function playTrack(index) {
+    if (index < 0 || index >= playlist.length) return;
+    
+    currentIdx = index;
+    const track = playlist[currentIdx];
+    
+    if (!track.audioUrl || track._id === "dummy") return;
+
+    audio.src = track.audioUrl;
+    audio.load();
+
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+        playPromise.then(() => {
+            // 🌟 [추가] 블루투스 & 차량 모니터에 정보 전송 🌟
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: track.name,           // 곡 제목
+                    artist: track.artist,         // 가수 이름
+                    album: 'RANKING AI 차트',     // 앨범명
+                    artwork: [
+                        { src: track.image, sizes: '512x512', type: 'image/png' } // 앨범 아트
+                    ]
+                });
+
+                // 핸들 리모컨 조작 (이전 곡/다음 곡) 연결
+                navigator.mediaSession.setActionHandler('previoustrack', () => {
+                    playTrack(currentIdx - 1);
+                });
+                navigator.mediaSession.setActionHandler('nexttrack', () => {
+                    playTrack(currentIdx + 1);
+                });
+            }
+            console.log("▶️ 재생 중: " + track.name);
+        }).catch(error => {
+            console.log("🚫 재생 차단됨:", error);
+        });
+    }
+}
+
+    // 🌟 [핵심] 노래가 끝나면 다음 곡으로 자동 이동 (모바일 연속 재생의 핵심)
+    audio.addEventListener('ended', () => {
+        console.log("🎵 곡 종료! 다음 곡을 재생합니다.");
+        currentIdx++;
+        
+        if (currentIdx < playlist.length) {
+            playTrack(currentIdx);
+        } else {
+            console.log("🏁 모든 곡 재생 완료! 처음으로 돌아갑니다.");
+            playTrack(0);
+        }
+    });
+
+    // 🌟 [연결] 노래 카드들을 클릭 가능하게 만들기
+    document.addEventListener('DOMContentLoaded', () => {
+        const cards = document.querySelectorAll('.rank-card');
+        
+        cards.forEach((card, index) => {
+            // 마우스 커서를 포인터로 변경
+            card.style.cursor = 'pointer';
+            
+            // 클릭 이벤트 연결
+            card.addEventListener('click', () => {
+                console.log((index + 1) + "번 노래 클릭됨");
+                playTrack(index);
+            });
+        });
+    });
+</script>
+
 </body>
 </html>
