@@ -4,6 +4,10 @@ const mongoose = require('mongoose');
 const path = require('path');
 const multer = require('multer');
 const session = require('express-session');
+
+const passport = require('passport');
+const NaverStrategy = require('passport-naver').Strategy;
+
 // 🌟 클라우디너리 영구 금고 세팅
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
@@ -116,6 +120,51 @@ app.use((req, res, next) => {
 });
 
 // =========================================
+// 🌟 네이버 소셜 로그인 (Passport) 🌟
+// =========================================
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser((user, done) => { done(null, user); });
+passport.deserializeUser((obj, done) => { done(null, obj); });
+
+passport.use(new NaverStrategy({
+    clientID: process.env.NAVER_CLIENT_ID,
+    clientSecret: process.env.NAVER_CLIENT_SECRET,
+    callbackURL: "https://rankingaimusic.com/auth/naver/callback" 
+}, async (accessToken, refreshToken, profile, done) => {
+    try {
+        const naverId = 'naver_' + profile.id; 
+        let user = await User.findOne({ username: naverId });
+        
+        // 처음 로그인하는 네이버 유저라면 몰래 자동 가입!
+        if (!user) {
+            const randomPassword = Math.random().toString(36).slice(-10); 
+            const hashedPassword = await bcrypt.hash(randomPassword, 10);
+            user = new User({ username: naverId, password: hashedPassword });
+            await user.save();
+        }
+        return done(null, { id: user.username, name: profile.displayName || '네이버유저', role: 'user' });
+    } catch (err) {
+        return done(err);
+    }
+}));
+
+// 네이버 로그인 버튼 눌렀을 때 가는 길
+app.get('/auth/naver', passport.authenticate('naver'));
+
+// 네이버 로그인 끝나고 우리 사이트로 돌아오는 길
+app.get('/auth/naver/callback', 
+    passport.authenticate('naver', { failureRedirect: '/login' }), 
+    (req, res) => {
+        req.session.user = req.user; // 세션에 로그인 도장 쾅!
+        res.send("<script>alert('네이버 로그인 성공!'); window.location.href='/';</script>");
+    }
+);
+// =========================================
+
+
+// =========================================
 // 🌟 메인 화면 (차트 & 최신음악 & 팝업)
 // =========================================
 app.get('/', async (req, res) => {
@@ -215,10 +264,15 @@ app.post('/login', async (req, res) => {
       return res.send("<script>alert('비밀번호가 틀렸습니다!'); window.history.back();</script>");
     }
     let userRole = 'user'; 
+    let displayName = user.username; // 기본적으로 자기 아이디를 이름표로 씀
+
     if (user.username === 'kamm7476') { 
         userRole = 'admin'; 
+        displayName = '관리자'; // 👑 최고 관리자만 '관리자'로 이름표 변경!
     }
-    req.session.user = { id: user.username, name: user.username, role: userRole }; 
+    
+    // 발급된 이름표(displayName)를 세션에 쏙 넣어줌
+    req.session.user = { id: user.username, name: displayName, role: userRole };
     
     if (userRole === 'admin') {
          res.send("<script>alert('👑 관리자님 환영합니다!'); window.location.href='/';</script>");
@@ -316,7 +370,7 @@ app.get('/board', async (req, res) => {
 app.post('/add-post', async (req, res) => {
     if (!req.session || !req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
     try {
-        await new Post({ title: req.body.title, content: req.body.content, author: req.session.user.id }).save();
+        await new Post({ title: req.body.title, content: req.body.content, author: req.session.user.name }).save();
         res.redirect('/board');
     } catch (err) { console.log(err); }
 });
@@ -381,7 +435,7 @@ app.post('/add-board-comment/:id', async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
         if (post) {
-            post.comments.push({ author: req.session.user.id, text: req.body.commentText });
+            post.comments.push({ author: req.session.user.name, text: req.body.commentText });
             await post.save();
         }
         res.redirect('/board'); 
@@ -625,7 +679,7 @@ app.post('/add-comment/:id', async (req, res) => {
         if (music) {
             // 3. 노래 장부의 comments 칸에 내 이름과 댓글 내용 쏙 넣기
             music.comments.push({ 
-                author: req.session.user.id, 
+                author: req.session.user.name, 
                 text: req.body.commentText 
             });
             await music.save(); // 장부 저장!
