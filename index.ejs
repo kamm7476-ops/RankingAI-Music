@@ -1,66 +1,117 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
     <title>Ranking AI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
     <style>
-        body { background: #0a0b10; color: white; font-family: sans-serif; }
-        .nav { display: flex; justify-content: space-between; padding: 20px; border-bottom: 1px solid #222; }
-        .logo { font-size: 1.5rem; color: #00d4ff; font-weight: bold; text-decoration: none; }
-        .rank-card { background: rgba(255,255,255,0.05); margin: 10px 0; padding: 20px; border-radius: 15px; display: flex; align-items: center; position: relative; }
-        .album-art { width: 60px; height: 60px; border-radius: 10px; margin: 0 20px; }
-        .delete-btn-wrap { margin-left: auto; } /* 삭제 버튼을 우측으로 밀어줍니다 */
+        body { 
+            background: #0a0b10; color: white; font-family: 'Pretendard', sans-serif; 
+            margin: 0; padding-bottom: 100px; /* 하단 플레이어 공간 확보 */
+        }
+        .nav { display: flex; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #222; background-color: #1a1a1a; align-items: center; }
+        .logo { font-size: 1.5rem; color: #ff5722; font-weight: bold; text-decoration: none; }
+        
+        /* 🌟 곡 리스트 카드 스타일 */
+        .rank-card { 
+            background: rgba(255,255,255,0.05); margin: 10px 0; padding: 15px 20px; 
+            border-radius: 12px; display: flex; align-items: center; position: relative; 
+            transition: 0.3s; border: 1px solid transparent; cursor: pointer;
+        }
+        .rank-card:hover { background: rgba(255,255,255,0.1); }
+        .album-art { width: 55px; height: 55px; border-radius: 8px; margin: 0 15px; object-fit: cover; }
+        .delete-btn-wrap { margin-left: auto; }
+        
+        /* 🌟 현재 재생 중인 곡 강조 스타일 (멜론 느낌) */
+        .rank-card.playing { 
+            background: rgba(255, 87, 34, 0.1); 
+            border: 1px solid #ff5722; 
+        }
+        .playing-icon {
+            color: #ff5722; font-size: 1.2rem; margin-right: 10px; display: none;
+        }
+        .rank-card.playing .playing-icon { display: block; }
+        .rank-card.playing .rank-number { display: none; }
+
+        /* 🌟 하단 플로팅 뮤직 플레이어 바 (진짜 앱 느낌) 🌟 */
+        #bottom-player {
+            position: fixed; bottom: 0; left: 0; width: 100%; 
+            background: rgba(20, 21, 24, 0.95); backdrop-filter: blur(10px);
+            border-top: 1px solid #333; padding: 12px 20px; 
+            display: flex; align-items: center; justify-content: space-between;
+            box-sizing: border-box; z-index: 1000; transform: translateY(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        #bottom-player.active { transform: translateY(0); } /* 노래 재생시 쓱 올라옴 */
+        
+        .bp-info { display: flex; align-items: center; gap: 12px; flex: 1; overflow: hidden; }
+        .bp-img { width: 45px; height: 45px; border-radius: 6px; object-fit: cover; }
+        .bp-text { display: flex; flex-direction: column; white-space: nowrap; overflow: hidden; }
+        .bp-title { font-size: 15px; font-weight: bold; text-overflow: ellipsis; overflow: hidden; color: #fff; }
+        .bp-artist { font-size: 12px; color: #aaa; text-overflow: ellipsis; overflow: hidden; }
+        
+        .bp-controls { display: flex; align-items: center; gap: 20px; margin-left: 10px; }
+        .bp-btn { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; padding: 0; }
+        .bp-btn.play-btn { font-size: 28px; color: #ff5722; }
     </style>
 </head>
 <body>
-   <nav class="nav" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background-color: #1a1a1a; border-bottom: 1px solid #333;">
-    <a href="/" class="logo" style="font-size: 1.5rem; font-weight: bold; color: #ff5722; text-decoration: none;"><%= t.logo %></a>
-
-    <div style="display: flex; align-items: center; gap: 20px;">
-        <div style="font-size: 0.9rem;">
-            <a href="/change-lang/ko" style="color: #bbb; text-decoration: none;">KO</a> 
-            <span style="color: #444;">|</span> 
-            <a href="/change-lang/en" style="color: #bbb; text-decoration: none;">EN</a>
+    <nav class="nav">
+        <a href="/" class="logo">RANKING AI</a>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <% if (user) { %>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <span style="font-weight: bold; color: #fff; font-size: 0.9rem;">
+                        <%= user.role === 'admin' ? '👑 관리자' : '👤' %> <span style="color: #ff5722;"><%= user.name || user.id %></span>님
+                    </span>
+                    <a href="/logout" style="padding: 5px 10px; background-color: #333; color: #fff; text-decoration: none; border-radius: 4px; font-size: 0.8rem;">로그아웃</a>
+                </div>
+            <% } else { %>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <a href="/login" style="color: #fff; text-decoration: none; font-size: 0.9rem;">로그인</a>
+                    <a href="/signup" style="padding: 5px 10px; background-color: #ff5722; color: #000; font-weight: bold; text-decoration: none; border-radius: 4px; font-size: 0.9rem;">회원가입</a>
+                </div>
+            <% } %>
         </div>
+    </nav>
 
-        <% if (user) { %>
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <span style="font-weight: bold; color: #fff;">
-                    <%= user.role === 'admin' ? '👑 관리자' : '👤 회원' %> 
-                    <span style="color: #ff5722;"><%= user.name %></span>님 환영합니다!
-                </span>
-                <a href="/logout" style="padding: 5px 10px; background-color: #333; color: #fff; text-decoration: none; border-radius: 4px; font-size: 0.9rem;">로그아웃</a>
-            </div>
-        <% } else { %>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <a href="/login" style="color: #fff; text-decoration: none; font-size: 0.9rem;">로그인</a>
-                <a href="/signup" style="padding: 5px 10px; background-color: #ff5722; color: #fff; text-decoration: none; border-radius: 4px; font-size: 0.9rem;">회원가입</a>
-            </div>
-        <% } %>
-    </div>
-</nav>
-
-    <div style="padding: 20px;">
-        <h2><%= t.chartTitle %></h2>
+    <div style="padding: 20px; max-width: 800px; margin: 0 auto;">
+        <h2 style="margin-bottom: 20px;">🔥 AI TOP CHART</h2>
         
         <% artists.forEach((song, i) => { %>
-            <div class="rank-card">
-                <div><%= i+1 %></div>
+            <div class="rank-card" data-index="<%= i %>">
+                <i class="fas fa-chart-simple playing-icon"></i>
+                <div class="rank-number" style="width: 20px; text-align: center; font-weight: bold; color: #aaa;"><%= i+1 %></div>
+                
                 <img src="<%= song.image %>" class="album-art">
-                <div>
-                    <strong><%= song.name %></strong><br>
-                    <small><%= song.artist %></small>
+                <div style="flex: 1; overflow: hidden;">
+                    <strong style="display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><%= song.name %></strong>
+                    <small style="color: #aaa;"><%= song.artist %></small>
                 </div>
                 
                 <% if (user && user.role === 'admin') { %>
                 <div class="delete-btn-wrap">
                     <form action="/delete-music/<%= song._id %>" method="POST" onsubmit="return confirm('관리자 권한으로 삭제하시겠습니까?');" style="margin:0;">
-                        <button type="button" class="admin-delete-btn" onclick="this.form.submit();" style="color: #ff4d4d; border: 1px solid #ff4d4d; background: none; cursor: pointer; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem;">강제 삭제</button>
+                        <button type="submit" class="admin-delete-btn" style="color: #ff4d4d; border: 1px solid #ff4d4d; background: none; cursor: pointer; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem;">삭제</button>
                     </form>
                 </div>
                 <% } %>
             </div>
         <% }) %>
+    </div>
+
+    <div id="bottom-player">
+        <div class="bp-info">
+            <img src="" id="bp-img" class="bp-img" alt="album">
+            <div class="bp-text">
+                <span id="bp-title" class="bp-title">노래 제목</span>
+                <span id="bp-artist" class="bp-artist">가수</span>
+            </div>
+        </div>
+        <div class="bp-controls">
+            <button class="bp-btn" onclick="playPrev()"><i class="fas fa-backward-step"></i></button>
+            <button class="bp-btn play-btn" onclick="togglePlay()"><i class="fas fa-circle-play" id="bp-play-icon"></i></button>
+            <button class="bp-btn" onclick="playNext()"><i class="fas fa-forward-step"></i></button>
+        </div>
     </div>
 
 <audio id="mainAudio" preload="auto" playsinline webkit-playsinline></audio>
@@ -69,25 +120,59 @@
     const audio = document.getElementById('mainAudio');
     const playlist = <%- JSON.stringify(artists) %>;
     let currentIdx = 0;
+    let isUnlocked = false; // 브라우저 오디오 엔진 잠금 해제 여부
 
-    // 블루투스 & 차량 모니터 전용 설정
-    function setupBluetooth(track) {
+    // UI 요소들
+    const bottomPlayer = document.getElementById('bottom-player');
+    const bpImg = document.getElementById('bp-img');
+    const bpTitle = document.getElementById('bp-title');
+    const bpArtist = document.getElementById('bp-artist');
+    const bpPlayIcon = document.getElementById('bp-play-icon');
+    const cards = document.querySelectorAll('.rank-card');
+
+    // 🌟 1. [핵심] 브라우저 오디오 엔진 강제 깨우기 (첫 터치 시 실행)
+    document.body.addEventListener('touchstart', unlockAudio, { once: true });
+    document.body.addEventListener('click', unlockAudio, { once: true });
+
+    function unlockAudio() {
+        if (isUnlocked) return;
+        audio.play().then(() => { audio.pause(); }).catch(() => {});
+        isUnlocked = true;
+        console.log("🔓 브라우저 오디오 엔진 잠금 해제 완료!");
+    }
+
+    // 🌟 2. [핵심] 전역 블루투스 & 미디어 세션 설정 (딱 한 번만 실행해서 꼬임 방지)
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.setActionHandler('previoustrack', () => playPrev());
+        navigator.mediaSession.setActionHandler('nexttrack', () => playNext());
+        navigator.mediaSession.setActionHandler('play', () => audio.play());
+        navigator.mediaSession.setActionHandler('pause', () => audio.pause());
+    }
+
+    // UI 업데이트 함수 (멜론처럼 보이기)
+    function updateUI(track, index) {
+        // 플레이어 바 띄우고 정보 채우기
+        bottomPlayer.classList.add('active');
+        bpImg.src = track.image || 'https://via.placeholder.com/512';
+        bpTitle.textContent = track.name || '알 수 없는 곡';
+        bpArtist.textContent = track.artist || 'RANKING AI';
+
+        // 리스트에서 현재 곡 색상 강조
+        cards.forEach(c => c.classList.remove('playing'));
+        if(cards[index]) cards[index].classList.add('playing');
+
+        // 블루투스/차량 모니터로 정보 쏘기
         if ('mediaSession' in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
-                title: track.name || '알 수 없는 곡',
+                title: track.name || '제목 없음',
                 artist: track.artist || 'RANKING AI',
                 album: 'RANKING AI TOP CHART',
                 artwork: [{ src: track.image || 'https://via.placeholder.com/512', sizes: '512x512', type: 'image/png' }]
             });
-
-            navigator.mediaSession.setActionHandler('previoustrack', () => playTrack(currentIdx - 1));
-            navigator.mediaSession.setActionHandler('nexttrack', () => playTrack(currentIdx + 1));
-            navigator.mediaSession.setActionHandler('play', () => audio.play());
-            navigator.mediaSession.setActionHandler('pause', () => audio.pause());
         }
     }
 
-    // 강력한 재생 엔진
+    // 🌟 3. 무적의 재생 엔진
     function playTrack(index) {
         if (!playlist || playlist.length === 0) return;
 
@@ -96,44 +181,57 @@
         
         currentIdx = index;
         const track = playlist[currentIdx];
-        const trackSrc = track.audioUrl || track.audio || track.url; // 음원 주소 찾기
+        const trackSrc = track.audioUrl || track.audio || track.url; 
         
         if (!trackSrc) {
-            playTrack(currentIdx + 1); // 주소 없으면 즉시 다음 곡
+            playNext(); // 주소 없으면 즉시 다음 곡
             return;
         }
 
         audio.src = trackSrc;
-        audio.load(); // 모바일을 위한 강제 로딩
+        audio.load();
         
         const playPromise = audio.play();
         if (playPromise !== undefined) {
             playPromise.then(() => {
-                setupBluetooth(track); // 곡 시작되면 블루투스 정보 세팅
+                updateUI(track, currentIdx);
             }).catch(err => {
-                console.log("자동재생 차단됨. 사용자의 첫 터치가 필요합니다.", err);
+                console.log("⚠️ 자동재생 방어됨. 사용자 클릭 필요.");
             });
         }
     }
 
-    // 🌟 [핵심] 1밀리초의 딜레이도 없이 즉시 다음 곡 쏘기! (모바일 연속재생 성공의 열쇠)
-    audio.addEventListener('ended', () => {
-        playTrack(currentIdx + 1);
+    // 이전/다음 곡 컨트롤 함수
+    function playNext() { playTrack(currentIdx + 1); }
+    function playPrev() { playTrack(currentIdx - 1); }
+
+    // 재생/일시정지 토글
+    function togglePlay() {
+        if (audio.paused) audio.play();
+        else audio.pause();
+    }
+
+    // 재생 상태에 따라 하단 아이콘 변경
+    audio.addEventListener('play', () => {
+        bpPlayIcon.classList.remove('fa-circle-play');
+        bpPlayIcon.classList.add('fa-circle-pause');
+    });
+    audio.addEventListener('pause', () => {
+        bpPlayIcon.classList.remove('fa-circle-pause');
+        bpPlayIcon.classList.add('fa-circle-play');
     });
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const cards = document.querySelectorAll('.rank-card');
-        cards.forEach((card, index) => {
-            card.style.cursor = 'pointer';
-            
-            card.addEventListener('click', (e) => {
-                // 관리자 삭제 버튼을 눌렀을 때는 노래가 틀어지지 않도록 방어
-                if(e.target.classList.contains('admin-delete-btn')) return; 
-                playTrack(index);
-            });
+    // 🌟 [연속재생 보장] 노래가 끝나면 즉시 다음 곡!
+    audio.addEventListener('ended', playNext);
+
+    // 카드 클릭 시 노래 재생 (삭제 버튼 예외 처리)
+    cards.forEach(card => {
+        card.addEventListener('click', (e) => {
+            if(e.target.closest('.admin-delete-btn')) return; // 삭제버튼 누르면 재생 안함
+            const index = parseInt(card.getAttribute('data-index'));
+            playTrack(index);
         });
     });
 </script>
-
 </body>
 </html>
