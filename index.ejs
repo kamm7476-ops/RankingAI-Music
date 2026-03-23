@@ -60,78 +60,55 @@
 <audio id="mainAudio" preload="auto"></audio>
 
 <script>
+    <script>
     const audio = document.getElementById('mainAudio');
-    // 서버에서 받은 노래 리스트를 자바스크립트 배열로 변환
     const playlist = <%- JSON.stringify(artists) %>;
     let currentIdx = 0;
 
-    // 🌟 [함수] 노래 재생하기
     function playTrack(index) {
-    if (index < 0 || index >= playlist.length) return;
-    
-    currentIdx = index;
-    const track = playlist[currentIdx];
-    
-    if (!track.audioUrl || track._id === "dummy") return;
+        if (index < 0) index = playlist.length - 1;
+        if (index >= playlist.length) index = 0;
+        
+        currentIdx = index;
+        const track = playlist[currentIdx];
+        const trackSrc = track.audioUrl || track.audio; // 필드명 확인용
+        
+        if (!trackSrc) return;
 
-    audio.src = track.audioUrl;
-    audio.load();
-
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-        playPromise.then(() => {
-            // 🌟 [추가] 블루투스 & 차량 모니터에 정보 전송 🌟
+        audio.src = trackSrc;
+        
+        // 📱 모바일/블루투스 핵심 로직
+        audio.play().then(() => {
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
-                    title: track.name,           // 곡 제목
-                    artist: track.artist,         // 가수 이름
-                    album: 'RANKING AI 차트',     // 앨범명
-                    artwork: [
-                        { src: track.image, sizes: '512x512', type: 'image/png' } // 앨범 아트
-                    ]
+                    title: track.name,
+                    artist: track.artist,
+                    album: 'RANKING AI CHART',
+                    artwork: [{ src: track.image, sizes: '512x512', type: 'image/png' }]
                 });
 
-                // 핸들 리모컨 조작 (이전 곡/다음 곡) 연결
-                navigator.mediaSession.setActionHandler('previoustrack', () => {
-                    playTrack(currentIdx - 1);
-                });
-                navigator.mediaSession.setActionHandler('nexttrack', () => {
-                    playTrack(currentIdx + 1);
-                });
+                // 블루투스/핸들 리모컨 버튼 연결
+                navigator.mediaSession.setActionHandler('previoustrack', () => playTrack(currentIdx - 1));
+                navigator.mediaSession.setActionHandler('nexttrack', () => playTrack(currentIdx + 1));
+                navigator.mediaSession.setActionHandler('play', () => audio.play());
+                navigator.mediaSession.setActionHandler('pause', () => audio.pause());
             }
-            console.log("▶️ 재생 중: " + track.name);
-        }).catch(error => {
-            console.log("🚫 재생 차단됨:", error);
-        });
+        }).catch(err => console.log("재생 차단됨 (첫 클릭 필요)"));
     }
-}
 
-    // 🌟 [핵심] 노래가 끝나면 다음 곡으로 자동 이동 (모바일 연속 재생의 핵심)
+    // 🌟 모바일 연속 재생의 핵심 (ended 이벤트)
     audio.addEventListener('ended', () => {
-        console.log("🎵 곡 종료! 다음 곡을 재생합니다.");
-        currentIdx++;
-        
-        if (currentIdx < playlist.length) {
-            playTrack(currentIdx);
-        } else {
-            console.log("🏁 모든 곡 재생 완료! 처음으로 돌아갑니다.");
-            playTrack(0);
-        }
+        console.log("곡 종료, 다음 곡으로!");
+        setTimeout(() => {
+            playTrack(currentIdx + 1);
+        }, 200); // 아주 짧은 딜레이가 모바일 안정성을 높여줍니다.
     });
 
-    // 🌟 [연결] 노래 카드들을 클릭 가능하게 만들기
     document.addEventListener('DOMContentLoaded', () => {
         const cards = document.querySelectorAll('.rank-card');
-        
         cards.forEach((card, index) => {
-            // 마우스 커서를 포인터로 변경
             card.style.cursor = 'pointer';
-            
-            // 클릭 이벤트 연결
-            card.addEventListener('click', () => {
-                console.log((index + 1) + "번 노래 클릭됨");
-                playTrack(index);
-            });
+            card.addEventListener('click', () => playTrack(index));
         });
     });
 </script>
