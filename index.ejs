@@ -7,8 +7,9 @@
         body { background: #0a0b10; color: white; font-family: sans-serif; }
         .nav { display: flex; justify-content: space-between; padding: 20px; border-bottom: 1px solid #222; }
         .logo { font-size: 1.5rem; color: #00d4ff; font-weight: bold; text-decoration: none; }
-        .rank-card { background: rgba(255,255,255,0.05); margin: 10px 0; padding: 20px; border-radius: 15px; display: flex; align-items: center; }
+        .rank-card { background: rgba(255,255,255,0.05); margin: 10px 0; padding: 20px; border-radius: 15px; display: flex; align-items: center; position: relative; }
         .album-art { width: 60px; height: 60px; border-radius: 10px; margin: 0 20px; }
+        .delete-btn-wrap { margin-left: auto; } /* 삭제 버튼을 우측으로 밀어줍니다 */
     </style>
 </head>
 <body>
@@ -38,8 +39,10 @@
         <% } %>
     </div>
 </nav>
+
     <div style="padding: 20px;">
         <h2><%= t.chartTitle %></h2>
+        
         <% artists.forEach((song, i) => { %>
             <div class="rank-card">
                 <div><%= i+1 %></div>
@@ -48,60 +51,86 @@
                     <strong><%= song.name %></strong><br>
                     <small><%= song.artist %></small>
                 </div>
+                
+                <% if (user && user.role === 'admin') { %>
+                <div class="delete-btn-wrap">
+                    <form action="/delete-music/<%= song._id %>" method="POST" onsubmit="return confirm('관리자 권한으로 삭제하시겠습니까?');" style="margin:0;">
+                        <button type="button" class="admin-delete-btn" onclick="this.form.submit();" style="color: #ff4d4d; border: 1px solid #ff4d4d; background: none; cursor: pointer; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem;">강제 삭제</button>
+                    </form>
+                </div>
+                <% } %>
             </div>
         <% }) %>
-        <% if (user && user.role === 'admin') { %>
-    <form action="/delete-music/<%= song._id %> method="POST" onsubmit="return confirm('관리자 권한으로 삭제하시겠습니까?');" style="margin-top:10px;">
-        <button type="submit" style="color: #ff4d4d; border: 1px solid #ff4d4d; background: none; cursor: pointer; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;">강제 삭제</button>
-    </form>
-        <% } %>
     </div>
 
-<audio id="mainAudio" preload="auto"></audio>
+<audio id="mainAudio" preload="auto" playsinline webkit-playsinline></audio>
 
 <script>
     const audio = document.getElementById('mainAudio');
     const playlist = <%- JSON.stringify(artists) %>;
     let currentIdx = 0;
 
+    // 블루투스 & 차량 모니터 전용 설정
+    function setupBluetooth(track) {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: track.name || '알 수 없는 곡',
+                artist: track.artist || 'RANKING AI',
+                album: 'RANKING AI TOP CHART',
+                artwork: [{ src: track.image || 'https://via.placeholder.com/512', sizes: '512x512', type: 'image/png' }]
+            });
+
+            navigator.mediaSession.setActionHandler('previoustrack', () => playTrack(currentIdx - 1));
+            navigator.mediaSession.setActionHandler('nexttrack', () => playTrack(currentIdx + 1));
+            navigator.mediaSession.setActionHandler('play', () => audio.play());
+            navigator.mediaSession.setActionHandler('pause', () => audio.pause());
+        }
+    }
+
+    // 강력한 재생 엔진
     function playTrack(index) {
+        if (!playlist || playlist.length === 0) return;
+
         if (index < 0) index = playlist.length - 1;
         if (index >= playlist.length) index = 0;
         
         currentIdx = index;
         const track = playlist[currentIdx];
-        const trackSrc = track.audioUrl || track.audio;
+        const trackSrc = track.audioUrl || track.audio || track.url; // 음원 주소 찾기
         
-        if (!trackSrc) return;
+        if (!trackSrc) {
+            playTrack(currentIdx + 1); // 주소 없으면 즉시 다음 곡
+            return;
+        }
 
         audio.src = trackSrc;
+        audio.load(); // 모바일을 위한 강제 로딩
         
-        audio.play().then(() => {
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: track.name,
-                    artist: track.artist || 'RANKING AI',
-                    album: 'RANKING AI CHART',
-                    artwork: [{ src: track.image, sizes: '512x512', type: 'image/png' }]
-                });
-
-                navigator.mediaSession.setActionHandler('previoustrack', () => playTrack(currentIdx - 1));
-                navigator.mediaSession.setActionHandler('nexttrack', () => playTrack(currentIdx + 1));
-                navigator.mediaSession.setActionHandler('play', () => audio.play());
-                navigator.mediaSession.setActionHandler('pause', () => audio.pause());
-            }
-        }).catch(err => console.log("재생 차단됨"));
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                setupBluetooth(track); // 곡 시작되면 블루투스 정보 세팅
+            }).catch(err => {
+                console.log("자동재생 차단됨. 사용자의 첫 터치가 필요합니다.", err);
+            });
+        }
     }
 
+    // 🌟 [핵심] 1밀리초의 딜레이도 없이 즉시 다음 곡 쏘기! (모바일 연속재생 성공의 열쇠)
     audio.addEventListener('ended', () => {
-        setTimeout(() => { playTrack(currentIdx + 1); }, 200);
+        playTrack(currentIdx + 1);
     });
 
     document.addEventListener('DOMContentLoaded', () => {
         const cards = document.querySelectorAll('.rank-card');
         cards.forEach((card, index) => {
             card.style.cursor = 'pointer';
-            card.addEventListener('click', () => { playTrack(index); });
+            
+            card.addEventListener('click', (e) => {
+                // 관리자 삭제 버튼을 눌렀을 때는 노래가 틀어지지 않도록 방어
+                if(e.target.classList.contains('admin-delete-btn')) return; 
+                playTrack(index);
+            });
         });
     });
 </script>

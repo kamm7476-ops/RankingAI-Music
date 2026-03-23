@@ -28,7 +28,6 @@
         /* 🌟 반응형 쇼츠 비디오 그리드 🌟 */
         .shorts-grid {
             display: grid;
-            /* 쇼츠는 세로로 기니까 한 칸의 너비를 살짝 좁게(220px) 잡아줍니다. */
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
             gap: 20px;
         }
@@ -37,11 +36,12 @@
         }
         .shorts-card:hover { border-color: #ffb300; transform: translateY(-5px); box-shadow: 0 5px 15px rgba(255,179,0,0.2); }
         
-        /* 🌟 쇼츠 비율 고정 마법 (9:16) 🌟 */
+        /* 🌟 [수정 완료] 쇼츠 비율 고정 마법 (9:16) 🌟 */
         .shorts-iframe-wrap {
             position: relative;
             width: 100%;
-            aspect-ratio: 9 / 16; /* 세로가 긴 형태! */
+            padding-bottom: 177.77%; /* 새로고침 없이 처음부터 무조건 세로비율 강제! */
+            height: 0;
             background: #000;
         }
         .shorts-iframe-wrap iframe {
@@ -57,7 +57,6 @@
             .header-nav { justify-content: flex-start; overflow-x: auto; white-space: nowrap; padding: 12px 15px; gap: 20px; }
             .header-nav::-webkit-scrollbar { display: none; }
             .input-row { flex-direction: column; }
-            /* 모바일에서는 쇼츠를 가로 2개로 쪼개거나 좀 더 꽉 차게 (여기서는 50%씩 2개로) */
             .shorts-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
         }
     </style>
@@ -113,11 +112,9 @@
             const videoId = getYoutubeId(video.url);
         %>
         <div class="shorts-card">
-            <div class="shorts-iframe-wrap" style="position: relative; width: 100%; aspect-ratio: 9/16; background: #000;">
+            <div class="shorts-iframe-wrap">
                 <% if (videoId) { %>
-                    <iframe src="https://www.youtube.com/embed/<%= videoId %>?modestbranding=1&rel=0" 
-                            style="position: absolute; top:0; left:0; width:100%; height:100%;" 
-                            allowfullscreen></iframe>
+                    <iframe src="https://www.youtube.com/embed/<%= videoId %>?modestbranding=1&rel=0" allowfullscreen></iframe>
                     
                     <div style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 8px; display: flex; align-items: center; gap: 6px; pointer-events: none; border: 1px solid rgba(255,255,255,0.1);">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="#ff0000"><path d="M17.77 10.32l-1.2-.5L18 8.06a4.47 4.47 0 0 0-2.48-5.74 4.63 4.63 0 0 0-5.74 2.49L5.94 10.3l1.2.5L5.75 12.5a4.47 4.47 0 0 0 2.48 5.74 4.63 4.63 0 0 0 5.74-2.49L17.77 10.3l-1.2-.5zM10 14.5v-5l4.5 2.5-4.5 2.5z"></path></svg>
