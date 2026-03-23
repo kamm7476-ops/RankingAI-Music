@@ -7,6 +7,7 @@ const session = require('express-session');
 
 const passport = require('passport');
 const NaverStrategy = require('passport-naver').Strategy;
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 // 🌟 클라우디너리 영구 금고 세팅
 const cloudinary = require('cloudinary').v2;
@@ -162,7 +163,42 @@ app.get('/auth/naver/callback',
     }
 );
 // =========================================
+// =========================================
+// 🌟 구글 소셜 로그인 파이프 🌟
+// =========================================
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "https://rankingaimusic.com/auth/google/callback"
+}, async (accessToken, refreshToken, profile, done) => {
+    try {
+        const googleId = 'google_' + profile.id; 
+        let user = await User.findOne({ username: googleId });
+        
+        // 처음 로그인하는 구글 유저라면 몰래 자동 가입!
+        if (!user) {
+            const randomPassword = Math.random().toString(36).slice(-10); 
+            const hashedPassword = await bcrypt.hash(randomPassword, 10);
+            user = new User({ username: googleId, password: hashedPassword });
+            await user.save();
+        }
+        return done(null, { id: user.username, name: profile.displayName || '구글유저', role: 'user' });
+    } catch (err) {
+        return done(err);
+    }
+}));
 
+// 구글 로그인 버튼 눌렀을 때 가는 길 (이메일, 프로필 정보 내놔!)
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+// 구글 로그인 끝나고 우리 사이트로 돌아오는 길
+app.get('/auth/google/callback', 
+    passport.authenticate('google', { failureRedirect: '/login' }),
+    (req, res) => {
+        req.session.user = req.user; // 세션에 로그인 도장 쾅!
+        res.send("<script>alert('초간단 구글 로그인 성공!'); window.location.href='/';</script>");
+    }
+);
 
 // =========================================
 // 🌟 메인 화면 (차트 & 최신음악 & 팝업)
