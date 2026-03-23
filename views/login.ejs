@@ -55,7 +55,27 @@
             </div>
             <button type="submit" class="btn-submit">로그인</button>
         </form>
-        
+
+        <div style="display: flex; align-items: center; margin-top: 25px; margin-bottom: 20px;">
+            <div style="flex-grow: 1; height: 1px; background: #333;"></div>
+            <span style="padding: 0 10px; color: #777; font-size: 12px;">또는 1초 만에 시작하기</span>
+            <div style="flex-grow: 1; height: 1px; background: #333;"></div>
+        </div>
+
+        <button type="button" onclick="alert('네이버 로그인 연동 준비 중입니다! 🛠️')" style="width:100%; background:#03C75A; color:#fff; border:none; padding:14px; border-radius:8px; font-weight:bold; font-size:15px; cursor:pointer; margin-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 8px;">
+            <strong style="font-size: 18px;">N</strong> 네이버로 로그인
+        </button>
+
+        <button type="button" onclick="alert('구글 로그인 연동 준비 중입니다! 🛠️')" style="width:100%; background:#ffffff; color:#000; border:none; padding:14px; border-radius:8px; font-weight:bold; font-size:15px; cursor:pointer; margin-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 8px;">
+            <strong style="font-size: 18px; color: #EA4335;">G</strong> 구글로 로그인
+        </button>
+        ```
+
+**💡 꿀팁:**
+현재 캡처해주신 화면은 '깃허브(GitHub) 웹사이트' 화면입니다! 코드를 수정하시려면 컴퓨터에 켜두신 **VS Code**에서 `views/login.ejs` 파일을 열어서 수정하시고 저장(`Ctrl + S`)하신 뒤, 터미널 3단 콤보(`git add .` -> `commit` -> `push`)를 하셔야 실제 사이트에 반영됩니다!
+
+적용해 보시고 예쁜 버튼이 잘 나오는지 확인해 보시겠어요? 😎🔥
+
         <div class="extra-links">
             계정이 없으신가요? <a href="/signup">회원가입하기</a><br><br>
             <a href="/">← 메인 화면으로 돌아가기</a>
