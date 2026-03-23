@@ -70,44 +70,38 @@
         
         currentIdx = index;
         const track = playlist[currentIdx];
-        const trackSrc = track.audioUrl || track.audio; // 필드명 확인용
+        const trackSrc = track.audioUrl || track.audio;
         
         if (!trackSrc) return;
 
         audio.src = trackSrc;
         
-        // 📱 모바일/블루투스 핵심 로직
         audio.play().then(() => {
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: track.name,
-                    artist: track.artist,
+                    artist: track.artist || 'RANKING AI',
                     album: 'RANKING AI CHART',
                     artwork: [{ src: track.image, sizes: '512x512', type: 'image/png' }]
                 });
 
-                // 블루투스/핸들 리모컨 버튼 연결
                 navigator.mediaSession.setActionHandler('previoustrack', () => playTrack(currentIdx - 1));
                 navigator.mediaSession.setActionHandler('nexttrack', () => playTrack(currentIdx + 1));
                 navigator.mediaSession.setActionHandler('play', () => audio.play());
                 navigator.mediaSession.setActionHandler('pause', () => audio.pause());
             }
-        }).catch(err => console.log("재생 차단됨 (첫 클릭 필요)"));
+        }).catch(err => console.log("재생 차단됨"));
     }
 
-    // 🌟 모바일 연속 재생의 핵심 (ended 이벤트)
     audio.addEventListener('ended', () => {
-        console.log("곡 종료, 다음 곡으로!");
-        setTimeout(() => {
-            playTrack(currentIdx + 1);
-        }, 200); // 아주 짧은 딜레이가 모바일 안정성을 높여줍니다.
+        setTimeout(() => { playTrack(currentIdx + 1); }, 200);
     });
 
     document.addEventListener('DOMContentLoaded', () => {
         const cards = document.querySelectorAll('.rank-card');
         cards.forEach((card, index) => {
             card.style.cursor = 'pointer';
-            card.addEventListener('click', () => playTrack(index));
+            card.addEventListener('click', () => { playTrack(index); });
         });
     });
 </script>
