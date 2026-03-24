@@ -32,7 +32,7 @@ const storage = new CloudinaryStorage({
 const upload = multer({ 
     storage: storage,
     limits: { 
-        fileSize: 1 * 1024 * 1024 // 🌟 이미지 최대 2MB로 제한! (1 곱하기 1MB)
+        fileSize: 2 * 1024 * 1024 // 🌟 이미지 최대 2MB로 제한! (1 곱하기 1MB)
     } 
 });
 
