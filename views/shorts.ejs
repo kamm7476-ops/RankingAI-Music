@@ -119,8 +119,8 @@
                 %>
                 <div class="shorts-card">
                     <% if (videoId) { %>
-                        <div class="shorts-iframe-wrap" style="cursor: pointer;"
-                             onclick="this.innerHTML='<iframe src=\'https://www.youtube.com/embed/<%= videoId %>?autoplay=1&playsinline=1\' style=\'position:absolute;top:0;left:0;width:100%;height:100%;border:none;\' allow=\'autoplay; encrypted-media\' allowfullscreen></iframe>'">
+                        <div class="shorts-iframe-wrap" data-id="<%= videoId %>" style="cursor:pointer;">
+                             onclick="this.innerHTML='<iframe src=\'https://www.youtube.com/embed/<%= videoId %>?autoplay=1&playsinline=1\' allow=\'autoplay; encrypted-media\' allowfullscreen></iframe>'">
                             
                             <img src="https://i.ytimg.com/vi/<%= videoId %>/hqdefault.jpg" style="position: absolute; top:0; left:0; width: 100%; height: 100%; object-fit: cover; opacity: 0.8;">
                             
@@ -156,5 +156,27 @@
             <% } %>
         </div>
     </div>
+
+<script>
+document.addEventListener("click", function(e) {
+  const wrap = e.target.closest(".shorts-iframe-wrap");
+
+  // 쇼츠 영역 아니면 무시
+  if (!wrap) return;
+
+  // 이미 실행된 경우 중복 방지
+  if (wrap.querySelector("iframe")) return;
+
+  const videoId = wrap.dataset.id;
+
+  wrap.innerHTML = `
+    <iframe 
+      src="https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1"
+      allow="autoplay; encrypted-media"
+      allowfullscreen>
+    </iframe>
+  `;
+});
+</script>
 </body>
 </html>
