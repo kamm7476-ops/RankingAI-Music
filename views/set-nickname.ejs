@@ -1,1 +1,42 @@
-
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아티스트명 설정 - RANKING AI</title>
+    <style>
+        body { 
+            background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; 
+            margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh;
+        }
+        .nickname-box {
+            background: #161718; padding: 40px; border-radius: 20px; text-align: center;
+            border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%; max-width: 400px;
+        }
+        .title { color: #ff5722; font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+        .subtitle { color: #aaa; font-size: 14px; margin-bottom: 30px; line-height: 1.5; }
+        input {
+            width: 90%; background: #000; color: #fff; border: 1px solid #444; 
+            padding: 15px; border-radius: 10px; font-size: 16px; margin-bottom: 20px;
+            text-align: center; outline: none; transition: 0.3s;
+        }
+        input:focus { border-color: #ff5722; box-shadow: 0 0 10px rgba(255,87,34,0.3); }
+        button {
+            width: 100%; background: #ff5722; color: #000; border: none; padding: 15px; 
+            border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s;
+        }
+        button:hover { background: #ff784e; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+    <div class="nickname-box">
+        <div class="title">환영합니다! 🎉</div>
+        <div class="subtitle">RANKING AI에서 활동하실<br>멋진 <b>아티스트명(닉네임)</b>을 설정해주세요.</div>
+        
+        <form action="/set-nickname" method="POST">
+            <input type="text" name="nickname" placeholder="예) RANKING_KING" required autocomplete="off" maxlength="15">
+            <button type="submit">이 이름으로 시작하기</button>
+        </form>
+    </div>
+</body>
+</html>
