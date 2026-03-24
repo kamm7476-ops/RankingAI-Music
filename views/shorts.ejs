@@ -25,49 +25,65 @@
         .input-row input { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; }
         .btn-upload { background: #ff5722; color: #000; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
 
-        /* 🌟 메인 화면: 5칸 꽉 찬 쇼츠 그리드 🌟 */
+        /* ========================================= */
+        /* 🌟 1. 절대 고장 안 나는 Flexbox 5칸 그리드 🌟 */
+        /* ========================================= */
         .shorts-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr); /* PC 무조건 5개 고정! */
+            display: flex;
+            flex-wrap: wrap;
             gap: 15px;
+            width: 100%;
         }
 
-        /* 🌟 쇼츠 전용 9:16 비율 카드 🌟 */
+        /* PC 기준: 100%에서 여백을 빼고 정확히 5등분 */
         .shorts-card {
+            width: calc(20% - 12px); 
             background: #111; border: 1px solid #222; border-radius: 12px; 
             overflow: hidden; position: relative; cursor: pointer;
-            aspect-ratio: 9 / 16; /* 가로세로 비율 자동 조절 */
-            transition: 0.2s;
-            min-width: 0; /* 🌟 핵심 방어막: 화면 대문짝만해지는 버그 원천 차단 🌟 */
+            transition: 0.2s; flex-shrink: 0;
         }
         .shorts-card:hover { border-color: #ff5722; transform: translateY(-5px); box-shadow: 0 8px 20px rgba(255,87,34,0.3); }
-        .shorts-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
 
-        /* 🌟 찐 쇼츠 로고 버튼 (렉 없이 0.001초 만에 뜸) 🌟 */
-        .shorts-logo-overlay {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 60px; height: 60px; pointer-events: none;
-            filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.6));
+        /* 🌟 2. 9:16 철벽 방어 (Padding Hack) 🌟 */
+        /* 브라우저가 헷갈리지 않게 무조건 16:9 비율 공간을 먼저 확보합니다. */
+        .shorts-card-inner {
+            width: 100%;
+            padding-bottom: 177.77%; 
+            position: relative;
+        }
+        
+        .shorts-card-inner img { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            object-fit: cover; opacity: 0.9; 
         }
 
         /* 🌟 하단 제목 오버레이 🌟 */
         .grid-info {
             position: absolute; bottom: 0; left: 0; width: 100%;
             background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-            padding: 20px 10px 10px; box-sizing: border-box; pointer-events: none;
+            padding: 30px 12px 12px; box-sizing: border-box; pointer-events: none; z-index: 5;
         }
-        .grid-title { font-size: 14px; font-weight: bold; color: #fff; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        @media (max-width: 1024px) { .shorts-grid { grid-template-columns: repeat(4, 1fr); } }
-        @media (max-width: 768px) { .shorts-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; } }
-        @media (max-width: 480px) { .shorts-grid { grid-template-columns: repeat(2, 1fr); } }
+        .grid-title { font-size: 14px; font-weight: bold; color: #fff; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 1px 1px 2px #000; }
+        .grid-uploader { font-size: 11px; color: #aaa; margin-bottom: 4px; text-shadow: 1px 1px 2px #000;}
+
+        /* 반응형: 태블릿 4칸, 모바일 3칸, 좁은폰 2칸 */
+        @media (max-width: 1024px) { .shorts-card { width: calc(25% - 11.25px); } }
+        @media (max-width: 768px) { 
+            .header-top { flex-direction: column; gap: 15px; }
+            .header-nav { justify-content: flex-start; overflow-x: auto; white-space: nowrap; padding: 12px 15px; gap: 20px; }
+            .header-nav::-webkit-scrollbar { display: none; }
+            .input-row { flex-direction: column; }
+            .shorts-card { width: calc(33.333% - 10px); } 
+        }
+        @media (max-width: 480px) { .shorts-card { width: calc(50% - 7.5px); } }
+
 
         /* ========================================= */
-        /* 🌟 클릭 시 열리는 "쇼츠 극장 (스와이프 모드)" 🌟 */
+        /* 🌟 3. 클릭 시 열리는 "쇼츠 극장 (스와이프)" 🌟 */
         /* ========================================= */
         .shorts-modal {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #000; z-index: 99999; display: none; /* 평소엔 숨김 */
+            background: #000; z-index: 99999; display: none; 
         }
         .btn-close-modal {
             position: fixed; top: 20px; left: 20px; z-index: 100000;
@@ -77,23 +93,22 @@
         }
         
         .modal-feed {
-            width: 100%; max-width: 450px; /* 폰 화면처럼 가운데 정렬 */
+            width: 100%; max-width: 450px; 
             height: 100vh; margin: 0 auto;
-            overflow-y: scroll; scroll-snap-type: y mandatory; /* 위아래 자석 스크롤! */
+            overflow-y: scroll; scroll-snap-type: y mandatory; 
             -ms-overflow-style: none; scrollbar-width: none;
+            background: #000;
         }
         .modal-feed::-webkit-scrollbar { display: none; }
 
         .modal-item {
             width: 100%; height: 100vh; scroll-snap-align: start;
             position: relative; display: flex; align-items: center; justify-content: center;
-            background: #111;
         }
 
         .modal-iframe-wrap { width: 100%; height: 100%; position: relative; }
-        /* 🌟 대문짝 렉 방지: 비율과 크기를 CSS로 더 꽉 붙잡았습니다 🌟 */
         .modal-iframe-wrap iframe {
-            position: absolute; top: 0; left: 0; width: 100% !important; height: 100% !important; border: none;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
         }
 
         .modal-overlay-info {
@@ -166,25 +181,28 @@
                 %>
                 <div class="shorts-card" onclick="openModal(<%= index %>)">
                     <% if (videoId) { %>
-                        <img src="https://i.ytimg.com/vi/<%= videoId %>/hqdefault.jpg" alt="썸네일">
-                        
-                        <div class="shorts-logo-overlay">
-                            <svg viewBox="0 0 32 32" width="100%" height="100%">
-                                <path d="M26.2,12.5l-2.6-1.5l2.6-1.5c2.4-1.4,3.2-4.5,1.8-6.9c-1.4-2.4-4.5-3.2-6.9-1.8l-15,8.7 c-2.4,1.4-3.2,4.5-1.8,6.9c0.9,1.5,2.4,2.3,4.1,2.4l2.5,1.5l-2.5,1.5c-2.4,1.4-3.2,4.5-1.8,6.9c1.4,2.4,4.5,3.2,6.9,1.8l15-8.7 C30.9,18.4,31.7,15.3,30.3,12.9C29.4,11.3,27.9,10.5,26.2,12.5z" fill="#ff0000"/>
-                                <polygon points="12.5,9.5 12.5,22.5 21.5,16" fill="#ffffff"/>
-                            </svg>
-                        </div>
+                        <div class="shorts-card-inner">
+                            <img src="https://i.ytimg.com/vi/<%= videoId %>/hqdefault.jpg" alt="썸네일">
+                            
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; pointer-events: none; z-index: 10;">
+                                <svg viewBox="0 0 32 32" width="50" height="50" style="filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.6));">
+                                    <path d="M26.2,12.5l-2.6-1.5l2.6-1.5c2.4-1.4,3.2-4.5,1.8-6.9c-1.4-2.4-4.5-3.2-6.9-1.8l-15,8.7 c-2.4,1.4-3.2,4.5-1.8,6.9c0.9,1.5,2.4,2.3,4.1,2.4l2.5,1.5l-2.5,1.5c-2.4,1.4-3.2,4.5-1.8,6.9c1.4,2.4,4.5,3.2,6.9,1.8l15-8.7 C30.9,18.4,31.7,15.3,30.3,12.9C29.4,11.3,27.9,10.5,26.2,12.5z" fill="#ff0000"/>
+                                    <polygon points="12.5,9.5 12.5,22.5 21.5,16" fill="#ffffff"/>
+                                </svg>
+                            </div>
 
-                        <div class="grid-info">
-                            <p class="grid-title"><%= video.title %></p>
+                            <div class="grid-info">
+                                <div class="grid-uploader">@<%= video.uploader %></div>
+                                <p class="grid-title"><%= video.title %></p>
+                            </div>
                         </div>
                     <% } else { %>
-                        <div style="display:flex; height:100%; justify-content:center; align-items:center; color:#555;">링크 오류</div>
+                        <div class="shorts-card-inner" style="display:flex; justify-content:center; align-items:center; background:#111; color:#555;">링크 오류</div>
                     <% } %>
                 </div>
                 <% }); %>
             <% } else { %>
-                <p style="color: #777; grid-column: 1 / -1; text-align: center;">등록된 쇼츠 영상이 없습니다.</p>
+                <p style="color: #777; width:100%; text-align: center;">등록된 쇼츠 영상이 없습니다.</p>
             <% } %>
         </div>
     </div>
@@ -222,7 +240,6 @@
     <script>
         let observer;
 
-        // 1. 인공지능 눈알 세팅 (화면에 보이는 것만 유튜브 틀기)
         function initObserver() {
             observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -230,7 +247,6 @@
                     const vid = entry.target.dataset.vid;
 
                     if (entry.isIntersecting && vid) {
-                        // 화면에 들어오면 -> 유튜브 자동 재생 + 무한 루프 켜기
                         wrap.innerHTML = `
                             <iframe 
                                 src="https://www.youtube.com/embed/${vid}?autoplay=1&loop=1&playlist=${vid}&playsinline=1&controls=0&rel=0" 
@@ -239,7 +255,6 @@
                             </iframe>
                         `;
                     } else {
-                        // 화면 밖으로 나가면 -> 폰 렉 안 걸리게 동영상 끄기 (소리 겹침 방지)
                         wrap.innerHTML = '';
                     }
                 });
@@ -248,44 +263,34 @@
                 threshold: 0.5 
             });
 
-            // 모든 모달 아이템에 인공지능 눈알 붙이기
             document.querySelectorAll('.modal-item').forEach(item => {
                 observer.observe(item);
             });
         }
 
-        // 2. 썸네일 클릭 시 극장 오픈!
         function openModal(index) {
             const modal = document.getElementById('shortsModal');
-            modal.style.display = 'block'; // 까만 극장 켜기
-            document.body.style.overflow = 'hidden'; // 뒤에 있는 원래 화면은 스크롤 안 되게 막기
+            modal.style.display = 'block'; 
+            document.body.style.overflow = 'hidden'; 
             
-            // 🌟 0초 만에 깨진 화면 없이 정확히 스크롤 🌟
-            // 브라우저가 레이아웃을 계산할 시간을 주기 위해 약간의 지연 시간을 둡니다
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    // 클릭한 그 영상 위치로 단숨에 이동
-                    const target = document.getElementById('modal-item-' + index);
-                    if(target) {
-                        target.scrollIntoView({ behavior: 'instant' });
-                    }
-                });
-            });
+            setTimeout(() => {
+                const target = document.getElementById('modal-item-' + index);
+                if(target) {
+                    target.scrollIntoView({ behavior: 'instant' });
+                }
+            }, 10);
         }
 
-        // 3. X 버튼 눌러서 극장 닫기
         function closeModal() {
             const modal = document.getElementById('shortsModal');
-            modal.style.display = 'none'; // 극장 숨기기
-            document.body.style.overflow = ''; // 원래 스크롤 원상복구
+            modal.style.display = 'none'; 
+            document.body.style.overflow = ''; 
             
-            // 모든 동영상 즉시 파괴 (소리 계속 나는 버그 방지)
             document.querySelectorAll('.modal-iframe-wrap').forEach(wrap => {
                 wrap.innerHTML = '';
             });
         }
 
-        // 페이지 켜지면 인공지능 눈알 가동 준비
         document.addEventListener("DOMContentLoaded", initObserver);
     </script>
 </body>
