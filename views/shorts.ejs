@@ -25,18 +25,21 @@
         .input-row input { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; }
         .btn-upload { background: #ff5722; color: #000; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
 
-        /* 🌟 반응형 쇼츠 비디오 그리드 (번쩍임 방지 강제 고정!) 🌟 */
-        .shorts-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr); /* 넓은 PC: 무조건 5개 */
+        /* 🌟 [핵심 변경] Flexbox로 갈아엎어서 번쩍임 원천 차단! 🌟 */
+        .shorts-list {
+            display: flex;
+            flex-wrap: wrap;
             gap: 20px;
             width: 100%;
         }
-        .shorts-card {
-            background: #161718; border: 1px solid #222; border-radius: 15px; overflow: hidden; transition: 0.2s;
-            min-width: 0; /* 사진이 화면을 뚫고 나가는 현상 방지 */
+        .shorts-item {
+            /* PC 무조건 5개 (100%에서 여백을 뺀 정확한 계산) */
+            width: calc(20% - 16px); 
+            background: #161718; border: 1px solid #222; border-radius: 15px; 
+            overflow: hidden; transition: 0.2s; box-sizing: border-box;
+            display: flex; flex-direction: column;
         }
-        .shorts-card:hover { border-color: #ffb300; transform: translateY(-5px); box-shadow: 0 5px 15px rgba(255,179,0,0.2); }
+        .shorts-item:hover { border-color: #ffb300; transform: translateY(-5px); box-shadow: 0 5px 15px rgba(255,179,0,0.2); }
         
         /* 🌟 쇼츠 비율 고정 마법 (9:16) 🌟 */
         .shorts-iframe-wrap {
@@ -45,28 +48,31 @@
             padding-bottom: 177.77%;
             height: 0;
             background: #000;
+            flex-shrink: 0;
         }
         .shorts-iframe-wrap iframe {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
         }
         
-        .shorts-info { padding: 12px; text-align: center; }
+        .shorts-info { padding: 12px; text-align: center; flex-grow: 1; }
         .shorts-title { font-size: 14px; font-weight: bold; margin: 0 0 8px 0; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .btn-delete { background: none; border: none; color: #ff4a4a; cursor: pointer; font-size: 12px; font-weight: bold; padding: 0; }
 
         /* 해상도별 강제 규칙 (새로고침 번쩍임 원천 차단) */
         @media (max-width: 1200px) {
-            .shorts-grid { grid-template-columns: repeat(4, 1fr); } /* 좁은 PC: 4개 */
+            .shorts-item { width: calc(25% - 15px); } /* 좁은 PC: 4개 */
         }
         @media (max-width: 900px) {
-            .shorts-grid { grid-template-columns: repeat(3, 1fr); } /* 태블릿: 3개 */
+            .shorts-item { width: calc(33.333% - 13.4px); } /* 태블릿: 3개 */
         }
         @media (max-width: 768px) {
             .header-top { flex-direction: column; gap: 15px; }
             .header-nav { justify-content: flex-start; overflow-x: auto; white-space: nowrap; padding: 12px 15px; gap: 20px; }
             .header-nav::-webkit-scrollbar { display: none; }
             .input-row { flex-direction: column; }
-            .shorts-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } /* 모바일: 2개 고정 */
+            
+            .shorts-list { gap: 10px; }
+            .shorts-item { width: calc(50% - 5px); } /* 모바일: 무조건 2개 고정 */
         }
     </style>
 </head>
@@ -108,7 +114,7 @@
 
         <h2 style="border-bottom: 2px solid #333; padding-bottom: 10px;">⚡ 요즘 뜨는 쇼츠</h2>
         
-        <div class="shorts-grid">
+        <div class="shorts-list">
             <% 
                 function getYoutubeId(url) {
                     if(!url) return null;
@@ -120,7 +126,7 @@
                 <% shorts.forEach(function(video) { 
                     const videoId = getYoutubeId(video.url);
                 %>
-                <div class="shorts-card">
+                <div class="shorts-item">
                     <% if (videoId) { %>
                         <div class="shorts-iframe-wrap" style="cursor: pointer;"
                              onclick="this.innerHTML='<iframe src=\'https://www.youtube.com/embed/<%= videoId %>?autoplay=1&modestbranding=1&rel=0\' style=\'position:absolute;top:0;left:0;width:100%;height:100%;border:none;\' allow=\'autoplay; encrypted-media\' allowfullscreen></iframe>'">
@@ -155,7 +161,7 @@
                 </div>
                 <% }); %>
             <% } else { %>
-                <p style="color: #777; grid-column: 1 / -1; text-align: center;">등록된 쇼츠 영상이 없습니다.</p>
+                <p style="color: #777; width: 100%; text-align: center;">등록된 쇼츠 영상이 없습니다.</p>
             <% } %>
         </div>
     </div>
