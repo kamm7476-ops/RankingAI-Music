@@ -4,17 +4,15 @@
     <title>Ranking AI</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
     <style>
         body { 
             background: #0a0b10; color: white; font-family: 'Pretendard', sans-serif; 
-            margin: 0; padding-bottom: 100px; /* 하단 플레이어 공간 확보 */
+            margin: 0; padding-bottom: 100px; 
         }
         .nav { display: flex; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #222; background-color: #1a1a1a; align-items: center; }
         .logo { font-size: 1.5rem; color: #ff5722; font-weight: bold; text-decoration: none; }
         
-        /* 🌟 곡 리스트 카드 스타일 */
         .rank-card { 
             background: rgba(255,255,255,0.05); margin: 10px 0; padding: 15px 20px; 
             border-radius: 12px; display: flex; align-items: center; position: relative; 
@@ -24,18 +22,11 @@
         .album-art { width: 55px; height: 55px; border-radius: 8px; margin: 0 15px; object-fit: cover; }
         .delete-btn-wrap { margin-left: auto; }
         
-        /* 🌟 현재 재생 중인 곡 강조 스타일 (멜론 느낌) */
-        .rank-card.playing { 
-            background: rgba(255, 87, 34, 0.1); 
-            border: 1px solid #ff5722; 
-        }
-        .playing-icon {
-            color: #ff5722; font-size: 1.2rem; margin-right: 10px; display: none;
-        }
+        .rank-card.playing { background: rgba(255, 87, 34, 0.1); border: 1px solid #ff5722; }
+        .playing-icon { color: #ff5722; font-size: 1.2rem; margin-right: 10px; display: none; }
         .rank-card.playing .playing-icon { display: block; }
         .rank-card.playing .rank-number { display: none; }
 
-        /* 🌟 하단 플로팅 뮤직 플레이어 바 (진짜 앱 느낌) 🌟 */
         #bottom-player {
             position: fixed; bottom: 0; left: 0; width: 100%; 
             background: rgba(20, 21, 24, 0.95); backdrop-filter: blur(10px);
@@ -44,7 +35,7 @@
             box-sizing: border-box; z-index: 1000; transform: translateY(100%);
             transition: transform 0.3s ease-in-out;
         }
-        #bottom-player.active { transform: translateY(0); } /* 노래 재생시 쓱 올라옴 */
+        #bottom-player.active { transform: translateY(0); } 
         
         .bp-info { display: flex; align-items: center; gap: 12px; flex: 1; overflow: hidden; }
         .bp-img { width: 45px; height: 45px; border-radius: 6px; object-fit: cover; }
@@ -59,31 +50,37 @@
 </head>
 <body>
 
+    <div id="inapp-blocker" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#ff5722; color:white; z-index:9999999; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; box-sizing:border-box; font-family:sans-serif;">
+        <i class="fas fa-triangle-exclamation" style="font-size:60px; margin-bottom:20px;"></i>
+        <h2 style="margin:0 0 15px 0; font-size:24px;">🚨 접속 오류 안내</h2>
+        <p style="font-size:16px; line-height:1.6; margin-bottom:25px;">
+            현재 접속하신 앱(카톡/네이버 등)에서는<br>
+            <strong>음악 연속 재생과 구글 로그인이 차단</strong>됩니다.
+        </p>
+        <div style="background:rgba(0,0,0,0.2); padding:20px; border-radius:12px; font-size:16px; line-height:1.6;">
+            화면 우측 하단(또는 상단)의 메뉴 <strong>[ ⋮ ]</strong> 를 눌러<br>
+            <strong style="color:#ffeb3b; font-size:18px;">[다른 브라우저로 열기(Safari/Chrome)]</strong>를<br>
+            반드시 선택해 주세요!
+        </div>
+    </div>
+
     <script>
         (function() {
             var ua = navigator.userAgent.toLowerCase();
             var targetUrl = location.href;
-            var isInApp = false;
+            var isKakao = ua.indexOf('kakaotalk') > -1;
+            var isInApp = ua.match(/naver|instagram|facebook|inapp|line/i);
 
-            // 1. 카카오톡/네이버 등 감지 시도 및 강제 이동 찔러보기
-            if (ua.match(/kakaotalk/i)) {
+            // 1. 튕겨내기 시도 (안드로이드/카톡 우선)
+            if (isKakao) {
                 location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(targetUrl);
-                isInApp = true;
-            } else if (ua.match(/naver|instagram|facebook|inapp/i)) {
-                if (ua.match(/android/i)) {
-                    location.href = 'intent://' + targetUrl.replace(/https?:\/\//i, '') + '#Intent;scheme=https;package=com.android.chrome;end';
-                }
-                isInApp = true;
+            } else if (isInApp && ua.indexOf('android') > -1) {
+                location.href = 'intent://' + targetUrl.replace(/https?:\/\//i, '') + '#Intent;scheme=https;package=com.android.chrome;end';
             }
 
-            // 2. 만약 앱이 강제 이동을 씹었다면? -> 화면 전체를 경고창으로 덮어서 마비시킴
-            if (isInApp) {
-                document.addEventListener("DOMContentLoaded", function() {
-                    var overlay = document.createElement('div');
-                    overlay.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:#ff5722;color:#fff;z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:25px;text-align:center;font-size:18px;line-height:1.6;font-family:sans-serif;";
-                    overlay.innerHTML = '<i class="fas fa-triangle-exclamation" style="font-size:50px;margin-bottom:20px;"></i><strong>🚨 접속 오류 안내</strong><br><br>카카오톡이나 네이버 앱 안에서는<br>음악 재생과 구글 로그인이 차단됩니다.<br><br><br>화면 오른쪽 아래(또는 위)의<br><strong>[ ⠇ ] 점 3개</strong> 또는 <strong>[ 🧭 나침반 ]</strong>을 눌러<br><br><span style="background:#fff;color:#ff5722;padding:5px 10px;border-radius:5px;font-weight:bold;display:inline-block;margin-top:10px;">[다른 브라우저로 열기]</span><br><br>를 꼭 선택해 주세요!';
-                    document.body.appendChild(overlay);
-                });
+            // 2. 핵심 로직: 카톡이나 인앱 브라우저가 "아니면(정상 브라우저면)" 주황색 창을 없앤다!
+            if (!isKakao && !isInApp) {
+                document.getElementById('inapp-blocker').style.display = 'none';
             }
         })();
     </script>
@@ -169,7 +166,6 @@
         if (isUnlocked) return;
         audio.play().then(() => { audio.pause(); }).catch(() => {});
         isUnlocked = true;
-        console.log("🔓 브라우저 오디오 엔진 잠금 해제 완료!");
     }
 
     if ('mediaSession' in navigator) {
@@ -221,7 +217,7 @@
             playPromise.then(() => {
                 updateUI(track, currentIdx);
             }).catch(err => {
-                console.log("⚠️ 자동재생 방어됨. 사용자 클릭 필요.");
+                console.log("자동재생 방어됨");
             });
         }
     }
