@@ -1,29 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <script>
-        (function() {
-            var ua = navigator.userAgent.toLowerCase();
-            var targetUrl = location.href;
-            
-            // 1. 카카오톡 접속 시 -> 외부 브라우저로 즉시 강제 이동
-            if (ua.indexOf('kakaotalk') > -1) {
-                location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(targetUrl);
-            } 
-            // 2. 네이버, 인스타그램, 페이스북 등 접속 시
-            else if (ua.match(/naver|instagram|facebook|inapp/i)) {
-                if (ua.indexOf('android') > -1) {
-                    // 안드로이드: 크롬 브라우저로 강제 튕겨내기
-                    location.href = 'intent://' + targetUrl.replace(/https?:\/\//i, '') + '#Intent;scheme=https;package=com.android.chrome;end';
-                } else if (ua.indexOf('iphone') > -1 || ua.indexOf('ipad') > -1) {
-                    // 아이폰: 애플 보안 정책상 자동 튕기기가 막혀있어 경고창 띄우기
-                    alert("🎵 원활한 음악 재생과 구글 로그인을 위해\n화면 우측 하단(또는 상단)의 [🧭 다른 브라우저로 열기(Safari)]를 눌러주세요!");
-                }
-            }
-        })();
-    </script>
-
     <title>Ranking AI</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
     <style>
         body { 
@@ -77,6 +58,36 @@
     </style>
 </head>
 <body>
+
+    <script>
+        (function() {
+            var ua = navigator.userAgent.toLowerCase();
+            var targetUrl = location.href;
+            var isInApp = false;
+
+            // 1. 카카오톡/네이버 등 감지 시도 및 강제 이동 찔러보기
+            if (ua.match(/kakaotalk/i)) {
+                location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(targetUrl);
+                isInApp = true;
+            } else if (ua.match(/naver|instagram|facebook|inapp/i)) {
+                if (ua.match(/android/i)) {
+                    location.href = 'intent://' + targetUrl.replace(/https?:\/\//i, '') + '#Intent;scheme=https;package=com.android.chrome;end';
+                }
+                isInApp = true;
+            }
+
+            // 2. 만약 앱이 강제 이동을 씹었다면? -> 화면 전체를 경고창으로 덮어서 마비시킴
+            if (isInApp) {
+                document.addEventListener("DOMContentLoaded", function() {
+                    var overlay = document.createElement('div');
+                    overlay.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:#ff5722;color:#fff;z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:25px;text-align:center;font-size:18px;line-height:1.6;font-family:sans-serif;";
+                    overlay.innerHTML = '<i class="fas fa-triangle-exclamation" style="font-size:50px;margin-bottom:20px;"></i><strong>🚨 접속 오류 안내</strong><br><br>카카오톡이나 네이버 앱 안에서는<br>음악 재생과 구글 로그인이 차단됩니다.<br><br><br>화면 오른쪽 아래(또는 위)의<br><strong>[ ⠇ ] 점 3개</strong> 또는 <strong>[ 🧭 나침반 ]</strong>을 눌러<br><br><span style="background:#fff;color:#ff5722;padding:5px 10px;border-radius:5px;font-weight:bold;display:inline-block;margin-top:10px;">[다른 브라우저로 열기]</span><br><br>를 꼭 선택해 주세요!';
+                    document.body.appendChild(overlay);
+                });
+            }
+        })();
+    </script>
+
     <nav class="nav">
         <a href="/" class="logo">RANKING AI</a>
         <div style="display: flex; align-items: center; gap: 20px;">
