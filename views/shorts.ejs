@@ -99,57 +99,56 @@
 
         <h2 style="border-bottom: 2px solid #333; padding-bottom: 10px;">⚡ 요즘 뜨는 쇼츠</h2>
         
-      <div class="shorts-grid">
-    <% 
-        function getYoutubeId(url) {
-            if(!url) return null;
-            const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/|watch\?.+&v=))([^"&?\/\s]{11})/);
-            return match ? match[1] : null;
-        }
-    %>
-    <% if (shorts && shorts.length > 0) { %>
-        <% shorts.forEach(function(video) { 
-            const videoId = getYoutubeId(video.url);
-        %>
-        <div class="shorts-card">
-            
-            <% if (videoId) { %>
-                <div class="shorts-iframe-wrap" style="cursor: pointer;"
-                     onclick="this.innerHTML='<iframe src=\'https://www.youtube.com/embed/<%= videoId %>?autoplay=1&modestbranding=1&rel=0\' style=\'position:absolute;top:0;left:0;width:100%;height:100%;border:none;\' allow=\'autoplay; encrypted-media\' allowfullscreen></iframe>'">
-                    
-                    <img src="https://i.ytimg.com/vi/<%= videoId %>/hqdefault.jpg" style="position: absolute; top:0; left:0; width: 100%; height: 100%; object-fit: cover; opacity: 0.8;">
-                    
-                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;">
-                        <svg viewBox="0 0 24 24" width="70" height="70" fill="#ff0000">
-                            <path d="M17.77 10.32l-1.2-.5L18 8.06a4.47 4.47 0 0 0-2.48-5.74 4.63 4.63 0 0 0-5.74 2.49L5.94 10.3l1.2.5L5.75 12.5a4.47 4.47 0 0 0 2.48 5.74 4.63 4.63 0 0 0 5.74-2.49L17.77 10.3l-1.2-.5zM10 14.5v-5l4.5 2.5-4.5 2.5z"></path>
-                        </svg>
-                    </div>
+        <div class="shorts-grid">
+            <% 
+                function getYoutubeId(url) {
+                    if(!url) return null;
+                    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/|watch\?.+&v=))([^"&?\/\s]{11})/);
+                    return match ? match[1] : null;
+                }
+            %>
+            <% if (shorts && shorts.length > 0) { %>
+                <% shorts.forEach(function(video) { 
+                    const videoId = getYoutubeId(video.url);
+                %>
+                <div class="shorts-card">
+                    <% if (videoId) { %>
+                        <div class="shorts-iframe-wrap" style="cursor: pointer;"
+                             onclick="this.innerHTML='<iframe src=\'https://www.youtube.com/embed/<%= videoId %>?autoplay=1&modestbranding=1&rel=0\' style=\'position:absolute;top:0;left:0;width:100%;height:100%;border:none;\' allow=\'autoplay; encrypted-media\' allowfullscreen></iframe>'">
+                            
+                            <img src="https://i.ytimg.com/vi/<%= videoId %>/hqdefault.jpg" style="position: absolute; top:0; left:0; width: 100%; height: 100%; object-fit: cover; opacity: 0.8;">
+                            
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;">
+                                <svg viewBox="0 0 24 24" width="70" height="70" fill="#ff0000">
+                                    <path d="M17.77 10.32l-1.2-.5L18 8.06a4.47 4.47 0 0 0-2.48-5.74 4.63 4.63 0 0 0-5.74 2.49L5.94 10.3l1.2.5L5.75 12.5a4.47 4.47 0 0 0 2.48 5.74 4.63 4.63 0 0 0 5.74-2.49L17.77 10.3l-1.2-.5zM10 14.5v-5l4.5 2.5-4.5 2.5z"></path>
+                                </svg>
+                            </div>
 
-                    <div style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 8px; display: flex; align-items: center; gap: 6px; pointer-events: none; border: 1px solid rgba(255,255,255,0.1);">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="#ff0000"><path d="M17.77 10.32l-1.2-.5L18 8.06a4.47 4.47 0 0 0-2.48-5.74 4.63 4.63 0 0 0-5.74 2.49L5.94 10.3l1.2.5L5.75 12.5a4.47 4.47 0 0 0 2.48 5.74 4.63 4.63 0 0 0 5.74-2.49L17.77 10.3l-1.2-.5zM10 14.5v-5l4.5 2.5-4.5 2.5z"></path></svg>
-                        <span style="font-size: 12px; font-weight: bold; color: #fff;">Shorts</span>
+                            <div style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 8px; display: flex; align-items: center; gap: 6px; pointer-events: none; border: 1px solid rgba(255,255,255,0.1);">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="#ff0000"><path d="M17.77 10.32l-1.2-.5L18 8.06a4.47 4.47 0 0 0-2.48-5.74 4.63 4.63 0 0 0-5.74 2.49L5.94 10.3l1.2.5L5.75 12.5a4.47 4.47 0 0 0 2.48 5.74 4.63 4.63 0 0 0 5.74-2.49L17.77 10.3l-1.2-.5zM10 14.5v-5l4.5 2.5-4.5 2.5z"></path></svg>
+                                <span style="font-size: 12px; font-weight: bold; color: #fff;">Shorts</span>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <div class="shorts-iframe-wrap">
+                            <div style="display:flex; align-items:center; justify-content:center; height:100%; color:#555; position: absolute; width:100%; top: 0; left: 0;">링크 오류</div>
+                        </div>
+                    <% } %>
+
+                    <div class="shorts-info">
+                        <h4 class="shorts-title"><%= video.title %></h4>
+                        <% if (user && (user.role === 'admin' || user.id === video.uploader)) { %>
+                            <form action="/delete-video/<%= video._id %>" method="POST" onsubmit="return confirm('삭제할까요?');" style="margin:0;">
+                                <button type="submit" class="btn-delete">❌ 삭제</button>
+                            </form>
+                        <% } %>
                     </div>
                 </div>
+                <% }); %>
             <% } else { %>
-                <div class="shorts-iframe-wrap">
-                    <div style="display:flex; align-items:center; justify-content:center; height:100%; color:#555; position: absolute; width:100%; top: 0; left: 0;">링크 오류</div>
-                </div>
+                <p style="color: #777; grid-column: 1 / -1; text-align: center;">등록된 쇼츠 영상이 없습니다.</p>
             <% } %>
-
-            <div class="shorts-info">
-                <h4 class="shorts-title"><%= video.title %></h4>
-                <% if (user && (user.role === 'admin' || user.id === video.uploader)) { %>
-                    <form action="/delete-video/<%= video._id %>" method="POST" onsubmit="return confirm('삭제할까요?');" style="margin:0;">
-                        <button type="submit" class="btn-delete">❌ 삭제</button>
-                    </form>
-                <% } %>
-            </div>
         </div>
-        <% }); %>
-    <% } else { %>
-        <p style="color: #777; grid-column: 1 / -1; text-align: center;">등록된 쇼츠 영상이 없습니다.</p>
-    <% } %>
-</div>
     </div>
 </body>
 </html>
