@@ -38,11 +38,12 @@
             overflow: hidden; position: relative; cursor: pointer;
             aspect-ratio: 9 / 16; /* 가로세로 비율 자동 조절 */
             transition: 0.2s;
+            min-width: 0; /* 🌟 핵심 방어막: 화면 대문짝만해지는 버그 원천 차단 🌟 */
         }
         .shorts-card:hover { border-color: #ff5722; transform: translateY(-5px); box-shadow: 0 8px 20px rgba(255,87,34,0.3); }
         .shorts-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
 
-        /* 🌟 찐 쇼츠 로고 버튼 (렉 없이 0초 만에 뜸) 🌟 */
+        /* 🌟 찐 쇼츠 로고 버튼 (렉 없이 0.001초 만에 뜸) 🌟 */
         .shorts-logo-overlay {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 60px; height: 60px; pointer-events: none;
@@ -90,13 +91,16 @@
         }
 
         .modal-iframe-wrap { width: 100%; height: 100%; position: relative; }
-        .modal-iframe-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        /* 🌟 대문짝 렉 방지: 비율과 크기를 CSS로 더 꽉 붙잡았습니다 🌟 */
+        .modal-iframe-wrap iframe {
+            position: absolute; top: 0; left: 0; width: 100% !important; height: 100% !important; border: none;
+        }
 
         .modal-overlay-info {
             position: absolute; bottom: 30px; left: 15px; right: 70px; z-index: 10; pointer-events: none;
         }
-        .modal-title { font-size: 16px; font-weight: bold; color: #fff; margin: 0 0 10px 0; text-shadow: 1px 1px 3px #000; }
-        .modal-uploader { font-size: 13px; color: #ddd; text-shadow: 1px 1px 2px #000; }
+        .modal-title { font-size: 16px; font-weight: bold; color: #fff; margin: 0 0 10px 0; text-shadow: 1px 1px 3px #000; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .modal-uploader { font-size: 13px; color: #ddd; text-shadow: 1px 1px 2px #000; margin-bottom: 5px; }
 
         .modal-side-menu {
             position: absolute; bottom: 30px; right: 15px; z-index: 10;
@@ -256,11 +260,17 @@
             modal.style.display = 'block'; // 까만 극장 켜기
             document.body.style.overflow = 'hidden'; // 뒤에 있는 원래 화면은 스크롤 안 되게 막기
             
-            // 클릭한 그 영상 위치로 단숨에 이동
-            const target = document.getElementById('modal-item-' + index);
-            if(target) {
-                target.scrollIntoView({ behavior: 'instant' });
-            }
+            // 🌟 0초 만에 깨진 화면 없이 정확히 스크롤 🌟
+            // 브라우저가 레이아웃을 계산할 시간을 주기 위해 약간의 지연 시간을 둡니다
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    // 클릭한 그 영상 위치로 단숨에 이동
+                    const target = document.getElementById('modal-item-' + index);
+                    if(target) {
+                        target.scrollIntoView({ behavior: 'instant' });
+                    }
+                });
+            });
         }
 
         // 3. X 버튼 눌러서 극장 닫기
