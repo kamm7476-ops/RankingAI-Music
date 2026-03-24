@@ -324,8 +324,8 @@
                         </div>
                         <textarea name="lyrics" placeholder="가사를 시간과 함께 입력하세요. (예: [00:15] 첫 번째 가사)"></textarea>
                         <div class="input-row">
-                            <div style="flex:1;"><span style="font-size: 12px; color: #ff5722; display: block; margin-bottom: 5px;">🖼️ 커버 이미지</span><input type="file" name="image" accept="image/*" class="file-upload" required></div>
-                            <div style="flex:1;"><span style="font-size: 12px; color: #ff5722; display: block; margin-bottom: 5px;">🎵 MP3 음원</span><input type="file" name="audio" accept="audio/*" class="file-upload" required></div>
+                            <div style="flex:1;"><span style="font-size: 12px; color: #ff5722; display: block; margin-bottom: 5px;">🖼️ 커버 이미지 (선택, 최대 1MB)</span><input type="file" name="image" accept="image/*" class="file-upload"></div>
+                            <div style="flex:1;"><span style="font-size: 12px; color: #ff5722; display: block; margin-bottom: 5px;">🎵 MP3 음원 (필수)</span><input type="file" name="audio" accept="audio/*" class="file-upload" required></div>
                         </div>
                         <button type="submit" class="btn-upload">차트 등록하기</button>
                     </form>
@@ -389,10 +389,10 @@
                 <table class="music-list">
                     <% if (artists && artists.length > 0) { %>
                         <% artists.forEach(function(music, index) { %>
-                        <tr class="music-item" data-id="<%= music._id %>" data-title="<%= music.name %>" data-artist="<%= music.artist %>" data-cover="<%= music.imageUrl %>" data-audio="<%= music.audioUrl %>">
+                        <tr class="music-item" data-id="<%= music._id %>" data-title="<%= music.name %>" data-artist="<%= music.artist %>" data-cover="<%= music.imageUrl || 'https://via.placeholder.com/512/1a1a1a/ff5722?text=RANKING+AI' %>" data-audio="<%= music.audioUrl %>">
                             <td class="check-col"><input type="checkbox" class="custom-checkbox song-check" value="<%= music._id %>"></td>
                             <td class="rank"><%= index + 1 %></td>
-                            <td style="width: 80px;"><img src="<%= music.imageUrl %>" class="album-art"></td>
+                            <td style="width: 80px;"><img src="<%= music.imageUrl || 'https://via.placeholder.com/512/1a1a1a/ff5722?text=RANKING+AI' %>" class="album-art"></td>
                             
                             <td class="song-info">
                                 <div class="song-title">
@@ -529,48 +529,42 @@
 
     <script>
 
-        // --- 여기서부터 복사하세요 ---
         let isLoop = false; 
 
         function toggleLoop() {
             const btnLoop = document.getElementById('id-btn-loop');
             isLoop = !isLoop;
             if (isLoop) {
-                btnLoop.style.color = "#ff5722"; // 켜지면 주황색
+                btnLoop.style.color = "#ff5722"; 
                 btnLoop.innerText = "🔂"; 
             } else {
-                btnLoop.style.color = "#777"; // 꺼지면 회색
+                btnLoop.style.color = "#777"; 
                 btnLoop.innerText = "🔁";
             }
         }
-        // --- 여기서부터 아래 내용을 복사해서 붙여넣으세요! ---
+        
         function parseAndShowLyrics(musicId, rawLyrics) {
             const lyricsBox = document.getElementById('lyrics-' + musicId);
             const lyricsContent = document.getElementById('lyrics-content-' + musicId);
             
             if (!lyricsBox || !lyricsContent) return;
 
-            // 이미 열려있으면 닫기
             if (lyricsBox.style.display === 'block') {
                 lyricsBox.style.display = 'none';
                 return;
             }
 
-            // 가사 내용 넣기
             if (!rawLyrics || rawLyrics.trim() === "" || rawLyrics === "undefined" || rawLyrics === "null") {
                 lyricsContent.innerHTML = "<p style='color:#777; text-align:center;'>등록된 가사가 없습니다.</p>";
             } else {
-                // 줄바꿈 보존 처리 및 백틱 안전 처리
                 const formattedLyrics = rawLyrics.split('\n').join('<br>');
                 lyricsContent.innerHTML = `<div style="line-height:1.8; padding:10px;">${formattedLyrics}</div>`;
             }
 
             lyricsBox.style.display = 'block';
         }
-        // --- 여기까지 ---
 
 
-        // 🌟 플레이어 숨기기/보이기 기능 🌟
         function togglePlayerVisibility() {
             const playerBar = document.getElementById('bottomPlayerBar');
             const toggleTab = document.querySelector('.player-toggle-tab');
@@ -587,7 +581,6 @@
         const genreBtns = document.querySelectorAll('.genre-btn');
         const hiddenInput = document.getElementById('hiddenGenreInput');
         
-        // 🌟 방어막 1: 장르 버튼 기능 (hiddenInput이 있을 때만 작동)
         genreBtns.forEach(btn => {
             btn.addEventListener('click', function() { 
                 genreBtns.forEach(b => b.classList.remove('active')); 
@@ -596,7 +589,6 @@
             });
         });
         
-        // 🌟 방어막 2: 폼이 화면에 존재할 때만(회원일 때만) 감시하기!
         const musicForm = document.getElementById('musicForm');
         if (musicForm) {
             musicForm.addEventListener('submit', function(e) { 
@@ -606,7 +598,6 @@
 
 
 
-        // 🌟 연속 재생 강화 엔진 (수정본) 🌟
         let playlist = [];
         let currentIndex = 0;
         let isPlaying = false;
@@ -634,11 +625,10 @@
             }
         }
 
-        // 🌟 핵심: 다음 곡으로 바톤 터치하는 로드 함수
         function loadTrack(index) {
             if(index >= 0 && index < playlist.length) {
                 const track = playlist[index];
-                currentIndex = index; // 현재 인덱스 업데이트
+                currentIndex = index; 
                 
                 if(!track.audio || track.audio.trim() === "" || track.audio === "undefined") {
                     console.log("음원 없음, 다음 곡으로:", track.title);
@@ -651,7 +641,7 @@
                 document.getElementById('main-player-cover').src = track.cover;
                 
                 mainAudio.src = track.audio;
-                mainAudio.load(); // 👈 새 음원 장전
+                mainAudio.load(); 
                 
                 const playPromise = mainAudio.play();
                 if (playPromise !== undefined) {
@@ -708,13 +698,12 @@
             }
         });
 
-        // 🌟 곡이 끝나면 무조건 다음 곡으로 이동!
         mainAudio.addEventListener('ended', () => {
             if (isLoop) {
                 mainAudio.currentTime = 0;
                 mainAudio.play();
             } else {
-                playNextTrack(); // 👈 여기서 끊김 없이 넘겨줍니다.
+                playNextTrack(); 
             }
         });
 
@@ -788,7 +777,6 @@
             .catch(err => alert("에러가 발생했습니다. 다시 시도해주세요."));
         }
 
-       // 🌟 음악 끊김 방지 마법 엔진 (PJAX) 🌟
         document.addEventListener('click', async (e) => {
             const link = e.target.closest('a');
             if (!link) return;
@@ -832,7 +820,6 @@
                 history.pushState(null, '', href);
                 document.title = newDoc.title;
                 
-                // 🌟 유튜브, 쇼츠, 커뮤니티 클릭 시 플레이어 자동 숨김!
                 const playerBar = document.getElementById('bottomPlayerBar');
                 if (playerBar) {
                     if (href.includes('/youtube') || href.includes('/shorts') || href.includes('/board')) {
@@ -873,35 +860,29 @@
             }
         }
 
-        // 🌟 진짜 좋아요 기능 (서버랑 통신함!) 🌟
         async function likeMusic(musicId) {
             try {
-                // 서버의 '/like/아이디' 주소로 좋아요 요청을 보냅니다!
                 const response = await fetch('/like/' + musicId, { method: 'POST' });
                 const data = await response.json();
 
                 if (data.success) {
-                    // 서버가 허락했다면? 화면 숫자 +1 올리기
                     const countSpan = document.getElementById('like-count-' + musicId);
                     countSpan.innerText = parseInt(countSpan.innerText) + 1;
                     
-                    // 하트 색상 빨간색으로 변경
                     const btn = document.getElementById('like-btn-' + musicId);
                     btn.innerHTML = '❤️ 좋아요 <span id="like-count-' + musicId + '">' + countSpan.innerText + '</span>';
                     btn.style.color = '#ff4a4a';
                     btn.style.borderColor = '#ff4a4a';
                     
                 } else {
-                    // 서버가 거절했다면? (로그인 안함, 이미 누름 등) 알림창 띄우기
                     alert(data.message);
                 }
             } catch (err) {
                 console.error("좋아요 통신 에러:", err);
                 alert("에러가 발생했습니다.");
             }
-        } // 👈 🌟 범인 검거!! 이 괄호가 빠져있어서 모든 기능이 멈췄던 겁니다!! 🌟
+        } 
 
-        // 🔗 노래 링크 복사 기능 (함수 밖으로 안전하게 독립!)
         function copyMusicLink(musicId) {
             const shareUrl = window.location.origin + '/?play=' + encodeURIComponent(musicId);
             navigator.clipboard.writeText(shareUrl).then(() => {
