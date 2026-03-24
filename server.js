@@ -102,6 +102,17 @@ const popupSchema = new mongoose.Schema({
 const Popup = mongoose.models.Popup || mongoose.model('Popup', popupSchema);
 
 // =========================================
+// 🌟 6. 1:1 관리자 DM (제휴/문의) 기능 DB
+// =========================================
+const dmSchema = new mongoose.Schema({
+    userId: String,
+    message: String,
+    reply: { type: String, default: '' }, // 관리자 답변칸
+    createdAt: { type: Date, default: Date.now }
+});
+const DM = mongoose.models.DM || mongoose.model('DM', dmSchema);
+
+// =========================================
 // 🌟 서버 기본 설정
 // =========================================
 app.set('view engine', 'ejs');
@@ -142,10 +153,10 @@ passport.use(new NaverStrategy({
         if (!user) {
             const randomPassword = Math.random().toString(36).slice(-10); 
             const hashedPassword = await bcrypt.hash(randomPassword, 10);
-            user = new User({ username: naverId, password: hashedPassword });
+            user = new User({ username: naverId, password: hashedPassword, nickname: "" }); // 닉네임은 일단 빈칸
             await user.save();
         }
-        return done(null, { id: user.username, name: profile.displayName || '네이버유저', role: 'user' });
+        return done(null, { id: user.username, name: user.nickname || "", role: user.role });
     } catch (err) {
         return done(err);
     }
@@ -158,11 +169,17 @@ app.get('/auth/naver', passport.authenticate('naver'));
 app.get('/auth/naver/callback', 
     passport.authenticate('naver', { failureRedirect: '/login' }), 
     (req, res) => {
-        req.session.user = req.user; // 세션에 로그인 도장 쾅!
-        res.send("<script>alert('네이버 로그인 성공!'); window.location.href='/';</script>");
+        // 🌟 중간 검문소: 닉네임이 없으면?
+        if (!req.user.name || req.user.name.trim() === "") {
+            req.session.tempUser = req.user; // 임시 패스 발급
+            res.send("<script>alert('환영합니다! 사이트에서 활동할 닉네임을 설정해주세요.'); window.location.href='/set-nickname';</script>");
+        } else {
+            req.session.user = req.user; // 정식 로그인 도장 쾅!
+            res.send("<script>alert('네이버 로그인 성공!'); window.location.href='/';</script>");
+        }
     }
 );
-// =========================================
+
 // =========================================
 // 🌟 구글 소셜 로그인 파이프 🌟
 // =========================================
@@ -179,10 +196,10 @@ passport.use(new GoogleStrategy({
         if (!user) {
             const randomPassword = Math.random().toString(36).slice(-10); 
             const hashedPassword = await bcrypt.hash(randomPassword, 10);
-            user = new User({ username: googleId, password: hashedPassword });
+            user = new User({ username: googleId, password: hashedPassword, nickname: "" }); // 닉네임은 일단 빈칸
             await user.save();
         }
-        return done(null, { id: user.username, name: profile.displayName || '구글유저', role: 'user' });
+        return done(null, { id: user.username, name: user.nickname || "", role: user.role });
     } catch (err) {
         return done(err);
     }
@@ -195,10 +212,138 @@ app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'em
 app.get('/auth/google/callback', 
     passport.authenticate('google', { failureRedirect: '/login' }),
     (req, res) => {
-        req.session.user = req.user; // 세션에 로그인 도장 쾅!
-        res.send("<script>alert('초간단 구글 로그인 성공!'); window.location.href='/';</script>");
+        // 🌟 중간 검문소: 닉네임이 없으면?
+        if (!req.user.name || req.user.name.trim() === "") {
+            req.session.tempUser = req.user; // 임시 패스 발급
+            res.send("<script>alert('환영합니다! 사이트에서 활동할 닉네임을 설정해주세요.'); window.location.href='/set-nickname';</script>");
+        } else {
+            req.session.user = req.user; // 정식 로그인 도장 쾅!
+            res.send("<script>alert('초간단 구글 로그인 성공!'); window.location.href='/';</script>");
+        }
     }
 );
+
+// ==========================================
+// 🌟 닉네임(아티스트명) 강제 설정 파이프 (중간 검문소) 🌟
+// ==========================================
+app.get('/set-nickname', (req, res) => {
+    if (!req.session.tempUser) return res.redirect('/login');
+    res.render('set-nickname'); // 멋진 닉네임 입력 화면 띄워주기
+});
+
+app.post('/set-nickname', async (req, res) => {
+    if (!req.session.tempUser) return res.redirect('/login');
+    try {
+        const newNickname = req.body.nickname.trim();
+        
+        // 1. 닉네임 중복 검사
+        const existing = await User.findOne({ nickname: newNickname });
+        if (existing) {
+            return res.send("<script>alert('이미 다른 분이 사용 중인 이름입니다! 다른 멋진 이름을 지어주세요.'); window.history.back();</script>");
+        }
+
+        // 2. DB에 닉네임 업데이트 저장
+        await User.findOneAndUpdate(
+            { username: req.session.tempUser.id }, 
+            { nickname: newNickname }
+        );
+
+        // 3. 드디어 진짜 로그인 도장 쾅!
+        req.session.user = { 
+            id: req.session.tempUser.id, 
+            name: newNickname, 
+            role: req.session.tempUser.role 
+        };
+        req.session.tempUser = null; // 임시 패스 파기
+
+        res.send(`<script>alert('${newNickname}님, 환영합니다! 멋진 활동 기대할게요.'); window.location.href='/';</script>`);
+    } catch (err) {
+        console.error("닉네임 설정 에러:", err);
+        res.send("<script>alert('에러가 발생했습니다.'); window.history.back();</script>");
+    }
+});
+
+// ==========================================
+// 🚪 1. 화면 보여주는 파이프 (GET)
+// ==========================================
+app.get('/signup', (req, res) => res.render('signup'));
+app.get('/login', (req, res) => res.render('login'));
+
+// ==========================================
+// 📝 2. 데이터 처리하는 파이프 (POST)
+// ==========================================
+app.post('/signup', async (req, res) => {
+  try {
+    const { username, password, nickname } = req.body;
+    
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.send("<script>alert('이미 있는 아이디입니다!'); window.history.back();</script>");
+    }
+    
+    if (nickname) {
+        const existingNickname = await User.findOne({ nickname });
+        if (existingNickname) {
+            return res.send("<script>alert('이미 사용 중인 닉네임입니다!'); window.history.back();</script>");
+        }
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ username: username, password: hashedPassword, nickname: nickname || "" });
+    await newUser.save();
+    
+    res.send("<script>alert('회원가입 성공! 로그인해주세요.'); window.location.href='/login';</script>");
+  } catch (error) {
+    console.error("가입 에러:", error);
+    res.send("<script>alert('가입 실패! 내용을 확인해주세요.'); window.history.back();</script>");
+  }
+});
+
+app.post('/login', async (req, res) => {
+  try {
+    const { username, password } = req.body; 
+    const user = await User.findOne({ username: username });
+    
+    if (!user) {
+      return res.send("<script>alert('없는 아이디입니다!'); window.history.back();</script>");
+    }
+    
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.send("<script>alert('비밀번호가 틀렸습니다!'); window.history.back();</script>");
+    }
+    
+    let userRole = 'user'; 
+    let displayName = user.nickname || ""; 
+
+    if (user.username === 'kamm7476') { 
+        userRole = 'admin'; 
+        displayName = '관리자'; 
+    }
+    
+    // 일반 유저인데 닉네임이 빈칸이면 강제로 설정 페이지로 보냄
+    if (userRole !== 'admin' && (!displayName || displayName.trim() === "")) {
+        req.session.tempUser = { id: user.username, role: userRole };
+        return res.send("<script>alert('환영합니다! 활동하실 닉네임을 설정해주세요.'); window.location.href='/set-nickname';</script>");
+    }
+
+    // 발급된 이름표(displayName)를 세션에 쏙 넣어줌
+    req.session.user = { id: user.username, name: displayName, role: userRole };
+    
+    if (userRole === 'admin') {
+         res.send("<script>alert('👑 관리자님 환영합니다!'); window.location.href='/';</script>");
+    } else {
+         res.send("<script>alert('반갑습니다, " + displayName + "님!'); window.location.href='/';</script>");
+    }
+  } catch (error) {
+    console.error("로그인 에러:", error);
+    res.send("<script>alert('로그인 처리 중 에러가 났어요.'); window.history.back();</script>");
+  }
+});
+
+app.get('/logout', (req, res) => {
+  req.session.destroy(() => { res.redirect('/'); });
+});
 
 // =========================================
 // 🌟 메인 화면 (차트 & 최신음악 & 팝업)
@@ -253,76 +398,12 @@ app.get('/', async (req, res) => {
             sortQuery: sortQuery, 
             periodQuery: periodQuery, // 🌟 화면에 어떤 탭인지 알려주기
             popularArtists: popularArtists,
-            popup: currentPopup, // 
             popup: activePopup
         });
     } catch (err) {
         console.log("DB 에러:", err);
         res.send("<h1>진짜 에러 원인: " + err.message + "</h1>")
     }
-});
-
-// ==========================================
-// 🚪 1. 화면 보여주는 파이프 (GET)
-// ==========================================
-app.get('/signup', (req, res) => res.render('signup'));
-app.get('/login', (req, res) => res.render('login'));
-
-// ==========================================
-// 📝 2. 데이터 처리하는 파이프 (POST)
-// ==========================================
-app.post('/signup', async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    const existingUser = await User.findOne({ username });
-    if (existingUser) {
-      return res.send("<script>alert('이미 있는 아이디입니다!'); window.history.back();</script>");
-    }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username: username, password: hashedPassword });
-    await newUser.save();
-    res.send("<script>alert('회원가입 성공! 로그인해주세요.'); window.location.href='/login';</script>");
-  } catch (error) {
-    console.error("가입 에러:", error);
-    res.send("<script>alert('가입 실패! 내용을 확인해주세요.'); window.history.back();</script>");
-  }
-});
-
-app.post('/login', async (req, res) => {
-  try {
-    const { username, password } = req.body; 
-    const user = await User.findOne({ username: username });
-    if (!user) {
-      return res.send("<script>alert('없는 아이디입니다!'); window.history.back();</script>");
-    }
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.send("<script>alert('비밀번호가 틀렸습니다!'); window.history.back();</script>");
-    }
-    let userRole = 'user'; 
-    let displayName = user.username; // 기본적으로 자기 아이디를 이름표로 씀
-
-    if (user.username === 'kamm7476') { 
-        userRole = 'admin'; 
-        displayName = '관리자'; // 👑 최고 관리자만 '관리자'로 이름표 변경!
-    }
-    
-    // 발급된 이름표(displayName)를 세션에 쏙 넣어줌
-    req.session.user = { id: user.username, name: displayName, role: userRole };
-    
-    if (userRole === 'admin') {
-         res.send("<script>alert('👑 관리자님 환영합니다!'); window.location.href='/';</script>");
-    } else {
-         res.send("<script>alert('반갑습니다, " + user.username + "님!'); window.location.href='/';</script>");
-    }
-  } catch (error) {
-    console.error("로그인 에러:", error);
-    res.send("<script>alert('로그인 처리 중 에러가 났어요.'); window.history.back();</script>");
-  }
-});
-
-app.get('/logout', (req, res) => {
-  req.session.destroy(() => { res.redirect('/'); });
 });
 
 // =========================================
@@ -415,12 +496,12 @@ app.post('/delete-post/:id', async (req, res) => {
     if (!req.session || !req.session.user) return res.redirect('/board');
     try {
         const post = await Post.findById(req.params.id);
-        if (req.session.user.role === 'admin' || req.session.user.id === post.author) await Post.findByIdAndDelete(req.params.id);
+        if (req.session.user.role === 'admin' || req.session.user.name === post.author) await Post.findByIdAndDelete(req.params.id);
         res.redirect('/board');
     } catch (err) { console.log(err); }
 });
 
-// 🌟🌟🌟 [여기에 추가됨!] 커뮤니티 게시글 수정 파이프 🌟🌟🌟
+// 🌟🌟🌟 커뮤니티 게시글 수정 파이프 🌟🌟🌟
 app.get('/edit-post/:id', async (req, res) => {
     if (!req.session || !req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
     try {
@@ -428,7 +509,7 @@ app.get('/edit-post/:id', async (req, res) => {
         if (!post) return res.send("<script>alert('존재하지 않는 게시글입니다.'); location.href='/board';</script>");
         
         const isAdmin = req.session.user.role === 'admin';
-        const isOwner = req.session.user.id === post.author;
+        const isOwner = req.session.user.name === post.author;
         
         if (isAdmin || isOwner) {
             res.render('edit-post', { user: req.session.user, post: post });
@@ -446,7 +527,7 @@ app.post('/edit-post/:id', async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
         const isAdmin = req.session.user.role === 'admin';
-        const isOwner = req.session.user.id === post.author;
+        const isOwner = req.session.user.name === post.author;
         
         if (isAdmin || isOwner) {
             await Post.findByIdAndUpdate(req.params.id, { 
@@ -462,8 +543,6 @@ app.post('/edit-post/:id', async (req, res) => {
         res.redirect('/board'); 
     }
 });
-// 🌟🌟🌟 여기까지 🌟🌟🌟
-
 
 // 🌟 back 에러 수정 완료!
 app.post('/add-board-comment/:id', async (req, res) => {
@@ -551,21 +630,22 @@ app.post('/add-music', (req, res, next) => {
         res.redirect('/');
     } catch (err) { res.status(500).send("<h1>DB 저장 실패 이유: " + err.message + "</h1>"); }
 });
+
 app.post('/delete-music/:id', async (req, res) => {
     if (!req.session.user) return res.redirect('/');
     try {
         const music = await Music.findById(req.params.id);
-        if (!music) return res.redirect('/');
-        const isAdmin = req.session.user.role === 'admin';
-        const isOwner = req.session.user.id === music.uploader;
-        if (isAdmin || isOwner) {
+        // 올린 본인이거나, '관리자(admin)'일 때만 삭제 허용!
+        if (music.uploader === req.session.user.id || req.session.user.role === 'admin') {
             await Music.findByIdAndDelete(req.params.id);
             await MyMusic.deleteMany({ musicId: req.params.id }); 
             res.redirect('/');
         } else {
             res.send("<script>alert('삭제 권한이 없습니다.'); location.href='/';</script>");
         }
-    } catch (err) { res.redirect('/'); }
+    } catch (err) {
+        res.status(500).send("음원 삭제 중 에러가 발생했습니다.");
+    }
 });
 
 app.get('/edit/:id', async (req, res) => {
@@ -662,7 +742,7 @@ app.post('/delete-music-comment/:musicId/:commentId', async (req, res) => {
         if (!music) return res.redirect('/'); 
 
         const comment = music.comments.id(req.params.commentId);
-        if (comment && (req.session.user.role === 'admin' || req.session.user.id === comment.author)) {
+        if (comment && (req.session.user.role === 'admin' || req.session.user.name === comment.author)) {
             music.comments.pull(req.params.commentId); // 댓글 쏙 빼서 버리기!
             await music.save();
         }
@@ -728,6 +808,7 @@ app.post('/add-comment/:id', async (req, res) => {
         res.redirect('/');
     }
 });
+
 // 🌟 재생수 업데이트 API (서버용)
 app.post('/play-count/:id', async (req, res) => {
     try {
@@ -739,19 +820,6 @@ app.post('/play-count/:id', async (req, res) => {
         console.error("재생수 업데이트 에러:", err);
         res.status(500).json({ success: false });
     }
-});
-
-// 📢 [권력 1] 공지사항 팝업 등록/수정
-app.post('/admin/popup', (req, res) => {
-    // 관리자가 아니면 쫓아냄
-    if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
-    
-    currentPopup = {
-        isActive: req.body.isActive === 'on', // 체크박스 ON/OFF
-        title: req.body.title,
-        content: req.body.content
-    };
-    res.redirect('/'); // 등록 후 메인 화면으로 가서 확인!
 });
 
 // ⚡ [권력 2] 유저 강제 탈퇴 (DB에서 영구 삭제)
@@ -767,33 +835,9 @@ app.post('/admin/delete-user/:id', async (req, res) => {
     }
 });
 
-// 🗑️ [권력 3] 관리자 전용 음원 강제 삭제 (메인 페이지 차트용)
-app.post('/delete-music/:id', async (req, res) => {
-    if (!req.session.user) return res.redirect('/');
-    try {
-        const music = await Music.findById(req.params.id);
-        // 올린 본인이거나, '관리자(admin)'일 때만 삭제 허용!
-        if (music.uploader === req.session.user.id || req.session.user.role === 'admin') {
-            await Music.findByIdAndDelete(req.params.id);
-        }
-        res.redirect('/');
-    } catch (err) {
-        res.status(500).send("음원 삭제 중 에러가 발생했습니다.");
-    }
-});
-
 // =========================================
-// 🌟 1:1 관리자 DM (제휴/문의) 기능 DB 및 파이프
+// 🌟 1:1 관리자 DM (제휴/문의) 기능 파이프
 // =========================================
-const dmSchema = new mongoose.Schema({
-    userId: String,
-    message: String,
-    reply: { type: String, default: '' }, // 관리자 답변칸
-    createdAt: { type: Date, default: Date.now }
-});
-const DM = mongoose.models.DM || mongoose.model('DM', dmSchema);
-
-// 1. DM 화면 보여주기 (유저는 자기것만, 관리자는 전부 다!)
 app.get('/contact', async (req, res) => {
     if (!req.session || !req.session.user) {
         return res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
@@ -810,14 +854,12 @@ app.get('/contact', async (req, res) => {
     res.render('contact', { user: req.session.user, dms: dms });
 });
 
-// 2. 유저가 관리자에게 메세지 보내기
 app.post('/contact/send', async (req, res) => {
     if (!req.session || !req.session.user) return res.redirect('/login');
     await new DM({ userId: req.session.user.id, message: req.body.message }).save();
     res.redirect('/contact');
 });
 
-// 3. 관리자가 답변 달기
 app.post('/contact/reply/:id', async (req, res) => {
     // 관리자만 답변할 수 있는 강력한 방어막!
     if (!req.session || !req.session.user || req.session.user.role !== 'admin') {
@@ -827,8 +869,6 @@ app.post('/contact/reply/:id', async (req, res) => {
     res.redirect('/contact');
 });
 
-
-// 4. DM 삭제 기능 (유저는 본인 것만, 관리자는 전부 다 지울 수 있음!)
 app.post('/contact/delete/:id', async (req, res) => {
     if (!req.session || !req.session.user) return res.redirect('/login');
     try {
