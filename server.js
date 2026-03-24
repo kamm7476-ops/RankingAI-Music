@@ -29,7 +29,12 @@ const storage = new CloudinaryStorage({
         allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'mp3', 'wav']
     }
 });
-const upload = multer({ storage: storage });
+const upload = multer({ 
+    storage: storage,
+    limits: { 
+        fileSize: 1 * 1024 * 1024 // 🌟 이미지 최대 2MB로 제한! (1 곱하기 1MB)
+    } 
+});
 
 const app = express();
 let currentPopup = { isActive: false, title: '', content: '' };
