@@ -25,14 +25,16 @@
         .input-row input { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; }
         .btn-upload { background: #ff5722; color: #000; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
 
-        /* 🌟 반응형 쇼츠 비디오 그리드 🌟 */
+        /* 🌟 반응형 쇼츠 비디오 그리드 (번쩍임 방지 강제 고정!) 🌟 */
         .shorts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+            grid-template-columns: repeat(5, 1fr); /* 넓은 PC: 무조건 5개 */
             gap: 20px;
+            width: 100%;
         }
         .shorts-card {
             background: #161718; border: 1px solid #222; border-radius: 15px; overflow: hidden; transition: 0.2s;
+            min-width: 0; /* 사진이 화면을 뚫고 나가는 현상 방지 */
         }
         .shorts-card:hover { border-color: #ffb300; transform: translateY(-5px); box-shadow: 0 5px 15px rgba(255,179,0,0.2); }
         
@@ -40,7 +42,7 @@
         .shorts-iframe-wrap {
             position: relative;
             width: 100%;
-            padding-bottom: 177.77%; /* 새로고침 없이 처음부터 무조건 세로비율 강제! */
+            padding-bottom: 177.77%;
             height: 0;
             background: #000;
         }
@@ -52,12 +54,19 @@
         .shorts-title { font-size: 14px; font-weight: bold; margin: 0 0 8px 0; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .btn-delete { background: none; border: none; color: #ff4a4a; cursor: pointer; font-size: 12px; font-weight: bold; padding: 0; }
 
+        /* 해상도별 강제 규칙 (새로고침 번쩍임 원천 차단) */
+        @media (max-width: 1200px) {
+            .shorts-grid { grid-template-columns: repeat(4, 1fr); } /* 좁은 PC: 4개 */
+        }
+        @media (max-width: 900px) {
+            .shorts-grid { grid-template-columns: repeat(3, 1fr); } /* 태블릿: 3개 */
+        }
         @media (max-width: 768px) {
             .header-top { flex-direction: column; gap: 15px; }
             .header-nav { justify-content: flex-start; overflow-x: auto; white-space: nowrap; padding: 12px 15px; gap: 20px; }
             .header-nav::-webkit-scrollbar { display: none; }
             .input-row { flex-direction: column; }
-            .shorts-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .shorts-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } /* 모바일: 2개 고정 */
         }
     </style>
 </head>
@@ -67,7 +76,7 @@
             <div class="logo" style="cursor:pointer;" onclick="window.location.href='/?sort=views'">RANKING AI</div>
             <div class="auth-buttons">
                 <% if (user) { %>
-                    <span style="color: #aaa; font-size: 14px;"><%= user.id %>님</span>
+                    <span style="color: #aaa; font-size: 14px;"><%= user.name || user.id %>님</span>
                     <a href="/logout" class="btn-login">로그아웃</a>
                 <% } else { %>
                     <a href="/login" class="btn-login">로그인</a>
