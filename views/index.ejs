@@ -205,6 +205,37 @@
     </style>
 </head>
 <body>
+    <div id="inapp-blocker" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#ff5722; color:white; z-index:9999999; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; box-sizing:border-box; font-family:sans-serif;">
+        <span style="font-size:60px; margin-bottom:20px;">⚠️</span>
+        <h2 style="margin:0 0 15px 0; font-size:24px;">접속 오류 안내</h2>
+        <p style="font-size:16px; line-height:1.6; margin-bottom:25px;">
+            현재 접속하신 앱(카톡/네이버 등)에서는<br>
+            <strong>음악 연속 재생이 강제로 차단</strong>됩니다.
+        </p>
+        <div style="background:rgba(0,0,0,0.2); padding:20px; border-radius:12px; font-size:16px; line-height:1.6;">
+            화면 우측 하단(또는 상단)의 메뉴 <strong>[ ⋮ ]</strong> 를 눌러<br>
+            <strong style="color:#ffeb3b; font-size:18px;">[다른 브라우저로 열기(Safari/Chrome)]</strong>를<br>
+            반드시 선택해 주세요!
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            var ua = navigator.userAgent.toLowerCase();
+            var targetUrl = location.href;
+            var isKakao = ua.indexOf('kakaotalk') > -1;
+            var isInApp = ua.match(/naver|instagram|facebook|inapp|line/i);
+
+            if (isKakao) {
+                // 카톡은 자동으로 외부 브라우저 띄워줌
+                location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(targetUrl);
+            } else if (isInApp) {
+                // 네이버 등은 경고창 띄움
+                document.getElementById('inapp-blocker').style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        })();
+    </script>
     <% if (typeof popup !== 'undefined' && popup && popup.isActive) { %>
         <div class="popup-overlay" id="mainPopup">
             <div class="popup-box">
@@ -524,7 +555,7 @@
             </div>
         </div>
         
-        <audio id="main-audio" style="display:none;"></audio>
+        <audio id="main-audio" style="display:none;" preload="auto" playsinline webkit-playsinline></audio>
     </div>
 
     <script>
@@ -648,6 +679,25 @@
                     playPromise.then(() => {
                         isPlaying = true;
                         if(btnPlay) btnPlay.innerText = "⏸";
+
+                        // 🌟 [추가된 마법] 스마트폰 잠금화면(OS)에 음악 정보 신고하기! 🌟
+                        if ('mediaSession' in navigator) {
+                            navigator.mediaSession.metadata = new MediaMetadata({
+                                title: track.title,
+                                artist: track.artist || 'RANKING AI',
+                                album: 'RANKING AI TOP 100',
+                                artwork: [
+                                    { src: track.cover || 'https://via.placeholder.com/512/1a1a1a/ff5722?text=RANKING+AI', sizes: '512x512', type: 'image/jpeg' }
+                                ]
+                            });
+
+                            // 잠금 화면에서 버튼 누를 때 작동하도록 연결
+                            navigator.mediaSession.setActionHandler('previoustrack', () => playPrevTrack());
+                            navigator.mediaSession.setActionHandler('nexttrack', () => playNextTrack());
+                            navigator.mediaSession.setActionHandler('play', () => { mainAudio.play(); isPlaying = true; if(btnPlay) btnPlay.innerText = "⏸"; });
+                            navigator.mediaSession.setActionHandler('pause', () => { mainAudio.pause(); isPlaying = false; if(btnPlay) btnPlay.innerText = "▶"; });
+                        }
+
                     }).catch(e => {
                         console.log("자동 재생 차단됨 (사용자 클릭 필요)");
                         isPlaying = false;
