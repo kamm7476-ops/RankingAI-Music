@@ -205,6 +205,35 @@
     </style>
 </head>
 <body>
+
+    <div id="inapp-banner" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); width:90%; max-width:400px; background:rgba(20,21,24,0.95); border:1px solid #ff5722; border-radius:12px; padding:15px; z-index:999999; box-shadow:0 10px 25px rgba(0,0,0,0.6); backdrop-filter:blur(10px); color:white; font-size:13px; line-height:1.5;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+            <strong style="color:#ffb300; font-size:14px; display:flex; align-items:center; gap:5px;">
+                💡 쾌적한 음악 감상 팁
+            </strong>
+            <button onclick="document.getElementById('inapp-banner').style.display='none'" style="background:none; border:none; color:#aaa; font-size:18px; cursor:pointer; padding:0; line-height:1;">✕</button>
+        </div>
+        <p style="margin:0 0 10px 0; color:#ddd;">
+            현재 접속하신 앱(카톡/네이버)에서는 화면이 꺼지면 음악이 멈출 수 있습니다. 🎵
+        </p>
+        <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; font-size:12px; color:#aaa;">
+            끊김 없는 연속 재생을 원하시면 우측 하단(또는 상단) 메뉴 <b>[ ⋮ ]</b>를 눌러 <br>
+            <b style="color:#ff5722;">[다른 브라우저로 열기(Safari/Chrome)]</b>를 선택해주세요!
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            var ua = navigator.userAgent.toLowerCase();
+            // 카톡, 네이버, 인스타 등 인앱 브라우저 감지
+            var isInApp = ua.match(/kakaotalk|naver|instagram|facebook|inapp|line/i);
+
+            if (isInApp) {
+                // 강제로 막지 않고, 부드러운 안내 배너만 띄웁니다!
+                document.getElementById('inapp-banner').style.display = 'block';
+            }
+        })();
+    </script>
     <div id="inapp-blocker" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#ff5722; color:white; z-index:9999999; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; box-sizing:border-box; font-family:sans-serif;">
         <span style="font-size:60px; margin-bottom:20px;">⚠️</span>
         <h2 style="margin:0 0 15px 0; font-size:24px;">접속 오류 안내</h2>
