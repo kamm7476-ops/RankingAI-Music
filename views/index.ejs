@@ -777,12 +777,15 @@
             .catch(err => alert("에러가 발생했습니다. 다시 시도해주세요."));
         }
 
+       // 🌟 쇼츠와 유튜브는 무조건 새 창(전체 로드)으로 열리게 예외 처리! 🌟
         document.addEventListener('click', async (e) => {
             const link = e.target.closest('a');
             if (!link) return;
 
             const href = link.getAttribute('href');
-            if (href && href.startsWith('/') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('edit')) {
+            
+            // 👇 shorts와 youtube 글자가 주소에 있으면 몰래 바꾸기(PJAX)를 멈추고 정상적으로 이동시킵니다!
+            if (href && href.startsWith('/') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('edit') && !href.includes('shorts') && !href.includes('youtube')) {
                 e.preventDefault(); 
                 navigateTo(href);
             }
