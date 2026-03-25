@@ -225,46 +225,13 @@
     <script>
         (function() {
             var ua = navigator.userAgent.toLowerCase();
-            // 카톡, 네이버, 인스타 등 인앱 브라우저 감지
             var isInApp = ua.match(/kakaotalk|naver|instagram|facebook|inapp|line/i);
-
             if (isInApp) {
-                // 강제로 막지 않고, 부드러운 안내 배너만 띄웁니다!
                 document.getElementById('inapp-banner').style.display = 'block';
             }
         })();
     </script>
-    <div id="inapp-blocker" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#ff5722; color:white; z-index:9999999; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; box-sizing:border-box; font-family:sans-serif;">
-        <span style="font-size:60px; margin-bottom:20px;">⚠️</span>
-        <h2 style="margin:0 0 15px 0; font-size:24px;">접속 오류 안내</h2>
-        <p style="font-size:16px; line-height:1.6; margin-bottom:25px;">
-            현재 접속하신 앱(카톡/네이버 등)에서는<br>
-            <strong>음악 연속 재생이 강제로 차단</strong>됩니다.
-        </p>
-        <div style="background:rgba(0,0,0,0.2); padding:20px; border-radius:12px; font-size:16px; line-height:1.6;">
-            화면 우측 하단(또는 상단)의 메뉴 <strong>[ ⋮ ]</strong> 를 눌러<br>
-            <strong style="color:#ffeb3b; font-size:18px;">[다른 브라우저로 열기(Safari/Chrome)]</strong>를<br>
-            반드시 선택해 주세요!
-        </div>
-    </div>
-
-    <script>
-        (function() {
-            var ua = navigator.userAgent.toLowerCase();
-            var targetUrl = location.href;
-            var isKakao = ua.indexOf('kakaotalk') > -1;
-            var isInApp = ua.match(/naver|instagram|facebook|inapp|line/i);
-
-            if (isKakao) {
-                // 카톡은 자동으로 외부 브라우저 띄워줌
-                location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(targetUrl);
-            } else if (isInApp) {
-                // 네이버 등은 경고창 띄움
-                document.getElementById('inapp-blocker').style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-            }
-        })();
-    </script>
+    
     <% if (typeof popup !== 'undefined' && popup && popup.isActive) { %>
         <div class="popup-overlay" id="mainPopup">
             <div class="popup-box">
@@ -288,7 +255,7 @@
     <header class="main-header">
        <div class="header-top">
             <div class="logo-wrap">
-                <div class="logo" style="cursor:pointer;" onclick="window.location.href='/?sort=views'">RANKING AI</div>
+                <img src="/logo.png" alt="RANKING AI 로고" style="height: 45px; cursor: pointer; object-fit: contain;" onclick="window.location.href='/?sort=views'">
                 <div id="google_translate_element" style="display:none;"></div>
                 <select id="custom-translate-select" class="lang-select" onchange="changeLanguage(this.value)">
                     <option value="ko">🇰🇷 한국어</option>
@@ -668,6 +635,28 @@
         const timeCurrent = document.getElementById('time-current');
         const timeTotal = document.getElementById('time-total');
 
+        // 🌟 모바일 크롬 연속재생 철벽 뚫기 (오디오 영구 패스권 마법) 🌟
+        let isAudioUnlocked = false;
+        
+        function unlockAudioForMobile() {
+            if (isAudioUnlocked) return;
+            
+            const playPromise = mainAudio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    mainAudio.pause();
+                    isAudioUnlocked = true;
+                    console.log("🔓 모바일 크롬 오디오 연속재생 권한 완벽 획득!");
+                    document.removeEventListener('touchstart', unlockAudioForMobile);
+                    document.removeEventListener('click', unlockAudioForMobile);
+                }).catch(e => {
+                });
+            }
+        }
+        document.addEventListener('touchstart', unlockAudioForMobile, { passive: true });
+        document.addEventListener('click', unlockAudioForMobile);
+        // 🌟 마법 추가 완료! 🌟
+
         function toggleAll(source) {
             document.querySelectorAll('.song-check').forEach(cb => cb.checked = source.checked);
         }
@@ -709,7 +698,6 @@
                         isPlaying = true;
                         if(btnPlay) btnPlay.innerText = "⏸";
 
-                        // 🌟 [추가된 마법] 스마트폰 잠금화면(OS)에 음악 정보 신고하기! 🌟
                         if ('mediaSession' in navigator) {
                             navigator.mediaSession.metadata = new MediaMetadata({
                                 title: track.title,
@@ -720,7 +708,6 @@
                                 ]
                             });
 
-                            // 잠금 화면에서 버튼 누를 때 작동하도록 연결
                             navigator.mediaSession.setActionHandler('previoustrack', () => playPrevTrack());
                             navigator.mediaSession.setActionHandler('nexttrack', () => playNextTrack());
                             navigator.mediaSession.setActionHandler('play', () => { mainAudio.play(); isPlaying = true; if(btnPlay) btnPlay.innerText = "⏸"; });
