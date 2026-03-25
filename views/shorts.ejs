@@ -6,12 +6,13 @@
     <title>쇼츠 모아보기 - RANKING AI</title>
 
     <script>
-        (function() {
-            if (!sessionStorage.getItem('shorts_reloaded')) {
-                sessionStorage.setItem('shorts_reloaded', 'true');
-                window.location.reload();
-            }
-        })();
+        // URL 주소를 검사해서 'reloaded'라는 비밀 암호가 없으면 무조건 강제 새로고침!
+        if (window.location.search.indexOf('reloaded=1') === -1) {
+            var currentUrl = window.location.href;
+            // 주소 끝에 몰래 비밀 암호를 붙여서 브라우저가 새 페이지인 줄 착각하게 만듭니다.
+            var separator = currentUrl.indexOf('?') > -1 ? '&' : '?';
+            window.location.replace(currentUrl + separator + 'reloaded=1');
+        }
     </script>
 
     <style>
@@ -43,6 +44,7 @@
             flex-wrap: wrap;
             gap: 15px;
             width: 100%;
+            visibility: visible; /* 숨김 방지 */
         }
 
         .shorts-card {
