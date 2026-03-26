@@ -22,7 +22,7 @@
         
         .logo { margin-bottom: 30px; width: 100%; }
         .logo img {
-            max-width: 100%; 
+            max-width: 100%; /* 🌟 절대 상자 밖으로 못 나가게 가둠! */
             height: auto;
             max-height: 55px; 
             cursor: pointer;
@@ -40,6 +40,7 @@
         }
         .input-group input:focus { border-color: #ff5722; box-shadow: 0 0 10px rgba(255, 87, 34, 0.2); }
         
+        /* 이메일 인증 버튼 스타일 */
         .btn-verify {
             background: #333; color: #fff; border: 1px solid #555; 
             border-radius: 8px; padding: 0 15px; font-size: 13px; font-weight: bold; 
@@ -53,6 +54,7 @@
         }
         .btn-verify-check:hover { background: #ffb300; }
 
+        /* 약관 박스 스타일 */
         .terms-container { margin-bottom: 25px; text-align: left; width: 100%; }
         .terms-container label.title { display: block; margin-bottom: 8px; font-size: 13px; color: #ff5722; font-weight: bold; }
         .terms-box {
@@ -126,27 +128,17 @@
                 <div class="terms-box">
                     <strong>제 1 조 (목적)</strong><br>
                     본 약관은 RANKING AI(이하 "사이트")가 제공하는 AI 음원 공유 및 커뮤니티 서비스의 이용조건, 절차 및 회원과 사이트 간의 권리와 의무를 규정함을 목적으로 합니다.<br><br>
-                    
                     <strong>제 2 조 (AI 음원 및 저작권 규정)</strong><br>
                     1. 회원이 사이트에 업로드한 AI 생성 음원, 가사, 이미지에 대한 모든 법적 책임은 해당 회원에게 있습니다.<br>
                     2. 타인의 목소리를 무단 도용(AI 학습 포함)하거나, 기존 아티스트의 저작권을 명백히 침해하여 수익을 편취하려는 목적으로 게시물을 올리는 행위는 금지됩니다.<br>
                     3. 저작권 침해 신고가 접수되거나 운영진이 부적절하다고 판단한 게시물은 사전 통지 없이 삭제될 수 있으며, 반복될 경우 계정이 영구 정지됩니다.<br><br>
-
-                    <strong style="color: #ff5722;">제 3 조 (음원 스트리밍 및 무상 이용 권한)</strong><br>
-                    1. 회원이 본 사이트에 음원을 업로드하는 것은, 다른 모든 이용자가 해당 음원을 사이트 내에서 자유롭게 스트리밍(재생)하고 감상할 수 있도록 허락하는 것으로 간주됩니다.<br>
-                    2. 회원은 업로드한 게시물(음원, 이미지, 가사 등)에 대해 사이트가 서비스 운영, 홍보, 차트 제공의 목적으로 무상 이용(재생, 전시)할 수 있는 비독점적 권리를 부여합니다.<br>
-                    3. 본 사이트는 유저가 올린 음원을 통해 직접적인 판매 수익(다운로드 과금 등)을 창출하지 않으며, 회원 역시 사이트를 향해 저작권료나 스트리밍 로열티를 청구할 수 없습니다.<br>
-                    4. 회원은 원할 경우 언제든 본인의 음원을 삭제할 수 있으며, 삭제 시 사이트 내 재생 및 노출은 즉시 중단됩니다.<br><br>
-
-                    <strong>제 4 조 (유튜브/쇼츠 홍보 및 게시물 규칙)</strong><br>
+                    <strong>제 3 조 (유튜브/쇼츠 홍보 및 게시물 규칙)</strong><br>
                     1. 유튜브 및 쇼츠 홍보 게시판에는 본인의 작업물 또는 관련 정보만 등록해야 하며, 광고성 스팸이나 허위 낚시성 링크 등록 시 즉시 제재됩니다.<br>
                     2. 타인을 비방하거나 욕설, 혐오 표현, 음란물을 게시하는 경우 정보통신망법에 의거하여 처벌받을 수 있으며, 사이트 이용이 영구 제한됩니다.<br><br>
-                    
-                    <strong>제 5 조 (서비스 이용 및 데이터 보호)</strong><br>
+                    <strong>제 4 조 (서비스 이용 및 데이터 보호)</strong><br>
                     1. 사이트는 서비스 개선을 위해 최소한의 정보(아이디, 암호화된 비밀번호, 활동 기록)를 수집하며, 회원의 소중한 정보는 철저히 보호됩니다.<br>
                     2. 소셜 로그인(네이버, 구글)을 통해 수집된 정보는 본인 확인 및 서비스 제공 목적으로만 사용되며 제3자에게 제공되지 않습니다.<br>
                     3. 회원은 언제든지 탈퇴를 요청할 수 있으며, 탈퇴 시 관련 법령에 따른 보존 정보를 제외한 모든 데이터는 즉시 파기됩니다.<br><br>
-                    
                     <strong>부칙</strong><br>
                     본 약관은 2026년 3월 23일부터 시행됩니다.
                 </div>
