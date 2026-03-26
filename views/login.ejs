@@ -5,35 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>로그인 - RANKING AI</title>
     <style>
+        /* 🌟 모바일 가로 삐져나옴 완벽 방어 마법 🌟 */
+        * { box-sizing: border-box; }
+        html, body { max-width: 100%; overflow-x: hidden; }
+
         body { 
             background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; 
             display: flex; justify-content: center; align-items: center; 
-            height: 100vh; margin: 0; 
+            min-height: 100vh; margin: 0; padding: 20px;
         }
         .login-box { 
-            background: #161718; padding: 40px; border-radius: 15px; 
+            background: #161718; padding: 40px 25px; border-radius: 15px; 
             border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
             width: 100%; max-width: 380px; text-align: center; 
-            box-sizing: border-box; margin: 20px;
         }
-        /* 로고 이미지를 중앙에 예쁘게 정렬하기 위한 속성 */
-        .logo { 
-            margin-bottom: 30px; 
-        }
+        
+        .logo { margin-bottom: 30px; width: 100%; }
         .logo img {
-            height: 55px; /* 모바일이나 로그인 창에 맞게 크기 조절 */
+            max-width: 100%; /* 🌟 절대 상자 밖으로 못 나가게 가둠! */
+            height: auto;
+            max-height: 55px; 
             cursor: pointer;
             object-fit: contain;
             transition: transform 0.2s ease;
         }
-        .logo img:hover {
-            transform: scale(1.05); /* 마우스 올리면 살짝 커지는 효과 */
-        }
+        .logo img:hover { transform: scale(1.05); }
+
         .input-group { margin-bottom: 20px; text-align: left; }
         .input-group label { display: block; margin-bottom: 8px; font-size: 13px; color: #aaa; font-weight: bold; }
         .input-group input { 
             width: 100%; padding: 14px; background: #222; border: 1px solid #444; 
-            border-radius: 8px; color: #fff; box-sizing: border-box; 
+            border-radius: 8px; color: #fff; 
             font-size: 15px; outline: none; transition: 0.3s; 
         }
         .input-group input:focus { border-color: #ff5722; box-shadow: 0 0 10px rgba(255, 87, 34, 0.2); }
