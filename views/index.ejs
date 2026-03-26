@@ -94,8 +94,7 @@
         /* 🌟 스포티파이 스타일 하단 플레이어 CSS 🌟 */
         .bottom-player-bar { 
             position: fixed; bottom: 0; left: 0; width: 100%; 
-            background: #181818; 
-            border-top: 1px solid #282828; 
+            background: #181818; border-top: 1px solid #282828; 
             padding: 12px 24px; box-sizing: border-box; 
             display: grid; grid-template-columns: 1fr 2fr 1fr; align-items: center; 
             z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); 
@@ -140,9 +139,19 @@
         .progress-area:hover #progress-bar::-webkit-slider-thumb { width: 12px; height: 12px; }
         .progress-area:hover #progress-bar { background: #5a5a5a; }
 
-        .player-right-placeholder { display: flex; justify-content: flex-end; min-width: 0; }
-        /* 🌟 스포티파이 스타일 CSS 끝 🌟 */
-
+        .player-right-placeholder { display: flex; justify-content: flex-end; align-items: center; min-width: 0; }
+        
+        /* 🌟 재생목록(Playlist) 모달 CSS 🌟 */
+        #playlist-modal {
+            display: none; position: fixed; bottom: 90px; right: 20px; width: 320px; max-height: 400px;
+            background: #181818; border: 1px solid #282828; border-radius: 12px; z-index: 1005;
+            overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        #playlist-modal::-webkit-scrollbar { width: 6px; }
+        #playlist-modal::-webkit-scrollbar-track { background: #181818; }
+        #playlist-modal::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+        .playlist-header { padding: 15px; border-bottom: 1px solid #282828; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: #181818; z-index: 10; }
+        
         .logo-wrap { display: flex; align-items: center; gap: 15px; }
         .lang-select { padding: 6px 12px; background: #222; color: #fff; border: 1px solid #ff5722; border-radius: 20px; font-weight: bold; font-size: 13px; outline: none; cursor: pointer; }
 
@@ -170,62 +179,54 @@
             .logo-wrap { width: 100%; justify-content: space-between; }
             .top-search-form { width: 100%; box-sizing: border-box; }
             .auth-buttons { width: 100%; justify-content: center; }
-
             .header-nav { justify-content: flex-start; overflow-x: auto; white-space: nowrap; padding: 12px 15px; gap: 20px; border-bottom: 1px solid #222; }
             .header-nav::-webkit-scrollbar { display: none; }
-
             .main-layout { flex-direction: column; gap: 20px; }
             .content-left { width: 100%; max-width: 100%; overflow-x: hidden; }
             .sidebar-right { width: 100%; position: static; box-sizing: border-box; margin-top: 10px; }
-
             .music-list, .music-list tbody, .music-item, .music-item td { display: block; width: 100%; box-sizing: border-box; }
             .music-item { position: relative; background: #161718; border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px solid #222; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
             .music-item td { padding: 0; border: none; }
-
             .check-col { position: absolute; top: 15px; right: 15px; z-index: 10; width: auto !important; }
             .rank { position: absolute; top: -12px; left: 15px; background: #ff5722; color: #000; border-radius: 6px; padding: 4px 12px; font-size: 14px; font-weight: 900; width: auto; z-index: 10; box-shadow: 0 2px 5px rgba(255,87,34,0.4); }
-
             .music-item td:nth-child(3) { float: left; width: 75px; margin-right: 15px; margin-top: 10px; }
             .song-info { margin-top: 12px; overflow: hidden; } 
-            
             .action-row { flex-wrap: wrap; gap: 6px; margin-top: 15px; clear: both; }
             .action-btn { padding: 8px 5px; font-size: 12px; flex: 1; text-align: center; justify-content: center; }
-
             body { padding-bottom: 160px; } 
-
             .chart-controls { display: flex !important; width: 100%; overflow-x: auto !important; flex-wrap: nowrap !important; gap: 10px; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
             .chart-controls::-webkit-scrollbar { display: none; }
             .control-btn { flex: 0 0 auto !important; white-space: nowrap !important; font-size: 13px; padding: 8px 15px; }
-
             .chart-header { flex-direction: column; align-items: flex-start; gap: 15px; }
             .tabs { display: flex; width: 100%; overflow-x: auto; gap: 20px; padding-bottom: 5px; -webkit-overflow-scrolling: touch; }
             .tabs::-webkit-scrollbar { display: none; }
             .tab { flex: 0 0 auto; white-space: nowrap; font-size: 15px; }
 
-            /* 🌟 스포티파이 모바일 미니 플레이어 CSS 🌟 */
+            /* 🌟 모바일 플레이어 전면 수정! 버튼 복구 & 레이아웃 정상화 🌟 */
             .bottom-player-bar { 
-                display: flex; flex-direction: row; padding: 8px 12px; gap: 12px;
-                border-radius: 8px; margin: 10px; width: calc(100% - 20px); 
-                bottom: 60px; border-top: none; background: #282828;
-                box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+                display: flex; flex-direction: column; padding: 10px 15px; gap: 10px;
+                border-radius: 0; margin: 0; width: 100%; 
+                bottom: 0; border-top: 1px solid #282828; background: #181818;
+                box-shadow: 0 -5px 20px rgba(0,0,0,0.8);
             }
-            .player-toggle-tab { display: none; } 
-            .player-right-placeholder { display: none; }
-            .player-info { flex: 1; width: auto; gap: 10px; }
-            .player-cover { width: 40px; height: 40px; border-radius: 4px; }
-            .player-title { font-size: 13px; }
-            .player-artist { font-size: 11px; }
+            .player-toggle-tab { display: block; top: -28px; right: 10px; padding: 4px 12px; font-size: 11px; border-radius: 8px 8px 0 0; } 
             
-            .player-controls-wrapper { width: auto; flex-direction: row; align-items: center; gap: 15px; margin: 0; }
-            .player-buttons { gap: 15px; }
-            #btn-prev, #id-btn-loop { display: none; } 
-            .player-buttons .play-btn { width: auto; height: auto; background: none; color: #fff; font-size: 24px; padding: 0; }
-            .player-buttons .play-btn:hover { background: none; transform: none; color: #ff5722; }
+            .player-info { width: 100%; justify-content: flex-start; gap: 12px; }
+            .player-cover { width: 45px; height: 45px; border-radius: 6px; }
             
-            .progress-area { position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; gap: 0; }
-            #time-current, #time-total { display: none; }
-            #progress-bar { height: 2px; border-radius: 0; background: rgba(255,255,255,0.1); margin: 0; padding: 0; }
-            #progress-bar::-webkit-slider-thumb { display: none; }
+            .player-controls-wrapper { width: 100%; flex-direction: column; gap: 6px; margin: 0; }
+            .player-buttons { gap: 30px; justify-content: center; width: 100%; }
+            #btn-prev, #id-btn-loop, #btn-next { display: block !important; font-size: 18px; }
+            .player-buttons .play-btn { width: 40px; height: 40px; font-size: 18px; padding-left: 3px; }
+            
+            .progress-area { position: static; width: 100%; height: auto; gap: 10px; }
+            #time-current, #time-total { display: block !important; font-size: 10px; }
+            #progress-bar { height: 4px; border-radius: 2px; background: #4d4d4d; }
+            #progress-bar::-webkit-slider-thumb { display: block !important; width: 10px; height: 10px; }
+
+            /* 재생목록 버튼 모바일 위치 */
+            .player-right-placeholder { position: absolute; top: 15px; right: 20px; display: block !important; }
+            #playlist-modal { bottom: 120px; right: 10px; width: calc(100% - 20px); max-height: 50vh; }
         }
 
         /* 🌟 팝업창 디자인 🌟 */
@@ -259,9 +260,7 @@
         (function() {
             var ua = navigator.userAgent.toLowerCase();
             var isInApp = ua.match(/kakaotalk|naver|instagram|facebook|inapp|line/i);
-            if (isInApp) {
-                document.getElementById('inapp-banner').style.display = 'block';
-            }
+            if (isInApp) { document.getElementById('inapp-banner').style.display = 'block'; }
         })();
     </script>
     
@@ -583,10 +582,22 @@
             </div>
         </div>
 
-        <div class="player-right-placeholder"></div>
+        <div class="player-right-placeholder">
+            <button onclick="togglePlaylist()" style="background:none; border:none; color:#b3b3b3; font-size:22px; cursor:pointer;" title="재생목록 보기">💽</button>
+        </div>
         
         <audio id="main-audio" style="display:none;" preload="auto" playsinline webkit-playsinline></audio>
         <audio id="heartbeat-audio" loop playsinline webkit-playsinline style="display:none;" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
+    </div>
+
+    <div id="playlist-modal">
+        <div class="playlist-header">
+            <strong style="color:#fff; font-size:14px;">현재 재생 목록</strong>
+            <button onclick="togglePlaylist()" style="background:none; border:none; color:#aaa; font-size:18px; cursor:pointer; padding:0; line-height:1;">✕</button>
+        </div>
+        <ul id="playlist-ul" style="list-style:none; padding:0; margin:0;">
+            <li style="padding:20px; text-align:center; color:#777; font-size:12px;">재생할 곡을 선택해주세요.</li>
+        </ul>
     </div>
 
     <script>
@@ -617,6 +628,41 @@
             playerBar.classList.toggle('collapsed');
             if (playerBar.classList.contains('collapsed')) toggleTab.innerText = '▲ 열기';
             else toggleTab.innerText = '▼ 숨기기';
+        }
+
+        // 🌟 재생목록 토글 & UI 업데이트 함수 🌟
+        function togglePlaylist() {
+            const modal = document.getElementById('playlist-modal');
+            if (modal.style.display === 'block') {
+                modal.style.display = 'none';
+            } else {
+                updatePlaylistUI();
+                modal.style.display = 'block';
+            }
+        }
+
+        function updatePlaylistUI() {
+            const ul = document.getElementById('playlist-ul');
+            ul.innerHTML = '';
+            if (playlist.length === 0) {
+                ul.innerHTML = '<li style="padding:20px; text-align:center; color:#777; font-size:12px;">재생할 곡을 선택해주세요.</li>';
+                return;
+            }
+            playlist.forEach((track, i) => {
+                const li = document.createElement('li');
+                const isCurrent = (i === currentIndex);
+                li.style = `padding:10px 15px; border-bottom:1px solid #222; display:flex; align-items:center; gap:12px; cursor:pointer; transition:0.2s; ${isCurrent ? 'background:rgba(255,87,34,0.1);' : ''}`;
+                li.onclick = () => { loadTrack(i); };
+                li.innerHTML = `
+                    <img src="${track.cover || 'https://via.placeholder.com/50/282828/ff5722'}" style="width:36px; height:36px; border-radius:4px; object-fit:cover;">
+                    <div style="display:flex; flex-direction:column; overflow:hidden; flex:1;">
+                        <span style="font-size:13px; font-weight:${isCurrent ? 'bold' : 'normal'}; color:${isCurrent ? '#ff5722' : '#fff'}; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${track.title}</span>
+                        <span style="font-size:11px; color:#aaa; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${track.artist}</span>
+                    </div>
+                    ${isCurrent ? '<span style="font-size:10px; color:#ff5722;">🎵</span>' : ''}
+                `;
+                ul.appendChild(li);
+            });
         }
 
         const genreBtns = document.querySelectorAll('.genre-btn');
@@ -675,6 +721,9 @@
             if(index >= 0 && index < playlist.length) {
                 const track = playlist[index];
                 currentIndex = index; 
+                
+                // 곡이 바뀔 때마다 재생목록 UI 갱신
+                updatePlaylistUI();
                 
                 if(!track.audio || track.audio.trim() === "" || track.audio === "undefined") {
                     setTimeout(() => playNextTrack(), 500); 
@@ -808,7 +857,7 @@
                 const playerBar = document.getElementById('bottomPlayerBar');
                 if (playerBar) {
                     if (href.includes('/youtube') || href.includes('/shorts') || href.includes('/board')) playerBar.style.display = 'none';
-                    else playerBar.style.display = 'grid'; // 스포티파이 스타일 grid로 복구
+                    else playerBar.style.display = 'flex'; 
                 }
                 reattachEvents(); window.scrollTo(0, 0); 
             } catch (err) { location.href = href; }
