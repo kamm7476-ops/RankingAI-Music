@@ -13,6 +13,10 @@
     <meta name="naver-site-verification" content="34a9f6198c9f271e3250e3d11cabcb17c24a7754" />
     <meta name="google-site-verification" content="hGmKKbn9hQDQ2viDIRcHFRPeIlRIZpkTZfFjgKb_sjA" />
     <style>
+        /* 🌟 가로 삐져나옴 완벽 방어 마법 (모바일 화면 딱 맞추기) 🌟 */
+        * { box-sizing: border-box; }
+        html, body { max-width: 100%; overflow-x: hidden; }
+        
         body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; padding-bottom: 100px; }
         a { text-decoration: none; color: inherit; }
 
@@ -193,7 +197,7 @@
             .song-info { margin-top: 12px; overflow: hidden; } 
             .action-row { flex-wrap: wrap; gap: 6px; margin-top: 15px; clear: both; }
             .action-btn { padding: 8px 5px; font-size: 12px; flex: 1; text-align: center; justify-content: center; }
-            body { padding-bottom: 160px; } 
+            body { padding-bottom: 180px; } 
             .chart-controls { display: flex !important; width: 100%; overflow-x: auto !important; flex-wrap: nowrap !important; gap: 10px; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
             .chart-controls::-webkit-scrollbar { display: none; }
             .control-btn { flex: 0 0 auto !important; white-space: nowrap !important; font-size: 13px; padding: 8px 15px; }
@@ -202,16 +206,16 @@
             .tabs::-webkit-scrollbar { display: none; }
             .tab { flex: 0 0 auto; white-space: nowrap; font-size: 15px; }
 
-            /* 🌟 모바일 플레이어 전면 수정! 버튼 복구 & 레이아웃 정상화 🌟 */
+            /* 🌟 모바일 플레이어 전면 수정! 가로 삐져나옴 완벽 방어 🌟 */
             .bottom-player-bar { 
                 display: flex; flex-direction: column; padding: 10px 15px; gap: 10px;
-                border-radius: 0; margin: 0; width: 100%; 
-                bottom: 0; border-top: 1px solid #282828; background: #181818;
-                box-shadow: 0 -5px 20px rgba(0,0,0,0.8);
+                border-radius: 0; margin: 0; width: 100%; max-width: 100vw;
+                bottom: 0; left: 0; right: 0; border-top: 1px solid #282828; background: #181818;
+                box-shadow: 0 -5px 20px rgba(0,0,0,0.8); box-sizing: border-box;
             }
             .player-toggle-tab { display: block; top: -28px; right: 10px; padding: 4px 12px; font-size: 11px; border-radius: 8px 8px 0 0; } 
             
-            .player-info { width: 100%; justify-content: flex-start; gap: 12px; }
+            .player-info { width: 100%; max-width: calc(100% - 40px); justify-content: flex-start; gap: 12px; }
             .player-cover { width: 45px; height: 45px; border-radius: 6px; }
             
             .player-controls-wrapper { width: 100%; flex-direction: column; gap: 6px; margin: 0; }
@@ -225,8 +229,8 @@
             #progress-bar::-webkit-slider-thumb { display: block !important; width: 10px; height: 10px; }
 
             /* 재생목록 버튼 모바일 위치 */
-            .player-right-placeholder { position: absolute; top: 15px; right: 20px; display: block !important; }
-            #playlist-modal { bottom: 120px; right: 10px; width: calc(100% - 20px); max-height: 50vh; }
+            .player-right-placeholder { position: absolute; top: 15px; right: 15px; display: block !important; }
+            #playlist-modal { bottom: 140px; right: 10px; width: calc(100% - 20px); max-height: 50vh; }
         }
 
         /* 🌟 팝업창 디자인 🌟 */
@@ -240,30 +244,6 @@
 </head>
 <body>
 
-    <div id="inapp-banner" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); width:90%; max-width:400px; background:rgba(20,21,24,0.95); border:1px solid #ff5722; border-radius:12px; padding:15px; z-index:999999; box-shadow:0 10px 25px rgba(0,0,0,0.6); backdrop-filter:blur(10px); color:white; font-size:13px; line-height:1.5;">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
-            <strong style="color:#ffb300; font-size:14px; display:flex; align-items:center; gap:5px;">
-                💡 쾌적한 음악 감상 팁
-            </strong>
-            <button onclick="document.getElementById('inapp-banner').style.display='none'" style="background:none; border:none; color:#aaa; font-size:18px; cursor:pointer; padding:0; line-height:1;">✕</button>
-        </div>
-        <p style="margin:0 0 10px 0; color:#ddd;">
-            현재 접속하신 앱(카톡/네이버)에서는 화면이 꺼지면 음악이 멈출 수 있습니다. 🎵
-        </p>
-        <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; font-size:12px; color:#aaa;">
-            끊김 없는 연속 재생을 원하시면 우측 하단(또는 상단) 메뉴 <b>[ ⋮ ]</b>를 눌러 <br>
-            <b style="color:#ff5722;">[다른 브라우저로 열기(Safari/Chrome)]</b>를 선택해주세요!
-        </div>
-    </div>
-
-    <script>
-        (function() {
-            var ua = navigator.userAgent.toLowerCase();
-            var isInApp = ua.match(/kakaotalk|naver|instagram|facebook|inapp|line/i);
-            if (isInApp) { document.getElementById('inapp-banner').style.display = 'block'; }
-        })();
-    </script>
-    
     <% if (typeof popup !== 'undefined' && popup && popup.isActive) { %>
         <div class="popup-overlay" id="mainPopup">
             <div class="popup-box">
