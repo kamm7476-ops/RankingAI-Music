@@ -16,10 +16,18 @@
             width: 100%; max-width: 380px; text-align: center; 
             box-sizing: border-box; margin: 20px;
         }
+        /* 로고 이미지를 중앙에 예쁘게 정렬하기 위한 속성 */
         .logo { 
-            font-size: 32px; font-weight: 900; margin-bottom: 30px; 
-            background: linear-gradient(45deg, #ff5722, #ffb300); 
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+            margin-bottom: 30px; 
+        }
+        .logo img {
+            height: 55px; /* 모바일이나 로그인 창에 맞게 크기 조절 */
+            cursor: pointer;
+            object-fit: contain;
+            transition: transform 0.2s ease;
+        }
+        .logo img:hover {
+            transform: scale(1.05); /* 마우스 올리면 살짝 커지는 효과 */
         }
         .input-group { margin-bottom: 20px; text-align: left; }
         .input-group label { display: block; margin-bottom: 8px; font-size: 13px; color: #aaa; font-weight: bold; }
@@ -42,7 +50,9 @@
 </head>
 <body>
     <div class="login-box">
-        <div class="logo">RANKING AI</div>
+        <div class="logo">
+            <img src="/logo.png" alt="RANKING AI 로고" onclick="window.location.href='/?sort=views'">
+        </div>
         
         <form action="/login" method="POST">
             <div class="input-group">

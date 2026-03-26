@@ -16,11 +16,21 @@
             width: 100%; max-width: 450px; text-align: center; 
             box-sizing: border-box;
         }
+        
+        /* 🌟 이미지 로고용 CSS 🌟 */
         .logo { 
-            font-size: 32px; font-weight: 900; margin-bottom: 30px; 
-            background: linear-gradient(45deg, #ff5722, #ffb300); 
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+            margin-bottom: 30px; 
         }
+        .logo img {
+            height: 55px; 
+            cursor: pointer;
+            object-fit: contain;
+            transition: transform 0.2s ease;
+        }
+        .logo img:hover {
+            transform: scale(1.05); 
+        }
+
         .input-group { margin-bottom: 20px; text-align: left; }
         .input-group label { display: block; margin-bottom: 8px; font-size: 13px; color: #aaa; font-weight: bold; }
         .input-group input { 
@@ -62,7 +72,9 @@
 </head>
 <body>
     <div class="signup-box">
-        <div class="logo">RANKING AI</div>
+        <div class="logo">
+            <img src="/logo.png" alt="RANKING AI 로고" onclick="window.location.href='/?sort=views'">
+        </div>
         
         <form action="/signup" method="POST">
             <div class="input-group">
