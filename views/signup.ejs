@@ -17,29 +17,38 @@
             box-sizing: border-box;
         }
         
-        /* 🌟 이미지 로고용 CSS 🌟 */
-        .logo { 
-            margin-bottom: 30px; 
-        }
+        .logo { margin-bottom: 30px; }
         .logo img {
             height: 55px; 
             cursor: pointer;
             object-fit: contain;
             transition: transform 0.2s ease;
         }
-        .logo img:hover {
-            transform: scale(1.05); 
-        }
+        .logo img:hover { transform: scale(1.05); }
 
         .input-group { margin-bottom: 20px; text-align: left; }
         .input-group label { display: block; margin-bottom: 8px; font-size: 13px; color: #aaa; font-weight: bold; }
-        .input-group input { 
+        .input-group input[type="text"], .input-group input[type="password"], .input-group input[type="email"] { 
             width: 100%; padding: 14px; background: #222; border: 1px solid #444; 
             border-radius: 8px; color: #fff; box-sizing: border-box; 
             font-size: 15px; outline: none; transition: 0.3s; 
         }
         .input-group input:focus { border-color: #ff5722; box-shadow: 0 0 10px rgba(255, 87, 34, 0.2); }
         
+        /* 🌟 이메일 인증 버튼 스타일 🌟 */
+        .btn-verify {
+            background: #333; color: #fff; border: 1px solid #555; 
+            border-radius: 8px; padding: 0 15px; font-size: 13px; font-weight: bold; 
+            cursor: pointer; transition: 0.2s; white-space: nowrap;
+        }
+        .btn-verify:hover { background: #444; border-color: #ff5722; color: #ff5722; }
+        .btn-verify-check {
+            background: #ff5722; color: #000; border: none; 
+            border-radius: 8px; padding: 0 15px; font-size: 13px; font-weight: bold; 
+            cursor: pointer; transition: 0.2s; white-space: nowrap;
+        }
+        .btn-verify-check:hover { background: #ffb300; }
+
         /* 🌟 약관 박스 스타일 🌟 */
         .terms-container { margin-bottom: 25px; text-align: left; }
         .terms-container label.title { display: block; margin-bottom: 8px; font-size: 13px; color: #ff5722; font-weight: bold; }
@@ -49,7 +58,7 @@
             height: 140px; overflow-y: auto; line-height: 1.6;
             margin-bottom: 12px;
         }
-        .checkbox-group { display: flex; align-items: center; gap: 8px; margin-left: 5px; }
+        .checkbox-group { display: flex; align-items: center; gap: 8px; margin-left: 5px; margin-top: 10px; }
         .checkbox-group input { width: 18px; height: 18px; accent-color: #ff5722; cursor: pointer; }
         .checkbox-group label { font-size: 13px; color: #ddd; cursor: pointer; font-weight: bold;}
 
@@ -63,7 +72,6 @@
         .extra-links a { color: #aaa; text-decoration: none; transition: 0.2s; font-weight: bold; }
         .extra-links a:hover { color: #ff5722; text-decoration: underline; }
         
-        /* 스크롤바 디자인 */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #111; border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
@@ -76,7 +84,7 @@
             <img src="/logo.png" alt="RANKING AI 로고" onclick="window.location.href='/?sort=views'">
         </div>
         
-        <form action="/signup" method="POST">
+        <form action="/signup" method="POST" id="signupForm" onsubmit="return validateForm()">
             <div class="input-group">
                 <label>아이디</label>
                 <input type="text" name="username" placeholder="사용할 아이디를 입력하세요" required>
@@ -89,35 +97,50 @@
                 <label>비밀번호 확인</label>
                 <input type="password" name="pw_confirm" placeholder="비밀번호를 다시 입력하세요" required>
             </div>
-            
             <div class="input-group">
                 <label>아티스트명 (닉네임)</label>
                 <input type="text" name="nickname" placeholder="활동하실 멋진 이름을 입력하세요" required autocomplete="off" maxlength="15">
             </div>
 
+            <div class="input-group">
+                <label>이메일 인증</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="email" id="emailInput" name="email" placeholder="이메일 주소" required style="flex: 1;">
+                    <button type="button" id="btnSendCode" class="btn-verify" onclick="sendVerificationEmail()">인증번호 발송</button>
+                </div>
+            </div>
+            
+            <div class="input-group" id="verifyGroup" style="display: none;">
+                <label style="color: #ffb300;">인증번호 입력</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="verifyCodeInput" placeholder="인증번호 6자리" style="flex: 1;">
+                    <button type="button" id="btnVerifyCode" class="btn-verify-check" onclick="checkVerificationCode()">인증 확인</button>
+                </div>
+            </div>
+
             <div class="terms-container">
                 <label class="title">이용약관 동의</label>
                 <div class="terms-box">
-    <strong>제 1 조 (목적)</strong><br>
-    본 약관은 RANKING AI(이하 "사이트")가 제공하는 AI 음원 공유 및 커뮤니티 서비스의 이용조건, 절차 및 회원과 사이트 간의 권리와 의무를 규정함을 목적으로 합니다.<br><br>
-
-    <strong>제 2 조 (AI 음원 및 저작권 규정)</strong><br>
-    1. 회원이 사이트에 업로드한 AI 생성 음원, 가사, 이미지에 대한 모든 법적 책임은 해당 회원에게 있습니다.<br>
-    2. 타인의 목소리를 무단 도용(AI 학습 포함)하거나, 기존 아티스트의 저작권을 명백히 침해하여 수익을 편취하려는 목적으로 게시물을 올리는 행위는 금지됩니다.<br>
-    3. 저작권 침해 신고가 접수되거나 운영진이 부적절하다고 판단한 게시물은 사전 통지 없이 삭제될 수 있으며, 반복될 경우 계정이 영구 정지됩니다.<br><br>
-
-    <strong>제 3 조 (유튜브/쇼츠 홍보 및 게시물 규칙)</strong><br>
-    1. 유튜브 및 쇼츠 홍보 게시판에는 본인의 작업물 또는 관련 정보만 등록해야 하며, 광고성 스팸이나 허위 낚시성 링크 등록 시 즉시 제재됩니다.<br>
-    2. 타인을 비방하거나 욕설, 혐오 표현, 음란물을 게시하는 경우 정보통신망법에 의거하여 처벌받을 수 있으며, 사이트 이용이 영구 제한됩니다.<br><br>
-
-    <strong>제 4 조 (서비스 이용 및 데이터 보호)</strong><br>
-    1. 사이트는 서비스 개선을 위해 최소한의 정보(아이디, 암호화된 비밀번호, 활동 기록)를 수집하며, 회원의 소중한 정보는 철저히 보호됩니다.<br>
-    2. 소셜 로그인(네이버, 구글)을 통해 수집된 정보는 본인 확인 및 서비스 제공 목적으로만 사용되며 제3자에게 제공되지 않습니다.<br>
-    3. 회원은 언제든지 탈퇴를 요청할 수 있으며, 탈퇴 시 관련 법령에 따른 보존 정보를 제외한 모든 데이터는 즉시 파기됩니다.<br><br>
-
-    <strong>부칙</strong><br>
-    본 약관은 2026년 3월 23일부터 시행됩니다.
-</div>
+                    <strong>제 1 조 (목적)</strong><br>
+                    본 약관은 RANKING AI(이하 "사이트")가 제공하는 AI 음원 공유 및 커뮤니티 서비스의 이용조건, 절차 및 회원과 사이트 간의 권리와 의무를 규정함을 목적으로 합니다.<br><br>
+                    <strong>제 2 조 (AI 음원 및 저작권 규정)</strong><br>
+                    1. 회원이 사이트에 업로드한 AI 생성 음원, 가사, 이미지에 대한 모든 법적 책임은 해당 회원에게 있습니다.<br>
+                    2. 타인의 목소리를 무단 도용(AI 학습 포함)하거나, 기존 아티스트의 저작권을 명백히 침해하여 수익을 편취하려는 목적으로 게시물을 올리는 행위는 금지됩니다.<br>
+                    3. 저작권 침해 신고가 접수되거나 운영진이 부적절하다고 판단한 게시물은 사전 통지 없이 삭제될 수 있으며, 반복될 경우 계정이 영구 정지됩니다.<br><br>
+                    <strong>제 3 조 (유튜브/쇼츠 홍보 및 게시물 규칙)</strong><br>
+                    1. 유튜브 및 쇼츠 홍보 게시판에는 본인의 작업물 또는 관련 정보만 등록해야 하며, 광고성 스팸이나 허위 낚시성 링크 등록 시 즉시 제재됩니다.<br>
+                    2. 타인을 비방하거나 욕설, 혐오 표현, 음란물을 게시하는 경우 정보통신망법에 의거하여 처벌받을 수 있으며, 사이트 이용이 영구 제한됩니다.<br><br>
+                    <strong>제 4 조 (서비스 이용 및 데이터 보호)</strong><br>
+                    1. 사이트는 서비스 개선을 위해 최소한의 정보(아이디, 암호화된 비밀번호, 활동 기록)를 수집하며, 회원의 소중한 정보는 철저히 보호됩니다.<br>
+                    2. 소셜 로그인(네이버, 구글)을 통해 수집된 정보는 본인 확인 및 서비스 제공 목적으로만 사용되며 제3자에게 제공되지 않습니다.<br>
+                    3. 회원은 언제든지 탈퇴를 요청할 수 있으며, 탈퇴 시 관련 법령에 따른 보존 정보를 제외한 모든 데이터는 즉시 파기됩니다.<br><br>
+                    <strong>부칙</strong><br>
+                    본 약관은 2026년 3월 23일부터 시행됩니다.
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="agreeTerms" required>
+                    <label for="agreeTerms">위 이용약관에 동의합니다. (필수)</label>
+                </div>
             </div>
 
             <button type="submit" class="btn-submit">회원가입 완료</button>
@@ -142,5 +165,95 @@
             <a href="/">← 메인 화면으로 돌아가기</a>
         </div>
     </div>
+
+    <script>
+        let isEmailVerified = false; // 이메일 인증 통과 여부를 기억하는 변수
+
+        // 1. 인증번호 발송 버튼 눌렀을 때
+        async function sendVerificationEmail() {
+            const email = document.getElementById('emailInput').value;
+            if (!email) return alert("이메일 주소를 먼저 입력해주세요!");
+            
+            const btn = document.getElementById('btnSendCode');
+            btn.innerText = "발송 중...";
+            btn.disabled = true;
+
+            try {
+                // (주의: 이 부분은 2단계 백엔드 작업을 해야 실제로 메일이 날아갑니다!)
+                const response = await fetch('/send-verification', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert("인증번호가 발송되었습니다. 메일함을 확인해주세요!");
+                    document.getElementById('verifyGroup').style.display = 'block'; // 인증번호 입력칸 띄우기
+                    btn.innerText = "재발송";
+                } else {
+                    alert(data.message || "발송에 실패했습니다.");
+                    btn.innerText = "인증번호 발송";
+                }
+            } catch (error) {
+                alert("서버 오류가 발생했습니다. (백엔드 세팅 필요)");
+                btn.innerText = "인증번호 발송";
+            }
+            btn.disabled = false;
+        }
+
+        // 2. 인증번호 확인 버튼 눌렀을 때
+        async function checkVerificationCode() {
+            const email = document.getElementById('emailInput').value;
+            const code = document.getElementById('verifyCodeInput').value;
+            if (!code) return alert("인증번호를 입력해주세요!");
+
+            try {
+                const response = await fetch('/verify-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, code: code })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    isEmailVerified = true;
+                    alert("이메일 인증이 완료되었습니다!");
+                    
+                    // 인증 완료되면 칸 잠그고 초록색으로 바꾸기
+                    document.getElementById('verifyCodeInput').disabled = true;
+                    document.getElementById('emailInput').readOnly = true;
+                    document.getElementById('btnSendCode').style.display = 'none';
+                    const verifyBtn = document.getElementById('btnVerifyCode');
+                    verifyBtn.innerText = "인증 완료 ✅";
+                    verifyBtn.style.background = "#03C75A";
+                    verifyBtn.style.color = "#fff";
+                    verifyBtn.disabled = true;
+                } else {
+                    alert("인증번호가 틀렸습니다. 다시 확인해주세요.");
+                }
+            } catch (error) {
+                alert("서버 오류가 발생했습니다.");
+            }
+        }
+
+        // 3. [회원가입 완료] 버튼 눌렀을 때 최종 검사
+        function validateForm() {
+            // 이메일 인증 안 했으면 빠꾸!
+            if (!isEmailVerified) {
+                alert("이메일 인증을 완료하셔야 가입할 수 있습니다.");
+                return false; 
+            }
+
+            // 이용약관 체크 안 했으면 빠꾸!
+            const agreeChecked = document.getElementById('agreeTerms').checked;
+            if (!agreeChecked) {
+                alert("이용약관에 동의하셔야 회원가입이 가능합니다.");
+                return false;
+            }
+
+            return true; // 모두 통과하면 폼 제출!
+        }
+    </script>
 </body>
 </html>

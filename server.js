@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 const multer = require('multer');
 const session = require('express-session');
+const nodemailer = require('nodemailer'); // 🌟 이메일 우체부 소환!
 
 const passport = require('passport');
 const NaverStrategy = require('passport-naver').Strategy;
@@ -39,7 +40,7 @@ const upload = multer({
 const app = express();
 let currentPopup = { isActive: false, title: '', content: '' };
 
-// 🌟 DB 연결 (영어를 숫자로 바꾼 완벽 버전!)
+// 🌟 DB 연결
 mongoose.connect(process.env.DB_URI)
   .then(() => console.log("☁️ 진짜 인터넷 창고(Cloud DB) 연결 완료!! ☁️"))
   .catch((err) => console.log("🔥 DB 연결 에러:", err));
@@ -51,7 +52,7 @@ const musicSchema = new mongoose.Schema({
     name: String, artist: String, genre: String, aiTool: String, lyrics: String,
     uploader: String, uploaderRealName: String, imageUrl: String, audioUrl: String,
     views: { type: Number, default: 0 },
-    likedBy: [String], // 🌟🌟🌟 명단 적는 칸
+    likedBy: [String], 
     comments: [{ author: String, text: String, date: { type: Date, default: Date.now } }],
     createdAt: { type: Date, default: Date.now }
 });
@@ -68,20 +69,20 @@ const videoSchema = new mongoose.Schema({
 const Video = mongoose.models.Video || mongoose.model('Video', videoSchema);
 
 // =========================================
-// 🌟 3. 커뮤니티 게시판 DB 주머니 (명단 추가 완료!)
+// 🌟 3. 커뮤니티 게시판 DB 주머니
 // =========================================
 const postSchema = new mongoose.Schema({
     title: String,
     content: String,
     author: String,
     likes: { type: Number, default: 0 },
-    likedBy: [String], // 🌟 게시글 좋아요 명단
+    likedBy: [String], 
     createdAt: { type: Date, default: Date.now },
     comments: [{ 
         author: String, 
         text: String, 
         likes: { type: Number, default: 0 },
-        likedBy: [String], // 🌟 댓글 좋아요 명단
+        likedBy: [String], 
         createdAt: { type: Date, default: Date.now } 
     }]
 });
@@ -112,7 +113,7 @@ const Popup = mongoose.models.Popup || mongoose.model('Popup', popupSchema);
 const dmSchema = new mongoose.Schema({
     userId: String,
     message: String,
-    reply: { type: String, default: '' }, // 관리자 답변칸
+    reply: { type: String, default: '' }, 
     createdAt: { type: Date, default: Date.now }
 });
 const DM = mongoose.models.DM || mongoose.model('DM', dmSchema);
@@ -154,11 +155,10 @@ passport.use(new NaverStrategy({
         const naverId = 'naver_' + profile.id; 
         let user = await User.findOne({ username: naverId });
         
-        // 처음 로그인하는 네이버 유저라면 몰래 자동 가입!
         if (!user) {
             const randomPassword = Math.random().toString(36).slice(-10); 
             const hashedPassword = await bcrypt.hash(randomPassword, 10);
-            user = new User({ username: naverId, password: hashedPassword, nickname: "" }); // 닉네임은 일단 빈칸
+            user = new User({ username: naverId, password: hashedPassword, nickname: "" }); 
             await user.save();
         }
         return done(null, { id: user.username, name: user.nickname || "", role: user.role });
@@ -167,19 +167,16 @@ passport.use(new NaverStrategy({
     }
 }));
 
-// 네이버 로그인 버튼 눌렀을 때 가는 길
 app.get('/auth/naver', passport.authenticate('naver'));
 
-// 네이버 로그인 끝나고 우리 사이트로 돌아오는 길
 app.get('/auth/naver/callback', 
     passport.authenticate('naver', { failureRedirect: '/login' }), 
     (req, res) => {
-        // 🌟 중간 검문소: 닉네임이 없으면?
         if (!req.user.name || req.user.name.trim() === "") {
-            req.session.tempUser = req.user; // 임시 패스 발급
+            req.session.tempUser = req.user; 
             res.send("<script>alert('환영합니다! 사이트에서 활동할 닉네임을 설정해주세요.'); window.location.href='/set-nickname';</script>");
         } else {
-            req.session.user = req.user; // 정식 로그인 도장 쾅!
+            req.session.user = req.user; 
             res.send("<script>alert('네이버 로그인 성공!'); window.location.href='/';</script>");
         }
     }
@@ -197,11 +194,10 @@ passport.use(new GoogleStrategy({
         const googleId = 'google_' + profile.id; 
         let user = await User.findOne({ username: googleId });
         
-        // 처음 로그인하는 구글 유저라면 몰래 자동 가입!
         if (!user) {
             const randomPassword = Math.random().toString(36).slice(-10); 
             const hashedPassword = await bcrypt.hash(randomPassword, 10);
-            user = new User({ username: googleId, password: hashedPassword, nickname: "" }); // 닉네임은 일단 빈칸
+            user = new User({ username: googleId, password: hashedPassword, nickname: "" }); 
             await user.save();
         }
         return done(null, { id: user.username, name: user.nickname || "", role: user.role });
@@ -210,19 +206,16 @@ passport.use(new GoogleStrategy({
     }
 }));
 
-// 구글 로그인 버튼 눌렀을 때 가는 길 (이메일, 프로필 정보 내놔!)
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-// 구글 로그인 끝나고 우리 사이트로 돌아오는 길
 app.get('/auth/google/callback', 
     passport.authenticate('google', { failureRedirect: '/login' }),
     (req, res) => {
-        // 🌟 중간 검문소: 닉네임이 없으면?
         if (!req.user.name || req.user.name.trim() === "") {
-            req.session.tempUser = req.user; // 임시 패스 발급
+            req.session.tempUser = req.user; 
             res.send("<script>alert('환영합니다! 사이트에서 활동할 닉네임을 설정해주세요.'); window.location.href='/set-nickname';</script>");
         } else {
-            req.session.user = req.user; // 정식 로그인 도장 쾅!
+            req.session.user = req.user; 
             res.send("<script>alert('초간단 구글 로그인 성공!'); window.location.href='/';</script>");
         }
     }
@@ -233,7 +226,7 @@ app.get('/auth/google/callback',
 // ==========================================
 app.get('/set-nickname', (req, res) => {
     if (!req.session.tempUser) return res.redirect('/login');
-    res.render('set-nickname'); // 멋진 닉네임 입력 화면 띄워주기
+    res.render('set-nickname'); 
 });
 
 app.post('/set-nickname', async (req, res) => {
@@ -241,25 +234,22 @@ app.post('/set-nickname', async (req, res) => {
     try {
         const newNickname = req.body.nickname.trim();
         
-        // 1. 닉네임 중복 검사
         const existing = await User.findOne({ nickname: newNickname });
         if (existing) {
             return res.send("<script>alert('이미 다른 분이 사용 중인 이름입니다! 다른 멋진 이름을 지어주세요.'); window.history.back();</script>");
         }
 
-        // 2. DB에 닉네임 업데이트 저장
         await User.findOneAndUpdate(
             { username: req.session.tempUser.id }, 
             { nickname: newNickname }
         );
 
-        // 3. 드디어 진짜 로그인 도장 쾅!
         req.session.user = { 
             id: req.session.tempUser.id, 
             name: newNickname, 
             role: req.session.tempUser.role 
         };
-        req.session.tempUser = null; // 임시 패스 파기
+        req.session.tempUser = null; 
 
         res.send(`<script>alert('${newNickname}님, 환영합니다! 멋진 활동 기대할게요.'); window.location.href='/';</script>`);
     } catch (err) {
@@ -268,14 +258,83 @@ app.post('/set-nickname', async (req, res) => {
     }
 });
 
+
 // ==========================================
-// 🚪 1. 화면 보여주는 파이프 (GET)
+// ✉️ 🌟 이메일 인증 발송 및 확인 파이프 (Nodemailer) 🌟
+// ==========================================
+const verificationCodes = new Map(); // 임시 번호 보관소 (서버 메모리)
+
+// 우체부(트랜스포터) 세팅
+const transporter = nodemailer.createTransport({
+    service: 'gmail', // 구글 메일 사용
+    auth: {
+        user: process.env.EMAIL_USER, // .env 파일에 적을 내 이메일
+        pass: process.env.EMAIL_PASS  // .env 파일에 적을 구글 앱 비밀번호
+    }
+});
+
+// 1. 인증번호 메일 쏘기
+app.post('/send-verification', async (req, res) => {
+    const { email } = req.body;
+    if (!email) return res.json({ success: false, message: "이메일이 없습니다." });
+
+    // 6자리 랜덤 숫자 생성
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // 번호 기억해두기 (5분 뒤 만료)
+    verificationCodes.set(email, {
+        code: code,
+        expires: Date.now() + 5 * 60 * 1000 
+    });
+
+    try {
+        await transporter.sendMail({
+            from: `"RANKING AI" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: "[RANKING AI] 회원가입 이메일 인증번호",
+            html: `<div style="font-family: sans-serif; padding: 30px; background-color: #f5f5f5; border-radius: 10px; text-align: center; max-width: 500px; margin: 0 auto;">
+                    <h2 style="color: #333; margin-bottom: 20px;">RANKING AI 회원가입 인증</h2>
+                    <p style="color: #555; font-size: 15px;">아래 6자리 인증번호를 회원가입 화면에 입력해주세요.</p>
+                    <div style="margin: 30px 0; padding: 20px; background: #fff; border: 2px solid #ff5722; border-radius: 8px; display: inline-block;">
+                        <h1 style="color: #ff5722; letter-spacing: 8px; margin: 0; font-size: 32px;">${code}</h1>
+                    </div>
+                    <p style="color: #888; font-size: 12px; margin-top: 20px;">※ 이 번호는 5분 동안만 유효합니다.</p>
+                   </div>`
+        });
+        res.json({ success: true });
+    } catch (error) {
+        console.error("이메일 발송 에러:", error);
+        res.json({ success: false, message: "이메일 발송 실패! 서버 설정을 확인해주세요." });
+    }
+});
+
+// 2. 입력한 번호 맞는지 채점하기
+app.post('/verify-code', (req, res) => {
+    const { email, code } = req.body;
+    const storedData = verificationCodes.get(email);
+
+    if (!storedData) return res.json({ success: false, message: "인증 요청 내역이 없습니다." });
+    if (Date.now() > storedData.expires) {
+        verificationCodes.delete(email); // 시간 지났으면 파기
+        return res.json({ success: false, message: "인증 시간이 만료되었습니다. 다시 요청해주세요." });
+    }
+    if (storedData.code !== code.trim()) {
+        return res.json({ success: false, message: "인증번호가 틀립니다." });
+    }
+
+    verificationCodes.delete(email); // 인증 성공하면 쓴 번호는 파기
+    res.json({ success: true });
+});
+
+
+// ==========================================
+// 🚪 화면 보여주는 파이프 (GET)
 // ==========================================
 app.get('/signup', (req, res) => res.render('signup'));
 app.get('/login', (req, res) => res.render('login'));
 
 // ==========================================
-// 📝 2. 데이터 처리하는 파이프 (POST)
+// 📝 데이터 처리하는 파이프 (POST)
 // ==========================================
 app.post('/signup', async (req, res) => {
   try {
@@ -326,13 +385,11 @@ app.post('/login', async (req, res) => {
         displayName = '관리자'; 
     }
     
-    // 일반 유저인데 닉네임이 빈칸이면 강제로 설정 페이지로 보냄
     if (userRole !== 'admin' && (!displayName || displayName.trim() === "")) {
         req.session.tempUser = { id: user.username, role: userRole };
         return res.send("<script>alert('환영합니다! 활동하실 닉네임을 설정해주세요.'); window.location.href='/set-nickname';</script>");
     }
 
-    // 발급된 이름표(displayName)를 세션에 쏙 넣어줌
     req.session.user = { id: user.username, name: displayName, role: userRole };
     
     if (userRole === 'admin') {
@@ -358,21 +415,20 @@ app.get('/', async (req, res) => {
         const searchQuery = req.query.search || ''; 
         const genreQuery = req.query.genre || ''; 
         const sortQuery = req.query.sort || 'views'; 
-        const periodQuery = req.query.period || ''; // 🌟 기간 탭 필터 추가!
+        const periodQuery = req.query.period || ''; 
         
         let filter = {};
         if (searchQuery) filter.artist = { $regex: searchQuery, $options: 'i' };
         if (genreQuery) filter.genre = genreQuery;
 
-        // 🌟 기간별 필터링 마법 (일간/주간/월간)
         if (periodQuery) {
             const now = new Date();
             let pastDate = new Date();
-            if (periodQuery === 'daily') pastDate.setDate(now.getDate() - 1); // 1일 전
-            else if (periodQuery === 'weekly') pastDate.setDate(now.getDate() - 7); // 7일 전
-            else if (periodQuery === 'monthly') pastDate.setMonth(now.getMonth() - 1); // 한 달 전
+            if (periodQuery === 'daily') pastDate.setDate(now.getDate() - 1); 
+            else if (periodQuery === 'weekly') pastDate.setDate(now.getDate() - 7); 
+            else if (periodQuery === 'monthly') pastDate.setMonth(now.getMonth() - 1); 
             
-            filter.createdAt = { $gte: pastDate }; // 이 날짜 이후에 등록된 곡만 가져와라!
+            filter.createdAt = { $gte: pastDate }; 
         }
 
         let sortOption = { views: -1 }; 
@@ -401,7 +457,7 @@ app.get('/', async (req, res) => {
             searchQuery: searchQuery, 
             genreQuery: genreQuery, 
             sortQuery: sortQuery, 
-            periodQuery: periodQuery, // 🌟 화면에 어떤 탭인지 알려주기
+            periodQuery: periodQuery, 
             popularArtists: popularArtists,
             popup: activePopup
         });
@@ -463,7 +519,6 @@ app.post('/add-shorts', async (req, res) => {
     res.redirect('/shorts');
 });
 
-// 🌟 back 에러 수정 완료!
 app.post('/delete-video/:id', async (req, res) => {
     if (!req.session || !req.session.user) return res.redirect('/youtube');
     try {
@@ -506,7 +561,6 @@ app.post('/delete-post/:id', async (req, res) => {
     } catch (err) { console.log(err); }
 });
 
-// 🌟🌟🌟 커뮤니티 게시글 수정 파이프 🌟🌟🌟
 app.get('/edit-post/:id', async (req, res) => {
     if (!req.session || !req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
     try {
@@ -549,7 +603,6 @@ app.post('/edit-post/:id', async (req, res) => {
     }
 });
 
-// 🌟 back 에러 수정 완료!
 app.post('/add-board-comment/:id', async (req, res) => {
     if (!req.session || !req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
     try {
@@ -568,43 +621,28 @@ app.post('/add-board-comment/:id', async (req, res) => {
 // =========================================
 // 🌟 기타 기능 (관리자 페이지 등)
 // =========================================
-// 👑 관리자 전용 대시보드 데이터 수집
 app.get('/admin', async (req, res) => {
     try {
-        // 관리자 권한 체크 (세션에 admin 정보가 없으면 튕겨내기)
         if (!req.session.user || req.session.user.role !== 'admin') {
             return res.redirect('/');
         }
 
-        // 1. 전체 가입자 및 음원 데이터 가져오기
         const allUsers = await User.find().lean();
         const allMusic = await Music.find().lean();
 
-        // 2. 가입자별 등록 음원수 합산해서 새로운 목록 만들기
         const usersWithStats = allUsers.map(u => {
             const myMusicCount = allMusic.filter(m => m.uploader === u.id).length;
-            return {
-                ...u,
-                musicCount: myMusicCount
-            };
+            return { ...u, musicCount: myMusicCount };
         });
 
-        // 3. 전체 통계 계산
         const stats = {
             totalUsers: allUsers.length,
             totalMusic: allMusic.length,
             totalViews: allMusic.reduce((sum, m) => sum + (m.views || 0), 0),
-            // 금일 방문자 등은 로그 시스템이 없으므로 일단 0이나 랜덤값으로 구조만 잡습니다.
             todayVisitor: Math.floor(Math.random() * 50) + 10 
         };
 
-        // 4. 관리자 페이지(admin.ejs)로 모든 데이터 쏴주기!
-        res.render('admin', { 
-            user: req.session.user,
-            stats: stats,
-            users: usersWithStats
-        });
-
+        res.render('admin', { user: req.session.user, stats: stats, users: usersWithStats });
     } catch (err) {
         console.error("관리자 데이터 수집 에러:", err);
         res.status(500).send("<h1>관리자 페이지 데이터를 불러오는데 실패했습니다. ㅠㅠ</h1>");
@@ -612,7 +650,6 @@ app.get('/admin', async (req, res) => {
 });
 
 app.post('/add-music', (req, res, next) => {
-    // 🌟 1. 문지기 출동! 로그인 안 한 사람은 여기서 바로 튕겨냅니다!
     if (!req.session || !req.session.user) {
         return res.send("<script>alert('회원만 음원을 업로드할 수 있습니다! 로그인해주세요.'); location.href='/login';</script>");
     }
@@ -625,7 +662,6 @@ app.post('/add-music', (req, res, next) => {
 }, async (req, res) => {
     try {
         const { name, artist, genre, aiTool, lyrics, realName } = req.body;
-        // 🌟 2. 이제 무조건 로그인한 사람(user.id) 이름으로만 저장됨!
         const uploader = req.session.user.id; 
         const imageUrl = req.files && req.files['image'] ? req.files['image'][0].path : 'https://via.placeholder.com/150';
         const audioUrl = req.files && req.files['audio'] ? req.files['audio'][0].path : '';
@@ -640,7 +676,6 @@ app.post('/delete-music/:id', async (req, res) => {
     if (!req.session.user) return res.redirect('/');
     try {
         const music = await Music.findById(req.params.id);
-        // 올린 본인이거나, '관리자(admin)'일 때만 삭제 허용!
         if (music.uploader === req.session.user.id || req.session.user.role === 'admin') {
             await Music.findByIdAndDelete(req.params.id);
             await MyMusic.deleteMany({ musicId: req.params.id }); 
@@ -684,9 +719,6 @@ app.post('/edit/:id', async (req, res) => {
     } catch (err) { res.redirect('/'); }
 });
 
-// =========================================
-// 🌟 음원 좋아요 기능
-// =========================================
 app.post('/like/:id', async (req, res) => {
     if (!req.session.user) return res.json({ success: false, message: "로그인이 필요합니다." });
     try {
@@ -737,9 +769,6 @@ app.post('/admin/popup', async (req, res) => {
     } catch (err) { res.send("<script>alert('팝업 설정 에러!'); window.history.back();</script>"); }
 });
 
-// =========================================
-// 🌟 1. 음원 댓글 ❌ 삭제 기능 (본인/관리자 전용)
-// =========================================
 app.post('/delete-music-comment/:musicId/:commentId', async (req, res) => {
     if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
     try {
@@ -748,16 +777,13 @@ app.post('/delete-music-comment/:musicId/:commentId', async (req, res) => {
 
         const comment = music.comments.id(req.params.commentId);
         if (comment && (req.session.user.role === 'admin' || req.session.user.name === comment.author)) {
-            music.comments.pull(req.params.commentId); // 댓글 쏙 빼서 버리기!
+            music.comments.pull(req.params.commentId); 
             await music.save();
         }
-        res.redirect('/'); // 🌟 back 대신 '/' (메인화면)으로 확정!
+        res.redirect('/'); 
     } catch (err) { res.redirect('/'); }
 });
 
-// =========================================
-// 🌟 2. 커뮤니티 게시글 & 댓글 좋아요 (1인 1회 방어막!)
-// =========================================
 app.post('/like-board-comment/:postId/:commentId', async (req, res) => {
     if (!req.session.user) return res.json({ success: false, message: "로그인 필요" });
     try {
@@ -767,7 +793,7 @@ app.post('/like-board-comment/:postId/:commentId', async (req, res) => {
         const isAdmin = req.session.user.role === 'admin';
 
         if (isAdmin) {
-            comment.likes = (comment.likes || 0) + 1; // 관리자는 무한 광클!
+            comment.likes = (comment.likes || 0) + 1; 
             await post.save();
             return res.json({ success: true, message: "👑 관리자 권한!" });
         } else {
@@ -784,41 +810,29 @@ app.post('/like-board-comment/:postId/:commentId', async (req, res) => {
     } catch (err) { res.status(500).json({ success: false }); }
 });
 
-// =========================================
-// 🌟 3. 메인 화면 음원 댓글 달기 파이프
-// =========================================
 app.post('/add-comment/:id', async (req, res) => {
-    // 1. 로그인 안 한 사람 튕겨내기
     if (!req.session || !req.session.user) {
         return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
     }
-
     try {
-        // 2. 어떤 노래에 댓글을 달았는지 찾기
         const music = await Music.findById(req.params.id);
-        
         if (music) {
-            // 3. 노래 장부의 comments 칸에 내 이름과 댓글 내용 쏙 넣기
             music.comments.push({ 
                 author: req.session.user.name, 
                 text: req.body.commentText 
             });
-            await music.save(); // 장부 저장!
+            await music.save(); 
         }
-        // 🌟 에러의 원인 완벽 제거: 저장 완료 후 메인 화면('/')으로 돌아가기!
         res.redirect('/'); 
-        
     } catch (err) {
         console.error("음원 댓글 등록 에러:", err);
         res.redirect('/');
     }
 });
 
-// 🌟 재생수 업데이트 API (서버용)
 app.post('/play-count/:id', async (req, res) => {
     try {
         const musicId = req.params.id;
-        // DB에서 음악을 찾아 조회수(views)를 1 올림
         await Music.findByIdAndUpdate(musicId, { $inc: { views: 1 } });
         res.json({ success: true });
     } catch (err) {
@@ -827,33 +841,26 @@ app.post('/play-count/:id', async (req, res) => {
     }
 });
 
-// ⚡ [권력 2] 유저 강제 탈퇴 (DB에서 영구 삭제)
 app.post('/admin/delete-user/:id', async (req, res) => {
     if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
     try {
         const userId = req.params.id;
-        await User.findOneAndDelete({ id: userId }); // 유저 삭제
-        await Music.deleteMany({ uploader: userId }); // 덤으로 그 유저가 올린 음악도 싹 삭제!
+        await User.findOneAndDelete({ id: userId }); 
+        await Music.deleteMany({ uploader: userId }); 
         res.redirect('/admin');
     } catch (err) {
         res.status(500).send("강제 탈퇴 중 에러가 발생했습니다.");
     }
 });
 
-// =========================================
-// 🌟 1:1 관리자 DM (제휴/문의) 기능 파이프
-// =========================================
 app.get('/contact', async (req, res) => {
     if (!req.session || !req.session.user) {
         return res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
     }
-    
     let dms = [];
     if (req.session.user.role === 'admin') {
-        // 관리자는 모든 유저의 DM을 최신순으로 봅니다.
         dms = await DM.find().sort({ createdAt: -1 });
     } else {
-        // 일반 유저는 '내 아이디'로 보낸 DM만 봅니다.
         dms = await DM.find({ userId: req.session.user.id }).sort({ createdAt: -1 });
     }
     res.render('contact', { user: req.session.user, dms: dms });
@@ -866,7 +873,6 @@ app.post('/contact/send', async (req, res) => {
 });
 
 app.post('/contact/reply/:id', async (req, res) => {
-    // 관리자만 답변할 수 있는 강력한 방어막!
     if (!req.session || !req.session.user || req.session.user.role !== 'admin') {
         return res.redirect('/');
     }
