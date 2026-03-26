@@ -91,44 +91,58 @@
         .lyrics-line { padding: 5px 0; display: flex; gap: 8px; cursor: pointer; }
         .lyrics-time { color: #ff5722; font-weight: bold; width: 45px; text-align: right; }
 
-        /* 🌟 하단 플레이어 및 애니메이션 CSS 🌟 */
+        /* 🌟 스포티파이 스타일 하단 플레이어 CSS 🌟 */
         .bottom-player-bar { 
             position: fixed; bottom: 0; left: 0; width: 100%; 
-            background: #1a1c1e; border-top: 2px solid #ff5722; 
-            padding: 10px 40px; box-sizing: border-box; 
-            display: flex; align-items: center; justify-content: space-between; 
-            z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); 
+            background: #181818; 
+            border-top: 1px solid #282828; 
+            padding: 12px 24px; box-sizing: border-box; 
+            display: grid; grid-template-columns: 1fr 2fr 1fr; align-items: center; 
+            z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); 
             transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); 
         }
-        .bottom-player-bar.collapsed {
-            transform: translateY(100%);
-        }
+        .bottom-player-bar.collapsed { transform: translateY(100%); }
         .player-toggle-tab {
-            position: absolute; top: -32px; right: 40px;
-            background: #1a1c1e; color: #ff5722;
-            border: 2px solid #ff5722; border-bottom: none;
-            padding: 6px 18px; border-radius: 12px 12px 0 0;
-            cursor: pointer; font-size: 13px; font-weight: bold;
-            z-index: 1001; box-shadow: 0 -4px 10px rgba(0,0,0,0.4);
-            transition: 0.2s;
+            position: absolute; top: -30px; right: 30px;
+            background: #181818; color: #b3b3b3;
+            border: 1px solid #282828; border-bottom: none;
+            padding: 6px 16px; border-radius: 8px 8px 0 0;
+            cursor: pointer; font-size: 12px; font-weight: bold;
+            z-index: 1001; transition: 0.2s;
         }
-        .player-toggle-tab:hover { background: #ff5722; color: #000; }
+        .player-toggle-tab:hover { color: #fff; background: #282828; }
 
-        .player-info { display: flex; align-items: center; gap: 15px; width: 300px; }
-        .player-cover { width: 50px; height: 50px; border-radius: 5px; background: #000; object-fit: cover; }
-        .player-text { display: flex; flex-direction: column; }
-        .player-title { font-size: 15px; font-weight: bold; color: #fff; }
-        .player-artist { font-size: 12px; color: #aaa; }
-        .player-controls-wrapper { flex: 1; max-width: 600px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        .player-buttons { display: flex; align-items: center; gap: 20px; }
-        .player-buttons button { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; transition: 0.2s; padding: 0; }
-        .player-buttons button:hover { color: #ff5722; }
-        .player-buttons .play-btn { font-size: 32px; color: #ff5722; }
+        .player-info { display: flex; align-items: center; gap: 14px; min-width: 0; }
+        .player-cover { width: 56px; height: 56px; border-radius: 6px; background: #282828; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .player-text { display: flex; flex-direction: column; gap: 4px; overflow: hidden; white-space: nowrap; }
+        .player-title { font-size: 14px; font-weight: 600; color: #fff; text-overflow: ellipsis; overflow: hidden; }
+        .player-title:hover { text-decoration: underline; cursor: pointer; }
+        .player-artist { font-size: 11px; color: #b3b3b3; text-overflow: ellipsis; overflow: hidden; }
+        .player-artist:hover { color: #fff; text-decoration: underline; cursor: pointer; }
+
+        .player-controls-wrapper { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; max-width: 600px; margin: 0 auto; }
+        .player-buttons { display: flex; align-items: center; gap: 24px; }
+        .player-buttons button { background: none; border: none; color: #b3b3b3; font-size: 16px; cursor: pointer; transition: 0.2s; padding: 0; }
+        .player-buttons button:hover { color: #fff; }
         
-        .progress-area { width: 100%; display: flex; align-items: center; gap: 10px; font-size: 12px; color: #aaa; }
-        #progress-bar { flex: 1; height: 4px; border-radius: 2px; -webkit-appearance: none; background: #444; outline: none; cursor: pointer; accent-color: #ff5722; }
-        #progress-bar::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #ff5722; }
+        .player-buttons .play-btn { 
+            width: 34px; height: 34px; border-radius: 50%; 
+            background: #fff; color: #000; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 14px; padding-left: 2px;
+            transition: all 0.2s;
+        }
+        .player-buttons .play-btn:hover { transform: scale(1.05); background: #ff5722; color: #fff; }
         
+        .progress-area { width: 100%; display: flex; align-items: center; gap: 8px; font-size: 11px; color: #a7a7a7; font-weight: 500; }
+        #progress-bar { flex: 1; height: 4px; border-radius: 2px; -webkit-appearance: none; background: #4d4d4d; outline: none; cursor: pointer; transition: 0.1s; }
+        #progress-bar::-webkit-slider-thumb { -webkit-appearance: none; width: 0; height: 0; border-radius: 50%; background: #fff; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .progress-area:hover #progress-bar::-webkit-slider-thumb { width: 12px; height: 12px; }
+        .progress-area:hover #progress-bar { background: #5a5a5a; }
+
+        .player-right-placeholder { display: flex; justify-content: flex-end; min-width: 0; }
+        /* 🌟 스포티파이 스타일 CSS 끝 🌟 */
+
         .logo-wrap { display: flex; align-items: center; gap: 15px; }
         .lang-select { padding: 6px 12px; background: #222; color: #fff; border: 1px solid #ff5722; border-radius: 20px; font-weight: bold; font-size: 13px; outline: none; cursor: pointer; }
 
@@ -177,11 +191,6 @@
             .action-row { flex-wrap: wrap; gap: 6px; margin-top: 15px; clear: both; }
             .action-btn { padding: 8px 5px; font-size: 12px; flex: 1; text-align: center; justify-content: center; }
 
-            .bottom-player-bar { padding: 12px 15px; flex-direction: column; gap: 12px; bottom: 0; border-top-width: 3px; }
-            .player-info { width: 100%; justify-content: flex-start; }
-            .player-controls-wrapper { width: 100%; }
-            .player-buttons { gap: 40px; }
-            
             body { padding-bottom: 160px; } 
 
             .chart-controls { display: flex !important; width: 100%; overflow-x: auto !important; flex-wrap: nowrap !important; gap: 10px; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
@@ -192,6 +201,31 @@
             .tabs { display: flex; width: 100%; overflow-x: auto; gap: 20px; padding-bottom: 5px; -webkit-overflow-scrolling: touch; }
             .tabs::-webkit-scrollbar { display: none; }
             .tab { flex: 0 0 auto; white-space: nowrap; font-size: 15px; }
+
+            /* 🌟 스포티파이 모바일 미니 플레이어 CSS 🌟 */
+            .bottom-player-bar { 
+                display: flex; flex-direction: row; padding: 8px 12px; gap: 12px;
+                border-radius: 8px; margin: 10px; width: calc(100% - 20px); 
+                bottom: 60px; border-top: none; background: #282828;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            }
+            .player-toggle-tab { display: none; } 
+            .player-right-placeholder { display: none; }
+            .player-info { flex: 1; width: auto; gap: 10px; }
+            .player-cover { width: 40px; height: 40px; border-radius: 4px; }
+            .player-title { font-size: 13px; }
+            .player-artist { font-size: 11px; }
+            
+            .player-controls-wrapper { width: auto; flex-direction: row; align-items: center; gap: 15px; margin: 0; }
+            .player-buttons { gap: 15px; }
+            #btn-prev, #id-btn-loop { display: none; } 
+            .player-buttons .play-btn { width: auto; height: auto; background: none; color: #fff; font-size: 24px; padding: 0; }
+            .player-buttons .play-btn:hover { background: none; transform: none; color: #ff5722; }
+            
+            .progress-area { position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; gap: 0; }
+            #time-current, #time-total { display: none; }
+            #progress-bar { height: 2px; border-radius: 0; background: rgba(255,255,255,0.1); margin: 0; padding: 0; }
+            #progress-bar::-webkit-slider-thumb { display: none; }
         }
 
         /* 🌟 팝업창 디자인 🌟 */
@@ -528,7 +562,7 @@
         <div class="player-toggle-tab" onclick="togglePlayerVisibility()">▼ 숨기기</div>
         
         <div class="player-info">
-            <img src="https://via.placeholder.com/50/222222/ff5722?text=Play" id="main-player-cover" class="player-cover">
+            <img src="https://via.placeholder.com/50/282828/ff5722?text=Play" id="main-player-cover" class="player-cover">
             <div class="player-text">
                 <span id="main-player-title" class="player-title">선택된 곡이 없습니다</span>
                 <span id="main-player-artist" class="player-artist">목록에서 음악을 선택해주세요</span>
@@ -537,18 +571,19 @@
         
         <div class="player-controls-wrapper">
            <div class="player-buttons">
-                <button id="id-btn-loop" onclick="toggleLoop()" title="한곡 반복" style="font-size: 16px; margin-right: 10px; color: #777; background:none; border:none; cursor:pointer;">🔁</button>
-    
-           <button id="btn-prev" onclick="playPrevTrack()">⏮</button>
-           <button id="btn-play" onclick="togglePlayPause()" class="play-btn">▶</button>
-           <button id="btn-next" onclick="playNextTrack()">⏭</button>
-        </div>
+               <button id="id-btn-loop" onclick="toggleLoop()" title="한곡 반복">🔁</button>
+               <button id="btn-prev" onclick="playPrevTrack()">⏮</button>
+               <button id="btn-play" onclick="togglePlayPause()" class="play-btn">▶</button>
+               <button id="btn-next" onclick="playNextTrack()">⏭</button>
+            </div>
             <div class="progress-area">
                 <span id="time-current">00:00</span>
                 <input type="range" id="progress-bar" value="0" min="0" max="100" step="1">
                 <span id="time-total">00:00</span>
             </div>
         </div>
+
+        <div class="player-right-placeholder"></div>
         
         <audio id="main-audio" style="display:none;" preload="auto" playsinline webkit-playsinline></audio>
         <audio id="heartbeat-audio" loop playsinline webkit-playsinline style="display:none;" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
@@ -599,18 +634,15 @@
 
         let playlist = []; let currentIndex = 0; let isPlaying = false;
         const mainAudio = document.getElementById('main-audio');
-        const heartbeatAudio = document.getElementById('heartbeat-audio'); // 💓 심장박동 오디오
+        const heartbeatAudio = document.getElementById('heartbeat-audio'); 
         const btnPlay = document.getElementById('btn-play');
         const progressBar = document.getElementById('progress-bar');
         const timeCurrent = document.getElementById('time-current');
         const timeTotal = document.getElementById('time-total');
 
-        // 🌟 1. 모바일 크롬 연속재생 철벽 뚫기 (심장박동 가동!) 🌟
         let isAudioUnlocked = false;
         function unlockAudioForMobile() {
             if (isAudioUnlocked) return;
-            
-            // 유저가 화면을 만지자마자, 투명 심장박동을 영원히 켜버립니다!
             heartbeatAudio.play().then(() => {
                 mainAudio.play().then(() => {
                     mainAudio.pause();
@@ -639,7 +671,6 @@
             }
         }
 
-        // 🌟 2. 백그라운드 딥 슬립 방어 핵심 로직 🌟
         function loadTrack(index) {
             if(index >= 0 && index < playlist.length) {
                 const track = playlist[index];
@@ -706,7 +737,6 @@
 
         progressBar.addEventListener('input', () => { if (mainAudio.duration) mainAudio.currentTime = (progressBar.value / 100) * mainAudio.duration; });
 
-        // 🌟 3. 다음 곡으로 넘길 때 브라우저 멱살 잡고 깨우기 🌟
         mainAudio.addEventListener('ended', () => {
             if (isLoop) {
                 mainAudio.currentTime = 0;
@@ -778,7 +808,7 @@
                 const playerBar = document.getElementById('bottomPlayerBar');
                 if (playerBar) {
                     if (href.includes('/youtube') || href.includes('/shorts') || href.includes('/board')) playerBar.style.display = 'none';
-                    else playerBar.style.display = 'flex';
+                    else playerBar.style.display = 'grid'; // 스포티파이 스타일 grid로 복구
                 }
                 reattachEvents(); window.scrollTo(0, 0); 
             } catch (err) { location.href = href; }
