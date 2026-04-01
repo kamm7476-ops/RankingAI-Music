@@ -22,25 +22,37 @@
 
         /* 🌟 헤더 레이아웃 (안정적인 3단 분리) */
         .main-header { background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
-        .header-top { display: flex; flex-wrap: nowrap; justify-content: space-between; align-items: center; padding: 15px 40px; border-bottom: 1px solid #1a1b1c; gap: 20px; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; border-bottom: 1px solid #1a1b1c; gap: 20px; }
         
-        /* 🌟 로고 60px & 원래 언어 선택창 나란히 배치 🌟 */
-        .logo-wrap { display: flex; align-items: center; gap: 15px; flex-shrink: 0; }
-        .logo-img { height: 60px; display: block; cursor: pointer; object-fit: contain; flex-shrink: 0; }
-        .lang-select { padding: 6px 12px; background: #222; color: #fff; border: 1px solid #ff5722; border-radius: 20px; font-weight: bold; font-size: 13px; outline: none; cursor: pointer; transition: 0.2s; }
-        .lang-select:hover { background: #333; }
+        /* 🌟 로고 크기 60px 고정 */
+        .logo-img { height: 60px; cursor: pointer; object-fit: contain; flex-shrink: 0; }
 
-        /* 🌟 검색창 유연성 (찌그러짐 방지 흡수용) */
-        .top-search-form { display: flex; align-items: center; background: #222; border: 2px solid #ff5722; border-radius: 25px; padding: 5px 15px; flex: 1; max-width: 400px; min-width: 150px; transition: all 0.3s ease; }
-        .top-search-form:focus-within { box-shadow: 0 0 15px rgba(255, 87, 34, 0.4); border-color: #ffb300; }
+        /* 🌟 검색창 유연성 유지 */
+        .top-search-form { display: flex; align-items: center; background: #222; border: 2px solid #ff5722; border-radius: 25px; padding: 5px 15px; flex: 1; max-width: 400px; margin: 0 20px; }
         .top-search-input { background: none; border: none; color: white; outline: none; flex: 1; font-size: 15px; padding: 5px; min-width: 0; }
-        .top-search-btn { background: none; border: none; color: #ff5722; font-weight: bold; cursor: pointer; font-size: 16px; padding: 0 10px; flex-shrink: 0; }
+        .top-search-btn { background: none; border: none; color: #ff5722; font-weight: bold; cursor: pointer; font-size: 16px; padding: 0 10px; }
+
+        /* 🌟 우측 버튼들 & 언어선택 (끝으로 위치!) 🌟 */
+        .auth-buttons { display: flex; gap: 15px; align-items: center; flex-shrink: 0; }
         
-        /* 🌟 우측 로그인/관리자 버튼 (절대 줄바꿈 안되게 사수!) */
-        .auth-buttons { display: flex; gap: 15px; align-items: center; flex-shrink: 0; white-space: nowrap; }
-        .btn-admin { color: #ff4a4a; font-weight: bold; font-size: 14px; border: 1px solid #ff4a4a; padding: 5px 12px; border-radius: 15px; display: inline-block; white-space: nowrap; }
-        .btn-login { color: #bbb; font-size: 14px; white-space: nowrap; }
-        .btn-signup { background: #ff5722; color: #000; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 14px; display: inline-block; white-space: nowrap; }
+        /* 🌟 원래 이미지 스타일의 주황색 바탕 언어 선택창 🌟 */
+        .lang-select { 
+            padding: 7px 14px; 
+            background: #222; 
+            color: #fff; 
+            border: 2px solid #ff5722; 
+            border-radius: 20px; 
+            font-weight: bold; 
+            font-size: 13px; 
+            outline: none; 
+            cursor: pointer; 
+            transition: 0.2s;
+        }
+        .lang-select:hover { background: #ff5722; color: #000; }
+
+        .btn-admin { color: #ff4a4a; font-weight: bold; font-size: 14px; border: 1px solid #ff4a4a; padding: 5px 12px; border-radius: 15px; }
+        .btn-login { color: #bbb; font-size: 14px; }
+        .btn-signup { background: #ff5722; color: #000; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 14px; }
 
         .header-nav { display: flex; justify-content: center; gap: 40px; padding: 12px 0; background: #0b0c0d; }
         .nav-item { color: #aaa; font-weight: 600; font-size: 16px; transition: 0.2s; position: relative; }
@@ -184,30 +196,51 @@
         @media (max-width: 900px) {
             .input-row { flex-direction: column; align-items: stretch; gap: 12px; }
             .input-row > div { width: 100%; box-sizing: border-box; }
-            .header-top { flex-direction: column; align-items: center; padding: 15px; gap: 15px; }
+            .header-top { flex-direction: column; padding: 15px; gap: 15px; }
+            .auth-buttons { width: 100%; justify-content: center; flex-wrap: wrap; }
             
-            /* 모바일에서도 깨지지 않는 로고/언어창 구조 유지 */
-            .logo-wrap { width: 100%; justify-content: space-between; align-items: center; }
-            .logo-img { height: 50px !important; max-width: 60%; } /* 모바일에서는 로고 50px로 안전하게 */
-            .lang-select { font-size: 11px; padding: 5px 10px; max-width: 35%; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+            /* 🌟 모바일 언어창 스타일 */
+            .lang-select { font-size: 11px; padding: 5px 10px; order: -1; margin-bottom: 10px; } 
             
             .top-search-form { width: 100%; max-width: none; margin: 0; box-sizing: border-box; }
-            .auth-buttons { width: 100%; justify-content: center; }
             .header-nav { justify-content: flex-start; overflow-x: auto; white-space: nowrap; padding: 12px 15px; gap: 20px; border-bottom: 1px solid #222; }
             .header-nav::-webkit-scrollbar { display: none; }
             .main-layout { flex-direction: column; gap: 20px; }
             .content-left { width: 100%; max-width: 100%; overflow-x: hidden; }
             .sidebar-right { width: 100%; position: static; box-sizing: border-box; margin-top: 10px; }
+            
             .music-list, .music-list tbody, .music-item, .music-item td { display: block; width: 100%; box-sizing: border-box; }
             .music-item { position: relative; background: #161718; border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px solid #222; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
             .music-item td { padding: 0; border: none; }
+            
             .check-col { position: absolute; top: 15px; right: 15px; z-index: 10; width: auto !important; }
-            .rank { position: absolute; top: -12px; left: 15px; background: #ff5722; color: #000; border-radius: 6px; padding: 4px 12px; font-size: 14px; font-weight: 900; width: auto; z-index: 10; box-shadow: 0 2px 5px rgba(255,87,34,0.4); }
-            .music-item td:nth-child(3) { float: left; width: 75px; margin-right: 15px; margin-top: 10px; }
-            .song-info { margin-top: 12px; overflow: hidden; } 
+            
+            /* 🌟 뚱뚱한 오렌지색 배경 삭제! 원래 PC버전처럼 숫자만 깔끔하게 나오도록 완벽 복구! 🌟 */
+            .rank { 
+                position: absolute !important; 
+                top: 40px !important; 
+                left: 10px !important; 
+                background: transparent !important; /* 오렌지색 싹 제거 */
+                color: #ff5722 !important; 
+                border-radius: 0 !important; 
+                padding: 0 !important; 
+                font-size: 24px !important; /* 순위 숫자 크기 */
+                font-weight: 900 !important; 
+                width: 30px !important; 
+                text-align: center !important;
+                z-index: 10 !important; 
+                box-shadow: none !important; /* 그림자 제거 */
+            }
+            .music-item:nth-child(1) .rank { font-size: 28px !important; }
+
+            /* 🌟 랭킹 숫자 들어갈 공간 마련해주기 🌟 */
+            .music-item td:nth-child(3) { float: left; width: 70px; margin-left: 35px; margin-right: 15px; margin-top: 0; }
+            .song-info { margin-top: 0; overflow: hidden; min-height: 70px; } 
+
             .action-row { flex-wrap: wrap; gap: 6px; margin-top: 15px; clear: both; }
             .action-btn { padding: 8px 5px; font-size: 12px; flex: 1; text-align: center; justify-content: center; }
             body { padding-bottom: 180px; } 
+            
             .chart-controls { display: flex !important; width: 100%; overflow-x: auto !important; flex-wrap: nowrap !important; gap: 10px; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
             .chart-controls::-webkit-scrollbar { display: none; }
             .control-btn { flex: 0 0 auto !important; white-space: nowrap !important; font-size: 13px; padding: 8px 15px; }
@@ -283,12 +316,19 @@
 
     <header class="main-header">
        <div class="header-top">
+            <img src="/logo.png" alt="RANKING AI 로고" class="logo-img" onclick="window.location.href='/?sort=views'">
             
-            <div class="logo-wrap">
-                <img src="/logo.png" alt="RANKING AI 로고" class="logo-img" onclick="window.location.href='/?sort=views'">
+            <form action="/" method="GET" class="top-search-form">
+                <div style="display: flex; align-items: center; justify-content: center; cursor: pointer; background: #fff; padding: 2px; border-radius: 4px; margin-right: 10px; box-shadow: 0 0 5px rgba(255,87,34,0.5); flex-shrink: 0;" 
+                     title="클릭하면 크게 확대됩니다! 친구들에게 공유해보세요 🚀" 
+                     onclick="window.open('https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://rankingaimusic.com', '_blank')">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=30x30&data=https://rankingaimusic.com" alt="QR Code" style="display: block; width: 24px; height: 24px;">
+                </div>
+                <input type="text" name="search" class="top-search-input" placeholder="아티스트 검색..." value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>">
+                <button type="submit" class="top-search-btn">🔍</button>
+            </form>
 
-                <div id="google_translate_element" style="display:none;"></div>
-                
+            <div class="auth-buttons">
                 <select id="custom-translate-select" class="lang-select" onchange="changeLanguage(this.value)">
                     <option value="ko">🇰🇷 한국어</option>
                     <option value="en">🇺🇸 English</option>
@@ -296,7 +336,8 @@
                     <option value="zh-TW">🇹🇼 繁體</option>
                     <option value="ja">🇯🇵 日本語</option>
                 </select>
-                
+
+                <div id="google_translate_element" style="display:none;"></div>
                 <script type="text/javascript">
                     function googleTranslateElementInit() {
                         new google.translate.TranslateElement({
@@ -314,26 +355,13 @@
                     }
                 </script>
                 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-            </div>
-            
-            <form action="/" method="GET" class="top-search-form">
-                <div style="display: flex; align-items: center; justify-content: center; cursor: pointer; background: #fff; padding: 2px; border-radius: 4px; margin-right: 10px; box-shadow: 0 0 5px rgba(255,87,34,0.5); flex-shrink: 0;" 
-                     title="클릭하면 크게 확대됩니다! 친구들에게 공유해보세요 🚀" 
-                     onclick="window.open('https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://rankingaimusic.com', '_blank')">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=30x30&data=https://rankingaimusic.com" alt="QR Code" style="display: block; width: 24px; height: 24px;">
-                </div>
-                
-                <input type="text" name="search" class="top-search-input" placeholder="아티스트 검색..." value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>">
-                <button type="submit" class="top-search-btn">🔍</button>
-            </form>
 
-            <div class="auth-buttons">
                 <% if (user && user.role === 'admin') { %>
                     <a href="/admin" class="btn-admin">👑 관리자</a>
                 <% } %>
                 
                 <% if (user) { %>
-                    <span style="color: #aaa; font-size: 14px;"><%= user.id %>님</span>
+                    <span style="color: #aaa; font-size: 14px;"><%= user.name || user.id %>님</span>
                     <a href="/logout" class="btn-login">로그아웃</a>
                 <% } else { %>
                     <a href="/login" class="btn-login">로그인</a>
