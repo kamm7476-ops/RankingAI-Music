@@ -20,7 +20,7 @@
         body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; padding-bottom: 100px; }
         a { text-decoration: none; color: inherit; }
 
-        /* 🌟 헤더 레이아웃 (안정적인 3단 분리) */
+        /* 🌟 헤더 레이아웃 */
         .main-header { background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
         .header-top { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; border-bottom: 1px solid #1a1b1c; gap: 20px; }
         
@@ -32,10 +32,10 @@
         .top-search-input { background: none; border: none; color: white; outline: none; flex: 1; font-size: 15px; padding: 5px; min-width: 0; }
         .top-search-btn { background: none; border: none; color: #ff5722; font-weight: bold; cursor: pointer; font-size: 16px; padding: 0 10px; }
 
-        /* 🌟 우측 버튼들 & 언어선택 (끝으로 위치!) 🌟 */
+        /* 🌟 우측 버튼들 & 언어선택 */
         .auth-buttons { display: flex; gap: 15px; align-items: center; flex-shrink: 0; }
         
-        /* 🌟 원래 이미지 스타일의 주황색 바탕 언어 선택창 🌟 */
+        /* 🌟 언어 선택창 */
         .lang-select { 
             padding: 7px 14px; 
             background: #222; 
@@ -96,7 +96,8 @@
         .control-btn:hover { background: #333; border-color: #ff5722; color: #ff5722; }
         .control-my-music { background: #ff5722; color: #000; font-weight: bold; border-color: #ff5722; }
 
-        .music-list { width: 100%; border-collapse: collapse; }
+        /* 🌟 테이블 틀 강제 고정! */
+        .music-list { width: 100%; border-collapse: collapse; table-layout: fixed; }
         .music-item { border-bottom: 1px solid #1a1b1c; transition: 0.2s; }
         .music-item:hover { background: rgba(255,255,255,0.02); }
         .music-item td { padding: 15px 10px; vertical-align: top; }
@@ -168,7 +169,7 @@
 
         .player-right-placeholder { display: flex; justify-content: flex-end; align-items: center; min-width: 0; }
         
-        /* 🌟 재생목록(Playlist) 모달 CSS 🌟 */
+        /* 🌟 재생목록 모달 CSS */
         #playlist-modal {
             display: none; position: fixed; bottom: 90px; right: 20px; width: 320px; max-height: 400px;
             background: #181818; border: 1px solid #282828; border-radius: 12px; z-index: 1005;
@@ -192,14 +193,13 @@
         .album-art { transition: all 0.3s ease; }
         .music-item:hover .album-art { transform: scale(1.08); box-shadow: 0 8px 15px rgba(255, 87, 34, 0.4); }
 
-        /* 🚨 모바일 디자인 핵심 수정 구역 🚨 */
+        /* 🚨 모바일 디자인 핵심 수정 구역 (가로 삐져나옴 영구 차단!) 🚨 */
         @media (max-width: 900px) {
             .input-row { flex-direction: column; align-items: stretch; gap: 12px; }
             .input-row > div { width: 100%; box-sizing: border-box; }
             .header-top { flex-direction: column; padding: 15px; gap: 15px; }
             .auth-buttons { width: 100%; justify-content: center; flex-wrap: wrap; }
             
-            /* 🌟 모바일 언어창 스타일 */
             .lang-select { font-size: 11px; padding: 5px 10px; order: -1; margin-bottom: 10px; } 
             
             .top-search-form { width: 100%; max-width: none; margin: 0; box-sizing: border-box; }
@@ -209,36 +209,60 @@
             .content-left { width: 100%; max-width: 100%; overflow-x: hidden; }
             .sidebar-right { width: 100%; position: static; box-sizing: border-box; margin-top: 10px; }
             
+            /* 🌟 가로 스크롤 방지 1: 테이블 너비 강제 고정! 🌟 */
             .music-list, .music-list tbody, .music-item, .music-item td { display: block; width: 100%; box-sizing: border-box; }
-            .music-item { position: relative; background: #161718; border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px solid #222; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+            
+            /* 🌟 가로 스크롤 방지 2: 카드 안에서 텍스트 밀고 나가는 것 차단 (overflow: hidden) 🌟 */
+            .music-item { 
+                position: relative; background: #161718; border-radius: 12px; 
+                padding: 15px; margin-bottom: 20px; border: 1px solid #222; 
+                box-shadow: 0 4px 6px rgba(0,0,0,0.3); 
+                overflow: hidden; /* 내부 요소가 절대 카드 밖으로 못 빠져나감 */
+            }
             .music-item td { padding: 0; border: none; }
             
             .check-col { position: absolute; top: 15px; right: 15px; z-index: 10; width: auto !important; }
             
-            /* 🌟 뚱뚱한 오렌지색 배경 삭제! 원래 PC버전처럼 숫자만 깔끔하게 나오도록 완벽 복구! 🌟 */
+            /* 🌟 순위표: 오렌지색 배경 싹 제거하고, 숫자만 예쁘게 정렬 🌟 */
             .rank { 
                 position: absolute !important; 
-                top: 40px !important; 
-                left: 10px !important; 
-                background: transparent !important; /* 오렌지색 싹 제거 */
+                top: 38px !important; /* 앨범아트 옆쪽 세로 중앙에 오게 */
+                left: 15px !important; 
+                background: transparent !important; 
                 color: #ff5722 !important; 
                 border-radius: 0 !important; 
                 padding: 0 !important; 
-                font-size: 24px !important; /* 순위 숫자 크기 */
+                font-size: 22px !important; 
                 font-weight: 900 !important; 
                 width: 30px !important; 
                 text-align: center !important;
                 z-index: 10 !important; 
-                box-shadow: none !important; /* 그림자 제거 */
+                box-shadow: none !important; 
             }
-            .music-item:nth-child(1) .rank { font-size: 28px !important; }
+            .music-item:nth-child(1) .rank { font-size: 26px !important; }
 
-            /* 🌟 랭킹 숫자 들어갈 공간 마련해주기 🌟 */
-            .music-item td:nth-child(3) { float: left; width: 70px; margin-left: 35px; margin-right: 15px; margin-top: 0; }
-            .song-info { margin-top: 0; overflow: hidden; min-height: 70px; } 
+            /* 🌟 앨범아트 위치 조정 (순위 숫자가 들어갈 45px 공간 비워두기!) 🌟 */
+            .music-item td:nth-child(3) { 
+                float: left; 
+                width: 70px !important; 
+                margin-left: 45px !important; /* 순위가 들어갈 왼쪽 여백 */
+                margin-right: 15px !important; 
+                margin-top: 0; 
+            }
+            
+            /* 🌟 가로 스크롤 방지 3: 제목 & 정보 영역 자동 줄바꿈 강제 적용! 🌟 */
+            .song-info { 
+                margin-top: 0; 
+                overflow: hidden; /* 남은 공간만 쓰게 BFC 생성 */
+                min-height: 70px; 
+                word-break: break-word; /* 제목이 너무 길면 줄바꿈 처리 */
+            } 
+            .song-title { max-width: 100%; display: block; } /* 제목 박스 공간 100% 한정 */
 
-            .action-row { flex-wrap: wrap; gap: 6px; margin-top: 15px; clear: both; }
+            /* 🌟 버튼 영역 줄바꿈 허용으로 공간 밀어냄 방지 🌟 */
+            .action-row { flex-wrap: wrap; gap: 6px; margin-top: 15px; clear: both; width: 100%; box-sizing: border-box; }
             .action-btn { padding: 8px 5px; font-size: 12px; flex: 1; text-align: center; justify-content: center; }
+            
             body { padding-bottom: 180px; } 
             
             .chart-controls { display: flex !important; width: 100%; overflow-x: auto !important; flex-wrap: nowrap !important; gap: 10px; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
