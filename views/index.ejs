@@ -182,11 +182,11 @@
             .input-row > div { width: 100%; box-sizing: border-box; }
             .header-top { flex-direction: column; align-items: center; padding: 15px; gap: 15px; }
             
-            /* 🌟 모바일 언어 삐져나옴 완벽 방어 🌟 */
-            .logo-wrap { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 10px; box-sizing: border-box; overflow: hidden; }
-            /* 🌟 로고 이미지를 다시 키웠습니다 (height: 55px) */
-            .logo-wrap img { height: 55px !important; width: auto; max-width: 65%; object-fit: contain; flex-shrink: 0; } 
-            .lang-select { font-size: 11px; padding: 5px 8px; flex-shrink: 1; max-width: 32%; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; } /* 언어선택창 자동 축소 */
+            /* 🌟 모바일 언어 삐져나옴 완벽 방어 & 로고 이미지 확대 🌟 */
+            .logo-wrap { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 5px; box-sizing: border-box; flex-wrap: nowrap; overflow: hidden; }
+            /* 🌟 로고 이미지를 다시 키웠습니다 (height: 70px) */
+            .logo-wrap img { height: 70px !important; max-height: 70px; width: auto; max-width: 65%; object-fit: contain; flex-shrink: 0; } 
+            .lang-select { font-size: 12px; padding: 6px 8px; flex-shrink: 0; max-width: 30%; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; } /* 언어선택창 자동 축소 */
             
             .top-search-form { width: 100%; box-sizing: border-box; }
             .auth-buttons { width: 100%; justify-content: center; }
@@ -286,7 +286,7 @@
     <header class="main-header">
        <div class="header-top">
             <div class="logo-wrap">
-                <img src="/logo.png" alt="RANKING AI 로고" style="height: 65px; cursor: pointer; object-fit: contain;" onclick="window.location.href='/?sort=views'">
+                <img src="/logo.png" alt="RANKING AI 로고" style="height: 80px; cursor: pointer; object-fit: contain;" onclick="window.location.href='/?sort=views'">
                 
                 <div id="google_translate_element" style="display:none;"></div>
                 <select id="custom-translate-select" class="lang-select" onchange="changeLanguage(this.value)">
@@ -294,7 +294,7 @@
                     <option value="en">🇺🇸 English</option>
                     <option value="zh-CN">🇨🇳 中文 (简体)</option>
                     <option value="zh-TW">🇹🇼 中文 (繁體)</option>
-                    <option value="ja">🇯🇵 일본語</option>
+                    <option value="ja">🇯🇵 日本語</option>
                 </select>
                 <script type="text/javascript">
                     function googleTranslateElementInit() {
