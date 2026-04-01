@@ -13,7 +13,8 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 // 🌟 클라우디너리 영구 금고 세팅
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const User = require('./user'); // (models 폴더에 있다면 './models/User' 로 수정!)
+const User = require('./models/user'); // (또는 './user') 기존 코드
+const Stats = require('./models/Stats'); // 🌟 이거 한 줄 추가!
 const bcrypt = require('bcrypt'); // 암호화 믹서기
 
 cloudinary.config({
@@ -893,6 +894,54 @@ app.post('/contact/delete/:id', async (req, res) => {
         res.redirect('/contact');
     }
 });
+// 🌟 오늘 날짜 구하는 마법의 함수
+const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0]; // 'YYYY-MM-DD' 형식
+};
 
+// 🌟 메인 화면 방문할 때마다 방문자 수 1씩 올리기 (미들웨어)
+app.use(async (req, res, next) => {
+    if (req.path === '/') { // 메인 페이지('/') 접속 시에만 카운트!
+        try {
+            const today = getTodayDate();
+            let stats = await Stats.findOne({ date: today });
+            
+            if (!stats) {
+                // 오늘 첫 방문자라면, 어제까지의 총 데이터를 가져와서 새로 만듦
+                const lastStat = await Stats.findOne().sort({ _id: -1 });
+                stats = new Stats({
+                    date: today,
+                    totalVisitors: lastStat ? lastStat.totalVisitors : 0,
+                    totalPlays: lastStat ? lastStat.totalPlays : 0
+                });
+            }
+            stats.dailyVisitors += 1;
+            stats.totalVisitors += 1;
+            await stats.save();
+        } catch (err) {
+            console.error("방문자 통계 에러:", err);
+        }
+    }
+    next();
+});
+
+// 🌟 대망의 관리자(Admin) 페이지 띄우기!
+app.get('/admin', async (req, res) => {
+    try {
+        // 1. 전체 유저 목록 최신 가입순으로 가져오기
+        const users = await User.find().sort({ createdAt: -1 });
+        
+        // 2. 오늘 통계 가져오기
+        const today = getTodayDate();
+        const stats = await Stats.findOne({ date: today }) || { dailyVisitors: 0, totalVisitors: 0, dailyPlays: 0, totalPlays: 0 };
+        
+        // 3. admin.ejs 화면에 데이터 던져주기!
+        res.render('admin', { users: users, stats: stats });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("관리자 페이지 로드 중 에러가 발생했습니다.");
+    }
+});
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
