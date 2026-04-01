@@ -37,21 +37,21 @@
         .btn-upload { background: #ff5722; color: #000; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
 
         /* ========================================= */
-        /* 🌟 완벽 작동하는 Flexbox 그리드 (PC 5칸) 🌟 */
+        /* 🌟 완벽 작동하는 Grid 마법 (PC 5칸 절대 고정!) 🌟 */
         /* ========================================= */
         .shorts-grid {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); /* 🔥 PC에서는 무조건 5칸 강제 분할! */
             gap: 15px;
             width: 100%;
             visibility: visible; /* 숨김 방지 */
         }
 
         .shorts-card {
-            width: calc(20% - 12px); 
+            width: 100%; /* Grid 안에서 꽉 차게 */
             background: #111; border: 1px solid #222; border-radius: 12px; 
             overflow: hidden; position: relative; cursor: pointer;
-            transition: 0.2s; flex-shrink: 0;
+            transition: 0.2s;
         }
         .shorts-card:hover { border-color: #ff5722; transform: translateY(-5px); box-shadow: 0 8px 20px rgba(255,87,34,0.3); }
 
@@ -84,7 +84,9 @@
         /* ========================================= */
         /* 📱 모바일/태블릿 반응형 마법 (3칸 고정!) 📱 */
         /* ========================================= */
-        @media (max-width: 1024px) { .shorts-card { width: calc(25% - 11.25px); } }
+        @media (max-width: 1024px) { 
+            .shorts-grid { grid-template-columns: repeat(4, 1fr); } /* 태블릿은 4칸 */
+        }
         
         @media (max-width: 768px) { 
             .header-top { flex-direction: column; gap: 15px; }
@@ -92,9 +94,12 @@
             .header-nav::-webkit-scrollbar { display: none; }
             .input-row { flex-direction: column; }
             
-            /* 🌟 모바일 세로: 간격을 줄이고 무조건 3칸으로 고정! 🌟 */
-            .shorts-grid { gap: 9px; }
-            .shorts-card { width: calc(33.333% - 6px); border-radius: 8px; } 
+            /* 🌟 모바일 세로: 무조건 3칸으로 강력 고정! 🌟 */
+            .shorts-grid { 
+                grid-template-columns: repeat(3, 1fr); /* 🔥 모바일은 무조건 3칸! */
+                gap: 9px; 
+            }
+            .shorts-card { border-radius: 8px; } 
 
             .shorts-logo-box { width: 35px; height: 35px; }
             .grid-info { padding: 20px 8px 8px; }
@@ -227,7 +232,7 @@
                 </div>
                 <% }); %>
             <% } else { %>
-                <p style="color: #777; width:100%; text-align: center;">등록된 쇼츠 영상이 없습니다.</p>
+                <p style="color: #777; width:100%; text-align: center; grid-column: 1 / -1;">등록된 쇼츠 영상이 없습니다.</p>
             <% } %>
         </div>
     </div>
