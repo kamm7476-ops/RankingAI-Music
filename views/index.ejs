@@ -8,6 +8,7 @@
     <meta name="keywords" content="Ranking AI, AI Music, AI Chart, 랭킹AI, AI음악, AI音楽, AI楽曲, AI音乐, AI排行榜, Suno AI, Udio AI">
     <meta property="og:title" content="Ranking AI - World's Best AI Music Chart">
     <meta property="og:description" content="Check out the hottest AI music from around the world!">
+    <meta property="og:description" content="Check out the hottest AI music from around the world!">
     <meta property="og:url" content="https://rankingaimusic.com">
     <meta name="content-language" content="en, ko, ja, zh">  
     <meta name="naver-site-verification" content="34a9f6198c9f271e3250e3d11cabcb17c24a7754" />
@@ -181,10 +182,11 @@
             .input-row > div { width: 100%; box-sizing: border-box; }
             .header-top { flex-direction: column; align-items: center; padding: 15px; gap: 15px; }
             
-            /* 🌟 모바일 언어 삐져나옴 완벽 방지 🌟 */
+            /* 🌟 모바일 언어 삐져나옴 완벽 방어 🌟 */
             .logo-wrap { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 10px; box-sizing: border-box; overflow: hidden; }
-            .logo-wrap img { max-width: 55%; object-fit: contain; } /* 로고 크기 안전하게 제한 */
-            .lang-select { font-size: 11px; padding: 4px 8px; flex-shrink: 1; max-width: 40%; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; } /* 언어선택창 자동 축소 */
+            /* 🌟 로고 이미지를 다시 키웠습니다 (height: 55px) */
+            .logo-wrap img { height: 55px !important; width: auto; max-width: 65%; object-fit: contain; flex-shrink: 0; } 
+            .lang-select { font-size: 11px; padding: 5px 8px; flex-shrink: 1; max-width: 32%; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; } /* 언어선택창 자동 축소 */
             
             .top-search-form { width: 100%; box-sizing: border-box; }
             .auth-buttons { width: 100%; justify-content: center; }
@@ -284,7 +286,7 @@
     <header class="main-header">
        <div class="header-top">
             <div class="logo-wrap">
-                <img src="/logo.png" alt="RANKING AI 로고" style="height: 45px; cursor: pointer; object-fit: contain;" onclick="window.location.href='/?sort=views'">
+                <img src="/logo.png" alt="RANKING AI 로고" style="height: 65px; cursor: pointer; object-fit: contain;" onclick="window.location.href='/?sort=views'">
                 
                 <div id="google_translate_element" style="display:none;"></div>
                 <select id="custom-translate-select" class="lang-select" onchange="changeLanguage(this.value)">
@@ -292,7 +294,7 @@
                     <option value="en">🇺🇸 English</option>
                     <option value="zh-CN">🇨🇳 中文 (简体)</option>
                     <option value="zh-TW">🇹🇼 中文 (繁體)</option>
-                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ja">🇯🇵 일본語</option>
                 </select>
                 <script type="text/javascript">
                     function googleTranslateElementInit() {
