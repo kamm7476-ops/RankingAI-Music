@@ -120,6 +120,17 @@ const dmSchema = new mongoose.Schema({
 const DM = mongoose.models.DM || mongoose.model('DM', dmSchema);
 
 // =========================================
+// 🌟 7. 관리자 -> 유저 쪽지(DM) DB 주머니 (새로 추가)
+// =========================================
+const messageSchema = new mongoose.Schema({
+    userId: String,
+    text: String,
+    isRead: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now }
+});
+const Message = mongoose.models.Message || mongoose.model('Message', messageSchema);
+
+// =========================================
 // 🌟 서버 기본 설정
 // =========================================
 app.set('view engine', 'ejs');
@@ -133,8 +144,17 @@ app.use(session({
   resave: false,
   saveUninitialized: false
 }));
-app.use((req, res, next) => {
+
+// 🌟 로그인 유저 정보 & 안 읽은 쪽지 확인 마법 (수정됨)
+app.use(async (req, res, next) => {
     res.locals.user = req.session.user || null;
+    if (req.session.user) {
+        try {
+            res.locals.unreadMessages = await Message.find({ userId: req.session.user.id, isRead: false });
+        } catch(e) { res.locals.unreadMessages = []; }
+    } else {
+        res.locals.unreadMessages = [];
+    }
     next();
 });
 
@@ -868,36 +888,31 @@ app.post('/contact/delete/:id', async (req, res) => {
 // 👑 관리자 전용 통제실 (Admin) 👑
 // =========================================
 app.get('/admin', async (req, res) => {
-    // 🚨 1. 관리자가 아니면 무조건 쫓아냅니다 (보안 통과문)
     if (!req.session.user || req.session.user.role !== 'admin') {
         return res.send("<script>alert('경고: 대표님만 들어갈 수 있는 통제실입니다!'); location.href='/';</script>");
     }
     
     try {
-        // 2. 가입한 유저 전부 불러오기 (최신 가입순)
         const users = await User.find().sort({ createdAt: -1 }).lean();
+        const allMusic = await Music.find().sort({ createdAt: -1 }).lean();
         
-        // 3. 오늘 기록된 방문자/재생수 통계표 가져오기
+        // 🌟 유저별 업로드 곡수 확인 및 목록 매칭
+        const usersWithMusic = users.map(user => {
+            const userMusic = allMusic.filter(m => m.uploader === user.username);
+            return { 
+                ...user, 
+                musicCount: userMusic.length, 
+                uploadedMusic: userMusic 
+            };
+        });
+        
         const today = getTodayDate();
         const stats = await Stats.findOne({ date: today }) || { dailyVisitors: 0, totalVisitors: 0, dailyPlays: 0, totalPlays: 0 };
         
-        // 4. 관리자 화면(admin.ejs)으로 데이터 쏴주기
-        res.render('admin', { users: users, stats: stats, user: req.session.user });
+        res.render('admin', { users: usersWithMusic, stats: stats, user: req.session.user });
     } catch (err) {
         console.error("관리자 페이지 로딩 에러:", err);
         res.status(500).send("관리자 페이지를 불러오는 중 에러가 났습니다.");
-    }
-});
-
-app.post('/admin/delete-user', async (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
-    try {
-        const userId = req.body.userId;
-        await User.findByIdAndDelete(userId); // 악성 유저 DB 삭제
-        await Music.deleteMany({ uploader: userId }); // 유저가 올린 곡들도 같이 삭제!
-        res.redirect('/admin');
-    } catch (err) {
-        res.status(500).send("회원 삭제에 실패했습니다.");
     }
 });
 
@@ -919,24 +934,19 @@ app.post('/admin/popup', async (req, res) => {
         res.send("<script>alert('팝업 설정 완료!'); window.location.href='/';</script>");
     } catch (err) { res.redirect('/'); }
 });
-// 🚨 악성 유저 강제 탈퇴 완벽 처리!
+
+// 🚨 악성 유저 강제 탈퇴 (중복 에러 방지 - 하나로 통합)
 app.post('/admin/delete-user', async (req, res) => {
-    // 관리자가 아니면 돌려보내기
     if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
     
     try {
-        const userId = req.body.userId; // 통제실 버튼에서 넘어온 유저 고유 ID
+        const userId = req.body.userId; 
         const userToDelete = await User.findById(userId);
         
         if (userToDelete) {
-            // 1. 이 악성 유저가 올린 음악들을 차트에서 싹 다 날려버립니다!
-            await Music.deleteMany({ uploader: userToDelete.username });
-            
-            // 2. 유저 계정 자체를 DB에서 영구 삭제!
-            await User.findByIdAndDelete(userId);
+            await Music.deleteMany({ uploader: userToDelete.username }); // 올린 음악 전부 삭제
+            await User.findByIdAndDelete(userId); // 유저 계정 삭제
         }
-        
-        // 삭제 성공하면 다시 통제실 화면으로 부드럽게 돌아가기
         res.redirect('/admin');
     } catch (err) {
         console.error("강제 탈퇴 에러:", err);
@@ -944,12 +954,38 @@ app.post('/admin/delete-user', async (req, res) => {
     }
 });
 
-// 🌟 (보너스) 에러창 방지용 안전장치!
-// 혹시라도 뒤로가기나 새로고침을 눌러서 'Cannot GET' 화면이 뜨려고 하면, 
-// 에러 안 띄우고 다시 통제실로 튕겨 보내주는 마법입니다!
+// 🌟 혹시라도 새로고침해서 Cannot GET 하얀 화면 뜰 때 통제실로 돌려보내는 방어 코드!
 app.get('/admin/delete-user', (req, res) => {
     res.redirect('/admin');
 });
+
+// 🚨 관리자 통제실 개별 곡 강제 삭제 기능
+app.post('/admin/delete-music-only/:id', async (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
+    try {
+        await Music.findByIdAndDelete(req.params.id);
+        await MyMusic.deleteMany({ musicId: req.params.id }); 
+        res.redirect('/admin'); 
+    } catch (err) { res.status(500).send("음원 삭제 에러가 발생했습니다."); }
+});
+
+// 💌 관리자가 유저에게 다이렉트 쪽지 발송
+app.post('/admin/send-message', async (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
+    try {
+        await new Message({ userId: req.body.userId, text: req.body.text }).save();
+        res.send("<script>alert('해당 유저에게 쪽지를 성공적으로 발송했습니다!'); history.back();</script>");
+    } catch (err) { res.status(500).send("에러가 발생했습니다."); }
+});
+
+// 💌 유저가 쪽지를 읽고 확인 버튼 눌렀을 때
+app.post('/read-message/:id', async (req, res) => {
+    try {
+        await Message.findByIdAndUpdate(req.params.id, { isRead: true });
+        res.redirect('back');
+    } catch (err) { res.redirect('back'); }
+});
+
 // 🚀 최종 서버 실행 코드
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
