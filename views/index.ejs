@@ -230,23 +230,30 @@
                 gap: 15px !important; 
             }
             
-            /* 🌟 [핵심 수정] 로고 코딱지 탈출!! 가로 제한을 넉넉하게 풀었습니다 🌟 */
+            /* 🌟 로고 코딱지 탈출!! 가로 제한을 넉넉하게 풀었습니다 🌟 */
             .logo-img { 
-                height: 60px !important;       /* 모바일에서도 PC처럼 큼직한 높이 유지! */
-                max-width: 350px !important;   /* 가로 공간을 확 늘려서 찌그러지지 않게 숨통 트임! */
-                flex-shrink: 0 !important;     /* 절대 작아지지 말라고 명령! */
+                height: 60px !important;       
+                max-width: 350px !important;   
+                flex-shrink: 0 !important;     
             }
             
-            /* 🌟 우측 버튼들 (로그인, 언어 등) */
+            /* 🌟 우측 버튼들 그룹 */
             .auth-buttons { 
-                flex: 1; 
+                flex: 1; /* 로고가 차지하고 남은 우측 공간을 모두 차지함 */
                 justify-content: flex-end; 
                 width: auto !important; 
                 flex-wrap: nowrap; 
                 gap: 10px !important; 
             }
             
-            .lang-select { font-size: 11px !important; padding: 5px 8px !important; margin-bottom: 0 !important; } 
+            /* 🌟 [핵심 수정] 언어 선택창을 로고 옆으로 착! 붙이기 🌟 */
+            .lang-select { 
+                font-size: 11px !important; 
+                padding: 5px 8px !important; 
+                margin-bottom: 0 !important; 
+                margin-right: auto !important; /* ✨ 이 마법의 한 줄이 로그인 버튼들을 우측 끝으로 밀어내고, 본인은 로고 옆에 남게 합니다! ✨ */
+            } 
+            
             .btn-signup, .btn-login { font-size: 12px !important; padding: 6px 10px !important; }
             
             /* 🌟 검색창: 2번째 줄로 내려서 가로 100% 꽉 차게 🌟 */
@@ -258,6 +265,7 @@
                 order: 3; /* 확실하게 맨 아랫줄로 보냄 */
             }
             .top-search-input { font-size: 14px !important; padding: 5px !important; }
+        }
             
             /* ------------------------------------------------ */
             /* 이 아래(.header-nav 부터)는 기존 코드 그대로 두시면 됩니다! */
