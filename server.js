@@ -13,7 +13,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 // 🌟 클라우디너리 영구 금고 세팅
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const User = require('./models/user'); 
+const User = require('./user'); 
 const Stats = require('./models/Stats'); // 🌟 통계 DB
 const bcrypt = require('bcrypt'); // 암호화 믹서기
 
