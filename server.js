@@ -919,7 +919,37 @@ app.post('/admin/popup', async (req, res) => {
         res.send("<script>alert('팝업 설정 완료!'); window.location.href='/';</script>");
     } catch (err) { res.redirect('/'); }
 });
+// 🚨 악성 유저 강제 탈퇴 완벽 처리!
+app.post('/admin/delete-user', async (req, res) => {
+    // 관리자가 아니면 돌려보내기
+    if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
+    
+    try {
+        const userId = req.body.userId; // 통제실 버튼에서 넘어온 유저 고유 ID
+        const userToDelete = await User.findById(userId);
+        
+        if (userToDelete) {
+            // 1. 이 악성 유저가 올린 음악들을 차트에서 싹 다 날려버립니다!
+            await Music.deleteMany({ uploader: userToDelete.username });
+            
+            // 2. 유저 계정 자체를 DB에서 영구 삭제!
+            await User.findByIdAndDelete(userId);
+        }
+        
+        // 삭제 성공하면 다시 통제실 화면으로 부드럽게 돌아가기
+        res.redirect('/admin');
+    } catch (err) {
+        console.error("강제 탈퇴 에러:", err);
+        res.status(500).send("회원 삭제 중 오류가 발생했습니다.");
+    }
+});
 
+// 🌟 (보너스) 에러창 방지용 안전장치!
+// 혹시라도 뒤로가기나 새로고침을 눌러서 'Cannot GET' 화면이 뜨려고 하면, 
+// 에러 안 띄우고 다시 통제실로 튕겨 보내주는 마법입니다!
+app.get('/admin/delete-user', (req, res) => {
+    res.redirect('/admin');
+});
 // 🚀 최종 서버 실행 코드
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
