@@ -120,7 +120,7 @@ const dmSchema = new mongoose.Schema({
 const DM = mongoose.models.DM || mongoose.model('DM', dmSchema);
 
 // =========================================
-// 🌟 7. 관리자 -> 유저 쪽지(DM) DB 주머니 (새로 추가)
+// 🌟 7. 관리자 -> 유저 쪽지(DM) DB 주머니
 // =========================================
 const messageSchema = new mongoose.Schema({
     userId: String,
@@ -145,7 +145,7 @@ app.use(session({
   saveUninitialized: false
 }));
 
-// 🌟 로그인 유저 정보 & 안 읽은 쪽지 확인 마법 (수정됨)
+// 🌟 로그인 유저 정보 & 안 읽은 쪽지 확인 마법
 app.use(async (req, res, next) => {
     res.locals.user = req.session.user || null;
     if (req.session.user) {
@@ -190,6 +190,32 @@ app.use(async (req, res, next) => {
     next();
 });
 
+// ======================================================
+// 🌟 [새로 추가됨!] 유저 로그인 횟수 카운터 마법 함수 🌟
+// ======================================================
+async function trackUserLogin(username) {
+    try {
+        const user = await User.findOne({ username: username });
+        if (!user) return;
+        
+        const todayStr = getTodayDate();
+        
+        // 날짜가 바뀌었으면 오늘 횟수는 1로 초기화하고 날짜 갱신
+        if (user.lastLoginDate !== todayStr) {
+            user.todayLogins = 1;
+            user.lastLoginDate = todayStr;
+        } else {
+            // 같은 날 또 로그인한 거면 오늘 횟수 +1
+            user.todayLogins = (user.todayLogins || 0) + 1;
+        }
+        
+        // 총 로그인 횟수는 언제나 +1
+        user.totalLogins = (user.totalLogins || 0) + 1;
+        
+        await user.save();
+    } catch(err) { console.error("로그인 카운트 에러:", err); }
+}
+
 // =========================================
 // 🌟 네이버 소셜 로그인 (Passport) 🌟
 // =========================================
@@ -224,12 +250,16 @@ app.get('/auth/naver', passport.authenticate('naver'));
 
 app.get('/auth/naver/callback', 
     passport.authenticate('naver', { failureRedirect: '/login' }), 
-    (req, res) => {
+    async (req, res) => {
         if (!req.user.name || req.user.name.trim() === "") {
             req.session.tempUser = req.user; 
             res.send("<script>alert('환영합니다! 사이트에서 활동할 닉네임을 설정해주세요.'); window.location.href='/set-nickname';</script>");
         } else {
             req.session.user = req.user; 
+            
+            // 🌟 네이버 로그인 카운트 올리기! 🌟
+            await trackUserLogin(req.user.id);
+            
             res.send("<script>alert('네이버 로그인 성공!'); window.location.href='/';</script>");
         }
     }
@@ -263,12 +293,16 @@ app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'em
 
 app.get('/auth/google/callback', 
     passport.authenticate('google', { failureRedirect: '/login' }),
-    (req, res) => {
+    async (req, res) => {
         if (!req.user.name || req.user.name.trim() === "") {
             req.session.tempUser = req.user; 
             res.send("<script>alert('환영합니다! 사이트에서 활동할 닉네임을 설정해주세요.'); window.location.href='/set-nickname';</script>");
         } else {
             req.session.user = req.user; 
+            
+            // 🌟 구글 로그인 카운트 올리기! 🌟
+            await trackUserLogin(req.user.id);
+            
             res.send("<script>alert('초간단 구글 로그인 성공!'); window.location.href='/';</script>");
         }
     }
@@ -302,6 +336,10 @@ app.post('/set-nickname', async (req, res) => {
             name: newNickname, 
             role: req.session.tempUser.role 
         };
+        
+        // 🌟 첫 닉네임 설정 후 로그인 처리될 때 카운트 올리기! 🌟
+        await trackUserLogin(req.session.tempUser.id);
+        
         req.session.tempUser = null; 
 
         res.send(`<script>alert('${newNickname}님, 환영합니다! 멋진 활동 기대할게요.'); window.location.href='/';</script>`);
@@ -435,6 +473,9 @@ app.post('/login', async (req, res) => {
     }
 
     req.session.user = { id: user.username, name: displayName, role: userRole };
+    
+    // 🌟 일반 아이디 로그인 카운트 올리기! 🌟
+    await trackUserLogin(user.username);
     
     if (userRole === 'admin') {
          res.send("<script>alert('👑 관리자님 환영합니다!'); window.location.href='/';</script>");

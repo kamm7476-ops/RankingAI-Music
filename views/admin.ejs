@@ -87,6 +87,8 @@
                 <th>가입일</th>
                 <th>아이디(닉네임)</th>
                 <th>업로드 수 🌟</th>
+                <th>오늘 접속</th>
+                <th>총 접속</th>
                 <th>등급</th>
                 <th>관리(쪽지/탈퇴)</th>
             </tr>
@@ -103,6 +105,9 @@
                                 🎧 <%= user.musicCount %>곡 보기
                             </span>
                         </td>
+
+                        <td data-label="오늘 접속" style="color: #ffb300; font-weight: bold;"><%= user.todayLogins || 0 %>회</td>
+                        <td data-label="총 접속" style="color: #4caf50; font-weight: bold;"><%= user.totalLogins || 0 %>회</td>
 
                         <td data-label="등급">
                             <% if(user.role === 'admin') { %>
@@ -125,8 +130,7 @@
                     </tr>
 
                     <tr id="music-list-<%= user.username %>" class="music-dropdown" style="display: none;">
-                        <td colspan="5" style="padding: 15px; border: 1px dashed #444;">
-                            <% if (user.uploadedMusic && user.uploadedMusic.length > 0) { %>
+                        <td colspan="7" style="padding: 15px; border: 1px dashed #444;"> <% if (user.uploadedMusic && user.uploadedMusic.length > 0) { %>
                                 <ul style="list-style:none; padding:0; margin:0;">
                                     <% user.uploadedMusic.forEach(music => { %>
                                         <li class="music-item-li">
@@ -147,7 +151,7 @@
                     </tr>
                 <% }) %>
             <% } else { %>
-                <tr><td colspan="5" style="text-align:center; padding: 30px;">가입한 유저가 없습니다.</td></tr>
+                <tr><td colspan="7" style="text-align:center; padding: 30px;">가입한 유저가 없습니다.</td></tr>
             <% } %>
         </tbody>
     </table>
