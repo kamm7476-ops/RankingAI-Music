@@ -13,8 +13,8 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 // 🌟 클라우디너리 영구 금고 세팅
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const User = require('./models/user'); // (또는 './user') 기존 코드
-const Stats = require('./models/Stats'); // 🌟 이거 한 줄 추가!
+const User = require('./models/user'); 
+const Stats = require('./models/Stats'); // 🌟 통계 DB
 const bcrypt = require('bcrypt'); // 암호화 믹서기
 
 cloudinary.config({
@@ -34,7 +34,7 @@ const storage = new CloudinaryStorage({
 const upload = multer({ 
     storage: storage,
     limits: { 
-        fileSize: 10 * 1024 * 1024 // 🌟 이미지 최대 10MB로 제한! (1 곱하기 1MB)
+        fileSize: 10 * 1024 * 1024 // 🌟 파일 최대 10MB로 제한!
     } 
 });
 
@@ -139,6 +139,38 @@ app.use((req, res, next) => {
 });
 
 // =========================================
+// 📈 방문자 수 카운터 마법 (무조건 라우터들보다 위에 있어야 함!)
+// =========================================
+const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0]; // 'YYYY-MM-DD' 형식
+};
+
+app.use(async (req, res, next) => {
+    if (req.path === '/') { // 메인 페이지('/') 접속 시에만 카운트!
+        try {
+            const today = getTodayDate();
+            let stats = await Stats.findOne({ date: today });
+            
+            if (!stats) {
+                const lastStat = await Stats.findOne().sort({ _id: -1 });
+                stats = new Stats({
+                    date: today,
+                    totalVisitors: lastStat ? lastStat.totalVisitors : 0,
+                    totalPlays: lastStat ? lastStat.totalPlays : 0
+                });
+            }
+            stats.dailyVisitors += 1;
+            stats.totalVisitors += 1;
+            await stats.save();
+        } catch (err) {
+            console.error("방문자 통계 에러:", err);
+        }
+    }
+    next();
+});
+
+// =========================================
 // 🌟 네이버 소셜 로그인 (Passport) 🌟
 // =========================================
 app.use(passport.initialize());
@@ -223,7 +255,7 @@ app.get('/auth/google/callback',
 );
 
 // ==========================================
-// 🌟 닉네임(아티스트명) 강제 설정 파이프 (중간 검문소) 🌟
+// 🌟 닉네임(아티스트명) 강제 설정 파이프 🌟
 // ==========================================
 app.get('/set-nickname', (req, res) => {
     if (!req.session.tempUser) return res.redirect('/login');
@@ -261,28 +293,24 @@ app.post('/set-nickname', async (req, res) => {
 
 
 // ==========================================
-// ✉️ 🌟 이메일 인증 발송 및 확인 파이프 (Nodemailer) 🌟
+// ✉️ 🌟 이메일 인증 발송 및 확인 파이프 🌟
 // ==========================================
-const verificationCodes = new Map(); // 임시 번호 보관소 (서버 메모리)
+const verificationCodes = new Map(); 
 
-// 우체부(트랜스포터) 세팅
 const transporter = nodemailer.createTransport({
-    service: 'gmail', // 구글 메일 사용
+    service: 'gmail',
     auth: {
-        user: process.env.EMAIL_USER, // .env 파일에 적을 내 이메일
-        pass: process.env.EMAIL_PASS  // .env 파일에 적을 구글 앱 비밀번호
+        user: process.env.EMAIL_USER, 
+        pass: process.env.EMAIL_PASS  
     }
 });
 
-// 1. 인증번호 메일 쏘기
 app.post('/send-verification', async (req, res) => {
     const { email } = req.body;
     if (!email) return res.json({ success: false, message: "이메일이 없습니다." });
 
-    // 6자리 랜덤 숫자 생성
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     
-    // 번호 기억해두기 (5분 뒤 만료)
     verificationCodes.set(email, {
         code: code,
         expires: Date.now() + 5 * 60 * 1000 
@@ -309,34 +337,29 @@ app.post('/send-verification', async (req, res) => {
     }
 });
 
-// 2. 입력한 번호 맞는지 채점하기
 app.post('/verify-code', (req, res) => {
     const { email, code } = req.body;
     const storedData = verificationCodes.get(email);
 
     if (!storedData) return res.json({ success: false, message: "인증 요청 내역이 없습니다." });
     if (Date.now() > storedData.expires) {
-        verificationCodes.delete(email); // 시간 지났으면 파기
+        verificationCodes.delete(email);
         return res.json({ success: false, message: "인증 시간이 만료되었습니다. 다시 요청해주세요." });
     }
     if (storedData.code !== code.trim()) {
         return res.json({ success: false, message: "인증번호가 틀립니다." });
     }
 
-    verificationCodes.delete(email); // 인증 성공하면 쓴 번호는 파기
+    verificationCodes.delete(email);
     res.json({ success: true });
 });
 
-
 // ==========================================
-// 🚪 화면 보여주는 파이프 (GET)
+// 🚪 회원가입 / 로그인 / 로그아웃 기능
 // ==========================================
 app.get('/signup', (req, res) => res.render('signup'));
 app.get('/login', (req, res) => res.render('login'));
 
-// ==========================================
-// 📝 데이터 처리하는 파이프 (POST)
-// ==========================================
 app.post('/signup', async (req, res) => {
   try {
     const { username, password, nickname } = req.body;
@@ -469,7 +492,7 @@ app.get('/', async (req, res) => {
 });
 
 // =========================================
-// 🌟 내 음악 보관함 라우터
+// 🌟 내 음악 보관함 (MyMusic)
 // =========================================
 app.post('/add-to-mymusic', async (req, res) => {
     try {
@@ -619,37 +642,35 @@ app.post('/add-board-comment/:id', async (req, res) => {
     }
 });
 
-// =========================================
-// 🌟 기타 기능 (관리자 페이지 등)
-// =========================================
-app.get('/admin', async (req, res) => {
+app.post('/like-board-comment/:postId/:commentId', async (req, res) => {
+    if (!req.session.user) return res.json({ success: false, message: "로그인 필요" });
     try {
-        if (!req.session.user || req.session.user.role !== 'admin') {
-            return res.redirect('/');
+        const post = await Post.findById(req.params.postId);
+        const comment = post.comments.id(req.params.commentId);
+        const username = req.session.user.id;
+        const isAdmin = req.session.user.role === 'admin';
+
+        if (isAdmin) {
+            comment.likes = (comment.likes || 0) + 1; 
+            await post.save();
+            return res.json({ success: true, message: "👑 관리자 권한!" });
+        } else {
+            if (!comment.likedBy) comment.likedBy = [];
+            if (comment.likedBy.includes(username)) {
+                return res.json({ success: false, message: "이미 좋아요를 누르셨습니다!" });
+            } else {
+                comment.likes = (comment.likes || 0) + 1;
+                comment.likedBy.push(username);
+                await post.save();
+                return res.json({ success: true });
+            }
         }
-
-        const allUsers = await User.find().lean();
-        const allMusic = await Music.find().lean();
-
-        const usersWithStats = allUsers.map(u => {
-            const myMusicCount = allMusic.filter(m => m.uploader === u.id).length;
-            return { ...u, musicCount: myMusicCount };
-        });
-
-        const stats = {
-            totalUsers: allUsers.length,
-            totalMusic: allMusic.length,
-            totalViews: allMusic.reduce((sum, m) => sum + (m.views || 0), 0),
-            todayVisitor: Math.floor(Math.random() * 50) + 10 
-        };
-
-        res.render('admin', { user: req.session.user, stats: stats, users: usersWithStats });
-    } catch (err) {
-        console.error("관리자 데이터 수집 에러:", err);
-        res.status(500).send("<h1>관리자 페이지 데이터를 불러오는데 실패했습니다. ㅠㅠ</h1>");
-    }
+    } catch (err) { res.status(500).json({ success: false }); }
 });
 
+// =========================================
+// 🌟 음악 추가, 수정, 삭제, 좋아요, 재생수 (Music CRUD)
+// =========================================
 app.post('/add-music', (req, res, next) => {
     if (!req.session || !req.session.user) {
         return res.send("<script>alert('회원만 음원을 업로드할 수 있습니다! 로그인해주세요.'); location.href='/login';</script>");
@@ -747,68 +768,21 @@ app.post('/like/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ success: false, message: "서버 에러가 발생했습니다." }); }
 });
 
-app.get('/admin/users', async (req, res) => {
+// 🌟 재생 버튼 누를 때마다 메인 재생수 + 통계 DB 재생수 둘 다 올리기!
+app.post('/play-count/:id', async (req, res) => {
     try {
-        if (!req.session.user || req.session.user.role !== 'admin') {
-            return res.send("<script>alert('관리자만 접근 가능합니다!'); location.href='/';</script>");
-        }
-        const users = await User.find().sort({ createdAt: -1 }); 
-        res.render('admin_users', { users: users });
-    } catch (err) { res.status(500).send("유저 목록 에러"); }
-});
-
-app.post('/admin/popup', async (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'admin') {
-        return res.send("<script>alert('관리자만 설정할 수 있습니다!'); window.history.back();</script>");
+        const musicId = req.params.id;
+        await Music.findByIdAndUpdate(musicId, { $inc: { views: 1 } });
+        
+        // Stats 재생수도 같이 올려줍니다!
+        const today = getTodayDate();
+        await Stats.findOneAndUpdate({ date: today }, { $inc: { dailyPlays: 1, totalPlays: 1 } });
+        
+        res.json({ success: true });
+    } catch (err) {
+        console.error("재생수 업데이트 에러:", err);
+        res.status(500).json({ success: false });
     }
-    try {
-        const { title, content, isActive } = req.body;
-        await Popup.deleteMany({}); 
-        const newPopup = new Popup({ title, content, isActive: isActive === 'on' });
-        await newPopup.save();
-        res.send("<script>alert('팝업 설정이 완료되었습니다!'); window.location.href='/';</script>");
-    } catch (err) { res.send("<script>alert('팝업 설정 에러!'); window.history.back();</script>"); }
-});
-
-app.post('/delete-music-comment/:musicId/:commentId', async (req, res) => {
-    if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
-    try {
-        const music = await Music.findById(req.params.musicId);
-        if (!music) return res.redirect('/'); 
-
-        const comment = music.comments.id(req.params.commentId);
-        if (comment && (req.session.user.role === 'admin' || req.session.user.name === comment.author)) {
-            music.comments.pull(req.params.commentId); 
-            await music.save();
-        }
-        res.redirect('/'); 
-    } catch (err) { res.redirect('/'); }
-});
-
-app.post('/like-board-comment/:postId/:commentId', async (req, res) => {
-    if (!req.session.user) return res.json({ success: false, message: "로그인 필요" });
-    try {
-        const post = await Post.findById(req.params.postId);
-        const comment = post.comments.id(req.params.commentId);
-        const username = req.session.user.id;
-        const isAdmin = req.session.user.role === 'admin';
-
-        if (isAdmin) {
-            comment.likes = (comment.likes || 0) + 1; 
-            await post.save();
-            return res.json({ success: true, message: "👑 관리자 권한!" });
-        } else {
-            if (!comment.likedBy) comment.likedBy = [];
-            if (comment.likedBy.includes(username)) {
-                return res.json({ success: false, message: "이미 좋아요를 누르셨습니다!" });
-            } else {
-                comment.likes = (comment.likes || 0) + 1;
-                comment.likedBy.push(username);
-                await post.save();
-                return res.json({ success: true });
-            }
-        }
-    } catch (err) { res.status(500).json({ success: false }); }
 });
 
 app.post('/add-comment/:id', async (req, res) => {
@@ -831,29 +805,24 @@ app.post('/add-comment/:id', async (req, res) => {
     }
 });
 
-app.post('/play-count/:id', async (req, res) => {
+app.post('/delete-music-comment/:musicId/:commentId', async (req, res) => {
+    if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
     try {
-        const musicId = req.params.id;
-        await Music.findByIdAndUpdate(musicId, { $inc: { views: 1 } });
-        res.json({ success: true });
-    } catch (err) {
-        console.error("재생수 업데이트 에러:", err);
-        res.status(500).json({ success: false });
-    }
+        const music = await Music.findById(req.params.musicId);
+        if (!music) return res.redirect('/'); 
+
+        const comment = music.comments.id(req.params.commentId);
+        if (comment && (req.session.user.role === 'admin' || req.session.user.name === comment.author)) {
+            music.comments.pull(req.params.commentId); 
+            await music.save();
+        }
+        res.redirect('/'); 
+    } catch (err) { res.redirect('/'); }
 });
 
-app.post('/admin/delete-user/:id', async (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
-    try {
-        const userId = req.params.id;
-        await User.findOneAndDelete({ id: userId }); 
-        await Music.deleteMany({ uploader: userId }); 
-        res.redirect('/admin');
-    } catch (err) {
-        res.status(500).send("강제 탈퇴 중 에러가 발생했습니다.");
-    }
-});
-
+// =========================================
+// 🌟 1:1 관리자 문의 (DM / Contact)
+// =========================================
 app.get('/contact', async (req, res) => {
     if (!req.session || !req.session.user) {
         return res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
@@ -894,54 +863,63 @@ app.post('/contact/delete/:id', async (req, res) => {
         res.redirect('/contact');
     }
 });
-// 🌟 오늘 날짜 구하는 마법의 함수
-const getTodayDate = () => {
-    const today = new Date();
-    return today.toISOString().split('T')[0]; // 'YYYY-MM-DD' 형식
-};
 
-// 🌟 메인 화면 방문할 때마다 방문자 수 1씩 올리기 (미들웨어)
-app.use(async (req, res, next) => {
-    if (req.path === '/') { // 메인 페이지('/') 접속 시에만 카운트!
-        try {
-            const today = getTodayDate();
-            let stats = await Stats.findOne({ date: today });
-            
-            if (!stats) {
-                // 오늘 첫 방문자라면, 어제까지의 총 데이터를 가져와서 새로 만듦
-                const lastStat = await Stats.findOne().sort({ _id: -1 });
-                stats = new Stats({
-                    date: today,
-                    totalVisitors: lastStat ? lastStat.totalVisitors : 0,
-                    totalPlays: lastStat ? lastStat.totalPlays : 0
-                });
-            }
-            stats.dailyVisitors += 1;
-            stats.totalVisitors += 1;
-            await stats.save();
-        } catch (err) {
-            console.error("방문자 통계 에러:", err);
-        }
-    }
-    next();
-});
-
-// 🌟 대망의 관리자(Admin) 페이지 띄우기!
+// =========================================
+// 👑 관리자 전용 통제실 (Admin) 👑
+// =========================================
 app.get('/admin', async (req, res) => {
+    // 🚨 1. 관리자가 아니면 무조건 쫓아냅니다 (보안 통과문)
+    if (!req.session.user || req.session.user.role !== 'admin') {
+        return res.send("<script>alert('경고: 대표님만 들어갈 수 있는 통제실입니다!'); location.href='/';</script>");
+    }
+    
     try {
-        // 1. 전체 유저 목록 최신 가입순으로 가져오기
-        const users = await User.find().sort({ createdAt: -1 });
+        // 2. 가입한 유저 전부 불러오기 (최신 가입순)
+        const users = await User.find().sort({ createdAt: -1 }).lean();
         
-        // 2. 오늘 통계 가져오기
+        // 3. 오늘 기록된 방문자/재생수 통계표 가져오기
         const today = getTodayDate();
         const stats = await Stats.findOne({ date: today }) || { dailyVisitors: 0, totalVisitors: 0, dailyPlays: 0, totalPlays: 0 };
         
-        // 3. admin.ejs 화면에 데이터 던져주기!
-        res.render('admin', { users: users, stats: stats });
+        // 4. 관리자 화면(admin.ejs)으로 데이터 쏴주기
+        res.render('admin', { users: users, stats: stats, user: req.session.user });
     } catch (err) {
-        console.error(err);
-        res.status(500).send("관리자 페이지 로드 중 에러가 발생했습니다.");
+        console.error("관리자 페이지 로딩 에러:", err);
+        res.status(500).send("관리자 페이지를 불러오는 중 에러가 났습니다.");
     }
 });
+
+app.post('/admin/delete-user', async (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
+    try {
+        const userId = req.body.userId;
+        await User.findByIdAndDelete(userId); // 악성 유저 DB 삭제
+        await Music.deleteMany({ uploader: userId }); // 유저가 올린 곡들도 같이 삭제!
+        res.redirect('/admin');
+    } catch (err) {
+        res.status(500).send("회원 삭제에 실패했습니다.");
+    }
+});
+
+app.get('/admin/users', async (req, res) => {
+    try {
+        if (!req.session.user || req.session.user.role !== 'admin') {
+            return res.send("<script>alert('관리자만 접근 가능합니다!'); location.href='/';</script>");
+        }
+        const users = await User.find().sort({ createdAt: -1 }); 
+        res.render('admin_users', { users: users });
+    } catch (err) { res.status(500).send("유저 목록 에러"); }
+});
+
+app.post('/admin/popup', async (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
+    try {
+        await Popup.deleteMany({}); 
+        await new Popup({ title: req.body.title, content: req.body.content, isActive: req.body.isActive === 'on' }).save();
+        res.send("<script>alert('팝업 설정 완료!'); window.location.href='/';</script>");
+    } catch (err) { res.redirect('/'); }
+});
+
+// 🚀 최종 서버 실행 코드
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
