@@ -159,8 +159,25 @@
         #playlist-modal::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
         .playlist-header { padding: 15px; border-bottom: 1px solid #282828; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: #181818; z-index: 10; }
         
-        .logo-wrap { display: flex; align-items: center; gap: 15px; }
-        .lang-select { padding: 6px 12px; background: #222; color: #fff; border: 1px solid #ff5722; border-radius: 20px; font-weight: bold; font-size: 13px; outline: none; cursor: pointer; }
+        /* 🌟 로고 찌그러짐 완벽 방어 마법 (relative 설정) 🌟 */
+        .logo-wrap { display: flex; align-items: center; gap: 15px; position: relative; }
+        
+        /* 🌟 언어 선택창을 로고의 오른쪽 끝 위에 수직 위치로 조정 (Absolute Positioning) 🌟 */
+        .lang-select { 
+            padding: 6px 12px; 
+            background: #222; 
+            color: #fff; 
+            border: 1px solid #ff5722; 
+            border-radius: 20px; 
+            font-weight: bold; 
+            font-size: 13px; 
+            outline: none; 
+            cursor: pointer; 
+            position: absolute; 
+            top: -10px; /* 로고 상단 여백으로 위로 이동 */
+            right: 0; /* 로고 오른쪽 끝에 맞춤 */
+            transform: translateY(-50%); /* 정확한 수직 중앙 정렬 */
+        }
 
         .logo { background: linear-gradient(45deg, #ff5722, #ffb300); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 2px 10px rgba(255, 87, 34, 0.2); }
         .top-search-form:focus-within { box-shadow: 0 0 15px rgba(255, 87, 34, 0.4); border-color: #ffb300; }
@@ -184,9 +201,25 @@
             .input-row > div { width: 100%; box-sizing: border-box; }
             .header-top { flex-direction: column; align-items: center; padding: 15px; gap: 15px; }
             
-            .logo-wrap { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 5px; box-sizing: border-box; flex-wrap: nowrap; overflow: hidden; }
+            /* 🌟 모바일에서도 로고 공간 사수 🌟 */
+            .logo-wrap { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 5px; box-sizing: border-box; flex-wrap: nowrap; overflow: hidden; position: relative; }
+            
+            /* 로고 크기 최적화 (PC/모바일 공통 55px) */
             .logo-wrap img { height: 55px !important; max-height: 55px; width: auto; max-width: 75%; object-fit: contain; flex-shrink: 0; } 
-            .lang-select { font-size: 10px; padding: 4px 5px; flex-shrink: 0; width: 85px; max-width: 22%; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; border-width: 1px; } 
+            
+            /* 모바일에서도 절대 위치 유지하되, 크기 조정 */
+            .lang-select { 
+                font-size: 10px; 
+                padding: 4px 5px; 
+                flex-shrink: 0; 
+                width: 85px; 
+                max-width: 22%; 
+                white-space: nowrap; 
+                text-overflow: ellipsis; 
+                overflow: hidden; 
+                border-width: 1px;
+                top: -8px; /* 모바일 여백 조정 */
+            } 
             
             .top-search-form { width: 100%; max-width: none; margin: 0; box-sizing: border-box; }
             .auth-buttons { width: 100%; justify-content: center; }
@@ -294,7 +327,7 @@
                     <option value="en">🇺🇸 English</option>
                     <option value="zh-CN">🇨🇳 中文 (简体)</option>
                     <option value="zh-TW">🇹🇼 中文 (繁體)</option>
-                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ja">🇯🇵 일본語</option>
                 </select>
                 <script type="text/javascript">
                     function googleTranslateElementInit() {
