@@ -180,7 +180,12 @@
             .input-row { flex-direction: column; align-items: stretch; gap: 12px; }
             .input-row > div { width: 100%; box-sizing: border-box; }
             .header-top { flex-direction: column; align-items: center; padding: 15px; gap: 15px; }
-            .logo-wrap { width: 100%; justify-content: space-between; }
+            
+            /* 🌟 모바일 언어 삐져나옴 완벽 방지 🌟 */
+            .logo-wrap { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 10px; box-sizing: border-box; overflow: hidden; }
+            .logo-wrap img { max-width: 55%; object-fit: contain; } /* 로고 크기 안전하게 제한 */
+            .lang-select { font-size: 11px; padding: 4px 8px; flex-shrink: 1; max-width: 40%; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; } /* 언어선택창 자동 축소 */
+            
             .top-search-form { width: 100%; box-sizing: border-box; }
             .auth-buttons { width: 100%; justify-content: center; }
             .header-nav { justify-content: flex-start; overflow-x: auto; white-space: nowrap; padding: 12px 15px; gap: 20px; border-bottom: 1px solid #222; }
@@ -281,12 +286,6 @@
             <div class="logo-wrap">
                 <img src="/logo.png" alt="RANKING AI 로고" style="height: 45px; cursor: pointer; object-fit: contain;" onclick="window.location.href='/?sort=views'">
                 
-                <div style="display: flex; flex-direction: column; align-items: center; margin-left: 15px; cursor: pointer; background: #fff; padding: 3px; border-radius: 6px; box-shadow: 0 0 10px rgba(255,87,34,0.3);" 
-                     title="클릭하면 크게 확대됩니다! 친구들에게 공유해보세요 🚀" 
-                     onclick="window.open('https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://rankingaimusic.com', '_blank')">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=40x40&data=https://rankingaimusic.com" alt="QR Code" style="display: block; border-radius: 2px;">
-                </div>
-
                 <div id="google_translate_element" style="display:none;"></div>
                 <select id="custom-translate-select" class="lang-select" onchange="changeLanguage(this.value)">
                     <option value="ko">🇰🇷 한국어</option>
@@ -315,9 +314,16 @@
             </div>
             
             <form action="/" method="GET" class="top-search-form">
+                <div style="display: flex; align-items: center; justify-content: center; cursor: pointer; background: #fff; padding: 2px; border-radius: 4px; margin-right: 10px; box-shadow: 0 0 5px rgba(255,87,34,0.5);" 
+                     title="클릭하면 크게 확대됩니다! 친구들에게 공유해보세요 🚀" 
+                     onclick="window.open('https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://rankingaimusic.com', '_blank')">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=30x30&data=https://rankingaimusic.com" alt="QR Code" style="display: block; width: 24px; height: 24px;">
+                </div>
+                
                 <input type="text" name="search" class="top-search-input" placeholder="아티스트 검색..." value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>">
                 <button type="submit" class="top-search-btn">🔍</button>
             </form>
+
             <div class="auth-buttons">
                 <% if (user && user.role === 'admin') { %>
                     <a href="/admin" class="btn-admin">👑 관리자</a>
