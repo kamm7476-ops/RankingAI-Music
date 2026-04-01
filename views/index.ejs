@@ -223,30 +223,40 @@
             .input-row { flex-direction: column; align-items: stretch; gap: 12px; }
             .input-row > div { width: 100%; box-sizing: border-box; }
             
-            /* 🌟 [수정] 모바일 헤더: 2줄로 시원하게 분리 (코딱지 로고, QR 찌그러짐 완벽 해결!) 🌟 */
+            /* 🌟 모바일 헤더: 2줄로 시원하게 분리 🌟 */
             .header-top { 
-                flex-wrap: wrap !important; /* 요소를 2줄로 자연스럽게 나눕니다 */
-                padding: 15px !important;  
+                flex-wrap: wrap !important; 
+                padding: 15px 15px !important;  
                 gap: 15px !important; 
             }
             
-            /* 🌟 [수정] 로고 크기 정상화 (크고 예쁘게!) */
-            .logo-img { height: 45px !important; max-width: 150px !important; flex-shrink: 0; }
+            /* 🌟 [핵심 수정] 로고 코딱지 탈출!! 가로 제한을 넉넉하게 풀었습니다 🌟 */
+            .logo-img { 
+                height: 50px !important;       /* 모바일에서도 PC처럼 큼직한 높이 유지! */
+                max-width: 250px !important;   /* 가로 공간을 확 늘려서 찌그러지지 않게 숨통 트임! */
+                flex-shrink: 0 !important;     /* 절대 작아지지 말라고 명령! */
+            }
             
-            /* 🌟 [수정] 우측 버튼들을 오른쪽 끝으로 밀어줌 */
-            .auth-buttons { flex: 1; justify-content: flex-end; width: auto !important; flex-wrap: nowrap; gap: 8px !important; flex-shrink: 0; }
+            /* 🌟 우측 버튼들 (로그인, 언어 등) */
+            .auth-buttons { 
+                flex: 1; 
+                justify-content: flex-end; 
+                width: auto !important; 
+                flex-wrap: nowrap; 
+                gap: 10px !important; 
+            }
             
             .lang-select { font-size: 11px !important; padding: 5px 8px !important; margin-bottom: 0 !important; } 
             .btn-signup, .btn-login { font-size: 12px !important; padding: 6px 10px !important; }
             
-            /* 🌟 [수정] 검색창을 두 번째 줄로 내려서 가로 100%로 시원하게 씁니다! */
+            /* 🌟 검색창: 2번째 줄로 내려서 가로 100% 꽉 차게 🌟 */
             .top-search-form { 
                 width: 100% !important; 
                 flex: 1 1 100% !important; 
                 margin: 0 !important; 
                 padding: 5px 15px !important;
+                order: 3; /* 확실하게 맨 아랫줄로 보냄 */
             }
-            /* 검색창 글자 크기도 시원하게 복구 */
             .top-search-input { font-size: 14px !important; padding: 5px !important; }
             
             /* ------------------------------------------------ */
