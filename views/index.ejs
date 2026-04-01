@@ -22,13 +22,14 @@
 
         /* 🌟 헤더 레이아웃 (안정적인 3단 분리) */
         .main-header { background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
-        .header-top { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; border-bottom: 1px solid #1a1b1c; gap: 20px; }
+        /* padding을 줄이고 flex-wrap: nowrap을 강제하여 한 줄에 가둡니다 */
+.header-top { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #1a1b1c; gap: 10px; flex-wrap: nowrap; }
         
         /* max-width를 추가해서 화면보다 커지지 않게 합니다 */
-.logo-img { height: 60px; max-width: 100%; cursor: pointer; object-fit: contain; flex-shrink: 1; }
+.logo-img { height: 50px; max-width: 100%; cursor: pointer; object-fit: contain; flex-shrink: 0; }
 
         /* 🌟 검색창 유연성 유지 */
-        .top-search-form { display: flex; align-items: center; background: #222; border: 2px solid #ff5722; border-radius: 25px; padding: 5px 15px; flex: 1; max-width: 400px; margin: 0 10px; min-width: 0; }
+        .top-search-form { display: flex; align-items: center; background: #222; border: 2px solid #ff5722; border-radius: 25px; padding: 5px 12px; flex: 1; max-width: 400px; margin: 0; min-width: 0; }
         .top-search-btn { background: none; border: none; color: #ff5722; font-weight: bold; cursor: pointer; font-size: 16px; padding: 0 10px; }
 
         /* 🌟 우측 버튼들 & 언어선택 (끝으로 위치!) 🌟 */
