@@ -280,6 +280,13 @@
        <div class="header-top">
             <div class="logo-wrap">
                 <img src="/logo.png" alt="RANKING AI 로고" style="height: 45px; cursor: pointer; object-fit: contain;" onclick="window.location.href='/?sort=views'">
+                
+                <div style="display: flex; flex-direction: column; align-items: center; margin-left: 15px; cursor: pointer; background: #fff; padding: 3px; border-radius: 6px; box-shadow: 0 0 10px rgba(255,87,34,0.3);" 
+                     title="클릭하면 크게 확대됩니다! 친구들에게 공유해보세요 🚀" 
+                     onclick="window.open('https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://rankingaimusic.com', '_blank')">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=40x40&data=https://rankingaimusic.com" alt="QR Code" style="display: block; border-radius: 2px;">
+                </div>
+
                 <div id="google_translate_element" style="display:none;"></div>
                 <select id="custom-translate-select" class="lang-select" onchange="changeLanguage(this.value)">
                     <option value="ko">🇰🇷 한국어</option>
