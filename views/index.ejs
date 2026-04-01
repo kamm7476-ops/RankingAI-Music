@@ -22,14 +22,37 @@
 
         /* 🌟 헤더 레이아웃 (안정적인 3단 분리) */
         .main-header { background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
-        /* padding을 줄이고 flex-wrap: nowrap을 강제하여 한 줄에 가둡니다 */
-.header-top { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #1a1b1c; gap: 10px; flex-wrap: nowrap; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #1a1b1c; gap: 10px; flex-wrap: nowrap; }
         
         /* max-width를 추가해서 화면보다 커지지 않게 합니다 */
-.logo-img { height: 50px; max-width: 100%; cursor: pointer; object-fit: contain; flex-shrink: 0; }
+        .logo-img { height: 50px; max-width: 100%; cursor: pointer; object-fit: contain; flex-shrink: 0; }
 
-        /* 🌟 검색창 유연성 유지 */
-        .top-search-form { display: flex; align-items: center; background: #222; border: 2px solid #ff5722; border-radius: 25px; padding: 5px 12px; flex: 1; max-width: 400px; margin: 0; min-width: 0; }
+        /* 🌟 검색창 유연성 유지 및 하얀색 배경 완벽 제거! 🌟 */
+        .top-search-form { 
+            display: flex; 
+            align-items: center; 
+            background: #222 !important; /* 어두운 배경 강제 */
+            border: 2px solid #ff5722; 
+            border-radius: 25px; 
+            padding: 5px 12px; 
+            flex: 1; 
+            max-width: 400px; 
+            margin: 0; 
+            min-width: 0; 
+        }
+        
+        /* 입력칸 투명화 (하얀 박스 방지) */
+        .top-search-input { 
+            background: transparent !important; /* 배경 투명하게 */
+            border: none !important;            /* 테두리 제거 */
+            color: white !important;            /* 글자는 흰색 */
+            outline: none; 
+            flex: 1; 
+            font-size: 14px; 
+            padding: 5px; 
+            min-width: 0; 
+        }
+        .top-search-input::placeholder { color: #aaa; }
         .top-search-btn { background: none; border: none; color: #ff5722; font-weight: bold; cursor: pointer; font-size: 16px; padding: 0 10px; }
 
         /* 🌟 우측 버튼들 & 언어선택 (끝으로 위치!) 🌟 */
@@ -105,11 +128,14 @@
         
         .rank { font-size: 22px; font-weight: 900; color: #ff5722; width: 40px; text-align: center; vertical-align: middle !important; }
         .album-art { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .song-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
-        .singer { font-size: 13px; color: #aaa; }
+        
+        /* 🌟 글자 밀림, 삐져나옴 방지 (PC/모바일 공통) 🌟 */
+        .song-title { font-size: 16px; font-weight: 600; display: block; margin-bottom: 4px; word-break: break-all; overflow: hidden; }
+        .singer { font-size: 13px; color: #aaa; word-break: break-all; }
+        
         .ai-badge { background: rgba(255, 87, 34, 0.1); border: 1px solid #ff5722; color: #ff5722; font-size: 10px; padding: 2px 6px; border-radius: 12px; margin-left: 5px; }
         
-        .action-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+        .action-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
         .action-btn { display: flex; align-items: center; gap: 4px; background: #222; color: #aaa; padding: 4px 10px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1px solid #333; }
         .action-btn:hover { background: #333; color: #ff5722; border-color: #ff5722; }
 
@@ -196,13 +222,30 @@
         @media (max-width: 900px) {
             .input-row { flex-direction: column; align-items: stretch; gap: 12px; }
             .input-row > div { width: 100%; box-sizing: border-box; }
-            .header-top { flex-direction: column; padding: 15px; gap: 15px; }
-            .auth-buttons { width: 100%; justify-content: center; flex-wrap: wrap; }
             
-            /* 🌟 모바일 언어창 스타일 */
-            .lang-select { font-size: 11px; padding: 5px 10px; order: -1; margin-bottom: 10px; } 
+            /* 🌟 모바일 1열 고정 및 로고/검색창 배치 최적화 🌟 */
+            .header-top { 
+                flex-direction: row !important; /* 강제 1행 정렬 */
+                padding: 10px 15px !important;  
+                gap: 5px !important;            /* 요소 간격 좁힘 */
+            }
+            .logo-img { height: 40px !important; max-width: 80px !important; flex-shrink: 0; }
             
-            .top-search-form { width: 100%; max-width: none; margin: 0; box-sizing: border-box; }
+            .auth-buttons { width: auto !important; justify-content: flex-end; flex-wrap: nowrap; gap: 5px !important; flex-shrink: 0; }
+            
+            /* 🌟 모바일 언어창 및 버튼 스타일 */
+            .lang-select { font-size: 10px !important; padding: 4px 6px !important; margin-bottom: 0 !important; } 
+            .btn-signup, .btn-login { font-size: 11px !important; padding: 5px 8px !important; }
+            
+            /* 🌟 모바일 검색창 강제 축소 및 1줄 보장 🌟 */
+            .top-search-form { 
+                width: auto !important; 
+                flex: 1 !important; 
+                margin: 0 5px !important; 
+                padding: 4px 10px !important;
+            }
+            .top-search-input { font-size: 12px !important; padding: 3px !important; }
+            
             .header-nav { justify-content: flex-start; overflow-x: auto; white-space: nowrap; padding: 12px 15px; gap: 20px; border-bottom: 1px solid #222; }
             .header-nav::-webkit-scrollbar { display: none; }
             .main-layout { flex-direction: column; gap: 20px; }
@@ -210,35 +253,33 @@
             .sidebar-right { width: 100%; position: static; box-sizing: border-box; margin-top: 10px; }
             
             .music-list, .music-list tbody, .music-item, .music-item td { display: block; width: 100%; box-sizing: border-box; }
-            .music-item { position: relative; background: #161718; border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px solid #222; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+            .music-item { position: relative; background: #161718; border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px solid #222; box-shadow: 0 4px 6px rgba(0,0,0,0.3); overflow: hidden; }
             .music-item td { padding: 0; border: none; }
             
             .check-col { position: absolute; top: 15px; right: 15px; z-index: 10; width: auto !important; }
             
-            /* 🌟 뚱뚱한 오렌지색 배경 삭제! 원래 PC버전처럼 숫자만 깔끔하게 나오도록 완벽 복구! 🌟 */
             .rank { 
                 position: absolute !important; 
                 top: 40px !important; 
                 left: 10px !important; 
-                background: transparent !important; /* 오렌지색 싹 제거 */
+                background: transparent !important; 
                 color: #ff5722 !important; 
                 border-radius: 0 !important; 
                 padding: 0 !important; 
-                font-size: 24px !important; /* 순위 숫자 크기 */
+                font-size: 24px !important; 
                 font-weight: 900 !important; 
                 width: 30px !important; 
                 text-align: center !important;
                 z-index: 10 !important; 
-                box-shadow: none !important; /* 그림자 제거 */
+                box-shadow: none !important; 
             }
             .music-item:nth-child(1) .rank { font-size: 28px !important; }
 
-            /* 🌟 랭킹 숫자 들어갈 공간 마련해주기 🌟 */
             .music-item td:nth-child(3) { float: left; width: 70px; margin-left: 35px; margin-right: 15px; margin-top: 0; }
             .song-info { margin-top: 0; overflow: hidden; min-height: 70px; } 
 
             .action-row { flex-wrap: wrap; gap: 6px; margin-top: 15px; clear: both; }
-            .action-btn { padding: 8px 5px; font-size: 12px; flex: 1; text-align: center; justify-content: center; }
+            .action-btn { padding: 8px 5px; font-size: 11px; flex: 1; text-align: center; justify-content: center; }
             body { padding-bottom: 180px; } 
             
             .chart-controls { display: flex !important; width: 100%; overflow-x: auto !important; flex-wrap: nowrap !important; gap: 10px; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
