@@ -218,33 +218,40 @@
         .album-art { transition: all 0.3s ease; }
         .music-item:hover .album-art { transform: scale(1.08); box-shadow: 0 8px 15px rgba(255, 87, 34, 0.4); }
 
-        /* 🚨 모바일 디자인 핵심 수정 구역 🚨 */
+       /* 🚨 모바일 디자인 핵심 수정 구역 🚨 */
         @media (max-width: 900px) {
             .input-row { flex-direction: column; align-items: stretch; gap: 12px; }
             .input-row > div { width: 100%; box-sizing: border-box; }
             
-            /* 🌟 모바일 1열 고정 및 로고/검색창 배치 최적화 🌟 */
+            /* 🌟 [수정] 모바일 헤더: 2줄로 시원하게 분리 (코딱지 로고, QR 찌그러짐 완벽 해결!) 🌟 */
             .header-top { 
-                flex-direction: row !important; /* 강제 1행 정렬 */
-                padding: 10px 15px !important;  
-                gap: 5px !important;            /* 요소 간격 좁힘 */
+                flex-wrap: wrap !important; /* 요소를 2줄로 자연스럽게 나눕니다 */
+                padding: 15px !important;  
+                gap: 15px !important; 
             }
-            .logo-img { height: 40px !important; max-width: 80px !important; flex-shrink: 0; }
             
-            .auth-buttons { width: auto !important; justify-content: flex-end; flex-wrap: nowrap; gap: 5px !important; flex-shrink: 0; }
+            /* 🌟 [수정] 로고 크기 정상화 (크고 예쁘게!) */
+            .logo-img { height: 45px !important; max-width: 150px !important; flex-shrink: 0; }
             
-            /* 🌟 모바일 언어창 및 버튼 스타일 */
-            .lang-select { font-size: 10px !important; padding: 4px 6px !important; margin-bottom: 0 !important; } 
-            .btn-signup, .btn-login { font-size: 11px !important; padding: 5px 8px !important; }
+            /* 🌟 [수정] 우측 버튼들을 오른쪽 끝으로 밀어줌 */
+            .auth-buttons { flex: 1; justify-content: flex-end; width: auto !important; flex-wrap: nowrap; gap: 8px !important; flex-shrink: 0; }
             
-            /* 🌟 모바일 검색창 강제 축소 및 1줄 보장 🌟 */
+            .lang-select { font-size: 11px !important; padding: 5px 8px !important; margin-bottom: 0 !important; } 
+            .btn-signup, .btn-login { font-size: 12px !important; padding: 6px 10px !important; }
+            
+            /* 🌟 [수정] 검색창을 두 번째 줄로 내려서 가로 100%로 시원하게 씁니다! */
             .top-search-form { 
-                width: auto !important; 
-                flex: 1 !important; 
-                margin: 0 5px !important; 
-                padding: 4px 10px !important;
+                width: 100% !important; 
+                flex: 1 1 100% !important; 
+                margin: 0 !important; 
+                padding: 5px 15px !important;
             }
-            .top-search-input { font-size: 12px !important; padding: 3px !important; }
+            /* 검색창 글자 크기도 시원하게 복구 */
+            .top-search-input { font-size: 14px !important; padding: 5px !important; }
+            
+            /* ------------------------------------------------ */
+            /* 이 아래(.header-nav 부터)는 기존 코드 그대로 두시면 됩니다! */
+            .header-nav { justify-content: flex-start; overflow-x: auto; white-space: nowrap; padding: 12px 15px; gap: 20px; border-bottom: 1px solid #222; }
             
             .header-nav { justify-content: flex-start; overflow-x: auto; white-space: nowrap; padding: 12px 15px; gap: 20px; border-bottom: 1px solid #222; }
             .header-nav::-webkit-scrollbar { display: none; }
