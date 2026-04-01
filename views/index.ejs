@@ -811,7 +811,8 @@
         document.addEventListener('click', async (e) => {
             const link = e.target.closest('a'); if (!link) return;
             const href = link.getAttribute('href');
-            if (href && href.startsWith('/') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('edit') && !href.includes('shorts') && !href.includes('youtube')) {
+            // 🌟 admin을 예외 처리 목록에 추가했습니다!
+            if (href && href.startsWith('/') && !href.includes('admin') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('edit') && !href.includes('shorts') && !href.includes('youtube')) {
                 e.preventDefault(); navigateTo(href);
             }
         });
