@@ -69,7 +69,7 @@
         <tbody>
             <% users.forEach(user => { %>
                 <tr>
-                    <td><%= user.createdAt ? user.createdAt.toISOString().substring(0, 10) : '날짜 없음' %></td>
+                    <td><%= user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '날짜 없음' %></td>
                     <td><strong><%= user.username %></strong> <%= user.nickname ? `(${user.nickname})` : '' %></td>
                     <td><%= user.email || '이메일 없음' %></td>
                     <td>
