@@ -9,8 +9,7 @@
         th { background: #ff5722; color: white; }
         tr:hover { background: #2a2a2a; }
         .back-btn { display: inline-block; margin-bottom: 20px; color: #aaa; text-decoration: none; }
-    </title>
-</head>
+    </style> </head>
 <body>
     <a href="/" class="back-btn">← 메인으로 돌아가기</a>
     <h1>👑 유저 관리 센터</h1>
@@ -26,14 +25,18 @@
             </tr>
         </thead>
         <tbody>
-            <% users.forEach(function(user, index) { %>
-            <tr>
-                <td><%= index + 1 %></td>
-                <td><%= user.username %></td>
-                <td><%= user.createdAt ? user.createdAt.toLocaleDateString() : '날짜정보없음' %></td>
-                <td><%= user.role || '일반유저' %></td>
-            </tr>
-            <% }); %>
+            <% if(users && users.length > 0) { %>
+                <% users.forEach(function(user, index) { %>
+                <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= user.username %></td>
+                    <td><%= user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '날짜정보없음' %></td>
+                    <td><%= user.role || '일반유저' %></td>
+                </tr>
+                <% }); %>
+            <% } else { %>
+                <tr><td colspan="4" style="text-align:center;">가입한 유저가 없습니다.</td></tr>
+            <% } %>
         </tbody>
     </table>
 </body>
