@@ -8,13 +8,12 @@
     <meta name="keywords" content="Ranking AI, AI Music, AI Chart, 랭킹AI, AI음악, AI音楽, AI楽曲, AI音乐, AI排行榜, Suno AI, Udio AI">
     <meta property="og:title" content="Ranking AI - World's Best AI Music Chart">
     <meta property="og:description" content="Check out the hottest AI music from around the world!">
-    <meta property="og:description" content="Check out the hottest AI music from around the world!">
     <meta property="og:url" content="https://rankingaimusic.com">
     <meta name="content-language" content="en, ko, ja, zh">  
     <meta name="naver-site-verification" content="34a9f6198c9f271e3250e3d11cabcb17c24a7754" />
     <meta name="google-site-verification" content="hGmKKbn9hQDQ2viDIRcHFRPeIlRIZpkTZfFjgKb_sjA" />
     <style>
-        /* 🌟 가로 삐져나옴 완벽 방어 마법 (모바일 화면 딱 맞추기) 🌟 */
+        /* 🌟 가로 삐져나옴 완벽 방어 마법 */
         * { box-sizing: border-box; }
         html, body { max-width: 100%; overflow-x: hidden; }
         
@@ -177,16 +176,20 @@
         .album-art { transition: all 0.3s ease; }
         .music-item:hover .album-art { transform: scale(1.08); box-shadow: 0 8px 15px rgba(255, 87, 34, 0.4); }
 
+        /* 🚨 모바일 디자인 핵심 수정 구역 🚨 */
         @media (max-width: 900px) {
             .input-row { flex-direction: column; align-items: stretch; gap: 12px; }
             .input-row > div { width: 100%; box-sizing: border-box; }
             .header-top { flex-direction: column; align-items: center; padding: 15px; gap: 15px; }
             
-            /* 🌟 모바일 언어 삐져나옴 완벽 방어 & 로고 이미지 확대 🌟 */
+            /* 🌟 로고 절대 사수 & 언어창 초미니 압축 🌟 */
             .logo-wrap { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 5px; box-sizing: border-box; flex-wrap: nowrap; overflow: hidden; }
-            /* 🌟 로고 이미지를 다시 키웠습니다 (height: 70px) */
-            .logo-wrap img { height: 70px !important; max-height: 70px; width: auto; max-width: 65%; object-fit: contain; flex-shrink: 0; } 
-            .lang-select { font-size: 12px; padding: 6px 8px; flex-shrink: 0; max-width: 30%; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; } /* 언어선택창 자동 축소 */
+            
+            /* 🌟 로고 높이를 75px로 빵빵하게 키우고, 너비를 최대 75%까지 보장! */
+            .logo-wrap img { height: 75px !important; max-height: 75px; width: auto; max-width: 75%; object-fit: contain; flex-shrink: 0; } 
+            
+            /* 🌟 언어 선택창은 진짜 최소한의 공간(약 22%)만 쓰도록 강제 압축! */
+            .lang-select { font-size: 10px; padding: 4px 5px; flex-shrink: 0; width: 85px; max-width: 22%; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; border-width: 1px; } 
             
             .top-search-form { width: 100%; box-sizing: border-box; }
             .auth-buttons { width: 100%; justify-content: center; }
