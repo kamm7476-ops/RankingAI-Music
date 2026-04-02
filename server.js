@@ -42,7 +42,7 @@ const upload = multer({
 const app = express();
 let currentPopup = { isActive: false, title: '', content: '' };
 
-pp.use(cookieParser()); // 🌟 2. 이거 한 줄 추가! (express() 아래쪽에 넣어주세요)
+app.use(cookieParser());// 🌟 2. 이거 한 줄 추가! (express() 아래쪽에 넣어주세요)
 
 // 🌟 DB 연결
 mongoose.connect(process.env.DB_URI)
