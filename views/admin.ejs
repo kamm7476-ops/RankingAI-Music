@@ -61,21 +61,41 @@
         <a href="/" style="color: #ff5722; text-decoration: underline; font-weight: bold; font-size: 14px;">← 메인으로 돌아가기</a>
     </div>
 
-    <div class="dashboard">
-        <div class="card">
-            <h3>오늘 방문자</h3>
-            <p class="number"><%= stats ? stats.dailyVisitors : 0 %> <span>명</span></p>
+   <div class="dashboard">
+        <div class="card" style="text-align: center;">
+            <h3 style="color: #ff5722; font-size: 16px; border-bottom: 1px solid #333; padding-bottom: 10px;">👥 오늘 방문자 (총 <%= stats ? stats.dailyVisitors : 0 %>명)</h3>
+            <div style="display: flex; justify-content: space-between; padding: 10px 20px 0;">
+                <div>
+                    <span style="color: #ccc; font-size: 12px;">🔸 손님(비회원)</span><br>
+                    <strong style="font-size: 24px; color: #00e5ff;"><%= stats ? (stats.guestVisitors || 0) : 0 %></strong>
+                </div>
+                <div>
+                    <span style="color: #ccc; font-size: 12px;">🔹 가입 회원</span><br>
+                    <strong style="font-size: 24px; color: #4caf50;"><%= stats ? (stats.memberVisitors || 0) : 0 %></strong>
+                </div>
+            </div>
         </div>
-        <div class="card">
-            <h3>누적 방문자</h3>
+
+        <div class="card" style="text-align: center;">
+            <h3 style="color: #ff5722; font-size: 16px; border-bottom: 1px solid #333; padding-bottom: 10px;">🎧 오늘 재생수 (총 <%= stats ? stats.dailyPlays : 0 %>회)</h3>
+            <div style="display: flex; justify-content: space-between; padding: 10px 20px 0;">
+                <div>
+                    <span style="color: #ccc; font-size: 12px;">🔸 손님(비회원)</span><br>
+                    <strong style="font-size: 24px; color: #00e5ff;"><%= stats ? (stats.guestPlays || 0) : 0 %></strong>
+                </div>
+                <div>
+                    <span style="color: #ccc; font-size: 12px;">🔹 가입 회원</span><br>
+                    <strong style="font-size: 24px; color: #4caf50;"><%= stats ? (stats.memberPlays || 0) : 0 %></strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
+            <h3>전체 누적 방문자</h3>
             <p class="number"><%= stats ? stats.totalVisitors : 0 %> <span>명</span></p>
         </div>
-        <div class="card">
-            <h3>오늘 재생수</h3>
-            <p class="number"><%= stats ? stats.dailyPlays : 0 %> <span>회</span></p>
-        </div>
-        <div class="card">
-            <h3>누적 재생수</h3>
+        <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
+            <h3>전체 누적 재생수</h3>
             <p class="number"><%= stats ? stats.totalPlays : 0 %> <span>회</span></p>
         </div>
     </div>
