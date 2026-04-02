@@ -6,6 +6,12 @@ const statsSchema = new mongoose.Schema({
     totalVisitors: { type: Number, default: 0 },
     dailyPlays: { type: Number, default: 0 },
     totalPlays: { type: Number, default: 0 }
+    // 👇 [추가된 부분] 회원/비회원 구분 기록장
+    memberVisitors: { type: Number, default: 0 }, // 오늘 회원 방문
+    guestVisitors: { type: Number, default: 0 },  // 오늘 비회원 방문
+    memberPlays: { type: Number, default: 0 },    // 오늘 회원 재생
+    guestPlays: { type: Number, default: 0 }      // 오늘 비회원 재생
+    
 });
 
 module.exports = mongoose.model('Stats', statsSchema);
