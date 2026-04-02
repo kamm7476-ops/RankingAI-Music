@@ -123,16 +123,17 @@ const dmSchema = new mongoose.Schema({
 const DM = mongoose.models.DM || mongoose.model('DM', dmSchema);
 
 // =========================================
-// 🌟 7. 관리자 -> 유저 쪽지(DM) DB 주머니
+// 🌟 7. 유저 간 1:1 쪽지(DM) DB 주머니 (구매 문의용 업그레이드!)
 // =========================================
 const messageSchema = new mongoose.Schema({
-    userId: String,
-    text: String,
+    userId: String,         // 받는 사람 아이디
+    senderName: String,     // 보낸 사람 닉네임 (추가!)
+    senderId: String,       // 보낸 사람 아이디 (추가! 나중에 답장용)
+    text: String,           // 쪽지 내용
     isRead: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now }
 });
 const Message = mongoose.models.Message || mongoose.model('Message', messageSchema);
-
 // =========================================
 // 🌟 서버 기본 설정
 // =========================================
@@ -1068,6 +1069,23 @@ app.post('/read-message/:id', async (req, res) => {
         res.redirect('back');
     } catch (err) { res.redirect('back'); }
 });
+// 💌 유저 간 1:1 쪽지 (음원 구매/사용 문의) 보내기
+app.post('/send-user-message', async (req, res) => {
+    if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
+    try {
+        await new Message({
+            userId: req.body.receiverId, // 곡 주인의 아이디
+            senderName: req.session.user.name, // 내 닉네임
+            senderId: req.session.user.id, // 내 아이디
+            text: req.body.text // 내가 쓴 내용
+        }).save();
+        res.send("<script>alert('작곡가에게 구매 문의 쪽지를 성공적으로 보냈습니다! 상대방이 접속 시 알림을 받게 됩니다.'); history.back();</script>");
+    } catch (err) {
+        console.error("쪽지 발송 에러:", err);
+        res.status(500).send("<script>alert('에러가 발생했습니다.'); history.back();</script>");
+    }
+});
+
 
 // 🚀 최종 서버 실행 코드
 const PORT = process.env.PORT || 4000;
