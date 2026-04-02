@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 const multer = require('multer');
 const session = require('express-session');
+const cookieParser = require('cookie-parser'); // 🌟 1. 이거 한 줄 추가!
 const nodemailer = require('nodemailer'); // 🌟 이메일 우체부 소환!
 
 const passport = require('passport');
@@ -40,6 +41,8 @@ const upload = multer({
 
 const app = express();
 let currentPopup = { isActive: false, title: '', content: '' };
+
+pp.use(cookieParser()); // 🌟 2. 이거 한 줄 추가! (express() 아래쪽에 넣어주세요)
 
 // 🌟 DB 연결
 mongoose.connect(process.env.DB_URI)
@@ -163,26 +166,45 @@ app.use(async (req, res, next) => {
 // =========================================
 const getTodayDate = () => {
     const today = new Date();
-    return today.toISOString().split('T')[0]; // 'YYYY-MM-DD' 형식
+    // 🌟 한국 시간대 기준으로 날짜 뽑기 (서버 시간 오류 방지)
+    return today.toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' }).replace(/\. /g, '-').replace('.', '');
 };
 
 app.use(async (req, res, next) => {
     if (req.path === '/') { // 메인 페이지('/') 접속 시에만 카운트!
         try {
             const today = getTodayDate();
-            let stats = await Stats.findOne({ date: today });
-            
-            if (!stats) {
-                const lastStat = await Stats.findOne().sort({ _id: -1 });
-                stats = new Stats({
-                    date: today,
-                    totalVisitors: lastStat ? lastStat.totalVisitors : 0,
-                    totalPlays: lastStat ? lastStat.totalPlays : 0
-                });
+            const cookieName = 'visited_' + today;
+
+            // 🌟 오늘 처음 온 사람이라면 (쿠키가 없다면 카운트!)
+            if (!req.cookies[cookieName]) {
+                // 자정까지 유지되는 쿠키 발급 (24시간)
+                res.cookie(cookieName, 'true', { maxAge: 24 * 60 * 60 * 1000 });
+
+                let stats = await Stats.findOne({ date: today });
+                
+                if (!stats) {
+                    const lastStat = await Stats.findOne().sort({ _id: -1 });
+                    stats = new Stats({
+                        date: today,
+                        totalVisitors: lastStat ? lastStat.totalVisitors : 0,
+                        totalPlays: lastStat ? lastStat.totalPlays : 0
+                    });
+                }
+                
+                // 🌟 기본 방문수 올리기
+                stats.dailyVisitors += 1;
+                stats.totalVisitors += 1;
+                
+                // 🌟 [핵심] 회원/비회원 구분해서 카운트 올리기
+                if (req.session && req.session.user) {
+                    stats.memberVisitors = (stats.memberVisitors || 0) + 1;
+                } else {
+                    stats.guestVisitors = (stats.guestVisitors || 0) + 1;
+                }
+                
+                await stats.save();
             }
-            stats.dailyVisitors += 1;
-            stats.totalVisitors += 1;
-            await stats.save();
         } catch (err) {
             console.error("방문자 통계 에러:", err);
         }
@@ -833,11 +855,31 @@ app.post('/like/:id', async (req, res) => {
 app.post('/play-count/:id', async (req, res) => {
     try {
         const musicId = req.params.id;
+        // 개별 음악의 조회수 1 증가
         await Music.findByIdAndUpdate(musicId, { $inc: { views: 1 } });
         
-        // Stats 재생수도 같이 올려줍니다!
+        // Stats 재생수 업데이트!
         const today = getTodayDate();
-        await Stats.findOneAndUpdate({ date: today }, { $inc: { dailyPlays: 1, totalPlays: 1 } });
+        
+        // 🌟 [핵심 추가] 현재 재생 누른 사람이 회원인지 비회원인지 확인!
+        const isMember = (req.session && req.session.user) ? true : false;
+        
+        // 총 재생수(dailyPlays, totalPlays)는 무조건 1 올리고,
+        const incData = { dailyPlays: 1, totalPlays: 1 };
+        
+        // 회원이면 memberPlays에 1 추가, 비회원이면 guestPlays에 1 추가!
+        if (isMember) {
+            incData.memberPlays = 1;
+        } else {
+            incData.guestPlays = 1;
+        }
+        
+        // 통계 DB에 한 번에 적용
+        await Stats.findOneAndUpdate(
+            { date: today }, 
+            { $inc: incData },
+            { upsert: true }
+        );
         
         res.json({ success: true });
     } catch (err) {
@@ -846,6 +888,7 @@ app.post('/play-count/:id', async (req, res) => {
     }
 });
 
+// 👇 아래 댓글 기능들은 대표님 코드 그대로 둔 것입니다! (건드릴 필요 없음)
 app.post('/add-comment/:id', async (req, res) => {
     if (!req.session || !req.session.user) {
         return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
@@ -880,7 +923,6 @@ app.post('/delete-music-comment/:musicId/:commentId', async (req, res) => {
         res.redirect('/'); 
     } catch (err) { res.redirect('/'); }
 });
-
 // =========================================
 // 🌟 1:1 관리자 문의 (DM / Contact)
 // =========================================
