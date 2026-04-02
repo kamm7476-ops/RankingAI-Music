@@ -572,8 +572,13 @@
                                 </div>
                                 <div class="singer"><%= music.artist %> (<%= music.genre %>) <span class="ai-badge">🎵 <%= music.aiTool %></span> <span style="margin-left:10px; color:#ff5722; font-size:12px;">🎧 재생 <%= music.views || 0 %>회</span></div>
                                 
-                                <div class="action-row">
+                               <div class="action-row">
                                     <div class="action-btn" onclick="playSingleTrack(this)">▶ 듣기</div>
+                                    
+                                    <% if (user && user.id !== music.uploader && music._id !== "dummy") { %>
+                                        <div class="action-btn" onclick="sendPurchaseMsg('<%= music.uploader %>', '<%= music.name %>')" style="color:#ffb300; border-color:#ffb300;">🤝 구매 제안</div>
+                                    <% } %>
+
                                     <div class="action-btn" onclick="parseAndShowLyrics('<%= music._id %>', `<%= music.lyrics %>`)">📝 가사</div>
                                     <div class="action-btn" onclick="copyMusicLink('<%= music._id %>')">🔗 공유</div>
                                     <div class="action-btn" onclick="document.getElementById('comments-<%= music._id %>').style.display = (document.getElementById('comments-<%= music._id %>').style.display === 'block') ? 'none' : 'block';">💬 댓글 <%= music.comments ? music.comments.length : 0 %></div>
@@ -1034,5 +1039,29 @@
             }
         });
     </script>
+});
+            }
+        });
+    </script>
+
+    <form id="purchaseMsgForm" action="/send-user-message" method="POST" style="display:none;">
+        <input type="hidden" name="receiverId" id="msgReceiverId">
+        <input type="hidden" name="text" id="msgUserText">
+    </form>
+
+    <script>
+        function sendPurchaseMsg(uploaderId, musicName) {
+            const text = prompt(`[${musicName}] 곡을 사용/구매하기 위해 작곡가에게 보낼 메시지를 적어주세요.\n\n(예: 상업적으로 사용하고 싶습니다. 1만원에 구매 가능할까요? 제 연락처는... )`);
+            
+            if (text && text.trim() !== "") {
+                document.getElementById('msgReceiverId').value = uploaderId;
+                document.getElementById('msgUserText').value = `[${musicName} 구매 제안] ` + text;
+                document.getElementById('purchaseMsgForm').submit();
+            }
+        }
+    </script>
+</body>
+</html>
+
 </body>
 </html>
