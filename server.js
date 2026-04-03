@@ -1138,9 +1138,42 @@ app.get('/chat/:roomId', async (req, res) => {
     }
 });
 
+// =========================================
+// 🌟 8. 실시간 웹소켓(Socket.io) 우체국 로직
+// =========================================
+io.on('connection', (socket) => {
+    // 1. 누군가 채팅방 화면에 들어옴
+    socket.on('joinRoom', ({ roomId, userId }) => {
+        socket.join(roomId); // 전용 방에 입장시킴
+    });
+
+    // 2. 누군가 메시지를 보냄!
+    socket.on('chatMessage', async (data) => {
+        try {
+            // (1) DB에 메시지 기록 저장 (나중에 다시 볼 수 있게)
+            const newMsg = await new ChatMessage({
+                roomId: data.roomId,
+                senderId: data.senderId,
+                senderName: data.senderName,
+                text: data.text
+            }).save();
+
+            // (2) 해당 방에 있는 '모두'에게 메시지를 실시간으로 쏴줌!
+            io.to(data.roomId).emit('message', newMsg);
+            
+            // (3) 채팅방 목록에 띄울 '마지막 메시지' 업데이트
+            await ChatRoom.findByIdAndUpdate(data.roomId, { 
+                lastMessage: data.text, 
+                updatedAt: Date.now() 
+            });
+        } catch(err) { 
+            console.log("웹소켓 메시지 에러:", err); 
+        }
+    });
+});
 
 // =========================================
-// 🌟 8. 서버 실행 (이제 app 대신 server를 켭니다!)
+// 🌟 9. 서버 실행 (이제 app 대신 server를 켭니다!)
 // =========================================
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {
