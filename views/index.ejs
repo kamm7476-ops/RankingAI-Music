@@ -361,20 +361,26 @@
     <% } %>
 
     <% if (typeof popup !== 'undefined' && popup && popup.isActive) { %>
-        <div class="popup-overlay" id="mainPopup">
-            <div class="popup-box">
-                <h2 class="popup-title">📢 <%= popup.title %></h2>
-                <div class="popup-content"><%= popup.content %></div>
-                <button class="popup-close-btn" onclick="document.getElementById('mainPopup').style.display='none'">확인</button>
-                <button class="popup-close-today" onclick="closePopupForToday()">오늘 하루 보지 않기</button>
+        <div id="mainPopup" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 999999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+            <div style="background: #161718; border: 2px solid #ff5722; border-radius: 20px; padding: 30px; width: 450px; max-width: 90%; box-shadow: 0 10px 50px rgba(255,87,34,0.5); text-align: center; position: relative;">
+                
+                <h2 style="color: #ff5722; margin-top: 0; font-size: 24px; font-weight: 900;">📢 <%= popup.title %></h2>
+                
+                <div style="text-align: left; color: #ddd; font-size: 15px; line-height: 1.8; background: #222; padding: 20px; border-radius: 12px; margin-bottom: 25px; white-space: pre-wrap; border: 1px solid #333;"><%= popup.content %></div>
+
+                <button onclick="document.getElementById('mainPopup').style.display='none'" style="background: #ff5722; color: #000; font-weight: bold; border: none; padding: 14px 0; border-radius: 10px; cursor: pointer; width: 100%; font-size: 16px; margin-bottom: 10px; transition: 0.2s;">확인했습니다</button>
+                
+                <button onclick="closePopupTodayV2()" style="background: none; border: none; color: #888; text-decoration: underline; cursor: pointer; font-size: 13px;">오늘 하루 보지 않기</button>
             </div>
         </div>
+
         <script>
-            if (localStorage.getItem('hidePopupToday') === new Date().toDateString()) {
+            // 저장 이름을 v2로 바꿔서 테스트 중에도 확실히 뜨게 했습니다.
+            if (localStorage.getItem('hidePopup_v2') === new Date().toDateString()) {
                 document.getElementById('mainPopup').style.display = 'none';
             }
-            function closePopupForToday() {
-                localStorage.setItem('hidePopupToday', new Date().toDateString());
+            function closePopupTodayV2() {
+                localStorage.setItem('hidePopup_v2', new Date().toDateString());
                 document.getElementById('mainPopup').style.display = 'none';
             }
         </script>
