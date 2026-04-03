@@ -1124,6 +1124,36 @@ app.post('/send-user-message', async (req, res) => {
     }
 });
 
+// =========================================
+// 📱 내 채팅 목록 화면 라우터
+// =========================================
+app.get('/chatlist', async (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+    try {
+        // 1. 내가 참여 중인 모든 채팅방을 '최근 대화순(updatedAt: -1)'으로 불러옵니다.
+        const rooms = await ChatRoom.find({ participants: req.session.user.id })
+                                    .sort({ updatedAt: -1 });
+
+        // 2. 화면에 뿌려주기 좋게 데이터 가공 (상대방 아이디만 쏙 뽑아내기)
+        const chatList = rooms.map(room => {
+            // participants 배열(나, 상대방)에서 '나'가 아닌 사람을 상대방으로 지정
+            const partnerId = room.participants.find(id => id !== req.session.user.id);
+            return {
+                _id: room._id,
+                partnerId: partnerId || "알 수 없음",
+                lastMessage: room.lastMessage || "대화 내용 없음",
+                updatedAt: room.updatedAt
+            };
+        });
+
+        // 3. 화면 렌더링
+        res.render('chatlist', { user: req.session.user, chatList: chatList });
+    } catch (err) {
+        console.error("채팅 목록 에러:", err);
+        res.status(500).send("<script>alert('채팅 목록을 불러올 수 없습니다.'); history.back();</script>");
+    }
+});
+
 // 📱 채팅방 화면 띄우기 라우터 (과거 메시지 불러오기 추가!)
 app.get('/chat/:roomId', async (req, res) => {
     if (!req.session.user) return res.redirect('/login');
