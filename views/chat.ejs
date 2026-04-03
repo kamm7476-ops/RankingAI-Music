@@ -9,21 +9,21 @@
         body { font-family: 'Pretendard', sans-serif; background: #0b0c0d; color: #fff; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         .header { background: #161718; padding: 15px 20px; border-bottom: 1px solid #222; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
         .back-btn { color: #aaa; text-decoration: none; font-size: 15px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
-        .back-btn:hover { color: #ff5722; }
+        .back-btn:hover { color: #ffb300; }
         .chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
         .msg { max-width: 75%; padding: 12px 16px; border-radius: 20px; font-size: 14px; line-height: 1.5; word-break: break-all; }
-        .msg.my { background: #ff5722; color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 4px 10px rgba(255,87,34,0.3); }
+        .msg.my { background: #ffb300; color: #000; font-weight: 500; align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 4px 10px rgba(255,179,0,0.3); }
         .msg.other { background: #222; color: #ddd; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #333; }
         .sender-name { font-size: 11px; color: #777; margin-bottom: 4px; margin-left: 5px; }
         .input-area { background: #161718; padding: 12px 15px; display: flex; gap: 10px; border-top: 1px solid #222; flex-shrink: 0; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
         .input-area input { flex: 1; background: #0b0c0d; border: 1px solid #333; color: #fff; padding: 14px 20px; border-radius: 25px; outline: none; font-size: 14px; }
-        .input-area button { background: #ff5722; color: #000; font-weight: 900; border: none; padding: 0 24px; border-radius: 25px; cursor: pointer; transition: 0.2s; }
+        .input-area button { background: #ffb300; color: #000; font-weight: 900; border: none; padding: 0 24px; border-radius: 25px; cursor: pointer; transition: 0.2s; }
         .input-area button:hover { filter: brightness(1.1); transform: scale(1.05); }
     </style>
 </head>
 <body>
     <div class="header">
-        <a href="/" class="back-btn">⬅ 나가기</a>
+        <a href="/chatlist" class="back-btn">⬅ 목록으로</a>
         <strong style="font-size: 16px;">💬 1:1 채팅방</strong>
         <div style="width: 60px;"></div>
     </div>
@@ -33,7 +33,7 @@
             대화방이 개설되었습니다.<br>서로 매너있는 대화를 나누어주세요! 🤝
         </div>
 
-        <% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+        <% if (typeof messages !== 'undefined' && messages && messages.length > 0) { %>
             <% messages.forEach(function(msg) { %>
                 <div style="display: flex; flex-direction: column;">
                     <% if (msg.senderId !== user.id) { %>
@@ -54,7 +54,7 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io(); // 전화선 연결!
+        const socket = io(); 
         const roomId = '<%= room._id %>';
         const myId = '<%= user.id %>';
         const myName = '<%= user.name %>';
@@ -63,25 +63,21 @@
         const chatForm = document.getElementById('chatForm');
         const msgInput = document.getElementById('msgInput');
 
-        // 🌟 [추가됨!] 페이지 열리자마자 스크롤을 맨 아래(최신 대화)로!
+        // 들어오자마자 스크롤 맨 밑으로!
         chatBox.scrollTop = chatBox.scrollHeight;
 
-        // 1. 채팅방에 입장했다고 서버에 알림
         socket.emit('joinRoom', { roomId: roomId, userId: myId });
 
-        // 2. 메시지 전송 버튼을 눌렀을 때
         chatForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const text = msgInput.value;
             if (text.trim() === '') return;
             
-            // 서버로 내 메시지를 쏨!
             socket.emit('chatMessage', { roomId: roomId, senderId: myId, senderName: myName, text: text });
-            msgInput.value = ''; // 입력창 비우기
+            msgInput.value = ''; 
             msgInput.focus();
         });
 
-        // 3. 서버에서 실시간으로 메시지가 날아왔을 때 화면에 그리기
         socket.on('message', (msg) => {
             const isMyMsg = (msg.senderId === myId);
             
@@ -104,7 +100,6 @@
             wrapper.appendChild(bubble);
             chatBox.appendChild(wrapper);
             
-            // 새 메시지가 오면 스크롤을 맨 아래로 자동으로 내림
             chatBox.scrollTop = chatBox.scrollHeight;
         });
     </script>
