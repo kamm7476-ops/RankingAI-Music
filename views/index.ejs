@@ -986,7 +986,9 @@
         !href.includes('logout') && 
         !href.includes('login') && 
         !href.includes('signup') && 
-        !href.includes('edit')) { 
+        !href.includes('edit') &&
+        !href.includes('shorts') && 
+        !href.includes('youtube')) { 
         
         e.preventDefault(); 
         navigateTo(href); // 이제 유튜브/쇼츠도 이 함수를 타고 '부분 로딩' 됩니다.
