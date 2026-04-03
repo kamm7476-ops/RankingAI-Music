@@ -69,6 +69,7 @@ const musicSchema = new mongoose.Schema({
     name: String, artist: String, genre: String, aiTool: String, lyrics: String,
     uploader: String, uploaderRealName: String, imageUrl: String, audioUrl: String,
     views: { type: Number, default: 0 },
+    likes: { type: Number, default: 0 },
     likedBy: [String], 
     comments: [{ author: String, text: String, date: { type: Date, default: Date.now } }],
     createdAt: { type: Date, default: Date.now }
@@ -859,7 +860,8 @@ app.post('/like/:id', async (req, res) => {
         if (!music) return res.json({ success: false, message: "노래를 찾을 수 없습니다." });
 
         if (isAdmin) {
-            music.views += 1; 
+            // 🌟 수정됨: views 대신 likes(좋아요) 주머니를 올립니다!
+            music.likes = (music.likes || 0) + 1; 
             await music.save();
             return res.json({ success: true, message: "👑 관리자 무제한 좋아요 완료!" });
         } else {
@@ -867,7 +869,8 @@ app.post('/like/:id', async (req, res) => {
             if (music.likedBy.includes(username)) {
                 return res.json({ success: false, message: "이미 좋아요를 누르셨습니다! (1인 1회 제한)" });
             } else {
-                music.views += 1; 
+                // 🌟 수정됨: views 대신 likes(좋아요) 주머니를 올립니다!
+                music.likes = (music.likes || 0) + 1; 
                 music.likedBy.push(username);
                 await music.save();
                 return res.json({ success: true });
