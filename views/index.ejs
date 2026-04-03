@@ -576,7 +576,7 @@
                                     <div class="action-btn" onclick="playSingleTrack(this)">▶ 듣기</div>
                                     
                                     <% if (user && user.id !== music.uploader && music._id !== "dummy") { %>
-                                        <div class="action-btn" onclick="sendPurchaseMsg('<%= music.uploader %>', '<%= music.name %>')" style="color:#ffb300; border-color:#ffb300;">🤝 구매 제안</div>
+                                        <div class="action-btn" onclick="sendPurchaseMsg('<%= music.uploader %>', '<%= music.name %>')" style="color:#ffb300; border-color:#ffb300;">구매제안</div>
                                     <% } %>
 
                                     <div class="action-btn" onclick="parseAndShowLyrics('<%= music._id %>', `<%= music.lyrics %>`)">📝 가사</div>
