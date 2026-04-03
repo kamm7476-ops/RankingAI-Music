@@ -539,7 +539,7 @@ app.get('/logout', (req, res) => {
 });
 
 // =========================================
-// 🌟 메인 화면 (차트 & 최신음악 & 팝업)
+// 🌟 메인 화면 (차트 & 최신음악 & 팝업 데이터 통합)
 // =========================================
 app.get('/', async (req, res) => {
     try {
@@ -558,7 +558,6 @@ app.get('/', async (req, res) => {
             if (periodQuery === 'daily') pastDate.setDate(now.getDate() - 1); 
             else if (periodQuery === 'weekly') pastDate.setDate(now.getDate() - 7); 
             else if (periodQuery === 'monthly') pastDate.setMonth(now.getMonth() - 1); 
-            
             filter.createdAt = { $gte: pastDate }; 
         }
 
@@ -572,6 +571,7 @@ app.get('/', async (req, res) => {
             { $limit: 10 }
         ]);
 
+        // 🔥 [중요] 팝업 데이터를 DB에서 명확하게 가져옵니다!
         const activePopup = await Popup.findOne({ isActive: true }).sort({ updatedAt: -1 });
 
         if (artists.length === 0 && !searchQuery && !genreQuery && !periodQuery) {
@@ -583,6 +583,7 @@ app.get('/', async (req, res) => {
             popularArtists = [{ _id: "비비(BIBI)", count: 1 }];
         }
         
+        // 🌟 render 할 때 'popup' 변수를 반드시 넘겨줍니다!
         res.render('index', { 
             artists: artists, 
             searchQuery: searchQuery, 
@@ -590,11 +591,11 @@ app.get('/', async (req, res) => {
             sortQuery: sortQuery, 
             periodQuery: periodQuery, 
             popularArtists: popularArtists,
-            popup: activePopup
+            popup: activePopup // 👈 이 이름이 index.ejs의 popup과 같아야 합니다!
         });
     } catch (err) {
         console.log("DB 에러:", err);
-        res.send("<h1>진짜 에러 원인: " + err.message + "</h1>")
+        res.send("<h1>진짜 에러 원인: " + err.message + "</h1>");
     }
 });
 
