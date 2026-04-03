@@ -428,6 +428,9 @@
                 
                 <% if (user) { %>
                     
+               <% if (user) { %>
+                    <span style="color: #aaa; font-size: 14px;"><%= user.name || user.id %>님</span>
+                    <a href="/logout" class="btn-login" style="margin-left: 15px;">로그아웃</a>
                 <% } else { %>
                     <a href="/login" class="btn-login">로그인</a>
                     <a href="/signup" class="btn-signup">회원가입</a>
