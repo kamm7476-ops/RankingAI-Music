@@ -976,13 +976,22 @@
 
         // 🌟 [수정됨] 음악 안 끊기는 마법에서 채팅 관련 링크(chat) 예외 처리 추가!
         document.addEventListener('click', async (e) => {
-            const link = e.target.closest('a'); if (!link) return;
-            const href = link.getAttribute('href');
-            
-            if (href && href.startsWith('/') && !href.includes('admin') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('edit') && !href.includes('shorts') && !href.includes('youtube') && !href.includes('chat')) {
-                e.preventDefault(); navigateTo(href);
-            }
-        });
+    const link = e.target.closest('a'); if (!link) return;
+    const href = link.getAttribute('href');
+    
+    // 핵심: shorts나 youtube가 포함되어 있어도 차단하지 않도록 수정!
+    if (href && href.startsWith('/') && 
+        !href.includes('admin') && 
+        !href.includes('delete') && 
+        !href.includes('logout') && 
+        !href.includes('login') && 
+        !href.includes('signup') && 
+        !href.includes('edit')) { 
+        
+        e.preventDefault(); 
+        navigateTo(href); // 이제 유튜브/쇼츠도 이 함수를 타고 '부분 로딩' 됩니다.
+    }
+});
 
         document.addEventListener('submit', async (e) => {
             const form = e.target;
