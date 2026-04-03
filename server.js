@@ -1139,6 +1139,11 @@ app.get('/chat/:roomId', async (req, res) => {
 });
 
 
-// 🚀 최종 서버 실행 코드
+// =========================================
+// 🌟 8. 서버 실행 (이제 app 대신 server를 켭니다!)
+// =========================================
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`🚀 RANKING AI 실행 중: ${PORT}`));
+server.listen(PORT, () => {
+    console.log(`📡 실시간 웹소켓 통합 서버 가동 완료! 포트: ${PORT}`);
+    console.log(`💓 이제 전용 대화 채널(WebSockets)이 활성화되었습니다.`);
+});
