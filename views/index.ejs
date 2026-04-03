@@ -337,7 +337,7 @@
             #playlist-modal { bottom: 140px; right: 10px; width: calc(100% - 20px); max-height: 50vh; }
         }
 
-        /* 🌟 팝업창 디자인 🌟 */
+        /* 🌟 팝업창 전용 디자인 (오버레이 및 기본 틀) 🌟 */
         .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .popup-box { background: #161718; border: 2px solid #ff5722; border-radius: 15px; padding: 30px; width: 400px; max-width: 90%; box-shadow: 0 10px 30px rgba(255,87,34,0.3); text-align: center; position: relative; }
         .popup-title { color: #fff; font-size: 22px; font-weight: 900; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 15px; }
@@ -361,57 +361,37 @@
     <% } %>
 
     <% if (typeof popup !== 'undefined' && popup && popup.isActive) { %>
-        <div id="mainPopup" style="position: fixed; top: 100px; left: 50px; width: 400px; z-index: 999999; background: #161718; border: 2px solid #ff5722; border-radius: 12px; box-shadow: 0 15px 50px rgba(0,0,0,0.8); overflow: hidden; display: block;">
+        <div id="mainPopup" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 400px; max-height: 80vh; z-index: 999999; background: #161718; border: 2px solid #ff5722; border-radius: 12px; box-shadow: 0 15px 50px rgba(0,0,0,0.9); display: flex; flex-direction: column; overflow: hidden;">
             
-            <div id="popupHandle" style="background: #222; padding: 10px 15px; cursor: move; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333;">
-                <span style="color: #ff5722; font-weight: bold; font-size: 14px;">📢 공지사항</span>
-                <span style="color: #666; font-size: 11px;">마우스로 잡아 끌어서 이동 가능</span>
+            <div style="background: #222; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333;">
+                <span style="color: #ff5722; font-weight: bold; font-size: 15px;">📢 공지사항</span>
             </div>
 
-            <div style="padding: 25px; text-align: center;">
+            <div style="padding: 25px; text-align: center; overflow-y: auto; flex: 1;">
                 <h2 style="color: #fff; margin-top: 0; font-size: 20px;"><%= popup.title %></h2>
-                <div style="text-align: left; color: #ddd; font-size: 14px; line-height: 1.7; background: #0b0c0d; padding: 15px; border-radius: 8px; margin-bottom: 20px; white-space: pre-wrap; max-height: 300px; overflow-y: auto;"><%= popup.content %></div>
+                <div style="text-align: left; color: #ddd; font-size: 14px; line-height: 1.7; background: #0b0c0d; padding: 15px; border-radius: 8px; margin-bottom: 0; white-space: pre-wrap;"><%= popup.content %></div>
             </div>
 
-            <div style="background: #222; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #333;">
+            <div style="background: #222; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #333;">
                 <label style="color: #aaa; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
                     <input type="checkbox" id="todayCheck" style="accent-color: #ff5722;"> 오늘 하루 이 창을 열지 않음
                 </label>
-                <button onclick="closePopupWithCheck()" style="background: #444; color: #fff; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">닫기</button>
+                <button onclick="closePopupWithCheck()" style="background: #444; color: #fff; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;">닫기</button>
             </div>
         </div>
 
         <script>
-            // 1. 드래그 기능 (팝업 이동) 구현
-            const popup = document.getElementById("mainPopup");
-            const handle = document.getElementById("popupHandle");
-            let isDragging = false;
-            let offset = { x: 0, y: 0 };
+            // 🌟 드래그 스크립트 완전히 제거! PC/모바일 상관없이 화면 한가운데 예쁘게 고정됩니다. 🌟
 
-            handle.onmousedown = (e) => {
-                isDragging = true;
-                offset.x = e.clientX - popup.offsetLeft;
-                offset.y = e.clientY - popup.offsetTop;
-            };
-
-            document.onmousemove = (e) => {
-                if (!isDragging) return;
-                popup.style.left = (e.clientX - offset.x) + "px";
-                popup.style.top = (e.clientY - offset.y) + "px";
-            };
-
-            document.onmouseup = () => { isDragging = false; };
-
-            // 2. 오늘 하루 안 보기 로직
             if (localStorage.getItem('hideMainPopup_melon') === new Date().toDateString()) {
-                popup.style.display = 'none';
+                document.getElementById("mainPopup").style.display = 'none';
             }
 
             function closePopupWithCheck() {
                 if (document.getElementById('todayCheck').checked) {
                     localStorage.setItem('hideMainPopup_melon', new Date().toDateString());
                 }
-                popup.style.display = 'none';
+                document.getElementById("mainPopup").style.display = 'none';
             }
         </script>
     <% } %>
