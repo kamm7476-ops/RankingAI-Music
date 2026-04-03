@@ -428,6 +428,9 @@
                 
                 <% if (user) { %>
                     <span style="color: #aaa; font-size: 14px;"><%= user.name || user.id %>님</span>
+                   <a href="/chatlist" style="margin-left: 10px; margin-right: 10px; font-size: 13px; font-weight: bold; color: #ffb300; background: rgba(255, 179, 0, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid #ffb300; text-decoration: none;">
+                        💬 톡 목록
+                    </a>
                     <a href="/logout" class="btn-login">로그아웃</a>
                 <% } else { %>
                     <a href="/login" class="btn-login">로그인</a>
