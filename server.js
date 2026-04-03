@@ -1124,15 +1124,18 @@ app.post('/send-user-message', async (req, res) => {
     }
 });
 
-// 📱 채팅방 화면 띄우기 라우터
+// 📱 채팅방 화면 띄우기 라우터 (과거 메시지 불러오기 추가!)
 app.get('/chat/:roomId', async (req, res) => {
     if (!req.session.user) return res.redirect('/login');
     try {
         const room = await ChatRoom.findById(req.params.roomId);
         if (!room) return res.status(404).send("<script>alert('방을 찾을 수 없습니다.'); history.back();</script>");
         
-        // 일단 방 껍데기만 렌더링 (화면은 다음 단계에서 만듭니다!)
-        res.render('chat', { user: req.session.user, room: room });
+        // 🌟 [핵심 추가] 이 방에서 나눴던 과거 대화 내용들 시간순으로 전부 불러오기!
+        const messages = await ChatMessage.find({ roomId: req.params.roomId }).sort({ createdAt: 1 });
+
+        // 화면(EJS)으로 방 정보와 함께 과거 메시지(messages)도 같이 던져줍니다!
+        res.render('chat', { user: req.session.user, room: room, messages: messages });
     } catch (err) {
         res.status(500).send("<script>alert('에러가 발생했습니다.'); history.back();</script>");
     }
