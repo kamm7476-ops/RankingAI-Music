@@ -427,11 +427,7 @@
                 <% } %>
                 
                 <% if (user) { %>
-                    <span style="color: #aaa; font-size: 14px;"><%= user.name || user.id %>님</span>
-                   <a href="/chatlist" style="margin-left: 10px; margin-right: 10px; font-size: 13px; font-weight: bold; color: #ffb300; background: rgba(255, 179, 0, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid #ffb300; text-decoration: none;">
-                        💬 톡 목록
-                    </a>
-                    <a href="/logout" class="btn-login">로그아웃</a>
+                    
                 <% } else { %>
                     <a href="/login" class="btn-login">로그인</a>
                     <a href="/signup" class="btn-signup">회원가입</a>
@@ -1063,5 +1059,11 @@
             }
         }
     </script>
+<% if (user) { %>
+        <a href="/chatlist" style="position: fixed; bottom: 20px; right: 20px; background: #ffb300; color: #000; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 15px rgba(255, 179, 0, 0.4); z-index: 1000; text-decoration: none; transition: transform 0.2s;">
+            💬
+        </a>
+    <% } %>
+
 </body>
 </html>
