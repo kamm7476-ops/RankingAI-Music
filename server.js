@@ -1172,6 +1172,29 @@ app.get('/chat/:roomId', async (req, res) => {
 });
 
 // =========================================
+// 📱 내 채팅 목록 화면 라우터 (🌟 이것이 빠져있었습니다!)
+// =========================================
+app.get('/chatlist', async (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+    try {
+        const rooms = await ChatRoom.find({ participants: req.session.user.id }).sort({ updatedAt: -1 });
+        const chatList = rooms.map(room => {
+            const partnerId = room.participants.find(id => id !== req.session.user.id);
+            return {
+                _id: room._id,
+                partnerId: partnerId || "알 수 없음",
+                lastMessage: room.lastMessage || "대화 내용 없음",
+                updatedAt: room.updatedAt
+            };
+        });
+        res.render('chatlist', { user: req.session.user, chatList: chatList });
+    } catch (err) {
+        console.error("채팅 목록 에러:", err);
+        res.status(500).send("<script>alert('채팅 목록을 불러올 수 없습니다.'); history.back();</script>");
+    }
+});
+
+// =========================================
 // 🌟 8. 실시간 웹소켓(Socket.io) 우체국 로직
 // =========================================
 io.on('connection', (socket) => {
