@@ -580,7 +580,7 @@
                                     <% } %>
 
                                     <div class="action-btn" onclick="parseAndShowLyrics('<%= music._id %>', `<%= music.lyrics %>`)">📝 가사</div>
-                                    <div class="action-btn" onclick="copyMusicLink('<%= music._id %>')">🔗 공유</div>
+                                   
                                     <div class="action-btn" onclick="document.getElementById('comments-<%= music._id %>').style.display = (document.getElementById('comments-<%= music._id %>').style.display === 'block') ? 'none' : 'block';">💬 댓글 <%= music.comments ? music.comments.length : 0 %></div>
         
                                     <% 
