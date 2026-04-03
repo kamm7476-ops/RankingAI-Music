@@ -11,6 +11,12 @@ const passport = require('passport');
 const NaverStrategy = require('passport-naver').Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
+// =========================================
+// 🌟 [추가됨!] 실시간 웹소켓(전화선) 부품
+// =========================================
+const http = require('http'); 
+const { Server } = require("socket.io"); 
+
 // 🌟 클라우디너리 영구 금고 세팅
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
@@ -40,6 +46,13 @@ const upload = multer({
 });
 
 const app = express();
+
+// =========================================
+// 🌟 [핵심 개조!] 일반 서버를 웹소켓 통신 서버로 감싸기
+// =========================================
+const server = http.createServer(app); 
+const io = new Server(server);         
+
 let currentPopup = { isActive: false, title: '', content: '' };
 
 app.use(cookieParser());// 🌟 2. 이거 한 줄 추가! (express() 아래쪽에 넣어주세요)
@@ -123,17 +136,27 @@ const dmSchema = new mongoose.Schema({
 const DM = mongoose.models.DM || mongoose.model('DM', dmSchema);
 
 // =========================================
-// 🌟 7. 유저 간 1:1 쪽지(DM) DB 주머니 (구매 문의용 업그레이드!)
+// 🌟 7. 실시간 1:1 채팅방 & 메시지 DB 주머니
 // =========================================
-const messageSchema = new mongoose.Schema({
-    userId: String,         // 받는 사람 아이디
-    senderName: String,     // 보낸 사람 닉네임 (추가!)
-    senderId: String,       // 보낸 사람 아이디 (추가! 나중에 답장용)
-    text: String,           // 쪽지 내용
+
+// (1) 대화방 자체를 저장
+const chatRoomSchema = new mongoose.Schema({
+    participants: [String], // 참여자 두 명의 아이디 (예: ['내아이디', '작곡가아이디'])
+    lastMessage: String,    // 마지막 대화 내용
+    updatedAt: { type: Date, default: Date.now }
+});
+const ChatRoom = mongoose.models.ChatRoom || mongoose.model('ChatRoom', chatRoomSchema);
+
+// (2) 그 안에서 오가는 대화 내용을 저장
+const chatMessageSchema = new mongoose.Schema({
+    roomId: { type: mongoose.Schema.Types.ObjectId, ref: 'ChatRoom' }, // 어느 방의 대화인가?
+    senderId: String,       // 보낸 사람 아이디
+    senderName: String,     // 보낸 사람 닉네임
+    text: String,           // 대화 내용
     isRead: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now }
 });
-const Message = mongoose.models.Message || mongoose.model('Message', messageSchema);
+const ChatMessage = mongoose.models.ChatMessage || mongoose.model('ChatMessage', chatMessageSchema);
 // =========================================
 // 🌟 서버 기본 설정
 // =========================================
@@ -1069,19 +1092,48 @@ app.post('/read-message/:id', async (req, res) => {
         res.redirect('back');
     } catch (err) { res.redirect('back'); }
 });
-// 💌 유저 간 1:1 쪽지 (음원 구매/사용 문의) 보내기
+// 💌 [여기서부터 갈아끼움!] 1:1 채팅방 생성 및 입장 라우터
+// =========================================
 app.post('/send-user-message', async (req, res) => {
     if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
+    
+    const partnerId = req.body.receiverId; // 작곡가 아이디
+    const myId = req.session.user.id;      // 내 아이디
+
+    if (myId === partnerId) return res.send("<script>alert('나 자신과는 대화할 수 없습니다!'); history.back();</script>");
+
     try {
-        await new Message({
-            userId: req.body.receiverId, // 곡 주인의 아이디
-            senderName: req.session.user.name, // 내 닉네임
-            senderId: req.session.user.id, // 내 아이디
-            text: req.body.text // 내가 쓴 내용
-        }).save();
-        res.send("<script>alert('작곡가에게 구매 문의 쪽지를 성공적으로 보냈습니다! 상대방이 접속 시 알림을 받게 됩니다.'); history.back();</script>");
+        // 1. 이미 우리 둘이 만든 방이 있는지 확인
+        let room = await ChatRoom.findOne({
+            participants: { $all: [myId, partnerId] }
+        });
+
+        // 2. 없으면 방을 새로 개설함
+        if (!room) {
+            room = await new ChatRoom({
+                participants: [myId, partnerId],
+                lastMessage: req.body.text // 첫 제안 메시지를 텍스트로 저장
+            }).save();
+        }
+
+        // 3. 해당 채팅방으로 유저를 이동시킴!
+        res.redirect(`/chat/${room._id}`);
     } catch (err) {
-        console.error("쪽지 발송 에러:", err);
+        console.error("채팅방 생성 에러:", err);
+        res.status(500).send("<script>alert('에러가 발생했습니다.'); history.back();</script>");
+    }
+});
+
+// 📱 채팅방 화면 띄우기 라우터
+app.get('/chat/:roomId', async (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+    try {
+        const room = await ChatRoom.findById(req.params.roomId);
+        if (!room) return res.status(404).send("<script>alert('방을 찾을 수 없습니다.'); history.back();</script>");
+        
+        // 일단 방 껍데기만 렌더링 (화면은 다음 단계에서 만듭니다!)
+        res.render('chat', { user: req.session.user, room: room });
+    } catch (err) {
         res.status(500).send("<script>alert('에러가 발생했습니다.'); history.back();</script>");
     }
 });
