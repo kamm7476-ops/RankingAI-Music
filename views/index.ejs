@@ -361,27 +361,57 @@
     <% } %>
 
     <% if (typeof popup !== 'undefined' && popup && popup.isActive) { %>
-        <div id="mainPopup" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 999999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
-            <div style="background: #161718; border: 2px solid #ff5722; border-radius: 20px; padding: 30px; width: 450px; max-width: 90%; box-shadow: 0 10px 50px rgba(255,87,34,0.5); text-align: center; position: relative;">
-                
-                <h2 style="color: #ff5722; margin-top: 0; font-size: 24px; font-weight: 900;">📢 <%= popup.title %></h2>
-                
-                <div style="text-align: left; color: #ddd; font-size: 15px; line-height: 1.8; background: #222; padding: 20px; border-radius: 12px; margin-bottom: 25px; white-space: pre-wrap; border: 1px solid #333;"><%= popup.content %></div>
+        <div id="mainPopup" style="position: fixed; top: 100px; left: 50px; width: 400px; z-index: 999999; background: #161718; border: 2px solid #ff5722; border-radius: 12px; box-shadow: 0 15px 50px rgba(0,0,0,0.8); overflow: hidden; display: block;">
+            
+            <div id="popupHandle" style="background: #222; padding: 10px 15px; cursor: move; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333;">
+                <span style="color: #ff5722; font-weight: bold; font-size: 14px;">📢 공지사항</span>
+                <span style="color: #666; font-size: 11px;">마우스로 잡아 끌어서 이동 가능</span>
+            </div>
 
-                <button onclick="document.getElementById('mainPopup').style.display='none'" style="background: #ff5722; color: #000; font-weight: bold; border: none; padding: 14px 0; border-radius: 10px; cursor: pointer; width: 100%; font-size: 16px; margin-bottom: 10px; transition: 0.2s;">확인했습니다</button>
-                
-                <button onclick="closePopupTodayV2()" style="background: none; border: none; color: #888; text-decoration: underline; cursor: pointer; font-size: 13px;">오늘 하루 보지 않기</button>
+            <div style="padding: 25px; text-align: center;">
+                <h2 style="color: #fff; margin-top: 0; font-size: 20px;"><%= popup.title %></h2>
+                <div style="text-align: left; color: #ddd; font-size: 14px; line-height: 1.7; background: #0b0c0d; padding: 15px; border-radius: 8px; margin-bottom: 20px; white-space: pre-wrap; max-height: 300px; overflow-y: auto;"><%= popup.content %></div>
+            </div>
+
+            <div style="background: #222; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #333;">
+                <label style="color: #aaa; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                    <input type="checkbox" id="todayCheck" style="accent-color: #ff5722;"> 오늘 하루 이 창을 열지 않음
+                </label>
+                <button onclick="closePopupWithCheck()" style="background: #444; color: #fff; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">닫기</button>
             </div>
         </div>
 
         <script>
-            // 저장 이름을 v2로 바꿔서 테스트 중에도 확실히 뜨게 했습니다.
-            if (localStorage.getItem('hidePopup_v2') === new Date().toDateString()) {
-                document.getElementById('mainPopup').style.display = 'none';
+            // 1. 드래그 기능 (팝업 이동) 구현
+            const popup = document.getElementById("mainPopup");
+            const handle = document.getElementById("popupHandle");
+            let isDragging = false;
+            let offset = { x: 0, y: 0 };
+
+            handle.onmousedown = (e) => {
+                isDragging = true;
+                offset.x = e.clientX - popup.offsetLeft;
+                offset.y = e.clientY - popup.offsetTop;
+            };
+
+            document.onmousemove = (e) => {
+                if (!isDragging) return;
+                popup.style.left = (e.clientX - offset.x) + "px";
+                popup.style.top = (e.clientY - offset.y) + "px";
+            };
+
+            document.onmouseup = () => { isDragging = false; };
+
+            // 2. 오늘 하루 안 보기 로직
+            if (localStorage.getItem('hideMainPopup_melon') === new Date().toDateString()) {
+                popup.style.display = 'none';
             }
-            function closePopupTodayV2() {
-                localStorage.setItem('hidePopup_v2', new Date().toDateString());
-                document.getElementById('mainPopup').style.display = 'none';
+
+            function closePopupWithCheck() {
+                if (document.getElementById('todayCheck').checked) {
+                    localStorage.setItem('hideMainPopup_melon', new Date().toDateString());
+                }
+                popup.style.display = 'none';
             }
         </script>
     <% } %>
