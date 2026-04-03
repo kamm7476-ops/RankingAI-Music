@@ -464,6 +464,8 @@ app.post('/verify-code', (req, res) => {
 // ==========================================
 app.get('/signup', (req, res) => res.render('signup'));
 app.get('/login', (req, res) => res.render('login'));
+// 🌟 약관 페이지 연결 마법 (이 줄을 추가하세요!)
+app.get('/terms', (req, res) => res.render('terms'));
 
 app.post('/signup', async (req, res) => {
   try {
