@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 채팅 목록</title>
+    <style>
+        body { font-family: 'Pretendard', sans-serif; background: #0b0c0d; color: #fff; margin: 0; padding-bottom: 50px; }
+        .header { background: #161718; padding: 15px 20px; border-bottom: 1px solid #222; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; }
+        .back-btn { color: #aaa; text-decoration: none; font-size: 15px; font-weight: bold; }
+        .back-btn:hover { color: #ff5722; }
+        .chat-list-container { padding: 0; margin: 0; list-style: none; }
+        .chat-item { display: flex; align-items: center; padding: 15px 20px; border-bottom: 1px solid #1a1b1c; text-decoration: none; color: inherit; transition: 0.2s; }
+        .chat-item:hover { background: rgba(255,87,34,0.05); }
+        .profile-img { width: 45px; height: 45px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-right: 15px; flex-shrink: 0; }
+        .chat-info { flex: 1; min-width: 0; }
+        .partner-name { font-size: 15px; font-weight: bold; color: #fff; margin-bottom: 4px; display: block; }
+        .last-msg { font-size: 13px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        .time { font-size: 11px; color: #555; white-space: nowrap; margin-left: 10px; }
+        .empty-msg { text-align: center; color: #555; padding: 50px 20px; font-size: 14px; line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/" class="back-btn">⬅ 홈으로</a>
+        <strong style="font-size: 16px;">💬 내 채팅 목록</strong>
+        <div style="width: 50px;"></div>
+    </div>
+
+    <ul class="chat-list-container">
+        <% if (chatList && chatList.length > 0) { %>
+            <% chatList.forEach(function(chat) { %>
+                <a href="/chat/<%= chat._id %>" class="chat-item">
+                    <div class="profile-img">👤</div>
+                    <div class="chat-info">
+                        <span class="partner-name"><%= chat.partnerId %></span>
+                        <span class="last-msg"><%= chat.lastMessage %></span>
+                    </div>
+                    <% 
+                        // 날짜 예쁘게 표시하기 로직
+                        const date = new Date(chat.updatedAt);
+                        const today = new Date();
+                        const isToday = date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
+                        const timeStr = isToday ? date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : (date.getMonth() + 1) + '월 ' + date.getDate() + '일';
+                    %>
+                    <span class="time"><%= timeStr %></span>
+                </a>
+            <% }); %>
+        <% } else { %>
+            <div class="empty-msg">
+                아직 진행 중인 대화가 없습니다.<br>
+                다른 작곡가의 음악에서 '구매 제안'을 시작해보세요! 🎵
+            </div>
+        <% } %>
+    </ul>
+</body>
+</html>
