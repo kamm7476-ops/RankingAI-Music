@@ -1049,13 +1049,28 @@
         <input type="hidden" name="text" id="msgUserText">
     </form>
 
-    <script>
+   <script>
         function sendPurchaseMsg(uploaderId, musicName) {
-            const text = prompt(`[${musicName}] 곡을 사용/구매하기 위해 작곡가에게 보낼 메시지를 적어주세요.\n\n(예: 상업적으로 사용하고 싶습니다. 1만원에 구매 가능할까요? 제 연락처는... )`);
+            const guideText = `[${musicName}] 사용 및 소유권 제안을 보내시겠습니까?
+
+📢 Ranking AI는 AI 음악의 대중화를 위해 노력합니다!
+✅ 개인 감상 및 식당/카페/매장 배경음악 재생: 100% 무료 (FREE) 🆓
+(매장에서 저희 홈페이지를 통해 마음껏 재생하셔도 저작권료가 발생하지 않습니다!)
+
+💡 [음원 소유 및 상업용 파일 구매 제안 예시]
+1. 개인 소장용 음원 파일 구매: 5천원 내외
+2. 수익형 유튜브 BGM/광고 사용권: 2만~4만원
+3. 음원 정식 발매 및 독점 소유권: 10만원 이상 (협의)
+
+⚠️ '독점 소유권' 협의 시, 발매 크레딧(작사/작곡)에 구매자의 성함을 등록하는 조건도 상담 가능합니다.
+
+위 가이드를 참고하여 원하시는 [사용 목적]과 [제안 금액], [연락처]를 자유롭게 적어주세요! 🤝`;
+
+            const text = prompt(guideText);
             
             if (text && text.trim() !== "") {
                 document.getElementById('msgReceiverId').value = uploaderId;
-                document.getElementById('msgUserText').value = `[${musicName} 구매 제안] ` + text;
+                document.getElementById('msgUserText').value = `[${musicName} 제안] ` + text;
                 document.getElementById('purchaseMsgForm').submit();
             }
         }
