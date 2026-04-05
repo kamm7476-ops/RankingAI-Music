@@ -702,35 +702,43 @@
         const timeCurrent = document.getElementById('time-current');
         const timeTotal = document.getElementById('time-total');
 
-        // 🌟 [부활] 지난주에 가장 잘 됐던 '오리지널 고주파 무음' 잠금 해제 (충돌 완벽 차단)
+       // 🌟 [최강 버전] 고주파를 더 강하게! + 오리지널 심장박동(Base64) 동시 타격!
         let audioCtx;
         let isAudioUnlocked = false;
 
         function unlockAudioForMobile() {
             if (isAudioUnlocked) return;
-            isAudioUnlocked = true;
+            isAudioUnlocked = true; // 터치 중복 방지
 
+            // 1. 브라우저가 절대 무시 못하는 초음파(21,000Hz) & 강한 볼륨(0.5) 발사
             try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
                 audioCtx = new AudioContext();
                 
                 const gainNode = audioCtx.createGain();
-                gainNode.gain.value = 0.001; 
+                gainNode.gain.value = 0.5; // 👈 기계가 확실히 인식하도록 볼륨 팍 올림!
                 
                 const oscillator = audioCtx.createOscillator();
                 oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(440, audioCtx.currentTime); 
+                oscillator.frequency.setValueAtTime(21000, audioCtx.currentTime); // 👈 사람 귀에 안 들리는 21,000Hz 초음파
                 
                 oscillator.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
                 oscillator.start(); 
-                
-                console.log("💓 지난주 전설의 고주파 가동 완료! (느린 곡도 끄떡없음)");
-                document.removeEventListener('touchstart', unlockAudioForMobile);
-                document.removeEventListener('click', unlockAudioForMobile);
             } catch (err) {
                 console.log("Web Audio API 지원 안 함:", err);
             }
+
+            // 2. HTML에 숨겨둔 전설의 Base64 심장박동 오디오 같이 깨우기!
+            const heartbeatAudio = document.getElementById('heartbeat-audio');
+            if (heartbeatAudio) {
+                heartbeatAudio.volume = 0.1;
+                heartbeatAudio.play().catch(e => console.log("심장박동 오디오 대기 중..."));
+            }
+
+            console.log("💓 [최강 버전] 21,000Hz 초음파 + Base64 심장박동 동시 가동 완료!");
+            document.removeEventListener('touchstart', unlockAudioForMobile);
+            document.removeEventListener('click', unlockAudioForMobile);
         }
         
         document.addEventListener('touchstart', unlockAudioForMobile, { passive: true });
