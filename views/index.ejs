@@ -595,8 +595,8 @@
         </div>
         
         <audio id="main-audio" style="display:none;" preload="auto" playsinline webkit-playsinline></audio>
-    </div> 
-    
+        <audio id="heartbeat-audio" loop playsinline webkit-playsinline style="display:none;" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
+    </div>    
     <div id="sync-lyrics-modal" style="display:none; position:fixed; bottom:90px; left:50%; transform:translateX(-50%); width:90%; max-width:400px; height:60vh; background:rgba(15, 16, 17, 0.95); border:1px solid #333; border-radius:15px; z-index:1005; overflow-y:auto; box-shadow:0 10px 40px rgba(0,0,0,0.9); padding:20px 20px 50vh 20px; text-align:center; backdrop-filter:blur(10px); scroll-behavior:smooth;">
         <div style="position:sticky; top:-20px; text-align:right; margin-bottom:20px; z-index:10;">
             <button onclick="toggleSyncLyrics()" style="background:rgba(0,0,0,0.5); border:1px solid #444; color:#fff; border-radius:50%; width:30px; height:30px; font-size:14px; cursor:pointer;">✕</button>
@@ -695,41 +695,30 @@
         // 🌟 통합 데이터 및 상태 관리
         let playlist = []; let currentIndex = 0; let isPlaying = false;
         let parsedLyrics = []; 
+        let errorCount = 0; // 🌟 3아웃 제도 부활!
 
         const mainAudio = document.getElementById('main-audio');
+        const heartbeatAudio = document.getElementById('heartbeat-audio'); // 🌟 지난주 전설의 심장박동 연결
         const btnPlay = document.getElementById('btn-play');
         const progressBar = document.getElementById('progress-bar');
         const timeCurrent = document.getElementById('time-current');
         const timeTotal = document.getElementById('time-total');
 
-        // 🌟 가장 잘 작동했던 무음 주파수 (크롬/네이버 잠금 해제 완벽버전)
-        let audioCtx;
         let isAudioUnlocked = false;
 
+        // 🌟 작주에 가장 잘 됐던 '오리지널 심장박동 잠금 해제' 함수
         function unlockAudioForMobile() {
             if (isAudioUnlocked) return;
-            isAudioUnlocked = true;
-
-            try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                audioCtx = new AudioContext();
-                
-                const gainNode = audioCtx.createGain();
-                gainNode.gain.value = 0.001; 
-                
-                const oscillator = audioCtx.createOscillator();
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(440, audioCtx.currentTime); 
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                oscillator.start(); 
-                
-                console.log("💓 고주파 심장박동 가동 완료!");
-                document.removeEventListener('touchstart', unlockAudioForMobile);
-                document.removeEventListener('click', unlockAudioForMobile);
-            } catch (err) {
-                console.log("Web Audio API 지원 안 함:", err);
+            if (heartbeatAudio) {
+                heartbeatAudio.play().then(() => {
+                    mainAudio.play().then(() => {
+                        mainAudio.pause();
+                        isAudioUnlocked = true;
+                        console.log("💓 지난주 전설의 오리지널 심장박동 가동 완료!");
+                        document.removeEventListener('touchstart', unlockAudioForMobile);
+                        document.removeEventListener('click', unlockAudioForMobile);
+                    }).catch(e => {});
+                }).catch(e => {});
             }
         }
         
@@ -796,10 +785,14 @@
                 updatePlaylistUI();
                 loadSyncLyrics(track.lyrics);
                 
-                // 🚨 네이버 스킵 방지: 음원 없으면 그냥 조용히 멈춤
+                // 🌟 불량 음원시 3번까지만 스킵 시도
                 if(!track.audio || track.audio.trim() === "" || track.audio === "undefined") {
-                    isPlaying = false; if(btnPlay) btnPlay.innerText = "▶";
-                    console.log("음원 파일이 없습니다.");
+                    errorCount++;
+                    if(errorCount >= 3) {
+                        isPlaying = false; if(btnPlay) btnPlay.innerText = "▶"; errorCount = 0;
+                    } else {
+                        setTimeout(() => playNextTrack(), 500); 
+                    }
                     return; 
                 }
                 
@@ -813,6 +806,7 @@
                 const playPromise = mainAudio.play();
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
+                        errorCount = 0; // 🌟 정상 재생되면 에러 카운터 초기화!
                         isPlaying = true;
                         if(btnPlay) btnPlay.innerText = "⏸";
 
@@ -828,9 +822,13 @@
                             navigator.mediaSession.setActionHandler('pause', () => togglePlayPause());
                         }
                     }).catch(e => {
-                        // 🚨 네이버 스킵 방지: 에러나면 무조건 정지!
-                        isPlaying = false; if(btnPlay) btnPlay.innerText = "▶"; 
-                        console.log("브라우저 차단 또는 재생 에러:", e);
+                        // 🌟 에러시 무조건 멈추지 않고, 3번까지만 스킵 시도
+                        errorCount++;
+                        if (errorCount >= 3) {
+                            isPlaying = false; if(btnPlay) btnPlay.innerText = "▶"; errorCount = 0;
+                        } else {
+                            setTimeout(() => playNextTrack(), 1000); 
+                        }
                     });
                 }
                 if (track.id && track.id !== "dummy") fetch('/play-count/' + track.id, { method: 'POST', keepalive: true }).catch(err => {});
@@ -883,15 +881,20 @@
                 mainAudio.currentTime = 0;
                 mainAudio.play().catch(e => { isPlaying = false; if(btnPlay) btnPlay.innerText = "▶"; });
             } else {
-                playNextTrack(); // 노래가 정상적으로 끝났을 때만 넘어감!
+                playNextTrack(); 
             }
         });
 
+        // 🌟 에러시 3번까지만 스킵 시도
         mainAudio.addEventListener('error', (e) => { 
-            isPlaying = false; if(btnPlay) btnPlay.innerText = "▶";
+            errorCount++;
+            if (errorCount >= 3) {
+                isPlaying = false; if(btnPlay) btnPlay.innerText = "▶"; errorCount = 0;
+            } else {
+                setTimeout(() => playNextTrack(), 1000); 
+            }
         });
 
-        // 🌟 사라졌던 클릭 실행 함수 완벽 복구 🌟
         function playSingleTrack(btnElement) {
             const tr = btnElement.closest('.music-item'); const audioUrl = tr.dataset.audio;
             if (!audioUrl || audioUrl === "undefined" || audioUrl.trim() === "") return alert("아직 음원이 제대로 업로드되지 않은 곡입니다!");
