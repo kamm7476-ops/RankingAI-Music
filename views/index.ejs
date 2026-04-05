@@ -694,8 +694,7 @@
 
         // 🌟 통합 데이터 및 상태 관리
         let playlist = []; let currentIndex = 0; let isPlaying = false;
-        let parsedLyrics = []; 
-        let consecutiveErrors = 0; // 네이버 무한 스킵 방어용 3아웃 카운터
+        let parsedLyrics = []; // 가사 저장용
 
         const mainAudio = document.getElementById('main-audio');
         const btnPlay = document.getElementById('btn-play');
@@ -801,14 +800,10 @@
                 updatePlaylistUI();
                 loadSyncLyrics(track.lyrics);
                 
-                // 3아웃 스킵 방어
+                // 🚨 스킵 기능 완전 삭제: 음원이 없으면 그냥 얌전히 정지!
                 if(!track.audio || track.audio.trim() === "" || track.audio === "undefined") {
-                    consecutiveErrors++;
-                    if (consecutiveErrors >= 3) {
-                        isPlaying = false; if(btnPlay) btnPlay.innerText = "▶"; consecutiveErrors = 0;
-                    } else {
-                        setTimeout(() => playNextTrack(), 500); 
-                    }
+                    isPlaying = false; if(btnPlay) btnPlay.innerText = "▶";
+                    console.log("음원 파일이 없습니다.");
                     return; 
                 }
                 
@@ -822,7 +817,6 @@
                 const playPromise = mainAudio.play();
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
-                        consecutiveErrors = 0; // 재생 성공시 에러 초기화
                         isPlaying = true;
                         if(btnPlay) btnPlay.innerText = "⏸";
 
@@ -838,13 +832,9 @@
                             navigator.mediaSession.setActionHandler('pause', () => togglePlayPause());
                         }
                     }).catch(e => {
-                        consecutiveErrors++;
-                        if (e.name === 'NotAllowedError' || consecutiveErrors >= 3) {
-                            isPlaying = false; if(btnPlay) btnPlay.innerText = "▶"; 
-                            if(consecutiveErrors >= 3) consecutiveErrors = 0;
-                        } else { 
-                            setTimeout(() => playNextTrack(), 1000); 
-                        }
+                        // 🚨 스킵 기능 완전 삭제: 재생 에러나면 무조건 정지! (다음 곡으로 넘어가지 않음)
+                        isPlaying = false; if(btnPlay) btnPlay.innerText = "▶"; 
+                        console.log("브라우저 차단 또는 재생 에러:", e);
                     });
                 }
                 if (track.id && track.id !== "dummy") fetch('/play-count/' + track.id, { method: 'POST', keepalive: true }).catch(err => {});
@@ -896,20 +886,17 @@
         mainAudio.addEventListener('ended', () => {
             if (isLoop) {
                 mainAudio.currentTime = 0;
-                mainAudio.play().catch(e => setTimeout(() => playNextTrack(), 1000));
+                mainAudio.play().catch(e => {
+                    isPlaying = false; if(btnPlay) btnPlay.innerText = "▶"; // 루프 에러시 정지
+                });
             } else {
-                playNextTrack(); 
+                playNextTrack(); // 🌟 노래가 '정상적으로 완벽하게 끝났을 때만' 다음 곡으로 넘어감!
             }
         });
 
         mainAudio.addEventListener('error', (e) => { 
-            consecutiveErrors++;
-            if (consecutiveErrors >= 3) {
-                isPlaying = false; if(btnPlay) btnPlay.innerText = "▶";
-                consecutiveErrors = 0;
-            } else {
-                setTimeout(() => playNextTrack(), 1000); 
-            }
+            // 🚨 스킵 기능 완전 삭제: 중간에 로딩 에러 나면 다음 곡으로 안 가고 정지!
+            isPlaying = false; if(btnPlay) btnPlay.innerText = "▶";
         });
 
         function playSingleTrack(btnElement) {
