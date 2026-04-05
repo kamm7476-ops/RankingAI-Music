@@ -568,7 +568,7 @@
                 <table class="music-list">
                     <% if (artists && artists.length > 0) { %>
                         <% artists.forEach(function(music, index) { %>
-                        <tr class="music-item" data-id="<%= music._id %>" data-title="<%= music.name %>" data-artist="<%= music.artist %>" data-cover="<%= music.imageUrl || 'https://via.placeholder.com/512/1a1a1a/ff5722?text=RANKING+AI' %>" data-audio="<%= music.audioUrl %>">
+                        <tr class="music-item" data-id="<%= music._id %>" data-title="<%= music.name %>" data-artist="<%= music.artist %>" data-cover="<%= music.imageUrl || 'https://via.placeholder.com/512/1a1a1a/ff5722?text=RANKING+AI' %>" data-audio="<%= music.audioUrl %>" data-lyrics="<%= encodeURIComponent(music.lyrics || '') %>">
                             <td class="check-col"><input type="checkbox" class="custom-checkbox song-check" value="<%= music._id %>"></td>
                             <td class="rank"><%= index + 1 %></td>
                             <td style="width: 80px;"><img src="<%= music.imageUrl || 'https://via.placeholder.com/512/1a1a1a/ff5722?text=RANKING+AI' %>" class="album-art"></td>
@@ -710,12 +710,23 @@
             </div>
         </div>
 
-      <div class="player-right-placeholder">
-            <button onclick="togglePlaylist()" style="background:none; border:none; color:#b3b3b3; font-size:22px; cursor:pointer;" title="재생목록 보기">💽</button>
+      <div class="player-right-placeholder" style="display:flex; gap:15px; align-items:center;">
+            <button onclick="toggleSyncLyrics()" style="background:none; border:none; color:#b3b3b3; font-size:20px; cursor:pointer; transition:0.2s;" title="실시간 가사 보기">🎤</button>
+            <button onclick="togglePlaylist()" style="background:none; border:none; color:#b3b3b3; font-size:22px; cursor:pointer; transition:0.2s;" title="재생목록 보기">💽</button>
         </div>
         
         <audio id="main-audio" style="display:none;" preload="auto" playsinline webkit-playsinline></audio>
-    </div> <div id="playlist-modal">
+    </div>
+
+    <div id="sync-lyrics-modal" style="display:none; position:fixed; bottom:90px; left:50%; transform:translateX(-50%); width:90%; max-width:400px; height:60vh; background:rgba(15, 16, 17, 0.95); border:1px solid #333; border-radius:15px; z-index:1005; overflow-y:auto; box-shadow:0 10px 40px rgba(0,0,0,0.9); padding:20px 20px 50vh 20px; text-align:center; backdrop-filter:blur(10px); scroll-behavior:smooth;">
+        <div style="position:sticky; top:-20px; text-align:right; margin-bottom:20px; z-index:10;">
+            <button onclick="toggleSyncLyrics()" style="background:rgba(0,0,0,0.5); border:1px solid #444; color:#fff; border-radius:50%; width:30px; height:30px; font-size:14px; cursor:pointer;">✕</button>
+        </div>
+        <div id="sync-lyrics-container" style="display:flex; flex-direction:column; gap:15px; font-size:16px; color:#777; transition:all 0.3s;">
+            </div>
+    </div>
+
+    <div id="playlist-modal">
         <div class="playlist-header">
             <strong style="color:#fff; font-size:14px;">현재 재생 목록</strong>
             <button onclick="togglePlaylist()" style="background:none; border:none; color:#aaa; font-size:18px; cursor:pointer; padding:0; line-height:1;">✕</button>
@@ -804,6 +815,8 @@
         if (musicForm) musicForm.addEventListener('submit', function(e) { if (hiddenInput && !hiddenInput.value) { e.preventDefault(); alert('장르를 선택해주세요!'); } });
 
         let playlist = []; let currentIndex = 0; let isPlaying = false;
+        let parsedLyrics = []; // 🌟 추가: 가사 저장용 변수
+
         const mainAudio = document.getElementById('main-audio');
         const heartbeatAudio = document.getElementById('heartbeat-audio'); 
         const btnPlay = document.getElementById('btn-play');
@@ -818,45 +831,30 @@
 
         function unlockAudioForMobile() {
             if (isAudioUnlocked) return;
-            
             try {
-                // 1. 사람 귀에 안 들리는 주파수 생성기 세팅
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
                 audioCtx = new AudioContext();
-                
-                // 2. 백그라운드에서도 안 죽게 빈 소리 계속 틀어놓기
                 oscillator = audioCtx.createOscillator();
                 const gainNode = audioCtx.createGain();
-                
-                gainNode.gain.value = 0; // 볼륨 0 (완벽한 무음)
+                gainNode.gain.value = 0;
                 oscillator.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
-                
-                oscillator.start(); // 무음 주파수 발사 시작!
-                
-                // 3. 메인 오디오도 한 번 깨워주기
+                oscillator.start();
                 mainAudio.play().then(() => {
                     mainAudio.pause();
                     isAudioUnlocked = true;
-                    console.log("💓 [강력 버전] 무음 주파수 가동! 네이버 앱에서도 안 끊깁니다.");
-                    
-                    // 한 번 성공하면 이벤트 지우기
                     document.removeEventListener('touchstart', unlockAudioForMobile);
                     document.removeEventListener('click', unlockAudioForMobile);
-                }).catch(e => console.log("메인 오디오 깨우기 대기중..."));
-                
+                }).catch(e => console.log("대기중..."));
             } catch (err) {
                 console.log("웹 오디오 API 지원 안함:", err);
             }
         }
         
-        // 유저가 화면을 만지는 순간 무음 주파수 발사!
         document.addEventListener('touchstart', unlockAudioForMobile, { passive: true });
         document.addEventListener('click', unlockAudioForMobile);
 
         function toggleAll(source) { document.querySelectorAll('.song-check').forEach(cb => cb.checked = source.checked); }
-
-        
 
         function togglePlayPause() {
             if (playlist.length === 0) return alert("재생할 곡을 선택해주세요!");
@@ -871,13 +869,51 @@
             }
         }
 
+        // 🌟 추가: 가사 모달 열기/닫기
+        function toggleSyncLyrics() {
+            const modal = document.getElementById('sync-lyrics-modal');
+            modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
+        }
+
+        // 🌟 추가: 가사 파싱해서 화면에 그리기
+        function loadSyncLyrics(rawLyrics) {
+            parsedLyrics = [];
+            const container = document.getElementById('sync-lyrics-container');
+            container.innerHTML = "";
+            
+            if (!rawLyrics || rawLyrics.trim() === "" || rawLyrics === "undefined") {
+                container.innerHTML = "<p style='color:#555; margin-top:50px;'>등록된 싱크 가사가 없습니다.</p>";
+                return;
+            }
+
+            const lines = decodeURIComponent(rawLyrics).split('\n');
+            const timeRegex = /\[(\d{2}):(\d{2}(?:\.\d{1,3})?)\](.*)/;
+            
+            lines.forEach(line => {
+                const match = line.match(timeRegex);
+                if (match) {
+                    const time = parseInt(match[1]) * 60 + parseFloat(match[2]);
+                    const text = match[3].trim() || "🎵";
+                    parsedLyrics.push({ time, text });
+                }
+            });
+
+            if (parsedLyrics.length > 0) {
+                parsedLyrics.forEach((lyric, idx) => {
+                    container.innerHTML += `<div id="sync-lyric-${idx}" class="sync-lyric-line" style="transition:0.3s; cursor:pointer;" onclick="mainAudio.currentTime=${lyric.time}; mainAudio.play();">${lyric.text}</div>`;
+                });
+            } else {
+                container.innerHTML = `<p style='color:#aaa; line-height:1.8; white-space:pre-wrap;'>${decodeURIComponent(rawLyrics).split('\n').join('<br>')}</p>`;
+            }
+        }
+
         function loadTrack(index) {
             if(index >= 0 && index < playlist.length) {
                 const track = playlist[index];
                 currentIndex = index; 
                 
-                // 곡이 바뀔 때마다 재생목록 UI 갱신
                 updatePlaylistUI();
+                loadSyncLyrics(track.lyrics); // 🌟 핵심: 노래 바뀔 때 가사도 불러오기!
                 
                 if(!track.audio || track.audio.trim() === "" || track.audio === "undefined") {
                     setTimeout(() => playNextTrack(), 500); 
@@ -908,7 +944,7 @@
                             navigator.mediaSession.setActionHandler('play', () => togglePlayPause());
                             navigator.mediaSession.setActionHandler('pause', () => togglePlayPause());
                         }
-                   }).catch(e => {
+                    }).catch(e => {
                         if (e.name === 'NotAllowedError') { 
                             isPlaying = false; if(btnPlay) btnPlay.innerText = "▶"; 
                         } else { 
@@ -938,6 +974,25 @@
                 if(secC < 10) secC = "0" + secC; timeCurrent.innerText = minC + ":" + secC;
                 let minD = Math.floor(duration / 60); let secD = Math.floor(duration % 60);
                 if(secD < 10) secD = "0" + secD; timeTotal.innerText = minD + ":" + secD;
+
+                // 🌟 핵심: 실시간 싱크 가사 하이라이트 및 스크롤 🌟
+                if (parsedLyrics.length > 0) {
+                    let activeIdx = -1;
+                    for (let i = 0; i < parsedLyrics.length; i++) {
+                        if (current >= parsedLyrics[i].time) activeIdx = i; else break;
+                    }
+                    document.querySelectorAll('.sync-lyric-line').forEach((el, i) => {
+                        if (i === activeIdx) {
+                            el.style.color = '#ff5722'; el.style.fontWeight = 'bold'; el.style.transform = 'scale(1.1)';
+                            const modal = document.getElementById('sync-lyrics-modal');
+                            if (modal.style.display === 'block') {
+                                modal.scrollTo({ top: el.offsetTop - modal.clientHeight / 2.5, behavior: 'smooth' });
+                            }
+                        } else {
+                            el.style.color = '#777'; el.style.fontWeight = 'normal'; el.style.transform = 'scale(1.0)';
+                        }
+                    });
+                }
             }
         });
 
@@ -955,16 +1010,17 @@
         mainAudio.addEventListener('error', (e) => { 
             setTimeout(() => playNextTrack(), 1000); 
         });
+
         function playSingleTrack(btnElement) {
             const tr = btnElement.closest('.music-item'); const audioUrl = tr.dataset.audio;
             if (!audioUrl || audioUrl === "undefined" || audioUrl.trim() === "") return alert("아직 음원이 제대로 업로드되지 않은 곡입니다!");
-            playlist = [{ id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: audioUrl }];
+            playlist = [{ id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: audioUrl, lyrics: tr.dataset.lyrics }]; // 가사(lyrics) 항목 추가됨!
             loadTrack(0);
         }
 
         function playAll() {
             const rows = document.querySelectorAll('.music-item');
-            playlist = Array.from(rows).map(tr => ({ id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio })).filter(t => t.audio && t.audio.trim() !== "" && t.audio !== "undefined");
+            playlist = Array.from(rows).map(tr => ({ id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio, lyrics: tr.dataset.lyrics })).filter(t => t.audio && t.audio.trim() !== "" && t.audio !== "undefined"); // 가사(lyrics) 항목 추가됨!
             if(playlist.length > 0) { currentIndex = 0; loadTrack(0); } else alert("재생 가능한 음원이 없습니다.");
         }
 
@@ -973,7 +1029,7 @@
             if(checkedBoxes.length === 0) return alert("재생할 곡을 먼저 체크해주세요!");
             playlist = Array.from(checkedBoxes).map(cb => {
                 const tr = cb.closest('.music-item');
-                return { id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio };
+                return { id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: tr.dataset.audio, lyrics: tr.dataset.lyrics }; // 가사(lyrics) 항목 추가됨!
             }).filter(t => t.audio && t.audio.trim() !== "" && t.audio !== "undefined");
             if(playlist.length > 0) { currentIndex = 0; loadTrack(0); } else alert("선택한 곡 중에 재생 가능한 음원이 없습니다.");
         }
