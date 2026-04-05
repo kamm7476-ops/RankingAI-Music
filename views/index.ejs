@@ -853,13 +853,10 @@
         // 유저가 화면을 만지는 순간 무음 주파수 발사!
         document.addEventListener('touchstart', unlockAudioForMobile, { passive: true });
         document.addEventListener('click', unlockAudioForMobile);
-                }).catch(e => {});
-            }).catch(e => {});
-        }
-        document.addEventListener('touchstart', unlockAudioForMobile, { passive: true });
-        document.addEventListener('click', unlockAudioForMobile);
 
         function toggleAll(source) { document.querySelectorAll('.song-check').forEach(cb => cb.checked = source.checked); }
+
+        
 
         function togglePlayPause() {
             if (playlist.length === 0) return alert("재생할 곡을 선택해주세요!");
