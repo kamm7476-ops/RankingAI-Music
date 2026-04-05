@@ -944,14 +944,13 @@
             }
         });
 
-        // 🌟 알 수 없는 로딩 에러 시에도 3아웃 제도 적용
+        // 🌟 [수정완료] 재생 중 끊김/에러 발생 시 멋대로 다음 곡으로 넘어가지 않음!
         mainAudio.addEventListener('error', (e) => { 
-            errorCount++;
-            if (errorCount >= 3) {
-                isPlaying = false; if(btnPlay) btnPlay.innerText = "▶"; errorCount = 0;
-            } else {
-                setTimeout(() => playNextTrack(), 1000); 
-            }
+            console.log("오디오 재생 중 에러 또는 네트워크 끊김 발생");
+            // 에러가 나면 맘대로 넘어가지 않고, 그냥 얌전히 일시정지 상태로 대기합니다.
+            errorCount = 0;
+            isPlaying = false; 
+            if(btnPlay) btnPlay.innerText = "▶"; 
         });
 
         function playSingleTrack(btnElement) {
