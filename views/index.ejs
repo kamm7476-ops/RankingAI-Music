@@ -909,9 +909,12 @@
                             navigator.mediaSession.setActionHandler('pause', () => togglePlayPause());
                         }
                    }).catch(e => {
-    isPlaying = false; 
-    if(btnPlay) btnPlay.innerText = "▶"; 
-});
+                        if (e.name === 'NotAllowedError') { 
+                            isPlaying = false; if(btnPlay) btnPlay.innerText = "▶"; 
+                        } else { 
+                            setTimeout(() => playNextTrack(), 1000); 
+                        }
+                    });
                 }
                 if (track.id && track.id !== "dummy") fetch('/play-count/' + track.id, { method: 'POST', keepalive: true }).catch(err => {});
             }
@@ -950,9 +953,8 @@
         });
 
         mainAudio.addEventListener('error', (e) => { 
-    isPlaying = false; 
-    if(btnPlay) btnPlay.innerText = "▶"; 
-});
+            setTimeout(() => playNextTrack(), 1000); 
+        });
         function playSingleTrack(btnElement) {
             const tr = btnElement.closest('.music-item'); const audioUrl = tr.dataset.audio;
             if (!audioUrl || audioUrl === "undefined" || audioUrl.trim() === "") return alert("아직 음원이 제대로 업로드되지 않은 곡입니다!");
