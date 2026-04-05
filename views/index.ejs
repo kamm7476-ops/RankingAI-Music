@@ -694,7 +694,7 @@
 
         // 🌟 통합 데이터 및 상태 관리
         let playlist = []; let currentIndex = 0; let isPlaying = false;
-        let parsedLyrics = []; // 가사 저장용
+        let parsedLyrics = []; 
 
         const mainAudio = document.getElementById('main-audio');
         const btnPlay = document.getElementById('btn-play');
@@ -702,13 +702,14 @@
         const timeCurrent = document.getElementById('time-current');
         const timeTotal = document.getElementById('time-total');
 
-        // 🌟 완벽한 무음 주파수 (크롬/네이버 잠금 해제용)
+        // 🌟 완벽한 무음 주파수 (크롬/네이버 잠금 해제용 - 충돌 완벽 제거버전!)
         let audioCtx;
-        let silentOsc;
         let isAudioUnlocked = false;
 
         function unlockAudioForMobile() {
             if (isAudioUnlocked) return;
+            isAudioUnlocked = true; // 🌟 들어오자마자 바로 잠금 해제 처리! (중복 실행 방지)
+
             try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
                 audioCtx = new AudioContext();
@@ -724,13 +725,9 @@
                 gainNode.connect(audioCtx.destination);
                 oscillator.start(); 
                 
-                mainAudio.play().then(() => {
-                    mainAudio.pause();
-                    isAudioUnlocked = true;
-                    console.log("💓 고주파 심장박동 가동 완료!");
-                    document.removeEventListener('touchstart', unlockAudioForMobile);
-                    document.removeEventListener('click', unlockAudioForMobile);
-                }).catch(e => console.log("오디오 대기 중..."));
+                console.log("💓 고주파 심장박동 가동 완료! (충돌 제거됨)");
+                document.removeEventListener('touchstart', unlockAudioForMobile);
+                document.removeEventListener('click', unlockAudioForMobile);
             } catch (err) {
                 console.log("Web Audio API 지원 안 함:", err);
             }
@@ -832,7 +829,7 @@
                             navigator.mediaSession.setActionHandler('pause', () => togglePlayPause());
                         }
                     }).catch(e => {
-                        // 🚨 스킵 기능 완전 삭제: 재생 에러나면 무조건 정지! (다음 곡으로 넘어가지 않음)
+                        // 🚨 에러나면 무조건 얌전히 정지! (스킵 폭주 방지)
                         isPlaying = false; if(btnPlay) btnPlay.innerText = "▶"; 
                         console.log("브라우저 차단 또는 재생 에러:", e);
                     });
@@ -859,6 +856,45 @@
                 if(secC < 10) secC = "0" + secC; timeCurrent.innerText = minC + ":" + secC;
                 let minD = Math.floor(duration / 60); let secD = Math.floor(duration % 60);
                 if(secD < 10) secD = "0" + secD; timeTotal.innerText = minD + ":" + secD;
+
+                // 싱크 가사 업데이트
+                if (parsedLyrics.length > 0) {
+                    let activeIdx = -1;
+                    for (let i = 0; i < parsedLyrics.length; i++) {
+                        if (current >= parsedLyrics[i].time) activeIdx = i; else break;
+                    }
+                    document.querySelectorAll('.sync-lyric-line').forEach((el, i) => {
+                        if (i === activeIdx) {
+                            el.style.color = '#ff5722'; el.style.fontWeight = 'bold'; el.style.transform = 'scale(1.1)';
+                            const modal = document.getElementById('sync-lyrics-modal');
+                            if (modal && modal.style.display === 'block') {
+                                modal.scrollTo({ top: el.offsetTop - modal.clientHeight / 2.5, behavior: 'smooth' });
+                            }
+                        } else {
+                            el.style.color = '#777'; el.style.fontWeight = 'normal'; el.style.transform = 'scale(1.0)';
+                        }
+                    });
+                }
+            }
+        });
+
+        progressBar.addEventListener('input', () => { if (mainAudio.duration) mainAudio.currentTime = (progressBar.value / 100) * mainAudio.duration; });
+
+        mainAudio.addEventListener('ended', () => {
+            if (isLoop) {
+                mainAudio.currentTime = 0;
+                mainAudio.play().catch(e => {
+                    isPlaying = false; if(btnPlay) btnPlay.innerText = "▶"; // 루프 에러시 정지
+                });
+            } else {
+                playNextTrack(); // 노래가 정상적으로 끝났을 때만 다음 곡!
+            }
+        });
+
+        mainAudio.addEventListener('error', (e) => { 
+            // 🚨 중간에 에러나면 무조건 정지!
+            isPlaying = false; if(btnPlay) btnPlay.innerText = "▶";
+        });
 
                 // 싱크 가사 업데이트
                 if (parsedLyrics.length > 0) {
