@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
+   <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ranking AI - AI Music Chart & Community (랭킹 AI / 音楽チャート / 音乐排行榜)</title>
-    <meta name="description" content="Global AI music rankings. Discover and share the best AI-generated music. 랭킹 AI - 글로벌 인공지능 음악 차트. AI音楽ランキング. AI音乐排行榜.">
-    <meta name="keywords" content="Ranking AI, AI Music, AI Chart, 랭킹AI, AI음악, AI音楽, AI楽曲, AI音乐, AI排行榜, Suno AI, Udio AI">
-    <meta property="og:title" content="Ranking AI - World's Best AI Music Chart">
-    <meta property="og:description" content="Check out the hottest AI music from around the world!">
+    
+    <title>Ranking AI Music (RAM) - 글로벌 랭킹AI뮤직 차트</title>
+    <meta name="description" content="전 세계의 핫한 AI 음악이 모이는 곳, 랭킹AI뮤직(RAM). 나만의 AI 음악을 차트에 올리고 사람들과 공유해 보세요!">
+    <meta name="keywords" content="Ranking AI Music, RAM, 랭킹AI뮤직, 랭킹AI, AI음악, AI음악차트, AI음악커뮤니티, Suno AI, Udio AI, AI작곡">
+    <meta property="og:title" content="Ranking AI Music (RAM) - 글로벌 AI 음악 차트">
+    <meta property="og:description" content="지금 가장 핫한 AI 음악을 랭킹AI뮤직에서 확인하세요!">
     <meta property="og:url" content="https://rankingaimusic.com">
-    <meta name="content-language" content="en, ko, ja, zh">  
+    <meta name="content-language" content="ko, en">  
+    
     <meta name="naver-site-verification" content="34a9f6198c9f271e3250e3d11cabcb17c24a7754" />
     <meta name="google-site-verification" content="hGmKKbn9hQDQ2viDIRcHFRPeIlRIZpkTZfFjgKb_sjA" />
     <style>
@@ -713,8 +715,7 @@
         </div>
         
         <audio id="main-audio" style="display:none;" preload="auto" playsinline webkit-playsinline></audio>
-        <audio id="heartbeat-audio" loop playsinline webkit-playsinline style="display:none;" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
-    </div>
+        <audio id="heartbeat-audio" loop playsinline 
 
     <div id="playlist-modal">
         <div class="playlist-header">
@@ -812,16 +813,48 @@
         const timeCurrent = document.getElementById('time-current');
         const timeTotal = document.getElementById('time-total');
 
+        // 🌟 강력한 무음 주파수(Web Audio API) 심장박동 기술 🌟
+        let audioCtx;
+        let oscillator;
         let isAudioUnlocked = false;
+
         function unlockAudioForMobile() {
             if (isAudioUnlocked) return;
-            heartbeatAudio.play().then(() => {
+            
+            try {
+                // 1. 사람 귀에 안 들리는 주파수 생성기 세팅
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+                
+                // 2. 백그라운드에서도 안 죽게 빈 소리 계속 틀어놓기
+                oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                gainNode.gain.value = 0; // 볼륨 0 (완벽한 무음)
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                oscillator.start(); // 무음 주파수 발사 시작!
+                
+                // 3. 메인 오디오도 한 번 깨워주기
                 mainAudio.play().then(() => {
                     mainAudio.pause();
                     isAudioUnlocked = true;
-                    console.log("💓 심장박동 가동 완료! 이제 크롬이 잠들지 않습니다.");
+                    console.log("💓 [강력 버전] 무음 주파수 가동! 네이버 앱에서도 안 끊깁니다.");
+                    
+                    // 한 번 성공하면 이벤트 지우기
                     document.removeEventListener('touchstart', unlockAudioForMobile);
                     document.removeEventListener('click', unlockAudioForMobile);
+                }).catch(e => console.log("메인 오디오 깨우기 대기중..."));
+                
+            } catch (err) {
+                console.log("웹 오디오 API 지원 안함:", err);
+            }
+        }
+        
+        // 유저가 화면을 만지는 순간 무음 주파수 발사!
+        document.addEventListener('touchstart', unlockAudioForMobile, { passive: true });
+        document.addEventListener('click', unlockAudioForMobile);
                 }).catch(e => {});
             }).catch(e => {});
         }
