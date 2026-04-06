@@ -926,7 +926,7 @@
                 mainAudio.src = track.audio.trim();
                 mainAudio.load(); 
                 
-                const playPromise = mainAudio.play();
+               const playPromise = mainAudio.play();
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
                         errorCount = 0; // 🌟 정상 재생 시 카운터 리셋
@@ -945,14 +945,11 @@
                             navigator.mediaSession.setActionHandler('pause', () => togglePlayPause());
                         }
                     }).catch(e => {
-                        // 🌟 로딩 지연 대응 (3번까지만 인내심 있게 스킵)
-                        errorCount++;
-                        if (errorCount >= 3) {
-                            isPlaying = false; if(btnPlay) btnPlay.innerText = "▶"; errorCount = 0;
-                            console.error("음원 재생을 브라우저가 막았거나 파일에 문제가 있습니다.");
-                        } else {
-                            setTimeout(() => playNextTrack(), 1000); 
-                        }
+                        // 🚨 [핵심 수정] 1초 만에 맘대로 다음 곡으로 스킵해버리는 코드를 삭제했습니다!
+                        // 로딩이 좀 걸려도 멋대로 넘기지 않고 얌전히 기다립니다.
+                        console.log("음원 로딩 지연 또는 재생 대기 중...", e);
+                        isPlaying = false; 
+                        if(btnPlay) btnPlay.innerText = "▶"; 
                     });
                 }
                 if (track.id && track.id !== "dummy") fetch('/play-count/' + track.id, { method: 'POST', keepalive: true }).catch(err => {});
