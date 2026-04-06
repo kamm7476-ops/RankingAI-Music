@@ -375,15 +375,27 @@
                             <button type="button" class="genre-btn" data-genre="클래식/재즈">클래식/재즈</button>
                             <button type="button" class="genre-btn" data-genre="뉴에이지">뉴에이지</button>
                         </div>
-                            <div id="vibe-container" style="margin-top: 15px; padding: 12px; background: #0b0c0d; border-radius: 8px; border: 1px solid #333; display: none;">
-                            <span style="font-size: 12px; color: #ff5722; display: block; margin-bottom: 8px; font-weight: bold;">✨ 어떤 매장/상황에 어울리나요? (태그 선택)</span>
-                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                                <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="cafe"> ☕ 카페</label>
-                                <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="study"> 💻 집중/스터디</label>
-                                <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="healing"> 🌿 힐링/명상</label>
-                                <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="fitness"> 🏋️ 헬스/운동</label>
-                                <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="hotel"> 🏙️ 호텔/라운지</label>
-                         </div>
+                            <div id="vibe-container" style="margin-top: 15px; padding: 12px; background: #1a1b1c; border-radius: 8px; border: 1px solid #333; display: none;">
+    <span style="font-size: 12px; color: #ff5722; display: block; margin-bottom: 8px; font-weight: bold;">✨ 어떤 매장/상황에 어울리나요? (태그 선택)</span>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+        <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="cafe"> ☕ 카페</label>
+        <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="study"> 💻 집중/스터디</label>
+        <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="healing"> 🌿 힐링/명상</label>
+        <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="fitness"> 🏋️ 헬스/운동</label>
+        <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="hotel"> 🏙️ 호텔/라운지</label>
+    </div>
+</div>
+<input type="hidden" name="vibe" id="hiddenVibeInput">
+
+<div class="input-row" style="margin-top:15px;">
+    <input type="text" name="aiTool" placeholder="사용 프로그램 (예: Suno)" required>
+    <input type="text" name="realName" placeholder="업로더 실명 (비공개)" required>
+</div>
+<textarea name="lyrics" placeholder="가사를 시간과 함께 입력하세요. (예: [00:15] 첫 번째 가사)"></textarea>
+<div class="input-row">
+    <div style="flex:1;"><span style="font-size: 12px; color: #ff5722; display: block; margin-bottom: 5px;">🖼️ 커버 이미지 (선택)</span><input type="file" name="image" accept="image/*" class="file-upload"></div>
+    <div style="flex:1;"><span style="font-size: 12px; color: #ff5722; display: block; margin-bottom: 5px;">🎵 MP3 음원 (필수)</span><input type="file" name="audio" accept="audio/*" class="file-upload" required></div>
+</div>
                         <input type="hidden" name="vibe" id="hiddenVibeInput">
                         <input type="hidden" name="genre" id="hiddenGenreInput" required>
                         <input type="hidden" name="genre" id="hiddenGenreInput" required>
