@@ -110,10 +110,11 @@
         .lyrics-line { padding: 5px 0; display: flex; gap: 8px; cursor: pointer; }
         .lyrics-time { color: #ff5722; font-weight: bold; width: 45px; text-align: right; }
 
-        /* 🌟 RAM 스타일 하단 플레이어 */
+        /* 🌟 RAM 스타일 하단 플레이어 (오렌지 라인 + 한글 버튼) 🌟 */
         .bottom-player-bar { 
             position: fixed; bottom: 0; left: 0; width: 100%; 
             background: #181818; 
+            /* 🟠 대표님이 요청하신 오렌지색 얇은 라인 */
             border-top: 2px solid #ff5722; 
             padding: 12px 24px; box-sizing: border-box; 
             display: grid; grid-template-columns: 1fr 2fr 1fr; align-items: center; 
@@ -161,19 +162,7 @@
             color: #fff; border-color: #ff5722; background: rgba(255, 87, 34, 0.1);
         }
 
-        /* 🚨 재생목록 창 우측 사이드에 완벽 고정! */
-        #playlist-modal {
-            display: none; position: fixed; bottom: 90px; right: 20px; 
-            width: 320px; max-height: 400px; background: #181818; 
-            border: 1px solid #ff5722; border-radius: 12px; 
-            z-index: 999999 !important; overflow-y: auto; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-        }
-        #playlist-modal::-webkit-scrollbar { width: 6px; }
-        #playlist-modal::-webkit-scrollbar-track { background: #181818; }
-        #playlist-modal::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
-
-        /* 🚨 모바일 디자인 (꼬인 부분 깔끔하게 정리) */
+        /* 🚨 모바일 디자인 핵심 수정 구역 🚨 */
         @media (max-width: 900px) {
             .input-row { flex-direction: column; align-items: stretch; gap: 12px; }
             .input-row > div { width: 100%; box-sizing: border-box; }
@@ -235,7 +224,6 @@
         .popup-content { color: #ccc; font-size: 15px; line-height: 1.6; margin-bottom: 25px; white-space: pre-wrap; }
         .popup-close-btn { background: #ff5722; color: #000; font-weight: bold; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; }
         .popup-close-today { background: none; border: none; color: #888; text-decoration: underline; margin-top: 15px; cursor: pointer; font-size: 13px; }
-
     </style>
 </head>
 <body>
@@ -619,13 +607,12 @@
         <audio id="main-audio" style="display:none;" preload="auto" playsinline webkit-playsinline></audio>
         <audio id="heartbeat-audio" loop playsinline webkit-playsinline style="display:none;" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
     </div>    
-    
     <div id="sync-lyrics-modal" style="display:none; position:fixed; bottom:90px; left:50%; transform:translateX(-50%); width:90%; max-width:400px; height:60vh; background:rgba(15, 16, 17, 0.95); border:1px solid #333; border-radius:15px; z-index:1005; overflow-y:auto; box-shadow:0 10px 40px rgba(0,0,0,0.9); padding:20px 20px 50vh 20px; text-align:center; backdrop-filter:blur(10px); scroll-behavior:smooth;">
         <div style="position:sticky; top:-20px; text-align:right; margin-bottom:20px; z-index:10;">
             <button type="button" onclick="toggleSyncLyrics()" style="background:rgba(0,0,0,0.5); border:1px solid #444; color:#fff; border-radius:50%; width:30px; height:30px; font-size:14px; cursor:pointer;">✕</button>
         </div>
         <div id="sync-lyrics-container" style="display:flex; flex-direction:column; gap:15px; font-size:16px; color:#777; transition:all 0.3s;">
-        </div>
+            </div>
     </div>
 
     <div id="playlist-modal" style="display: none; position: fixed; bottom: 90px; right: 20px; width: 320px; max-height: 400px; background: #181818; border: 1px solid #ff5722; border-radius: 12px; z-index: 999999 !important; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
@@ -724,8 +711,8 @@
 
         const genreBtns = document.querySelectorAll('.genre-btn');
         const hiddenInput = document.getElementById('hiddenGenreInput');
-        const vibeContainer = document.getElementById('vibe-container'); 
-        const hiddenVibeInput = document.getElementById('hiddenVibeInput'); 
+        const vibeContainer = document.getElementById('vibe-container'); // 👈 태그 박스 찾기
+        const hiddenVibeInput = document.getElementById('hiddenVibeInput'); // 👈 태그 값 담을 곳 찾기
 
         genreBtns.forEach(btn => {
             btn.addEventListener('click', function() { 
@@ -734,16 +721,19 @@
                 const selectedGenre = this.getAttribute('data-genre');
                 if(hiddenInput) hiddenInput.value = selectedGenre;
 
+                // 🌟 [추가됨] 뉴에이지를 선택했을 때만 상황별 태그 창을 보여줍니다!
                 if (selectedGenre === '뉴에이지') {
                     if(vibeContainer) vibeContainer.style.display = 'block';
                 } else {
                     if(vibeContainer) vibeContainer.style.display = 'none';
+                    // 다른 장르일 땐 체크된 태그들 싹 지우기
                     document.querySelectorAll('.vibe-check').forEach(cb => cb.checked = false);
                     if(hiddenVibeInput) hiddenVibeInput.value = "";
                 }
             });
         });
 
+        // 🌟 [추가됨] 체크박스 선택할 때마다 서버로 보낼 데이터를 업데이트합니다.
         document.addEventListener('change', function(e) {
             if (e.target.classList.contains('vibe-check')) {
                 const checkedValues = Array.from(document.querySelectorAll('.vibe-check:checked')).map(cb => cb.value);
@@ -773,44 +763,49 @@
         const timeCurrent = document.getElementById('time-current');
         const timeTotal = document.getElementById('time-total');
 
-        // 🌟 2. [최강 버전] 21,000Hz 강력 초음파 + 오리지널 심장박동(Base64) 동시 타격!
+        // 🚨 [초강력 업그레이드] 21,000Hz 초음파 + 오리지널 심장박동 완벽 가동 로직
         let audioCtx;
         let isAudioUnlocked = false;
 
-        function unlockAudioForMobile() {
-            if (isAudioUnlocked) return;
+        function initSuperUltrasonic() {
+            if (isAudioUnlocked) {
+                // 이미 풀렸어도 AudioContext가 잠들었으면 다시 깨움
+                if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+                return;
+            }
             isAudioUnlocked = true;
 
             try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
                 audioCtx = new AudioContext();
                 
+                // 1. 아주 강력한 고주파 (21000Hz) 파워 맥스 (1.0)
                 const gainNode = audioCtx.createGain();
-                gainNode.gain.value = 0.5; // 👈 확실한 인식(0.5)
+                gainNode.gain.value = 1.0; 
                 
                 const oscillator = audioCtx.createOscillator();
                 oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(21000, audioCtx.currentTime); // 👈 21,000Hz 귀에 안들리는 초음파
+                oscillator.frequency.setValueAtTime(21000, audioCtx.currentTime); 
                 
                 oscillator.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
                 oscillator.start(); 
-            } catch (err) { console.log("Web Audio API 지원 안 함:", err); }
-
-            if (heartbeatAudio) {
-                heartbeatAudio.volume = 0.1;
-                heartbeatAudio.play().catch(e => console.log("심장박동 대기 중..."));
-            }
-
-            console.log("💓 [최강 버전] 21,000Hz 초음파 + Base64 심장박동 동시 가동 완료!");
-            document.removeEventListener('touchstart', unlockAudioForMobile);
-            document.removeEventListener('click', unlockAudioForMobile);
+                
+                // 2. 백그라운드 무음 루프 (심장박동) 강제 시작
+                if (heartbeatAudio) {
+                    heartbeatAudio.volume = 0.5;
+                    heartbeatAudio.play().catch(e => console.log("Heartbeat play blocked, but ultrasonic is active."));
+                }
+                
+                console.log("🚀 [초강력 방어모드] 21,000Hz 고주파 + 심장박동 완벽 가동 완료!");
+            } catch (err) { console.error("Web Audio API 지원 안 함:", err); }
         }
         
-        document.addEventListener('touchstart', unlockAudioForMobile, { passive: true });
-        document.addEventListener('click', unlockAudioForMobile);
+        // 화면 터치/클릭 시마다 무조건 초음파 엔진 깨우기
+        document.addEventListener('touchstart', initSuperUltrasonic, { passive: true });
+        document.addEventListener('click', initSuperUltrasonic);
 
-        // 🌟 [추가/수정] 오디오가 플레이될 때 초음파와 심장박동이 잠들지 않도록 확실히 깨움
+        // 🌟 오디오 플레이 시에도 엔진이 죽지 않게 계속 깨움
         mainAudio.addEventListener('play', () => {
             if (audioCtx && audioCtx.state === 'suspended') {
                 audioCtx.resume();
@@ -835,6 +830,43 @@
             }
         }
 
+        function toggleSyncLyrics() {
+            const modal = document.getElementById('sync-lyrics-modal');
+            if(modal) modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function loadSyncLyrics(rawLyrics) {
+            parsedLyrics = [];
+            const container = document.getElementById('sync-lyrics-container');
+            if(!container) return;
+            container.innerHTML = "";
+            
+            if (!rawLyrics || rawLyrics.trim() === "" || rawLyrics === "undefined" || rawLyrics === "null") {
+                container.innerHTML = "<p style='color:#555; margin-top:50px;'>등록된 싱크 가사가 없습니다.</p>";
+                return;
+            }
+
+            const lines = decodeURIComponent(rawLyrics).split('\n');
+            const timeRegex = /\[(\d{2}):(\d{2}(?:\.\d{1,3})?)\](.*)/;
+            
+            lines.forEach(line => {
+                const match = line.match(timeRegex);
+                if (match) {
+                    const time = parseInt(match[1]) * 60 + parseFloat(match[2]);
+                    const text = match[3].trim() || "🎵";
+                    parsedLyrics.push({ time, text });
+                }
+            });
+
+            if (parsedLyrics.length > 0) {
+                parsedLyrics.forEach((lyric, idx) => {
+                    container.innerHTML += `<div id="sync-lyric-${idx}" class="sync-lyric-line" style="transition:0.3s; cursor:pointer; padding:5px 0;" onclick="mainAudio.currentTime=${lyric.time}; mainAudio.play();">${lyric.text}</div>`;
+                });
+            } else {
+                container.innerHTML = `<p style='color:#aaa; line-height:1.8; white-space:pre-wrap;'>${decodeURIComponent(rawLyrics).split('\n').join('<br>')}</p>`;
+            }
+        }
+
         function loadTrack(index) {
             if(index >= 0 && index < playlist.length) {
                 const track = playlist[index];
@@ -856,7 +888,8 @@
                 document.getElementById('main-player-artist').innerText = track.artist;
                 document.getElementById('main-player-cover').src = track.cover || '/logo.png';
                 
-                mainAudio.src = track.audio;
+                // URL에 공백이 있으면 에러나므로 확실히 제거 (trim)
+                mainAudio.src = track.audio.trim();
                 mainAudio.load(); 
                 
                 const playPromise = mainAudio.play();
@@ -882,6 +915,7 @@
                         errorCount++;
                         if (errorCount >= 3) {
                             isPlaying = false; if(btnPlay) btnPlay.innerText = "▶"; errorCount = 0;
+                            console.error("음원 재생을 브라우저가 막았거나 파일에 문제가 있습니다.");
                         } else {
                             setTimeout(() => playNextTrack(), 1000); 
                         }
@@ -968,7 +1002,7 @@
 
         // 🌟 [수정완료] 재생 중 끊김/에러 발생 시 멋대로 다음 곡으로 넘어가지 않음!
         mainAudio.addEventListener('error', (e) => { 
-            console.log("오디오 재생 중 에러 또는 네트워크 끊김 발생");
+            console.error("오디오 재생 중 에러 또는 네트워크 끊김 발생", mainAudio.error);
             // 에러가 나면 맘대로 넘어가지 않고, 그냥 얌전히 일시정지 상태로 대기합니다.
             errorCount = 0;
             isPlaying = false; 
