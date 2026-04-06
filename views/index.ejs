@@ -110,12 +110,10 @@
         .lyrics-line { padding: 5px 0; display: flex; gap: 8px; cursor: pointer; }
         .lyrics-time { color: #ff5722; font-weight: bold; width: 45px; text-align: right; }
 
-       /* 🌟 RAM 스타일 하단 플레이어 (오렌지 라인 + 한글 버튼) 🌟 */
+        /* 🌟 RAM 스타일 하단 플레이어 (오렌지 라인 + 한글 버튼) 🌟 */
         .bottom-player-bar { 
             position: fixed; bottom: 0; left: 0; width: 100%; 
-            background: #181818; 
-            /* 🟠 대표님이 요청하신 오렌지색 얇은 라인 */
-            border-top: 2px solid #ff5722; 
+            background: #181818; border-top: 2px solid #ff5722; 
             padding: 12px 24px; box-sizing: border-box; 
             display: grid; grid-template-columns: 1fr 2fr 1fr; align-items: center; 
             z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); 
@@ -162,7 +160,7 @@
             color: #fff; border-color: #ff5722; background: rgba(255, 87, 34, 0.1);
         }
 
-        /* 🚨 모바일 디자인 핵심 수정 구역 (대표님의 기존 소중한 코드들) 🚨 */
+        /* 🚨 모바일 디자인 핵심 수정 구역 🚨 */
         @media (max-width: 900px) {
             .input-row { flex-direction: column; align-items: stretch; gap: 12px; }
             .input-row > div { width: 100%; box-sizing: border-box; }
@@ -217,23 +215,6 @@
             #playlist-modal { bottom: 140px; right: 10px; width: calc(100% - 20px); max-height: 50vh; }
         }
 
-            /* 모바일 플레이어 */
-            .bottom-player-bar { display: flex; flex-direction: column; padding: 10px 15px; gap: 10px; border-radius: 0; margin: 0; width: 100%; max-width: 100vw; bottom: 0; left: 0; right: 0; border-top: 1px solid #282828; background: #181818; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); box-sizing: border-box; }
-            .player-toggle-tab { display: block; top: -28px; right: 10px; padding: 4px 12px; font-size: 11px; border-radius: 8px 8px 0 0; } 
-            .player-info { width: 100%; max-width: calc(100% - 40px); justify-content: flex-start; gap: 12px; }
-            .player-cover { width: 45px; height: 45px; border-radius: 6px; }
-            .player-controls-wrapper { width: 100%; flex-direction: column; gap: 6px; margin: 0; }
-            .player-buttons { gap: 30px; justify-content: center; width: 100%; }
-            #btn-prev, #id-btn-loop, #btn-next { display: block !important; font-size: 18px; }
-            .player-buttons .play-btn { width: 40px; height: 40px; font-size: 18px; padding-left: 3px; }
-            .progress-area { position: static; width: 100%; height: auto; gap: 10px; }
-            #time-current, #time-total { display: block !important; font-size: 10px; }
-            #progress-bar { height: 4px; border-radius: 2px; background: #4d4d4d; }
-            #progress-bar::-webkit-slider-thumb { display: block !important; width: 10px; height: 10px; }
-            .player-right-placeholder { position: absolute; top: 15px; right: 15px; display: block !important; }
-            #playlist-modal { bottom: 140px; right: 10px; width: calc(100% - 20px); max-height: 50vh; }
-        }
-
         /* 🌟 팝업창 전용 디자인 */
         .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .popup-box { background: #161718; border: 2px solid #ff5722; border-radius: 15px; padding: 30px; width: 400px; max-width: 90%; box-shadow: 0 10px 30px rgba(255,87,34,0.3); text-align: center; position: relative; }
@@ -241,14 +222,13 @@
         .popup-content { color: #ccc; font-size: 15px; line-height: 1.6; margin-bottom: 25px; white-space: pre-wrap; }
         .popup-close-btn { background: #ff5722; color: #000; font-weight: bold; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; }
         .popup-close-today { background: none; border: none; color: #888; text-decoration: underline; margin-top: 15px; cursor: pointer; font-size: 13px; }
+        
         /* 🚨 [추가!] 재생목록 창을 무조건 맨 앞으로 끌어올리는 강력한 마법 */
         #playlist-modal {
             z-index: 999999 !important;
         }
 
     </style>
-
-   </style>
 </head>
 <body>
 
@@ -388,7 +368,9 @@
                             <button type="button" class="genre-btn" data-genre="일렉트로니카">일렉트로니카</button>
                             <button type="button" class="genre-btn" data-genre="클래식/재즈">클래식/재즈</button>
                             <button type="button" class="genre-btn" data-genre="뉴에이지">뉴에이지</button>
-                       </div> <div id="vibe-container" style="margin-top: 15px; padding: 12px; background: #1a1b1c; border-radius: 8px; border: 1px solid #333; display: none;">
+                        </div> 
+                        
+                        <div id="vibe-container" style="margin-top: 15px; padding: 12px; background: #1a1b1c; border-radius: 8px; border: 1px solid #333; display: none;">
                             <span style="font-size: 12px; color: #ff5722; display: block; margin-bottom: 8px; font-weight: bold;">✨ 어떤 매장/상황에 어울리나요? (태그 선택)</span>
                             <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                                 <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="cafe"> ☕ 카페</label>
@@ -624,9 +606,8 @@
         </div>
 
       <div class="player-right-placeholder">
-            <button onclick="toggleSyncLyrics()" title="실시간 가사 보기">가사</button>
-            
-            <button onclick="togglePlaylist()" title="재생목록 보기">목록</button>
+            <button type="button" onclick="toggleSyncLyrics()">가사</button>
+            <button type="button" onclick="togglePlaylist()">목록</button>
       </div>
         
         <audio id="main-audio" style="display:none;" preload="auto" playsinline webkit-playsinline></audio>
@@ -640,8 +621,8 @@
             </div>
     </div>
 
-    <div id="playlist-modal">
-        <div class="playlist-header">
+    <div id="playlist-modal" style="display: none; position: fixed; bottom: 90px; right: 20px; width: 320px; max-height: 400px; background: #181818; border: 1px solid #ff5722; border-radius: 12px; z-index: 999999; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+        <div class="playlist-header" style="padding: 15px; border-bottom: 1px solid #282828; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: #181818; z-index: 10;">
             <strong style="color:#fff; font-size:14px;">현재 재생 목록</strong>
             <button onclick="togglePlaylist()" style="background:none; border:none; color:#aaa; font-size:18px; cursor:pointer; padding:0; line-height:1;">✕</button>
         </div>
@@ -701,17 +682,19 @@
         }
 
         function togglePlaylist() {
-    const modal = document.getElementById('playlist-modal');
-    if (modal.style.display === 'block') {
-        modal.style.display = 'none';
-    } else {
-        updatePlaylistUI(); // 목록 내용을 새로고침하는 함수
-        modal.style.display = 'block';
-    }
-}
+            const modal = document.getElementById('playlist-modal');
+            if (!modal) return;
+            if (modal.style.display === 'block') {
+                modal.style.display = 'none';
+            } else {
+                updatePlaylistUI(); 
+                modal.style.display = 'block';
+            }
+        }
 
         function updatePlaylistUI() {
             const ul = document.getElementById('playlist-ul');
+            if(!ul) return;
             ul.innerHTML = '';
             if (playlist.length === 0) {
                 ul.innerHTML = '<li style="padding:20px; text-align:center; color:#777; font-size:12px;">재생할 곡을 선택해주세요.</li>';
@@ -736,8 +719,8 @@
 
         const genreBtns = document.querySelectorAll('.genre-btn');
         const hiddenInput = document.getElementById('hiddenGenreInput');
-        const vibeContainer = document.getElementById('vibe-container'); // 👈 태그 박스 찾기
-        const hiddenVibeInput = document.getElementById('hiddenVibeInput'); // 👈 태그 값 담을 곳 찾기
+        const vibeContainer = document.getElementById('vibe-container');
+        const hiddenVibeInput = document.getElementById('hiddenVibeInput'); 
 
         genreBtns.forEach(btn => {
             btn.addEventListener('click', function() { 
@@ -746,19 +729,16 @@
                 const selectedGenre = this.getAttribute('data-genre');
                 if(hiddenInput) hiddenInput.value = selectedGenre;
 
-                // 🌟 [추가됨] 뉴에이지를 선택했을 때만 상황별 태그 창을 보여줍니다!
                 if (selectedGenre === '뉴에이지') {
                     if(vibeContainer) vibeContainer.style.display = 'block';
                 } else {
                     if(vibeContainer) vibeContainer.style.display = 'none';
-                    // 다른 장르일 땐 체크된 태그들 싹 지우기
                     document.querySelectorAll('.vibe-check').forEach(cb => cb.checked = false);
                     if(hiddenVibeInput) hiddenVibeInput.value = "";
                 }
             });
         });
 
-        // 🌟 [추가됨] 체크박스 선택할 때마다 서버로 보낼 데이터를 업데이트합니다.
         document.addEventListener('change', function(e) {
             if (e.target.classList.contains('vibe-check')) {
                 const checkedValues = Array.from(document.querySelectorAll('.vibe-check:checked')).map(cb => cb.value);
@@ -776,10 +756,9 @@
             });
         }
 
-        // 🌟 통합 데이터 및 상태 관리
         let playlist = []; let currentIndex = 0; let isPlaying = false;
         let parsedLyrics = []; 
-        let errorCount = 0; // 🌟 3아웃(무한 스킵 방지) 카운터
+        let errorCount = 0;
 
         const mainAudio = document.getElementById('main-audio');
         const heartbeatAudio = document.getElementById('heartbeat-audio'); 
@@ -788,7 +767,6 @@
         const timeCurrent = document.getElementById('time-current');
         const timeTotal = document.getElementById('time-total');
 
-        // 🌟 2. [최강 버전] 21,000Hz 강력 초음파 + 오리지널 심장박동(Base64) 동시 타격!
         let audioCtx;
         let isAudioUnlocked = false;
 
@@ -799,14 +777,11 @@
             try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
                 audioCtx = new AudioContext();
-                
                 const gainNode = audioCtx.createGain();
-                gainNode.gain.value = 0.5; // 👈 확실한 인식(0.5)
-                
+                gainNode.gain.value = 0.5; 
                 const oscillator = audioCtx.createOscillator();
                 oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(21000, audioCtx.currentTime); // 👈 21,000Hz 귀에 안들리는 초음파
-                
+                oscillator.frequency.setValueAtTime(21000, audioCtx.currentTime); 
                 oscillator.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
                 oscillator.start(); 
@@ -816,8 +791,6 @@
                 heartbeatAudio.volume = 0.1;
                 heartbeatAudio.play().catch(e => console.log("심장박동 대기 중..."));
             }
-
-            console.log("💓 [최강 버전] 21,000Hz 초음파 + Base64 심장박동 동시 가동 완료!");
             document.removeEventListener('touchstart', unlockAudioForMobile);
             document.removeEventListener('click', unlockAudioForMobile);
         }
@@ -885,7 +858,6 @@
                 updatePlaylistUI();
                 loadSyncLyrics(track.lyrics);
                 
-                // 🌟 빈 껍데기 파일 스킵 (3번 이상 오류 나면 정지)
                 if(!track.audio || track.audio.trim() === "" || track.audio === "undefined") {
                     errorCount++;
                     if(errorCount >= 3) {
@@ -904,7 +876,7 @@
                 const playPromise = mainAudio.play();
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
-                        errorCount = 0; // 🌟 정상 재생 시 카운터 리셋
+                        errorCount = 0;
                         isPlaying = true;
                         if(btnPlay) btnPlay.innerText = "⏸";
 
@@ -920,7 +892,6 @@
                             navigator.mediaSession.setActionHandler('pause', () => togglePlayPause());
                         }
                     }).catch(e => {
-                        // 🌟 로딩 지연 대응 (3번까지만 인내심 있게 스킵)
                         errorCount++;
                         if (errorCount >= 3) {
                             isPlaying = false; if(btnPlay) btnPlay.innerText = "▶"; errorCount = 0;
@@ -935,16 +906,13 @@
 
         function playPrevTrack() { if (currentIndex > 0) loadTrack(currentIndex - 1); else alert("첫 번째 곡입니다."); }
         
-        // 🌟 3. 마법의 똑똑한 다음 곡 넘기기 기능! (4가지 모드 완벽 대응)
         function playNextTrack() {
             if (currentIndex < playlist.length - 1) {
                 loadTrack(currentIndex + 1);
             } else { 
-                // 플레이리스트의 맨 마지막 곡일 때
                 if (loopMode === 'all') {
-                    loadTrack(0); // 전체 무한재생: 1번 곡으로 돌아감
+                    loadTrack(0);
                 } else if (loopMode === 'auto') {
-                    // 추천 자동재생(✨): 현재 화면에서 안 깨진 음원 중 랜덤으로 뽑아서 계속 틀어줌!
                     const rows = document.querySelectorAll('.music-item');
                     const validRows = Array.from(rows).filter(tr => tr.dataset.audio && tr.dataset.audio.trim() !== "" && tr.dataset.audio !== "undefined");
                     
@@ -959,7 +927,6 @@
                         mainAudio.pause(); isPlaying = false; if(btnPlay) btnPlay.innerText = "▶";
                     }
                 } else {
-                    // 기본 모드 -> 얌전히 정지
                     mainAudio.pause(); isPlaying = false;
                     if(btnPlay) btnPlay.innerText = "▶"; 
                     if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
@@ -998,20 +965,17 @@
 
         progressBar.addEventListener('input', () => { if (mainAudio.duration) mainAudio.currentTime = (progressBar.value / 100) * mainAudio.duration; });
 
-        // 🌟 1곡 무한재생 대응
         mainAudio.addEventListener('ended', () => {
             if (loopMode === 'one') {
                 mainAudio.currentTime = 0;
                 mainAudio.play().catch(e => { isPlaying = false; if(btnPlay) btnPlay.innerText = "▶"; });
             } else {
-                playNextTrack(); // 나머지는 이 녀석이 똑똑하게 처리
+                playNextTrack(); 
             }
         });
 
-        // 🌟 [수정완료] 재생 중 끊김/에러 발생 시 멋대로 다음 곡으로 넘어가지 않음!
         mainAudio.addEventListener('error', (e) => { 
             console.log("오디오 재생 중 에러 또는 네트워크 끊김 발생");
-            // 에러가 나면 맘대로 넘어가지 않고, 그냥 얌전히 일시정지 상태로 대기합니다.
             errorCount = 0;
             isPlaying = false; 
             if(btnPlay) btnPlay.innerText = "▶"; 
