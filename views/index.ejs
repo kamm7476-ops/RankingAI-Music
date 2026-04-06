@@ -373,8 +373,19 @@
                             <button type="button" class="genre-btn" data-genre="트로트">트로트</button>
                             <button type="button" class="genre-btn" data-genre="일렉트로니카">일렉트로니카</button>
                             <button type="button" class="genre-btn" data-genre="클래식/재즈">클래식/재즈</button>
-                            <button type="button" class="genre-btn" data-genre="기타장르">기타장르</button>
+                            <button type="button" class="genre-btn" data-genre="뉴에이지">뉴에이지</button>
                         </div>
+                            <div id="vibe-container" style="margin-top: 15px; padding: 12px; background: #0b0c0d; border-radius: 8px; border: 1px solid #333; display: none;">
+                            <span style="font-size: 12px; color: #ff5722; display: block; margin-bottom: 8px; font-weight: bold;">✨ 어떤 매장/상황에 어울리나요? (태그 선택)</span>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="cafe"> ☕ 카페</label>
+                                <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="study"> 💻 집중/스터디</label>
+                                <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="healing"> 🌿 힐링/명상</label>
+                                <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="fitness"> 🏋️ 헬스/운동</label>
+                                <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="hotel"> 🏙️ 호텔/라운지</label>
+                         </div>
+                        <input type="hidden" name="vibe" id="hiddenVibeInput">
+                        <input type="hidden" name="genre" id="hiddenGenreInput" required>
                         <input type="hidden" name="genre" id="hiddenGenreInput" required>
                         
                         <div class="input-row">
@@ -701,16 +712,45 @@
 
         const genreBtns = document.querySelectorAll('.genre-btn');
         const hiddenInput = document.getElementById('hiddenGenreInput');
+        const vibeContainer = document.getElementById('vibe-container'); // 👈 태그 박스 찾기
+        const hiddenVibeInput = document.getElementById('hiddenVibeInput'); // 👈 태그 값 담을 곳 찾기
+
         genreBtns.forEach(btn => {
             btn.addEventListener('click', function() { 
                 genreBtns.forEach(b => b.classList.remove('active')); 
                 this.classList.add('active'); 
-                if(hiddenInput) hiddenInput.value = this.getAttribute('data-genre'); 
+                const selectedGenre = this.getAttribute('data-genre');
+                if(hiddenInput) hiddenInput.value = selectedGenre;
+
+                // 🌟 [추가됨] 뉴에이지를 선택했을 때만 상황별 태그 창을 보여줍니다!
+                if (selectedGenre === '뉴에이지') {
+                    if(vibeContainer) vibeContainer.style.display = 'block';
+                } else {
+                    if(vibeContainer) vibeContainer.style.display = 'none';
+                    // 다른 장르일 땐 체크된 태그들 싹 지우기
+                    document.querySelectorAll('.vibe-check').forEach(cb => cb.checked = false);
+                    if(hiddenVibeInput) hiddenVibeInput.value = "";
+                }
             });
+        });
+
+        // 🌟 [추가됨] 체크박스 선택할 때마다 서버로 보낼 데이터를 업데이트합니다.
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('vibe-check')) {
+                const checkedValues = Array.from(document.querySelectorAll('.vibe-check:checked')).map(cb => cb.value);
+                if(hiddenVibeInput) hiddenVibeInput.value = checkedValues.join(',');
+            }
         });
         
         const musicForm = document.getElementById('musicForm');
-        if (musicForm) musicForm.addEventListener('submit', function(e) { if (hiddenInput && !hiddenInput.value) { e.preventDefault(); alert('장르를 선택해주세요!'); } });
+        if (musicForm) {
+            musicForm.addEventListener('submit', function(e) { 
+                if (hiddenInput && !hiddenInput.value) { 
+                    e.preventDefault(); 
+                    alert('장르를 선택해주세요!'); 
+                } 
+            });
+        }
 
         // 🌟 통합 데이터 및 상태 관리
         let playlist = []; let currentIndex = 0; let isPlaying = false;
