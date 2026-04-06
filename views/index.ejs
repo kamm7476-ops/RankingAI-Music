@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-   <meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <title>Ranking AI Music (RAM) - 글로벌 랭킹AI뮤직 차트</title>
@@ -110,11 +110,10 @@
         .lyrics-line { padding: 5px 0; display: flex; gap: 8px; cursor: pointer; }
         .lyrics-time { color: #ff5722; font-weight: bold; width: 45px; text-align: right; }
 
-       /* 🌟 RAM 스타일 하단 플레이어 (오렌지 라인 + 한글 버튼) 🌟 */
+        /* 🌟 RAM 스타일 하단 플레이어 */
         .bottom-player-bar { 
             position: fixed; bottom: 0; left: 0; width: 100%; 
             background: #181818; 
-            /* 🟠 대표님이 요청하신 오렌지색 얇은 라인 */
             border-top: 2px solid #ff5722; 
             padding: 12px 24px; box-sizing: border-box; 
             display: grid; grid-template-columns: 1fr 2fr 1fr; align-items: center; 
@@ -162,7 +161,19 @@
             color: #fff; border-color: #ff5722; background: rgba(255, 87, 34, 0.1);
         }
 
-        /* 🚨 모바일 디자인 핵심 수정 구역 (대표님의 기존 소중한 코드들) 🚨 */
+        /* 🚨 재생목록 창 우측 사이드에 완벽 고정! */
+        #playlist-modal {
+            display: none; position: fixed; bottom: 90px; right: 20px; 
+            width: 320px; max-height: 400px; background: #181818; 
+            border: 1px solid #ff5722; border-radius: 12px; 
+            z-index: 999999 !important; overflow-y: auto; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        #playlist-modal::-webkit-scrollbar { width: 6px; }
+        #playlist-modal::-webkit-scrollbar-track { background: #181818; }
+        #playlist-modal::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+
+        /* 🚨 모바일 디자인 (꼬인 부분 깔끔하게 정리) */
         @media (max-width: 900px) {
             .input-row { flex-direction: column; align-items: stretch; gap: 12px; }
             .input-row > div { width: 100%; box-sizing: border-box; }
@@ -214,24 +225,7 @@
             #progress-bar { height: 4px; border-radius: 2px; background: #4d4d4d; }
             #progress-bar::-webkit-slider-thumb { display: block !important; width: 10px; height: 10px; }
             .player-right-placeholder { position: absolute; top: 15px; right: 15px; display: block !important; }
-            #playlist-modal { bottom: 140px; right: 10px; width: calc(100% - 20px); max-height: 50vh; }
-        }
-
-            /* 모바일 플레이어 */
-            .bottom-player-bar { display: flex; flex-direction: column; padding: 10px 15px; gap: 10px; border-radius: 0; margin: 0; width: 100%; max-width: 100vw; bottom: 0; left: 0; right: 0; border-top: 1px solid #282828; background: #181818; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); box-sizing: border-box; }
-            .player-toggle-tab { display: block; top: -28px; right: 10px; padding: 4px 12px; font-size: 11px; border-radius: 8px 8px 0 0; } 
-            .player-info { width: 100%; max-width: calc(100% - 40px); justify-content: flex-start; gap: 12px; }
-            .player-cover { width: 45px; height: 45px; border-radius: 6px; }
-            .player-controls-wrapper { width: 100%; flex-direction: column; gap: 6px; margin: 0; }
-            .player-buttons { gap: 30px; justify-content: center; width: 100%; }
-            #btn-prev, #id-btn-loop, #btn-next { display: block !important; font-size: 18px; }
-            .player-buttons .play-btn { width: 40px; height: 40px; font-size: 18px; padding-left: 3px; }
-            .progress-area { position: static; width: 100%; height: auto; gap: 10px; }
-            #time-current, #time-total { display: block !important; font-size: 10px; }
-            #progress-bar { height: 4px; border-radius: 2px; background: #4d4d4d; }
-            #progress-bar::-webkit-slider-thumb { display: block !important; width: 10px; height: 10px; }
-            .player-right-placeholder { position: absolute; top: 15px; right: 15px; display: block !important; }
-            #playlist-modal { bottom: 140px; right: 10px; width: calc(100% - 20px); max-height: 50vh; }
+            #playlist-modal { bottom: 140px !important; right: 10px !important; width: calc(100% - 20px) !important; max-height: 50vh !important; }
         }
 
         /* 🌟 팝업창 전용 디자인 */
@@ -241,14 +235,8 @@
         .popup-content { color: #ccc; font-size: 15px; line-height: 1.6; margin-bottom: 25px; white-space: pre-wrap; }
         .popup-close-btn { background: #ff5722; color: #000; font-weight: bold; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; }
         .popup-close-today { background: none; border: none; color: #888; text-decoration: underline; margin-top: 15px; cursor: pointer; font-size: 13px; }
-        /* 🚨 [추가!] 재생목록 창을 무조건 맨 앞으로 끌어올리는 강력한 마법 */
-        #playlist-modal {
-            z-index: 999999 !important;
-        }
 
     </style>
-
-   </style>
 </head>
 <body>
 
@@ -624,25 +612,26 @@
         </div>
 
       <div class="player-right-placeholder">
-            <button onclick="toggleSyncLyrics()" title="실시간 가사 보기">가사</button>
-            <button onclick="togglePlaylist()" title="재생목록 보기">목록</button>
+            <button type="button" onclick="toggleSyncLyrics()" title="실시간 가사 보기">가사</button>
+            <button type="button" onclick="togglePlaylist()" title="재생목록 보기">목록</button>
       </div>
         
         <audio id="main-audio" style="display:none;" preload="auto" playsinline webkit-playsinline></audio>
         <audio id="heartbeat-audio" loop playsinline webkit-playsinline style="display:none;" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
     </div>    
+    
     <div id="sync-lyrics-modal" style="display:none; position:fixed; bottom:90px; left:50%; transform:translateX(-50%); width:90%; max-width:400px; height:60vh; background:rgba(15, 16, 17, 0.95); border:1px solid #333; border-radius:15px; z-index:1005; overflow-y:auto; box-shadow:0 10px 40px rgba(0,0,0,0.9); padding:20px 20px 50vh 20px; text-align:center; backdrop-filter:blur(10px); scroll-behavior:smooth;">
         <div style="position:sticky; top:-20px; text-align:right; margin-bottom:20px; z-index:10;">
-            <button onclick="toggleSyncLyrics()" style="background:rgba(0,0,0,0.5); border:1px solid #444; color:#fff; border-radius:50%; width:30px; height:30px; font-size:14px; cursor:pointer;">✕</button>
+            <button type="button" onclick="toggleSyncLyrics()" style="background:rgba(0,0,0,0.5); border:1px solid #444; color:#fff; border-radius:50%; width:30px; height:30px; font-size:14px; cursor:pointer;">✕</button>
         </div>
         <div id="sync-lyrics-container" style="display:flex; flex-direction:column; gap:15px; font-size:16px; color:#777; transition:all 0.3s;">
-            </div>
+        </div>
     </div>
 
-    <div id="playlist-modal">
-        <div class="playlist-header">
+    <div id="playlist-modal" style="display: none; position: fixed; bottom: 90px; right: 20px; width: 320px; max-height: 400px; background: #181818; border: 1px solid #ff5722; border-radius: 12px; z-index: 999999 !important; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+        <div class="playlist-header" style="padding: 15px; border-bottom: 1px solid #282828; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: #181818; z-index: 10;">
             <strong style="color:#fff; font-size:14px;">현재 재생 목록</strong>
-            <button onclick="togglePlaylist()" style="background:none; border:none; color:#aaa; font-size:18px; cursor:pointer; padding:0; line-height:1;">✕</button>
+            <button type="button" onclick="togglePlaylist()" style="background:none; border:none; color:#aaa; font-size:18px; cursor:pointer; padding:0; line-height:1;">✕</button>
         </div>
         <ul id="playlist-ul" style="list-style:none; padding:0; margin:0;">
             <li style="padding:20px; text-align:center; color:#777; font-size:12px;">재생할 곡을 선택해주세요.</li>
@@ -700,14 +689,14 @@
         }
 
         function togglePlaylist() {
-    const modal = document.getElementById('playlist-modal');
-    if (modal.style.display === 'block') {
-        modal.style.display = 'none';
-    } else {
-        updatePlaylistUI(); // 목록 내용을 새로고침하는 함수
-        modal.style.display = 'block';
-    }
-}
+            const modal = document.getElementById('playlist-modal');
+            if (modal.style.display === 'block') {
+                modal.style.display = 'none';
+            } else {
+                updatePlaylistUI(); // 목록 내용을 새로고침하는 함수
+                modal.style.display = 'block';
+            }
+        }
 
         function updatePlaylistUI() {
             const ul = document.getElementById('playlist-ul');
@@ -735,8 +724,8 @@
 
         const genreBtns = document.querySelectorAll('.genre-btn');
         const hiddenInput = document.getElementById('hiddenGenreInput');
-        const vibeContainer = document.getElementById('vibe-container'); // 👈 태그 박스 찾기
-        const hiddenVibeInput = document.getElementById('hiddenVibeInput'); // 👈 태그 값 담을 곳 찾기
+        const vibeContainer = document.getElementById('vibe-container'); 
+        const hiddenVibeInput = document.getElementById('hiddenVibeInput'); 
 
         genreBtns.forEach(btn => {
             btn.addEventListener('click', function() { 
@@ -745,19 +734,16 @@
                 const selectedGenre = this.getAttribute('data-genre');
                 if(hiddenInput) hiddenInput.value = selectedGenre;
 
-                // 🌟 [추가됨] 뉴에이지를 선택했을 때만 상황별 태그 창을 보여줍니다!
                 if (selectedGenre === '뉴에이지') {
                     if(vibeContainer) vibeContainer.style.display = 'block';
                 } else {
                     if(vibeContainer) vibeContainer.style.display = 'none';
-                    // 다른 장르일 땐 체크된 태그들 싹 지우기
                     document.querySelectorAll('.vibe-check').forEach(cb => cb.checked = false);
                     if(hiddenVibeInput) hiddenVibeInput.value = "";
                 }
             });
         });
 
-        // 🌟 [추가됨] 체크박스 선택할 때마다 서버로 보낼 데이터를 업데이트합니다.
         document.addEventListener('change', function(e) {
             if (e.target.classList.contains('vibe-check')) {
                 const checkedValues = Array.from(document.querySelectorAll('.vibe-check:checked')).map(cb => cb.value);
@@ -824,6 +810,16 @@
         document.addEventListener('touchstart', unlockAudioForMobile, { passive: true });
         document.addEventListener('click', unlockAudioForMobile);
 
+        // 🌟 [추가/수정] 오디오가 플레이될 때 초음파와 심장박동이 잠들지 않도록 확실히 깨움
+        mainAudio.addEventListener('play', () => {
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            if (heartbeatAudio && heartbeatAudio.paused) {
+                heartbeatAudio.play().catch(e => {});
+            }
+        });
+
         function toggleAll(source) { document.querySelectorAll('.song-check').forEach(cb => cb.checked = source.checked); }
 
         function togglePlayPause() {
@@ -836,43 +832,6 @@
                 mainAudio.pause(); isPlaying = false;
                 if(btnPlay) btnPlay.innerText = "▶";
                 if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
-            }
-        }
-
-        function toggleSyncLyrics() {
-            const modal = document.getElementById('sync-lyrics-modal');
-            if(modal) modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
-        }
-
-        function loadSyncLyrics(rawLyrics) {
-            parsedLyrics = [];
-            const container = document.getElementById('sync-lyrics-container');
-            if(!container) return;
-            container.innerHTML = "";
-            
-            if (!rawLyrics || rawLyrics.trim() === "" || rawLyrics === "undefined" || rawLyrics === "null") {
-                container.innerHTML = "<p style='color:#555; margin-top:50px;'>등록된 싱크 가사가 없습니다.</p>";
-                return;
-            }
-
-            const lines = decodeURIComponent(rawLyrics).split('\n');
-            const timeRegex = /\[(\d{2}):(\d{2}(?:\.\d{1,3})?)\](.*)/;
-            
-            lines.forEach(line => {
-                const match = line.match(timeRegex);
-                if (match) {
-                    const time = parseInt(match[1]) * 60 + parseFloat(match[2]);
-                    const text = match[3].trim() || "🎵";
-                    parsedLyrics.push({ time, text });
-                }
-            });
-
-            if (parsedLyrics.length > 0) {
-                parsedLyrics.forEach((lyric, idx) => {
-                    container.innerHTML += `<div id="sync-lyric-${idx}" class="sync-lyric-line" style="transition:0.3s; cursor:pointer; padding:5px 0;" onclick="mainAudio.currentTime=${lyric.time}; mainAudio.play();">${lyric.text}</div>`;
-                });
-            } else {
-                container.innerHTML = `<p style='color:#aaa; line-height:1.8; white-space:pre-wrap;'>${decodeURIComponent(rawLyrics).split('\n').join('<br>')}</p>`;
             }
         }
 
