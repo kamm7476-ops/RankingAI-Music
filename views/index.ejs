@@ -217,6 +217,23 @@
             #playlist-modal { bottom: 140px !important; right: 10px !important; width: calc(100% - 20px) !important; max-height: 50vh !important; }
         }
 
+            /* 모바일 플레이어 */
+            .bottom-player-bar { display: flex; flex-direction: column; padding: 10px 15px; gap: 10px; border-radius: 0; margin: 0; width: 100%; max-width: 100vw; bottom: 0; left: 0; right: 0; border-top: 1px solid #282828; background: #181818; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); box-sizing: border-box; }
+            .player-toggle-tab { display: block; top: -28px; right: 10px; padding: 4px 12px; font-size: 11px; border-radius: 8px 8px 0 0; } 
+            .player-info { width: 100%; max-width: calc(100% - 40px); justify-content: flex-start; gap: 12px; }
+            .player-cover { width: 45px; height: 45px; border-radius: 6px; }
+            .player-controls-wrapper { width: 100%; flex-direction: column; gap: 6px; margin: 0; }
+            .player-buttons { gap: 30px; justify-content: center; width: 100%; }
+            #btn-prev, #id-btn-loop, #btn-next { display: block !important; font-size: 18px; }
+            .player-buttons .play-btn { width: 40px; height: 40px; font-size: 18px; padding-left: 3px; }
+            .progress-area { position: static; width: 100%; height: auto; gap: 10px; }
+            #time-current, #time-total { display: block !important; font-size: 10px; }
+            #progress-bar { height: 4px; border-radius: 2px; background: #4d4d4d; }
+            #progress-bar::-webkit-slider-thumb { display: block !important; width: 10px; height: 10px; }
+            .player-right-placeholder { position: absolute; top: 15px; right: 15px; display: block !important; }
+            #playlist-modal { bottom: 140px; right: 10px; width: calc(100% - 20px); max-height: 50vh; }
+        }
+
         /* 🌟 팝업창 전용 디자인 */
         .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .popup-box { background: #161718; border: 2px solid #ff5722; border-radius: 15px; padding: 30px; width: 400px; max-width: 90%; box-shadow: 0 10px 30px rgba(255,87,34,0.3); text-align: center; position: relative; }
@@ -224,7 +241,14 @@
         .popup-content { color: #ccc; font-size: 15px; line-height: 1.6; margin-bottom: 25px; white-space: pre-wrap; }
         .popup-close-btn { background: #ff5722; color: #000; font-weight: bold; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; }
         .popup-close-today { background: none; border: none; color: #888; text-decoration: underline; margin-top: 15px; cursor: pointer; font-size: 13px; }
+        /* 🚨 [추가!] 재생목록 창을 무조건 맨 앞으로 끌어올리는 강력한 마법 */
+        #playlist-modal {
+            z-index: 999999 !important;
+        }
+
     </style>
+
+   </style>
 </head>
 <body>
 
@@ -711,8 +735,8 @@
 
         const genreBtns = document.querySelectorAll('.genre-btn');
         const hiddenInput = document.getElementById('hiddenGenreInput');
-        const vibeContainer = document.getElementById('vibe-container'); // 👈 태그 박스 찾기
-        const hiddenVibeInput = document.getElementById('hiddenVibeInput'); // 👈 태그 값 담을 곳 찾기
+        const vibeContainer = document.getElementById('vibe-container'); 
+        const hiddenVibeInput = document.getElementById('hiddenVibeInput'); 
 
         genreBtns.forEach(btn => {
             btn.addEventListener('click', function() { 
@@ -721,19 +745,16 @@
                 const selectedGenre = this.getAttribute('data-genre');
                 if(hiddenInput) hiddenInput.value = selectedGenre;
 
-                // 🌟 [추가됨] 뉴에이지를 선택했을 때만 상황별 태그 창을 보여줍니다!
                 if (selectedGenre === '뉴에이지') {
                     if(vibeContainer) vibeContainer.style.display = 'block';
                 } else {
                     if(vibeContainer) vibeContainer.style.display = 'none';
-                    // 다른 장르일 땐 체크된 태그들 싹 지우기
                     document.querySelectorAll('.vibe-check').forEach(cb => cb.checked = false);
                     if(hiddenVibeInput) hiddenVibeInput.value = "";
                 }
             });
         });
 
-        // 🌟 [추가됨] 체크박스 선택할 때마다 서버로 보낼 데이터를 업데이트합니다.
         document.addEventListener('change', function(e) {
             if (e.target.classList.contains('vibe-check')) {
                 const checkedValues = Array.from(document.querySelectorAll('.vibe-check:checked')).map(cb => cb.value);
@@ -763,9 +784,10 @@
         const timeCurrent = document.getElementById('time-current');
         const timeTotal = document.getElementById('time-total');
 
-        // 🚨 [초강력 업그레이드] 21,000Hz 초음파 + 오리지널 심장박동 완벽 가동 로직
+        // 🌟 2. [최강 버전] 21,000Hz 강력 초음파 + 오리지널 심장박동(Base64) 동시 타격!
         let audioCtx;
         let isAudioUnlocked = false;
+        let keepAliveInterval; // 👈 추가된 무한 루프 변수
 
         function initSuperUltrasonic() {
             if (isAudioUnlocked) {
@@ -794,10 +816,23 @@
                 // 2. 백그라운드 무음 루프 (심장박동) 강제 시작
                 if (heartbeatAudio) {
                     heartbeatAudio.volume = 0.5;
-                    heartbeatAudio.play().catch(e => console.log("Heartbeat play blocked, but ultrasonic is active."));
+                    heartbeatAudio.play().catch(e => console.log("심장박동 대기 중..."));
+                }
+
+                // 3. ✨ [궁극의 방어막] 5초마다 브라우저 강제 기상 (절대 못 잠들게 함)
+                if (!keepAliveInterval) {
+                    keepAliveInterval = setInterval(() => {
+                        if (audioCtx && audioCtx.state === 'suspended') {
+                            audioCtx.resume();
+                            console.log("잠든 AudioContext 강제 기상!");
+                        }
+                        if (heartbeatAudio && heartbeatAudio.paused) {
+                            heartbeatAudio.play().catch(e => {});
+                        }
+                    }, 5000);
                 }
                 
-                console.log("🚀 [초강력 방어모드] 21,000Hz 고주파 + 심장박동 완벽 가동 완료!");
+                console.log("🚀 [초강력 방어모드] 21,000Hz 고주파 + 심장박동 + 5초 무한기상 완료!");
             } catch (err) { console.error("Web Audio API 지원 안 함:", err); }
         }
         
@@ -888,7 +923,6 @@
                 document.getElementById('main-player-artist').innerText = track.artist;
                 document.getElementById('main-player-cover').src = track.cover || '/logo.png';
                 
-                // URL에 공백이 있으면 에러나므로 확실히 제거 (trim)
                 mainAudio.src = track.audio.trim();
                 mainAudio.load(); 
                 
@@ -1002,7 +1036,7 @@
 
         // 🌟 [수정완료] 재생 중 끊김/에러 발생 시 멋대로 다음 곡으로 넘어가지 않음!
         mainAudio.addEventListener('error', (e) => { 
-            console.error("오디오 재생 중 에러 또는 네트워크 끊김 발생", mainAudio.error);
+            console.log("오디오 재생 중 에러 또는 네트워크 끊김 발생");
             // 에러가 나면 맘대로 넘어가지 않고, 그냥 얌전히 일시정지 상태로 대기합니다.
             errorCount = 0;
             isPlaying = false; 
