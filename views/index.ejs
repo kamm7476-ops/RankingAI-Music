@@ -694,14 +694,14 @@
         }
 
         function togglePlaylist() {
-            const modal = document.getElementById('playlist-modal');
-            if (modal.style.display === 'block') {
-                modal.style.display = 'none';
-            } else {
-                updatePlaylistUI();
-                modal.style.display = 'block';
-            }
-        }
+    const modal = document.getElementById('playlist-modal');
+    if (modal.style.display === 'block') {
+        modal.style.display = 'none';
+    } else {
+        updatePlaylistUI(); // 목록 내용을 새로고침하는 함수
+        modal.style.display = 'block';
+    }
+}
 
         function updatePlaylistUI() {
             const ul = document.getElementById('playlist-ul');
