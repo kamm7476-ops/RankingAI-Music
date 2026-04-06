@@ -911,6 +911,7 @@
                 updatePlaylistUI();
                 loadSyncLyrics(track.lyrics);
                 
+                // 🌟 빈 껍데기 파일 스킵
                 if(!track.audio || track.audio.trim() === "" || track.audio === "undefined") {
                     errorCount++;
                     if(errorCount >= 3) {
@@ -924,18 +925,19 @@
                 document.getElementById('main-player-cover').src = track.cover || '/logo.png';
                 
                 // 🔥 [필살기 1] 오디오 엔진 강제 기상 (네이버 앱 수면 방지)
-                if (audioCtx) {
+                if (audioCtx && audioCtx.state === 'suspended') {
                     audioCtx.resume();
                 }
 
-                // 🔥 [필살기 2] 네이버 앱용 메모리 초기화
+                // 🚨 [핵심: 네이버 뒷곡 버튼 부활] 메모리 세척을 가장 악랄하게 진행합니다.
                 mainAudio.pause();
-                mainAudio.src = ""; 
+                mainAudio.removeAttribute('src'); // src 속성 자체를 아예 뜯어냅니다. (네이버 착각 유도)
+                mainAudio.load(); // 껍데기만 남은 오디오 객체를 강제로 비워버림
                 
-                // 🔥 [필살기 3] 0.2초의 여유 후 재생 (네이버 보안 회피)
+                // 🔥 [필살기 3] 0.3초의 넉넉한 여유 후 재생 (네이버 보안 완벽 회피)
                 setTimeout(() => {
-                    mainAudio.src = track.audio.trim();
-                    mainAudio.load(); // 네이버 앱 전용 권한 획득
+                    mainAudio.src = track.audio.trim(); // 깨끗해진 객체에 새 주소를 꽂습니다.
+                    mainAudio.load(); // 주소를 꽂고 다시 로드해야 네이버가 정상적인 새 노래로 인식합니다.
 
                     const playPromise = mainAudio.play();
                     if (playPromise !== undefined) {
@@ -955,16 +957,18 @@
                             }
                         }).catch(e => {
                             console.log("네이버 재생 재시도 중...");
-                            // 네이버가 막을 경우 0.5초 뒤 마지막 심폐소생술
+                            // 네이버가 막을 경우 1초 뒤에 다시 시도 (0.5초는 네이버가 눈치챌 수 있음)
                             setTimeout(() => {
-                                mainAudio.play().catch(() => {
-                                    isPlaying = false;
-                                    if(btnPlay) btnPlay.innerText = "▶";
-                                });
-                            }, 500);
+                                if (currentIndex === index) { // 사용자가 버튼을 마구 누른게 아니라면
+                                    mainAudio.play().catch(() => {
+                                        isPlaying = false;
+                                        if(btnPlay) btnPlay.innerText = "▶";
+                                    });
+                                }
+                            }, 1000);
                         });
                     }
-                }, 200); 
+                }, 300); // 👈 0.2초에서 0.3초로 시간을 늘려 네이버 엔진의 오작동을 막습니다.
 
                 if (track.id && track.id !== "dummy") fetch('/play-count/' + track.id, { method: 'POST', keepalive: true }).catch(err => {});
             }
