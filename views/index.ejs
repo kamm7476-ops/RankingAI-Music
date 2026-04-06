@@ -785,14 +785,13 @@
         const timeCurrent = document.getElementById('time-current');
         const timeTotal = document.getElementById('time-total');
 
-        // 🌟 2. [최강 버전] 21,000Hz 강력 초음파 + 오리지널 심장박동(Base64) 동시 타격!
+       // 🌟 [완벽 무음 버전] 초미세 백색소음 + 5초 루프 (귀에 절대 안 들림!)
         let audioCtx;
         let isAudioUnlocked = false;
-        let keepAliveInterval; // 👈 추가된 무한 루프 변수
+        let keepAliveInterval; 
 
         function initSuperUltrasonic() {
             if (isAudioUnlocked) {
-                // 이미 풀렸어도 AudioContext가 잠들었으면 다시 깨움
                 if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
                 return;
             }
@@ -802,42 +801,44 @@
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
                 audioCtx = new AudioContext();
                 
-                // 1. 아주 강력한 고주파 (21000Hz) 파워 맥스 (1.0)
+                // 1. 삐- 소리 대신 '무음 백색소음'을 만듭니다.
+                const bufferSize = audioCtx.sampleRate * 0.5;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+                
+                const source = audioCtx.createBufferSource();
+                source.buffer = buffer;
+                source.loop = true; // 무한 반복
+                
+                // 2. 🚨 볼륨을 0.00001 (0.001%)로 설정! 사람 귀엔 절대 안 들립니다.
                 const gainNode = audioCtx.createGain();
-                gainNode.gain.value = 1.0; 
+                gainNode.gain.value = 0.00001; 
                 
-                const oscillator = audioCtx.createOscillator();
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(21000, audioCtx.currentTime); 
-                
-                oscillator.connect(gainNode);
+                source.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
-                oscillator.start(); 
+                source.start(); 
                 
-                // 2. 백그라운드 무음 루프 (심장박동) 강제 시작
                 if (heartbeatAudio) {
-                    heartbeatAudio.volume = 0.5;
-                    heartbeatAudio.play().catch(e => console.log("심장박동 대기 중..."));
+                    heartbeatAudio.volume = 0.1;
+                    heartbeatAudio.play().catch(e => {});
                 }
 
-                // 3. ✨ [궁극의 방어막] 5초마다 브라우저 강제 기상 (절대 못 잠들게 함)
+                // 3. 5초마다 엔진 강제 기상 (네이버 수면 방지)
                 if (!keepAliveInterval) {
                     keepAliveInterval = setInterval(() => {
-                        if (audioCtx && audioCtx.state === 'suspended') {
-                            audioCtx.resume();
-                            console.log("잠든 AudioContext 강제 기상!");
-                        }
-                        if (heartbeatAudio && heartbeatAudio.paused) {
-                            heartbeatAudio.play().catch(e => {});
-                        }
+                        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+                        if (heartbeatAudio && heartbeatAudio.paused) heartbeatAudio.play().catch(e => {});
                     }, 5000);
                 }
                 
-                console.log("🚀 [초강력 방어모드] 21,000Hz 고주파 + 심장박동 + 5초 무한기상 완료!");
-            } catch (err) { console.error("Web Audio API 지원 안 함:", err); }
+                console.log("💓 완벽 무음 엔진 가동 완료 (귀에 안 들림)");
+            } catch (err) { console.log("Web Audio API 미지원"); }
         }
         
-        // 화면 터치/클릭 시마다 무조건 초음파 엔진 깨우기
+        // 화면 터치/클릭 시마다 엔진 깨우기
         document.addEventListener('touchstart', initSuperUltrasonic, { passive: true });
         document.addEventListener('click', initSuperUltrasonic);
 
