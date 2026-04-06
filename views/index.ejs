@@ -910,7 +910,6 @@
                 updatePlaylistUI();
                 loadSyncLyrics(track.lyrics);
                 
-                // 🌟 빈 껍데기 파일 스킵
                 if(!track.audio || track.audio.trim() === "" || track.audio === "undefined") {
                     errorCount++;
                     if(errorCount >= 3) {
@@ -923,52 +922,52 @@
                 document.getElementById('main-player-artist').innerText = track.artist;
                 document.getElementById('main-player-cover').src = track.cover || '/logo.png';
                 
-                // 🚨 [핵심 1] 모바일 백그라운드 권한 유지를 위해 mainAudio.load() 삭제!
-                // src만 쏙 바꿔치기하고 바로 play()를 때려야 모바일이 "연속 재생"으로 인정해 줍니다.
-                mainAudio.src = track.audio.trim();
-                
-                const playPromise = mainAudio.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        errorCount = 0; 
-                        isPlaying = true;
-                        if(btnPlay) btnPlay.innerText = "⏸";
-
-                        if ('mediaSession' in navigator) {
-                            navigator.mediaSession.playbackState = "playing";
-                            navigator.mediaSession.metadata = new MediaMetadata({
-                                title: track.title, artist: track.artist || 'RANKING AI', album: 'RANKING AI TOP 100',
-                                artwork: [{ src: track.cover || 'https://rankingaimusic.com/logo.png', sizes: '512x512', type: 'image/jpeg' }]
-                            });
-                            navigator.mediaSession.setActionHandler('previoustrack', () => playPrevTrack());
-                            navigator.mediaSession.setActionHandler('nexttrack', () => playNextTrack());
-                            navigator.mediaSession.setActionHandler('play', () => togglePlayPause());
-                            navigator.mediaSession.setActionHandler('pause', () => togglePlayPause());
-                        }
-                    }).catch(e => {
-                        // 🚨 [핵심 2] 스킵하지 않고 "집념의 재시도" 로직 추가!
-                        console.log("모바일 오디오 에러명:", e.name);
-                        if (e.name === 'NotAllowedError') {
-                            // 브라우저가 화면 꺼짐 등으로 재생을 완전히 막아버린 경우 (대기 상태로 둠)
-                            isPlaying = false; 
-                            if(btnPlay) btnPlay.innerText = "▶"; 
-                        } else if (e.name !== 'AbortError') {
-                            // 버퍼링이나 인터넷 지연으로 늦게 켜지는 조용한 곡/발라드 대응!
-                            // 다음 곡으로 스킵해버리지 않고, 3초 뒤에 "현재 곡"을 한 번 더 틀어봅니다.
-                            console.log("로딩 지연! 3초 후 현재 곡 재시도...");
-                            setTimeout(() => {
-                                if (currentIndex === index) { // 사용자가 다른 곡을 누르지 않고 기다리고 있다면
-                                    mainAudio.play().catch(err => console.log("재시도 실패:", err));
-                                }
-                            }, 3000);
-                        }
-                    });
+                // 🔥 [필살기 1] 오디오 엔진 강제 기상 (네이버 앱 수면 방지)
+                if (audioCtx) {
+                    audioCtx.resume();
                 }
+
+                // 🔥 [필살기 2] 네이버 앱용 메모리 초기화
+                mainAudio.pause();
+                mainAudio.src = ""; 
+                
+                // 🔥 [필살기 3] 0.2초의 여유 후 재생 (네이버 보안 회피)
+                setTimeout(() => {
+                    mainAudio.src = track.audio.trim();
+                    mainAudio.load(); // 네이버 앱 전용 권한 획득
+
+                    const playPromise = mainAudio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            errorCount = 0; 
+                            isPlaying = true;
+                            if(btnPlay) btnPlay.innerText = "⏸";
+
+                            if ('mediaSession' in navigator) {
+                                navigator.mediaSession.playbackState = "playing";
+                                navigator.mediaSession.metadata = new MediaMetadata({
+                                    title: track.title, 
+                                    artist: track.artist || 'RANKING AI', 
+                                    album: 'RANKING AI TOP 100',
+                                    artwork: [{ src: track.cover || 'https://rankingaimusic.com/logo.png', sizes: '512x512', type: 'image/jpeg' }]
+                                });
+                            }
+                        }).catch(e => {
+                            console.log("네이버 재생 재시도 중...");
+                            // 네이버가 막을 경우 0.5초 뒤 마지막 심폐소생술
+                            setTimeout(() => {
+                                mainAudio.play().catch(() => {
+                                    isPlaying = false;
+                                    if(btnPlay) btnPlay.innerText = "▶";
+                                });
+                            }, 500);
+                        });
+                    }
+                }, 200); 
+
                 if (track.id && track.id !== "dummy") fetch('/play-count/' + track.id, { method: 'POST', keepalive: true }).catch(err => {});
             }
         }
-
-        function playPrevTrack() { if (currentIndex > 0) loadTrack(currentIndex - 1); else alert("첫 번째 곡입니다."); }
         
         // 🌟 3. 마법의 똑똑한 다음 곡 넘기기 기능! (4가지 모드 완벽 대응)
         function playNextTrack() {
