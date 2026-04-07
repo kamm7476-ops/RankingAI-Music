@@ -229,7 +229,18 @@
         #playlist-modal {
             z-index: 999999 !important;
         }
+       /* 🚨 [수정] 재생목록 창 겹침 해결: 맨 앞으로 + 채팅창 위로 끌어올림 */
+        #playlist-modal {
+            bottom: 130px !important; /* PC: 채팅창 피해 위로 */
+            z-index: 999999 !important;
+        }
 
+        /* 📱 모바일 화면: 하단 플레이어와 채팅창 모두 피해서 더 위로 올림 */
+        @media (max-width: 900px) {
+            #playlist-modal {
+                bottom: 180px !important;
+            }
+        }
    
    </style>
 </head>
