@@ -287,7 +287,7 @@
                      onclick="window.open('https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://rankingaimusic.com', '_blank')">
                     <img src="https://api.qrserver.com/v1/create-qr-code/?size=30x30&data=https://rankingaimusic.com" alt="QR Code" style="display: block; width: 24px; height: 24px;">
                 </div>
-                <input type="text" name="search" class="top-search-input" placeholder="아티스트 검색..." value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>">
+                <input type="text" name="search" class="top-search-input" placeholder="아티스트 검색..." value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                 <button type="submit" class="top-search-btn">🔍</button>
             </form>
 
