@@ -909,6 +909,9 @@
                 const track = playlist[index];
                 currentIndex = index; 
                 
+                // 🚨 [핵심 해결] 타이머에 의존하지 않고, 새 곡이 시작될 때 자물쇠를 즉시 풀어버립니다!
+                window.isSwapping = false; 
+                
                 updatePlaylistUI();
                 loadSyncLyrics(track.lyrics);
                 
@@ -924,35 +927,29 @@
                 document.getElementById('main-player-artist').innerText = track.artist;
                 document.getElementById('main-player-cover').src = track.cover || '/logo.png';
                 
-                // 👑 [PRO 전용 기술] 네이버 엔진의 'ended' 이벤트 강제 탈취 (Pre-emptive Swap)
+                // 👑 [PRO 전용 기술] 네이버 엔진의 'ended' 이벤트 강제 탈취
                 if (!window.proEngineAttached) {
                     window.proEngineAttached = true;
                     
-                    // 1. 노래가 끝나는 'ended' 이벤트를 아예 발생하지 못하게 막아버립니다.
                     mainAudio.onended = (e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        console.log("👑 PRO 엔진: 네이버의 종료 감지를 무력화했습니다.");
                     };
 
-                    // 2. 노래 종료 0.3초 전, 시스템이 눈치채기 전에 강제로 다음 곡을 밀어넣습니다.
                     mainAudio.addEventListener('timeupdate', () => {
-                        if (mainAudio.duration && (mainAudio.duration - mainAudio.currentTime <= 0.3)) {
-                            // 중복 스킵 방지를 위한 락(Lock)
+                        // 곡 종료 0.5초 전으로 조금 더 여유를 두어 백그라운드 딜레이에 대비합니다.
+                        if (mainAudio.duration && (mainAudio.duration - mainAudio.currentTime <= 0.5)) {
+                            // 자물쇠가 풀려있을 때만 스킵 발동!
                             if (!window.isSwapping) {
-                                window.isSwapping = true;
-                                console.log("👑 PRO 엔진: 곡 종료 0.3초 전 강제 바통 터치 발동!");
-                                
-                                playNextTrack(); // OS가 오디오를 끄기 전에 다음 곡을 즉시 실행
-                                
-                                // 1초 뒤에 다시 락 해제
-                                setTimeout(() => { window.isSwapping = false; }, 1000);
+                                window.isSwapping = true; // 자물쇠 잠금 (중복 실행 방지)
+                                console.log("👑 PRO 엔진: 곡 종료 0.5초 전 강제 바통 터치!");
+                                playNextTrack(); 
+                                // (이전에 있던 setTimeout 자물쇠 해제 로직은 삭제했습니다)
                             }
                         }
                     });
                 }
 
-                // 🚨 지연 없이 즉각적인 주소 교체 및 재생
                 mainAudio.src = track.audio.trim();
                 
                 const playPromise = mainAudio.play();
