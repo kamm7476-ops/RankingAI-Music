@@ -912,15 +912,11 @@
                 updatePlaylistUI();
                 loadSyncLyrics(track.lyrics);
                 
-                // 🌟 빈 파일 스킵
                 if(!track.audio || track.audio.trim() === "" || track.audio === "undefined") {
                     errorCount++;
                     if(errorCount >= 3) {
                         isPlaying = false; if(btnPlay) btnPlay.innerText = "▶"; errorCount = 0;
-                    } else { 
-                        // 딜레이 없이 즉시 스킵
-                        playNextTrack(); 
-                    }
+                    } else { playNextTrack(); } // 지연 없이 즉시 넘김
                     return; 
                 }
                 
@@ -928,17 +924,22 @@
                 document.getElementById('main-player-artist').innerText = track.artist;
                 document.getElementById('main-player-cover').src = track.cover || '/logo.png';
                 
-                // 🔥 엔진 깨우기 (수면 방지)
-                if (audioCtx && audioCtx.state === 'suspended') {
-                    audioCtx.resume();
+                // 🚀 [멜론/지니급 코어 엔진 탑재] 🚀
+                // 네이버가 JS 타이머를 죽여도 살아남는 '오디오 자체 이벤트'에 심폐소생술을 이식합니다.
+                if (!window.naverMelonEngineAttached) {
+                    window.naverMelonEngineAttached = true;
+                    mainAudio.addEventListener('timeupdate', () => {
+                        // 노래가 스피커로 흘러나오는 내내 0.25초마다 브라우저를 강제로 깨웁니다.
+                        if (audioCtx && audioCtx.state === 'suspended') {
+                            audioCtx.resume().catch(()=>{});
+                        }
+                    });
                 }
 
-                // 🚨 [핵심 변경] 시간 지연(setTimeout) 삭제! 즉시 교체!
-                mainAudio.pause();
+                // 🚨 [네이티브 앱 정공법] 오디오 흐름(Session)을 절대 끊지 않습니다!
+                // pause()나 load() 같은 꼼수 없이, 재생 중인 통로에 다음 곡 주소만 바꿔치기합니다.
                 mainAudio.src = track.audio.trim();
-                // ※ 네이버 앱에서 load()를 쓰면 흐름이 끊길 수 있으므로 삭제했습니다.
                 
-                // 🚨 지연 시간 없이 0초 만에 즉시 재생 명령 (타이머가 멈춰도 무조건 실행됨)
                 const playPromise = mainAudio.play();
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
@@ -956,12 +957,13 @@
                             });
                         }
                     }).catch(e => {
-                        console.log("즉시 재생 방어됨:", e.name);
-                        // 네이버가 막으면 무음 심장박동을 틀어놓고 0.5초 뒤 한 번 더 찌릅니다.
-                        if (heartbeatAudio && heartbeatAudio.paused) heartbeatAudio.play().catch(()=>{});
-                        setTimeout(() => {
-                            if(currentIndex === index) mainAudio.play().catch(()=>{});
-                        }, 500);
+                        console.log("네이버 재생 차단됨:", e.name);
+                        isPlaying = false; 
+                        if(btnPlay) btnPlay.innerText = "▶"; 
+                        
+                        // 최후의 보루: 만약 막혔다면 무음 심장박동을 틀고 0.5초 뒤 한 번 더 타격!
+                        if (heartbeatAudio) heartbeatAudio.play().catch(()=>{});
+                        setTimeout(() => { if(currentIndex === index) mainAudio.play().catch(()=>{}); }, 500);
                     });
                 }
 
