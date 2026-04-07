@@ -225,20 +225,17 @@
         .popup-content { color: #ccc; font-size: 15px; line-height: 1.6; margin-bottom: 25px; white-space: pre-wrap; }
         .popup-close-btn { background: #ff5722; color: #000; font-weight: bold; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; }
         .popup-close-today { background: none; border: none; color: #888; text-decoration: underline; margin-top: 15px; cursor: pointer; font-size: 13px; }
-        /* 🚨 [추가!] 재생목록 창을 무조건 맨 앞으로 끌어올리는 강력한 마법 */
+        /* 🚨 [최종 수정] 재생목록 창을 노란색 채팅 위젯 위로 완벽하게 덮어버리는 끝판왕 마법 */
         #playlist-modal {
-            z-index: 999999 !important;
-        }
-       /* 🚨 [수정] 재생목록 창 겹침 해결: 맨 앞으로 + 채팅창 위로 끌어올림 */
-        #playlist-modal {
-            bottom: 130px !important; /* PC: 채팅창 피해 위로 */
-            z-index: 999999 !important;
+            bottom: 100px !important; /* PC 화면에서 붕 뜨지 않게 조절 */
+            z-index: 2147483647 !important; /* 브라우저 최대 수치! 노란 아이콘 무조건 이김 */
         }
 
-        /* 📱 모바일 화면: 하단 플레이어와 채팅창 모두 피해서 더 위로 올림 */
+        /* 📱 모바일 화면 */
         @media (max-width: 900px) {
             #playlist-modal {
-                bottom: 180px !important;
+                bottom: 140px !important;
+                z-index: 2147483647 !important; /* 모바일에서도 노란 아이콘 완벽하게 덮음 */
             }
         }
    
