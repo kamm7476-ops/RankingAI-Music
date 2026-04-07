@@ -916,7 +916,7 @@
                     errorCount++;
                     if(errorCount >= 3) {
                         isPlaying = false; if(btnPlay) btnPlay.innerText = "▶"; errorCount = 0;
-                    } else { playNextTrack(); } // 지연 없이 즉시 넘김
+                    } else { playNextTrack(); }
                     return; 
                 }
                 
@@ -924,20 +924,32 @@
                 document.getElementById('main-player-artist').innerText = track.artist;
                 document.getElementById('main-player-cover').src = track.cover || '/logo.png';
                 
-                // 🚀 [멜론/지니급 코어 엔진 탑재] 🚀
-                // 네이버가 JS 타이머를 죽여도 살아남는 '오디오 자체 이벤트'에 심폐소생술을 이식합니다.
-                if (!window.naverMelonEngineAttached) {
-                    window.naverMelonEngineAttached = true;
+                // 🏃‍♂️ [네이버 3곡 멈춤 방어: 오디오 바통 터치 기술] 🏃‍♂️
+                if (!window.naverBatonAttached) {
+                    window.naverBatonAttached = true;
+                    
                     mainAudio.addEventListener('timeupdate', () => {
-                        // 노래가 스피커로 흘러나오는 내내 0.25초마다 브라우저를 강제로 깨웁니다.
-                        if (audioCtx && audioCtx.state === 'suspended') {
-                            audioCtx.resume().catch(()=>{});
+                        // 1. 브라우저 엔진 계속 깨우기 (딥 슬립 방지)
+                        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+                        
+                        // 2. 🚨 [핵심] 노래 끝나기 1.5초 전, 무음 오디오를 미리 재생하여 '오디오 공백'을 없앱니다!
+                        // 이렇게 하면 곡이 넘어가는 찰나에도 네이버는 "오디오가 계속 재생 중이군" 하고 속게 됩니다.
+                        if (mainAudio.duration && (mainAudio.duration - mainAudio.currentTime < 1.5)) {
+                            if (heartbeatAudio && heartbeatAudio.paused) {
+                                heartbeatAudio.play().catch(()=>{});
+                            }
                         }
+                    });
+
+                    // 3. 다음 곡이 무사히 재생을 시작하면, 바통(무음 오디오)을 다시 조용히 내려놓습니다.
+                    mainAudio.addEventListener('playing', () => {
+                         if (heartbeatAudio && !heartbeatAudio.paused) {
+                             heartbeatAudio.pause();
+                         }
                     });
                 }
 
-                // 🚨 [네이티브 앱 정공법] 오디오 흐름(Session)을 절대 끊지 않습니다!
-                // pause()나 load() 같은 꼼수 없이, 재생 중인 통로에 다음 곡 주소만 바꿔치기합니다.
+                // 🚨 지연 시간(setTimeout) 없이 즉시 다음 곡 주입 및 재생
                 mainAudio.src = track.audio.trim();
                 
                 const playPromise = mainAudio.play();
@@ -961,7 +973,7 @@
                         isPlaying = false; 
                         if(btnPlay) btnPlay.innerText = "▶"; 
                         
-                        // 최후의 보루: 만약 막혔다면 무음 심장박동을 틀고 0.5초 뒤 한 번 더 타격!
+                        // 방어막이 뚫려도 0.5초 뒤 마지막 강제 재생 시도
                         if (heartbeatAudio) heartbeatAudio.play().catch(()=>{});
                         setTimeout(() => { if(currentIndex === index) mainAudio.play().catch(()=>{}); }, 500);
                     });
