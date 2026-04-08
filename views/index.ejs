@@ -988,35 +988,37 @@
                     window.carrierWaveAudio.volume = 0.01;
                 }
 
-                // 👑 [업그레이드된 이중 안전망] MP3 가짜 재생시간 방어 (4초 스왑 + 대기 감지)
+                // 👑 [최종 완성형 이중 안전망] 정석(0.5초) + 오류 곡(Stalled) 비상 탈출
                 if (!window.proEngineAttached) {
                     window.proEngineAttached = true;
 
-                    // 1. 덫을 4.0초 전으로 엄청나게 넓힙니다 (가짜 시간 오차 무시)
+                    // 1. [정석] 멀쩡한 노래는 꼬리를 자르지 않고 '0.5초 전'에 부드럽게 스왑합니다.
                     mainAudio.addEventListener('timeupdate', () => {
-                        if (mainAudio.duration && (mainAudio.duration - mainAudio.currentTime <= 4.0)) {
+                        if (mainAudio.duration && (mainAudio.duration - mainAudio.currentTime <= 0.5)) {
                             if (!window.isSwapping) {
                                 window.isSwapping = true;
-                                console.log("👑 PRO 엔진: 곡 종료 4.0초 전 넉넉하게 바통 터치!");
+                                console.log("👑 PRO 엔진: 곡 종료 0.5초 전 정상 바통 터치!");
                                 playNextTrack(); 
                             }
                         }
                     });
 
-                    // 2. 🚨 노래 끝부분(5초 이내)에서 데이터가 없어서 멈춰버리면 즉시 강제 스킵!
+                    // 2. 🚨 [비상 센서] 노래 끝부분(5초 이내)인데 오디오 파일 오류로 허공에 멈췄을 때만 즉시 낚아챕니다!
                     const forceSkipIfStuck = () => {
+                        // 정상적으로 재생 중일 때는 발동 안 함. 멈춰 섰을 때만 발동!
                         if (mainAudio.duration && (mainAudio.duration - mainAudio.currentTime <= 5.0)) {
                             if (!window.isSwapping) {
                                 window.isSwapping = true;
-                                console.log("👑 PRO 엔진: 끝부분 대기(Stalled) 감지! 즉시 강제 스킵!");
+                                console.log("👑 PRO 엔진: 가짜 재생시간 대기(Stalled) 감지! 비상 스킵!");
                                 playNextTrack();
                             }
                         }
                     };
+                    // 브라우저가 "데이터가 없어서 멈췄어요"라고 할 때만 센서 작동
                     mainAudio.addEventListener('waiting', forceSkipIfStuck);
                     mainAudio.addEventListener('stalled', forceSkipIfStuck);
 
-                    // 3. 정상 종료 시 비상 스킵
+                    // 3. 정상 종료 시 백업
                     mainAudio.onended = () => {
                         if (!window.isSwapping) {
                             window.isSwapping = true;
