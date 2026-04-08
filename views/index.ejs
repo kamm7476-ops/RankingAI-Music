@@ -988,17 +988,35 @@
                     window.carrierWaveAudio.volume = 0.01;
                 }
 
-                // 👑 이중 안전망: 1.5초 넉넉하게 스왑 + 비상 탈출구
+                // 👑 [업그레이드된 이중 안전망] MP3 가짜 재생시간 방어 (4초 스왑 + 대기 감지)
                 if (!window.proEngineAttached) {
                     window.proEngineAttached = true;
+
+                    // 1. 덫을 4.0초 전으로 엄청나게 넓힙니다 (가짜 시간 오차 무시)
                     mainAudio.addEventListener('timeupdate', () => {
-                        if (mainAudio.duration && (mainAudio.duration - mainAudio.currentTime <= 1.5)) {
+                        if (mainAudio.duration && (mainAudio.duration - mainAudio.currentTime <= 4.0)) {
                             if (!window.isSwapping) {
                                 window.isSwapping = true;
+                                console.log("👑 PRO 엔진: 곡 종료 4.0초 전 넉넉하게 바통 터치!");
                                 playNextTrack(); 
                             }
                         }
                     });
+
+                    // 2. 🚨 노래 끝부분(5초 이내)에서 데이터가 없어서 멈춰버리면 즉시 강제 스킵!
+                    const forceSkipIfStuck = () => {
+                        if (mainAudio.duration && (mainAudio.duration - mainAudio.currentTime <= 5.0)) {
+                            if (!window.isSwapping) {
+                                window.isSwapping = true;
+                                console.log("👑 PRO 엔진: 끝부분 대기(Stalled) 감지! 즉시 강제 스킵!");
+                                playNextTrack();
+                            }
+                        }
+                    };
+                    mainAudio.addEventListener('waiting', forceSkipIfStuck);
+                    mainAudio.addEventListener('stalled', forceSkipIfStuck);
+
+                    // 3. 정상 종료 시 비상 스킵
                     mainAudio.onended = () => {
                         if (!window.isSwapping) {
                             window.isSwapping = true;
@@ -1014,7 +1032,7 @@
             }
         }
         
-        // 🌟 3. 마법의 똑똑한 다음 곡 넘기기 기능! (4가지 모드 완벽 대응)
+        // 🌟 4. 마법의 똑똑한 다음 곡 넘기기 기능! (4가지 모드 완벽 대응)
         function playNextTrack() {
             if (currentIndex < playlist.length - 1) {
                 loadTrack(currentIndex + 1);
