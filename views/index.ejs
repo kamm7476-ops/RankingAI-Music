@@ -1238,32 +1238,6 @@
                     });
                 }
             }
-        });// 🚀 [통화 종료 후 화면 복귀 시 자동 재생 엔진] 🚀
-        let wasPlayingBeforeInterruption = false;
-
-        mainAudio.addEventListener('pause', () => {
-            if (isPlaying) {
-                console.log("📞 시스템(전화 등)에 의해 오디오 강제 정지됨!");
-                wasPlayingBeforeInterruption = true; 
-            }
-        });
-
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible' && wasPlayingBeforeInterruption) {
-                console.log("👀 화면 복귀 감지! 중단된 음악을 즉시 자동 재생 시도합니다.");
-                
-                const playPromise = mainAudio.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        console.log("✅ 통화 종료 후 자동 재생 성공!");
-                        wasPlayingBeforeInterruption = false; 
-                        isPlaying = true;
-                        if(btnPlay) btnPlay.innerText = "⏸";
-                    }).catch(e => {
-                        console.log("❌ 브라우저 자동재생 방어막에 막힘 (터치 1회 필요)");
-                    });
-                }
-            }
         });
     </script>
 
