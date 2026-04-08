@@ -921,7 +921,7 @@
                 const track = playlist[index];
                 currentIndex = index; 
                 
-                // 🚨 [핵심 해결] 타이머에 의존하지 않고, 새 곡이 시작될 때 자물쇠를 즉시 풀어버립니다!
+                // 🚨 자물쇠 즉시 해제
                 window.isSwapping = false; 
                 
                 updatePlaylistUI();
@@ -938,30 +938,55 @@
                 document.getElementById('main-player-title').innerText = track.title;
                 document.getElementById('main-player-artist').innerText = track.artist;
                 document.getElementById('main-player-cover').src = track.cover || '/logo.png';
+
+                // 🌟 [최신 기술 도입] OS에 "나는 플레이리스트다!" 라고 직접 신고합니다.
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.playbackState = "playing";
+                    navigator.mediaSession.metadata = new MediaMetadata({
+                        title: track.title, 
+                        artist: track.artist || 'RANKING AI', 
+                        album: 'RANKING AI TOP 100',
+                        artwork: [{ src: track.cover || 'https://rankingaimusic.com/logo.png', sizes: '512x512', type: 'image/jpeg' }]
+                    });
+
+                    // 🚨 [핵심] 다음곡/이전곡 액션을 OS에 미리 등록해 두면, 화면이 꺼져도 권한을 빼앗지 않습니다!
+                    try {
+                        navigator.mediaSession.setActionHandler('nexttrack', () => { window.isSwapping = true; playNextTrack(); });
+                        navigator.mediaSession.setActionHandler('previoustrack', () => { 
+                            if(typeof playPrevTrack === 'function') playPrevTrack(); 
+                        });
+                        navigator.mediaSession.setActionHandler('play', () => mainAudio.play());
+                        navigator.mediaSession.setActionHandler('pause', () => mainAudio.pause());
+                    } catch(e) {}
+                }
                 
-                // 👑 [PRO 전용 기술] 네이버 엔진의 'ended' 이벤트 강제 탈취
+                // 👑 [안전장치 2중 설계] 스로틀링 방어 + 비상 스킵 복구
                 if (!window.proEngineAttached) {
                     window.proEngineAttached = true;
-                    
-                    mainAudio.onended = (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    };
 
+                    // 1. 시계가 느려질 것을 대비해 0.5초가 아닌 '1.5초' 전부터 넉넉하게 낚아챕니다.
                     mainAudio.addEventListener('timeupdate', () => {
-                        // 곡 종료 0.5초 전으로 조금 더 여유를 두어 백그라운드 딜레이에 대비합니다.
-                        if (mainAudio.duration && (mainAudio.duration - mainAudio.currentTime <= 0.5)) {
-                            // 자물쇠가 풀려있을 때만 스킵 발동!
+                        if (mainAudio.duration && (mainAudio.duration - mainAudio.currentTime <= 1.5)) {
                             if (!window.isSwapping) {
-                                window.isSwapping = true; // 자물쇠 잠금 (중복 실행 방지)
-                                console.log("👑 PRO 엔진: 곡 종료 0.5초 전 강제 바통 터치!");
+                                window.isSwapping = true;
+                                console.log("👑 PRO 엔진: 곡 종료 1.5초 전 여유롭게 바통 터치!");
                                 playNextTrack(); 
-                                // (이전에 있던 setTimeout 자물쇠 해제 로직은 삭제했습니다)
                             }
                         }
                     });
+
+                    // 2. 🚨 최후의 보루: 네이버가 시계를 아예 멈춰서 1.5초 구간마저 건너뛰었다면?
+                    // 노래가 끝났을 때(ended) 아무것도 안 하게 막았던 멍청한 과거를 버리고, 여기서 바로 다음 곡을 쏩니다!
+                    mainAudio.onended = () => {
+                        if (!window.isSwapping) {
+                            window.isSwapping = true;
+                            console.log("👑 PRO 엔진: timeupdate 무시됨 -> ended 이벤트로 비상 스킵 발동!");
+                            playNextTrack();
+                        }
+                    };
                 }
 
+                // 즉시 재생
                 mainAudio.src = track.audio.trim();
                 
                 const playPromise = mainAudio.play();
@@ -970,16 +995,6 @@
                         errorCount = 0; 
                         isPlaying = true;
                         if(btnPlay) btnPlay.innerText = "⏸";
-
-                        if ('mediaSession' in navigator) {
-                            navigator.mediaSession.playbackState = "playing";
-                            navigator.mediaSession.metadata = new MediaMetadata({
-                                title: track.title, 
-                                artist: track.artist || 'RANKING AI', 
-                                album: 'RANKING AI TOP 100',
-                                artwork: [{ src: track.cover || 'https://rankingaimusic.com/logo.png', sizes: '512x512', type: 'image/jpeg' }]
-                            });
-                        }
                     }).catch(e => {
                         console.log("재생 방어됨:", e.name);
                         isPlaying = false; 
