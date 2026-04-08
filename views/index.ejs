@@ -916,12 +916,11 @@
             }
         }
 
-        function loadTrack(index) {
+       function loadTrack(index) {
             if(index >= 0 && index < playlist.length) {
                 const track = playlist[index];
                 currentIndex = index; 
                 
-                // 🚨 자물쇠 즉시 해제
                 window.isSwapping = false; 
                 
                 updatePlaylistUI();
@@ -939,7 +938,18 @@
                 document.getElementById('main-player-artist').innerText = track.artist;
                 document.getElementById('main-player-cover').src = track.cover || '/logo.png';
 
-                // 🌟 [최신 기술 도입] OS에 "나는 플레이리스트다!" 라고 직접 신고합니다.
+                // 🚀 [대형 플랫폼 비기: 무음 반송파(Carrier Wave) 장착] 🚀
+                // 네트워크가 느려서 곡 사이에 공백이 생겨도 절대 멈추지 않게 방어합니다.
+                if (!window.carrierWaveAudio) {
+                    window.carrierWaveAudio = new Audio();
+                    // 브라우저가 다운로드할 필요가 없는 1초짜리 초경량 무음 MP3 파일 (Base64)
+                    window.carrierWaveAudio.src = "data:audio/mpeg;base64,//OQxAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq";
+                    window.carrierWaveAudio.loop = true; // 영원히 무한 반복
+                    window.carrierWaveAudio.volume = 0.01;
+                    console.log("👑 PRO 엔진: 곡 사이 공백을 메꿀 무음 반송파 생성 완료!");
+                }
+                
+                // 🌟 OS(모바일 시스템)에 "이건 1곡짜리가 아니라 플레이리스트다!" 라고 정식 신고
                 if ('mediaSession' in navigator) {
                     navigator.mediaSession.playbackState = "playing";
                     navigator.mediaSession.metadata = new MediaMetadata({
@@ -949,44 +959,37 @@
                         artwork: [{ src: track.cover || 'https://rankingaimusic.com/logo.png', sizes: '512x512', type: 'image/jpeg' }]
                     });
 
-                    // 🚨 [핵심] 다음곡/이전곡 액션을 OS에 미리 등록해 두면, 화면이 꺼져도 권한을 빼앗지 않습니다!
                     try {
                         navigator.mediaSession.setActionHandler('nexttrack', () => { window.isSwapping = true; playNextTrack(); });
-                        navigator.mediaSession.setActionHandler('previoustrack', () => { 
-                            if(typeof playPrevTrack === 'function') playPrevTrack(); 
-                        });
-                        navigator.mediaSession.setActionHandler('play', () => mainAudio.play());
-                        navigator.mediaSession.setActionHandler('pause', () => mainAudio.pause());
+                        navigator.mediaSession.setActionHandler('previoustrack', () => { if(typeof playPrevTrack === 'function') playPrevTrack(); });
+                        navigator.mediaSession.setActionHandler('play', () => { mainAudio.play(); window.carrierWaveAudio.play().catch(()=>{}); });
+                        navigator.mediaSession.setActionHandler('pause', () => { mainAudio.pause(); window.carrierWaveAudio.pause(); });
                     } catch(e) {}
                 }
                 
-                // 👑 [안전장치 2중 설계] 스로틀링 방어 + 비상 스킵 복구
+                // 👑 이중 안전망: 1.5초 넉넉하게 스왑 + 비상 탈출구
                 if (!window.proEngineAttached) {
                     window.proEngineAttached = true;
 
-                    // 1. 시계가 느려질 것을 대비해 0.5초가 아닌 '1.5초' 전부터 넉넉하게 낚아챕니다.
+                    // 시계가 느려질 것을 대비해 1.5초 전부터 넉넉하게 바통을 터치합니다.
                     mainAudio.addEventListener('timeupdate', () => {
                         if (mainAudio.duration && (mainAudio.duration - mainAudio.currentTime <= 1.5)) {
                             if (!window.isSwapping) {
                                 window.isSwapping = true;
-                                console.log("👑 PRO 엔진: 곡 종료 1.5초 전 여유롭게 바통 터치!");
                                 playNextTrack(); 
                             }
                         }
                     });
 
-                    // 2. 🚨 최후의 보루: 네이버가 시계를 아예 멈춰서 1.5초 구간마저 건너뛰었다면?
-                    // 노래가 끝났을 때(ended) 아무것도 안 하게 막았던 멍청한 과거를 버리고, 여기서 바로 다음 곡을 쏩니다!
+                    // 네이버가 너무 깊이 잠들어서 1.5초 구간을 건너뛰었다면 여기서 강제로 스킵!
                     mainAudio.onended = () => {
                         if (!window.isSwapping) {
                             window.isSwapping = true;
-                            console.log("👑 PRO 엔진: timeupdate 무시됨 -> ended 이벤트로 비상 스킵 발동!");
                             playNextTrack();
                         }
                     };
                 }
 
-                // 즉시 재생
                 mainAudio.src = track.audio.trim();
                 
                 const playPromise = mainAudio.play();
@@ -995,6 +998,9 @@
                         errorCount = 0; 
                         isPlaying = true;
                         if(btnPlay) btnPlay.innerText = "⏸";
+                        
+                        // 메인 노래가 정상 재생을 시작하면, 무음 반송파도 찰거머리처럼 같이 틀어줍니다.
+                        window.carrierWaveAudio.play().catch(()=>{});
                     }).catch(e => {
                         console.log("재생 방어됨:", e.name);
                         isPlaying = false; 
