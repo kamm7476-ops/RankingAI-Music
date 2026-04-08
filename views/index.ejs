@@ -922,7 +922,29 @@
                 currentIndex = index; 
                 
                 window.isSwapping = false; 
-                
+                // 🚀 [여기에 추가!] 네이버 장기 수면 방지: 가변 무음 펄스 엔진
+                if (!window.naverDeepSleepDefender) {
+                    window.naverDeepSleepDefender = true;
+                    try {
+                        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                        const oscillator = audioCtx.createOscillator();
+                        const gainNode = audioCtx.createGain();
+
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(1, audioCtx.currentTime); // 사람 귀에 안 들리는 1Hz 진동
+                        gainNode.gain.setValueAtTime(0.001, audioCtx.currentTime); // 시스템이 '재생 중'으로 인식할 최소 볼륨
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioCtx.destination);
+                        oscillator.start();
+
+                        // 1분마다 주파수를 랜덤하게 바꿔서 네이버 AI를 속임
+                        setInterval(() => {
+                            oscillator.frequency.setValueAtTime(Math.random() * 2, audioCtx.currentTime);
+                            if (audioCtx.state === 'suspended') audioCtx.resume();
+                        }, 60000);
+                    } catch (e) { console.log("펄스 엔진 기동 실패"); }
+                }
                 // 빈 파일 예외 처리
                 if(!track.audio || track.audio.trim() === "" || track.audio === "undefined") {
                     errorCount++;
