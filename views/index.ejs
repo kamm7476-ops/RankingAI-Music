@@ -981,7 +981,7 @@
                     });
                 }
 
-                // 👑 [이중 엔진] 15초 전 캐싱 + 0.3초 전 강제 스왑
+                // 👑 [풀옵션 엔진] 15초 전 캐싱 + 0.3초 스왑 + 🚨멈춤 감지 즉시 탈출🚨
                 if (!window.proEngineAttached) {
                     window.proEngineAttached = true;
                     window.nextAudioCache = new Audio();
@@ -1004,6 +1004,21 @@
                         }
                     });
 
+                    // 🚨 [여기에 비상 탈출 센서가 추가되었습니다!] 🚨
+                    // 가짜 시간 때문에 2초를 남기고 오디오가 멈춰버렸을 때 (waiting/stalled)
+                    const forceSkipIfStuck = () => {
+                        if (mainAudio.duration && (mainAudio.duration - mainAudio.currentTime <= 5.0)) {
+                            if (!window.isSwapping) {
+                                window.isSwapping = true;
+                                console.log("👑 PRO: 끝부분 허공 멈춤(Stalled) 감지! 즉시 강제 스킵!");
+                                playNextTrack();
+                            }
+                        }
+                    };
+                    mainAudio.addEventListener('waiting', forceSkipIfStuck);
+                    mainAudio.addEventListener('stalled', forceSkipIfStuck);
+
+                    // 3. 정상 종료 시 백업
                     mainAudio.onended = () => {
                         if (!window.isSwapping) {
                             window.isSwapping = true;
