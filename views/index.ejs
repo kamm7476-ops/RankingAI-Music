@@ -147,11 +147,20 @@
         }
         .player-buttons .play-btn:hover { transform: scale(1.05); background: #ff5722; color: #fff; }
         
-        .progress-area { width: 100%; display: flex; align-items: center; gap: 8px; font-size: 11px; color: #a7a7a7; font-weight: 500; }
-        #progress-bar { flex: 1; height: 4px; border-radius: 2px; -webkit-appearance: none; background: #4d4d4d; outline: none; cursor: pointer; transition: 0.1s; }
-        #progress-bar::-webkit-slider-thumb { -webkit-appearance: none; width: 0; height: 0; border-radius: 50%; background: #fff; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        ..progress-area { width: 100%; display: flex; align-items: center; gap: 8px; font-size: 11px; color: #a7a7a7; font-weight: 500; }
+        #progress-bar { 
+            flex: 1; height: 4px; border-radius: 2px; -webkit-appearance: none; 
+            background: linear-gradient(to right, #ff5722 0%, #4d4d4d 0%); /* 🚀 시작할 때 빈 게이지 */
+            outline: none; cursor: pointer; transition: 0.1s; 
+        }
+        #progress-bar::-webkit-slider-thumb { 
+            -webkit-appearance: none; width: 0; height: 0; border-radius: 50%; 
+            background: #ff5722; /* 🚀 동그라미를 주황색으로 포인트! */
+            transition: 0.2s; box-shadow: 0 0 8px rgba(255,87,34,0.8); /* 🚀 은은한 빛 번짐 */
+        }
         .progress-area:hover #progress-bar::-webkit-slider-thumb { width: 12px; height: 12px; }
-        .progress-area:hover #progress-bar { background: #5a5a5a; }
+        /* JS 색상 채우기를 방해하므로 아래 hover 속성은 지웁니다! */
+        /* .progress-area:hover #progress-bar { background: #5a5a5a; } */
 
         /* 🌟 우측 버튼 (가사/목록 한글 버튼 전용 스타일) */
         .player-right-placeholder { display: flex; justify-content: flex-end; align-items: center; min-width: 0; gap: 10px; }
@@ -1033,7 +1042,7 @@
             }
         }
         
-        // 🌟 4. 마법의 똑똑한 다음 곡 넘기기 기능! (4가지 모드 완벽 대응)
+       // 🌟 4. 마법의 똑똑한 다음 곡 넘기기 기능! (4가지 모드 완벽 대응)
         function playNextTrack() {
             if (currentIndex < playlist.length - 1) {
                 loadTrack(currentIndex + 1);
@@ -1068,7 +1077,12 @@
         mainAudio.addEventListener('timeupdate', () => {
             const current = mainAudio.currentTime; const duration = mainAudio.duration;
             if (duration && !isNaN(duration)) {
-                progressBar.value = (current / duration) * 100;
+                const progressPercent = (current / duration) * 100;
+                progressBar.value = progressPercent;
+                
+                // 🚀 [핵심] 재생되는 퍼센트만큼 실시간으로 주황색 배경 채우기!
+                progressBar.style.background = `linear-gradient(to right, #ff5722 ${progressPercent}%, #4d4d4d ${progressPercent}%)`;
+
                 let minC = Math.floor(current / 60); let secC = Math.floor(current % 60);
                 if(secC < 10) secC = "0" + secC; timeCurrent.innerText = minC + ":" + secC;
                 let minD = Math.floor(duration / 60); let secD = Math.floor(duration % 60);
@@ -1094,7 +1108,13 @@
             }
         });
 
-        progressBar.addEventListener('input', () => { if (mainAudio.duration) mainAudio.currentTime = (progressBar.value / 100) * mainAudio.duration; });
+        progressBar.addEventListener('input', () => { 
+            if (mainAudio.duration) {
+                mainAudio.currentTime = (progressBar.value / 100) * mainAudio.duration; 
+                // 🚀 사용자가 마우스로 드래그 할 때도 즉시 색깔 채우기
+                progressBar.style.background = `linear-gradient(to right, #ff5722 ${progressBar.value}%, #4d4d4d ${progressBar.value}%)`;
+            }
+        });
 
         // 🌟 1곡 무한재생 대응
         mainAudio.addEventListener('ended', () => {
