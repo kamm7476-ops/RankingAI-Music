@@ -1145,10 +1145,27 @@
         });
 
         function playSingleTrack(btnElement) {
-            const tr = btnElement.closest('.music-item'); const audioUrl = tr.dataset.audio;
+            const tr = btnElement.closest('.music-item'); 
+            const audioUrl = tr.dataset.audio;
             if (!audioUrl || audioUrl === "undefined" || audioUrl.trim() === "") return alert("아직 음원이 제대로 업로드되지 않은 곡입니다!");
-            playlist = [{ id: tr.dataset.id, title: tr.dataset.title, artist: tr.dataset.artist, cover: tr.dataset.cover, audio: audioUrl, lyrics: tr.dataset.lyrics }]; 
-            loadTrack(0);
+            
+            // 👑 [해결책] 현재 화면에 있는 '모든 곡'을 플레이리스트 큐(Queue)에 먼저 꽉 채워 넣습니다!
+            const rows = document.querySelectorAll('.music-item');
+            playlist = Array.from(rows).map(row => ({ 
+                id: row.dataset.id, title: row.dataset.title, artist: row.dataset.artist, 
+                cover: row.dataset.cover, audio: row.dataset.audio, lyrics: row.dataset.lyrics 
+            })).filter(t => t.audio && t.audio.trim() !== "" && t.audio !== "undefined");
+            
+            // 내가 방금 클릭한 곡이 전체 100곡 중 몇 번째(Index)인지 찾아냅니다.
+            const clickedId = tr.dataset.id;
+            const targetIndex = playlist.findIndex(t => t.id === clickedId);
+            
+            // 그 번호부터 재생을 시작합니다! (끝나면 자연스럽게 다음 곡으로 무한 주행)
+            if (targetIndex !== -1) {
+                loadTrack(targetIndex);
+            } else {
+                loadTrack(0); // 혹시 못 찾으면 1번 곡부터
+            }
         }
 
         function playAll() {
