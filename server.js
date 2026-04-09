@@ -167,6 +167,26 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// 🚀🚀🚀 [여기에 출입증 코드 추가!] 🚀🚀🚀
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*"); // 모든 외부 사이트의 택배 허용!
+    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type");
+    // 크롬이 '이 택배 받아도 돼?' 하고 미리 물어보는 것(OPTIONS)에 무조건 OK 사인 줌
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+    next();
+});
+// 🚀🚀🚀 [출입증 코드 끝] 🚀🚀🚀
+
+app.use(session({
+    secret: 'ranking-admin-secure-key',
+// ... (아래는 기존 코드 그대로) ...
+
 app.use(session({
   secret: 'ranking_secret_key_1234', 
   resave: false,
