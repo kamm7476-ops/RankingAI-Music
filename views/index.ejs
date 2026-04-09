@@ -147,20 +147,29 @@
         }
         .player-buttons .play-btn:hover { transform: scale(1.05); background: #ff5722; color: #fff; }
         
-        ..progress-area { width: 100%; display: flex; align-items: center; gap: 8px; font-size: 11px; color: #a7a7a7; font-weight: 500; }
+        .progress-area { width: 100%; display: flex; align-items: center; gap: 8px; font-size: 11px; color: #a7a7a7; font-weight: 500; }
+        
         #progress-bar { 
-            flex: 1; height: 4px; border-radius: 2px; -webkit-appearance: none; 
-            background: linear-gradient(to right, #ff5722 0%, #4d4d4d 0%); /* 🚀 시작할 때 빈 게이지 */
-            outline: none; cursor: pointer; transition: 0.1s; 
+            flex: 1; 
+            height: 6px; /* 🚀 선 두께를 4px에서 6px로 키워서 터치하기 편하게! */
+            border-radius: 3px; 
+            -webkit-appearance: none; 
+            background: linear-gradient(to right, #ff5722 0%, #4d4d4d 0%); 
+            outline: none; 
+            cursor: pointer; 
+            transition: 0.1s; 
         }
+        
         #progress-bar::-webkit-slider-thumb { 
-            -webkit-appearance: none; width: 0; height: 0; border-radius: 50%; 
-            background: #ff5722; /* 🚀 동그라미를 주황색으로 포인트! */
-            transition: 0.2s; box-shadow: 0 0 8px rgba(255,87,34,0.8); /* 🚀 은은한 빛 번짐 */
+            -webkit-appearance: none; 
+            width: 14px; /* 🚀 숨어있던 동그라미를 항상 보이게 원상복구! */
+            height: 14px; 
+            border-radius: 50%; 
+            background: #ff5722; 
+            transition: 0.2s; 
+            cursor: pointer;
+            box-shadow: 0 0 6px rgba(255,87,34,0.8); /* 은은한 빛 번짐 */
         }
-        .progress-area:hover #progress-bar::-webkit-slider-thumb { width: 12px; height: 12px; }
-        /* JS 색상 채우기를 방해하므로 아래 hover 속성은 지웁니다! */
-        /* .progress-area:hover #progress-bar { background: #5a5a5a; } */
 
         /* 🌟 우측 버튼 (가사/목록 한글 버튼 전용 스타일) */
         .player-right-placeholder { display: flex; justify-content: flex-end; align-items: center; min-width: 0; gap: 10px; }
