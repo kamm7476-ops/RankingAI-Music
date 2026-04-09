@@ -921,11 +921,11 @@
                 const track = playlist[index];
                 currentIndex = index; 
                 
-                // 자물쇠 초기화
+                // 🚨 [필수 수정] 자물쇠 2개를 모두 즉시 해제하여 다음 곡 로딩 준비!
                 window.isSwapping = false; 
                 window.isPreloading = false; 
 
-                // 👑 네이버 딥슬립 방지 엔진
+                // 👑 [네이버 딥슬립 방지] 초저주파 펄스 엔진 (강화 버전)
                 if (!window.naverDeepSleepDefender) {
                     window.naverDeepSleepDefender = true;
                     try {
@@ -933,7 +933,7 @@
                         const oscillator = audioCtx.createOscillator();
                         const gainNode = audioCtx.createGain();
                         oscillator.type = 'sine';
-                        oscillator.frequency.setValueAtTime(15, audioCtx.currentTime);
+                        oscillator.frequency.setValueAtTime(15, audioCtx.currentTime); // 15Hz: 실제 스피커 물리 진동 유발
                         gainNode.gain.setValueAtTime(0.005, audioCtx.currentTime); 
                         oscillator.connect(gainNode);
                         gainNode.connect(audioCtx.destination);
@@ -950,6 +950,7 @@
                     else { playNextTrack(); } return; 
                 }
                 
+                // 🚀 [우선순위] 오디오 소스부터 즉시 할당
                 mainAudio.src = track.audio.trim();
                 const playPromise = mainAudio.play();
                 
@@ -959,6 +960,7 @@
                         if(btnPlay) btnPlay.innerText = "⏸";
                         if(window.carrierWaveAudio) window.carrierWaveAudio.play().catch(()=>{});
 
+                        // 오디오 안정화 후 UI 업데이트
                         setTimeout(() => {
                             updatePlaylistUI();
                             loadSyncLyrics(track.lyrics);
@@ -979,17 +981,23 @@
                     });
                 }
 
+                // 👑 [이중 엔진] 15초 전 캐싱 + 0.3초 전 강제 스왑
                 if (!window.proEngineAttached) {
                     window.proEngineAttached = true;
                     window.nextAudioCache = new Audio();
 
                     mainAudio.addEventListener('timeupdate', () => {
                         const remain = mainAudio.duration - mainAudio.currentTime;
+                        
+                        // 1. 다음 곡 미리 찌르기 (15초 전)
                         if (remain <= 15.0 && !window.isPreloading && currentIndex < playlist.length - 1) {
-                            window.isPreloading = true;
+                            window.isPreloading = true; // 자물쇠 잠금
                             window.nextAudioCache.src = playlist[currentIndex + 1].audio.trim();
                             window.nextAudioCache.load();
+                            console.log("👑 PRO: 다음 곡 프리로딩 시작");
                         }
+
+                        // 2. 0.3초 전 강제 릴레이
                         if (remain <= 0.3 && !window.isSwapping) {
                             window.isSwapping = true;
                             playNextTrack(); 
