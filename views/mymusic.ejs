@@ -170,11 +170,13 @@
     </div>
 
     <script>
-        // 기존 모든 기능 스크립트 그대로 유지
+        // 기본 변수 세팅
         let playlist = [];
         let currentIndex = 0;
         let loopMode = 0; // 0:안함, 1:한곡, 2:전체
         let isPlaying = false;
+        let errorCount = 0; // 🚨 비상 엔진용 에러 카운트 추가
+
         const mainAudio = document.getElementById('main-audio');
         const btnPlay = document.getElementById('btn-play');
         const btnLoop = document.getElementById('btn-loop-mode');
@@ -237,19 +239,114 @@
             }
         }
 
+        // 👑 [여기가 핵심!] 네이버 철벽 방어용 마스터 loadTrack 엔진
         function loadTrack(index) {
             if(index >= 0 && index < playlist.length) {
                 const track = playlist[index];
-                currentIndex = index;
-                document.getElementById('main-player-title').innerText = track.title;
-                document.getElementById('main-player-artist').innerText = track.artist;
-                document.getElementById('main-player-cover').src = track.cover;
-                mainAudio.src = track.audio;
+                currentIndex = index; 
+                
+                window.isSwapping = false; 
+                window.isPreloading = false; 
+
+                // 🚀 1. 네이버 장기 수면 방지: 가변 무음 펄스 엔진
+                if (!window.naverDeepSleepDefender) {
+                    window.naverDeepSleepDefender = true;
+                    try {
+                        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                        const oscillator = audioCtx.createOscillator();
+                        const gainNode = audioCtx.createGain();
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(15, audioCtx.currentTime); 
+                        gainNode.gain.setValueAtTime(0.005, audioCtx.currentTime); 
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioCtx.destination);
+                        oscillator.start();
+                        setInterval(() => {
+                            if (audioCtx.state === 'suspended') audioCtx.resume();
+                        }, 20000);
+                    } catch (e) {}
+                }
+
+                // 빈 파일 예외 처리
+                if(!track.audio || track.audio.trim() === "" || track.audio === "undefined") {
+                    errorCount++;
+                    if(errorCount >= 3) { isPlaying = false; btnPlay.innerHTML = "<i class='bx bx-play'></i>"; errorCount = 0; }
+                    else { playNextTrack(); } return; 
+                }
+
+                // 오디오 즉시 재생
+                mainAudio.src = track.audio.trim();
                 mainAudio.load();
-                mainAudio.play().then(() => {
-                    isPlaying = true;
-                    btnPlay.innerHTML = "<i class='bx bx-pause'></i>";
-                });
+                const playPromise = mainAudio.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        errorCount = 0; 
+                        isPlaying = true;
+                        btnPlay.innerHTML = "<i class='bx bx-pause'></i>";
+                        
+                        setTimeout(() => {
+                            document.getElementById('main-player-title').innerText = track.title;
+                            document.getElementById('main-player-artist').innerText = track.artist;
+                            document.getElementById('main-player-cover').src = track.cover || 'https://via.placeholder.com/55/1a1b1c/333333?text=AI';
+
+                            if ('mediaSession' in navigator) {
+                                navigator.mediaSession.playbackState = "playing";
+                                navigator.mediaSession.metadata = new MediaMetadata({
+                                    title: track.title, 
+                                    artist: track.artist || 'RANKING AI',
+                                    artwork: [{ src: track.cover || 'https://via.placeholder.com/55', sizes: '512x512', type: 'image/jpeg' }]
+                                });
+                            }
+                        }, 50);
+                    }).catch(e => {
+                        isPlaying = false; btnPlay.innerHTML = "<i class='bx bx-play'></i>"; 
+                        setTimeout(() => { if(currentIndex === index) mainAudio.play().catch(()=>{}); }, 500);
+                    });
+                }
+
+                // 🚀 2. [풀옵션 엔진] 15초 전 캐싱 + 0.3초 스왑 + 멈춤 감지 비상 탈출
+                if (!window.proEngineAttached) {
+                    window.proEngineAttached = true;
+                    window.nextAudioCache = new Audio();
+
+                    mainAudio.addEventListener('timeupdate', () => {
+                        const remain = mainAudio.duration - mainAudio.currentTime;
+                        
+                        // 15초 전 프리로딩
+                        if (remain <= 15.0 && !window.isPreloading && currentIndex < playlist.length - 1) {
+                            window.isPreloading = true; 
+                            window.nextAudioCache.src = playlist[currentIndex + 1].audio.trim();
+                            window.nextAudioCache.load();
+                        }
+
+                        // 0.3초 전 강제 스왑
+                        if (remain <= 0.3 && !window.isSwapping) {
+                            window.isSwapping = true;
+                            playNextTrack(); 
+                        }
+                    });
+
+                    // 비상 탈출 센서
+                    const forceSkipIfStuck = () => {
+                        if (mainAudio.duration && (mainAudio.duration - mainAudio.currentTime <= 5.0)) {
+                            if (!window.isSwapping) {
+                                window.isSwapping = true;
+                                playNextTrack();
+                            }
+                        }
+                    };
+                    mainAudio.addEventListener('waiting', forceSkipIfStuck);
+                    mainAudio.addEventListener('stalled', forceSkipIfStuck);
+
+                    // 정상 종료 시 백업
+                    mainAudio.onended = () => {
+                        if (!window.isSwapping) {
+                            window.isSwapping = true;
+                            playNextTrack();
+                        }
+                    };
+                }
             }
         }
 
@@ -286,7 +383,8 @@
             });
         });
 
-        mainAudio.addEventListener('ended', playNextTrack);
+        // 🚨 기존에 있던 mainAudio.addEventListener('ended', playNextTrack); 는 여기서 깔끔하게 삭제되었습니다! 🚨
+
         mainAudio.addEventListener('timeupdate', () => {
             if (mainAudio.duration) {
                 progressBar.value = (mainAudio.currentTime / mainAudio.duration) * 100;
@@ -298,6 +396,7 @@
                 document.getElementById('time-total').innerText = `${md}:${sd < 10 ? '0'+sd : sd}`;
             }
         });
+        
         progressBar.addEventListener('input', () => {
             if (mainAudio.duration) mainAudio.currentTime = (progressBar.value / 100) * mainAudio.duration;
         });
