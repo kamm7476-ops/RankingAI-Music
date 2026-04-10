@@ -114,7 +114,6 @@
         .bottom-player-bar { 
             position: fixed; bottom: 0; left: 0; width: 100%; 
             background: #181818; 
-            /* 🟠 대표님이 요청하신 오렌지색 얇은 라인 */
             border-top: 2px solid #ff5722; 
             padding: 12px 24px; box-sizing: border-box; 
             display: grid; grid-template-columns: 1fr 2fr 1fr; align-items: center; 
@@ -235,7 +234,6 @@
             #playlist-modal { bottom: 140px !important; right: 10px !important; width: calc(100% - 20px) !important; max-height: 50vh !important; }
         }
 
-
         /* 🌟 팝업창 전용 디자인 */
         .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .popup-box { background: #161718; border: 2px solid #ff5722; border-radius: 15px; padding: 30px; width: 400px; max-width: 90%; box-shadow: 0 10px 30px rgba(255,87,34,0.3); text-align: center; position: relative; }
@@ -243,6 +241,7 @@
         .popup-content { color: #ccc; font-size: 15px; line-height: 1.6; margin-bottom: 25px; white-space: pre-wrap; }
         .popup-close-btn { background: #ff5722; color: #000; font-weight: bold; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; }
         .popup-close-today { background: none; border: none; color: #888; text-decoration: underline; margin-top: 15px; cursor: pointer; font-size: 13px; }
+        
         /* 🚨 [최종 수정] 재생목록 창을 노란색 채팅 위젯 위로 완벽하게 덮어버리는 끝판왕 마법 */
         #playlist-modal {
             bottom: 100px !important; /* PC 화면에서 붕 뜨지 않게 조절 */
@@ -256,13 +255,10 @@
                 z-index: 2147483647 !important; /* 모바일에서도 노란 아이콘 완벽하게 덮음 */
             }
         }
-/* ========================================= */
+        /* ========================================= */
         /* 🌟 유튜브 전용 글로벌 디자인 🌟 */
         /* ========================================= */
-        .upload-section { background: #161718; padding: 30px; border-radius: 15px; margin-bottom: 40px; border: 1px solid #333; }
-        .input-row { display: flex; gap: 15px; margin-bottom: 15px; }
-        .input-row input { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; }
-        .btn-upload { background: #ff5722; color: #000; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
+        /* 🚨 [핵심 수정] 관리자 방과 업로드 창의 레이아웃을 부수던 중복된 4줄 제거! */
 
         .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
         .video-card { background: #161718; border: 1px solid #222; border-radius: 12px; overflow: hidden; transition: 0.2s; }
@@ -288,7 +284,6 @@
         /* 📱 반응형 (유튜브 + 쇼츠) */
         @media (max-width: 1024px) { .shorts-grid { grid-template-columns: repeat(4, 1fr); } }
         @media (max-width: 768px) {
-            .input-row { flex-direction: column; }
             .video-grid { grid-template-columns: 1fr; } 
             
             /* 모바일 세로: 무조건 3칸으로 강력 고정! */
@@ -299,7 +294,7 @@
             .grid-title { font-size: 12px; }
             .grid-uploader { font-size: 10px; margin-bottom: 2px; }
         }
-   </style>
+    </style>
 </head>
 <body>
 
