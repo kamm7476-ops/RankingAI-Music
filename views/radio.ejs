@@ -96,36 +96,113 @@
     <audio id="radio-audio" style="display:none;"></audio>
 
     <script>
-        // 🌟 껍데기만 만들어둔 상태입니다! (2단계에서 서버랑 연결할 예정)
-        const vinyl = document.getElementById('radio-cover');
+       const vinyl = document.getElementById('radio-cover');
         const playBtn = document.getElementById('btn-radio-play');
-        let isPlaying = false;
+        const titleEl = document.getElementById('radio-title');
+        const artistEl = document.getElementById('radio-artist');
+        const audio = document.getElementById('radio-audio');
 
-        // 임시 재생 버튼 테스트용 마법
+        let radioPlaylist = [];
+        let currentIdx = 0;
+        let isPlaying = false;
+        let currentMood = 'all';
+
+        // 📡 1. 자판기에서 음악 뭉치 뽑아오기
+        async function fetchTracks(mood) {
+            try {
+                const res = await fetch('/api/radio-tracks?mood=' + mood);
+                const data = await res.json();
+                if(data && data.length > 0) {
+                    radioPlaylist = data;
+                    currentIdx = 0;
+                    loadTrack(0);
+                    // 곡을 가져왔으니 바로 재생!
+                    if (isPlaying) audio.play().catch(e => console.log(e));
+                } else {
+                    titleEl.innerText = "이 채널엔 아직 곡이 없어요 😢";
+                    vinyl.classList.remove('playing');
+                }
+            } catch(e) { console.log(e); }
+        }
+
+        // 💿 2. 오디오 장전 및 화면(LP판/제목) 업데이트
+        function loadTrack(index) {
+            if(index >= radioPlaylist.length) {
+                // 리스트가 끝났으면 다시 자판기에서 새로운 랜덤 20곡을 뽑아옵니다! (무한반복 마법)
+                fetchTracks(currentMood);
+                return;
+            }
+            const track = radioPlaylist[index];
+            audio.src = track.audioUrl || track.audio; 
+            titleEl.innerText = track.name;
+            artistEl.innerText = track.artist;
+            vinyl.src = track.imageUrl || '/logo.png';
+        }
+
+        // ▶️ 3. 재생/일시정지 버튼
         playBtn.addEventListener('click', () => {
-            isPlaying = !isPlaying;
-            if(isPlaying) {
+            if(radioPlaylist.length === 0) return alert("채널을 불러오는 중입니다...");
+            
+            if(audio.paused) {
+                audio.play();
                 playBtn.innerText = "⏸";
-                vinyl.classList.add('playing'); // LP판 돌기 시작!
+                vinyl.classList.add('playing');
+                isPlaying = true;
             } else {
+                audio.pause();
                 playBtn.innerText = "▶";
-                vinyl.classList.remove('playing'); // LP판 멈춤!
+                vinyl.classList.remove('playing');
+                isPlaying = false;
             }
         });
 
-        // 무드(채널) 변경 버튼 시각 효과
+        // ⏭️ 4. 노래가 끝나면 자동으로 다음 랜덤 곡!
+        audio.addEventListener('ended', () => {
+            currentIdx++;
+            loadTrack(currentIdx);
+            audio.play();
+        });
+
+        // 앞/뒤 곡 넘기기 버튼
+        document.getElementById('btn-radio-next').addEventListener('click', () => {
+            if(radioPlaylist.length > 0) {
+                currentIdx++;
+                loadTrack(currentIdx);
+                if(isPlaying) audio.play();
+            }
+        });
+        document.getElementById('btn-radio-prev').addEventListener('click', () => {
+            if(currentIdx > 0) {
+                currentIdx--;
+                loadTrack(currentIdx);
+                if(isPlaying) audio.play();
+            }
+        });
+
+        // 🎛️ 5. 무드(채널) 변경 버튼
         function changeMood(mood, element) {
             document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('active'));
             element.classList.add('active');
+            currentMood = mood;
             
-            // 배경색 살짝씩 바꿔주는 감성 디테일
+            // 배경색 싹~ 감성적으로 변경
             const body = document.body;
             if(mood === 'cafe') body.style.background = 'linear-gradient(135deg, #1a1412, #2c1e16)';
             else if(mood === 'study') body.style.background = 'linear-gradient(135deg, #0f171e, #1e293b)';
             else if(mood === 'healing') body.style.background = 'linear-gradient(135deg, #141f18, #1c2e22)';
             else if(mood === 'fitness') body.style.background = 'linear-gradient(135deg, #2b1111, #3f1616)';
             else body.style.background = 'linear-gradient(135deg, #0b0c0d, #1a1111)';
+
+            // 채널이 바뀌면 음악도 싹 새로 가져옵니다!
+            titleEl.innerText = "채널 튜닝 중... 📻";
+            artistEl.innerText = "잠시만 기다려주세요";
+            fetchTracks(mood);
         }
+
+        // 🚀 처음에 접속하면 '전체 랜덤' 채널로 곡을 장전해둠!
+        window.onload = () => {
+            fetchTracks('all');
+        };
     </script>
 </body>
 </html>
