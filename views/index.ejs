@@ -520,8 +520,10 @@
     <div style="background: #161718; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; display: flex; gap: 8px; flex-wrap: wrap;">
        <% const displayGenres = ['K-POP','POP','J-POP','C-POP','V-POP','T-POP','발라드','댄스','랩/힙합','R&B/Soul','인디음악','록/메탈','트로트','일렉트로니카','클래식/재즈','기타장르']; %>
         <% displayGenres.forEach(g => { %>
-                    </div>
-                <% } %>
+            <a href="/?genre=<%= g %>" style="padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; border: 1px solid <%= genreQuery === g ? '#ff5722' : '#444' %>; background: <%= genreQuery === g ? '#ff5722' : '#222' %>; color: <%= genreQuery === g ? '#000' : '#aaa' %>; transition: 0.2s;"><%= g %></a>
+        <% }) %>
+    </div>
+<% } %>
                 <div class="chart-controls">
                     <input type="checkbox" id="checkAll" class="custom-checkbox" onchange="toggleAll(this)">
                     <button class="control-btn" onclick="playAll()">▶ 전체듣기</button>
