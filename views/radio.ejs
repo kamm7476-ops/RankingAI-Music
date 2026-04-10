@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAM 무드 라디오 📻</title>
+    <style>
+        /* 🌟 라디오 전용 풀스크린 감성 배경 */
+        body { 
+            margin: 0; padding: 0; height: 100vh; 
+            background: linear-gradient(135deg, #0b0c0d, #1a1111); 
+            color: #fff; font-family: 'Pretendard', sans-serif; 
+            display: flex; flex-direction: column; overflow: hidden; 
+            transition: background 1s ease; /* 배경색 부드럽게 변경 */
+        }
+        
+        /* 상단 뒤로가기 헤더 */
+        .radio-header { padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+        .btn-back { color: #aaa; text-decoration: none; font-size: 16px; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn-back:hover { color: #ff5722; }
+        .radio-logo { font-size: 20px; font-weight: 900; color: #ff5722; letter-spacing: 1px; }
+
+        /* 메인 중앙 정렬 */
+        .radio-container { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 20px; position: relative; z-index: 5; }
+        
+        /* 🌟 빙글빙글 LP판 마법 🌟 */
+        .vinyl-wrapper { position: relative; margin-bottom: 40px; }
+        .vinyl-record { 
+            width: 280px; height: 280px; border-radius: 50%; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8); 
+            border: 15px solid #111; object-fit: cover; 
+            animation: spin 6s linear infinite; 
+            animation-play-state: paused; /* 기본은 멈춤 상태 */
+        }
+        .vinyl-record.playing { animation-play-state: running; } /* 재생 시 돌아감! */
+        .vinyl-hole { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 25px; height: 25px; background: #0b0c0d; border-radius: 50%; border: 3px solid #222; }
+        
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* 곡 정보 */
+        .track-title { font-size: 28px; font-weight: 900; margin: 0 0 10px 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .track-artist { font-size: 16px; color: #bbb; margin: 0 0 30px 0; }
+
+        /* 라디오 컨트롤러 */
+        .radio-controls { display: flex; align-items: center; gap: 30px; margin-bottom: 40px; }
+        .btn-control { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; transition: 0.2s; }
+        .btn-control:hover { color: #ff5722; transform: scale(1.1); }
+        .btn-play-huge { width: 70px; height: 70px; background: #ff5722; color: #000; border-radius: 50%; font-size: 28px; display: flex; align-items: center; justify-content: center; padding-left: 4px; box-shadow: 0 10px 20px rgba(255,87,34,0.4); }
+        .btn-play-huge:hover { transform: scale(1.05); background: #fff; }
+
+        /* 무드(태그) 선택기 */
+        .mood-selector { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 400px; }
+        .mood-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #ccc; padding: 10px 20px; border-radius: 30px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.3s; backdrop-filter: blur(5px); }
+        .mood-btn:hover { background: rgba(255,255,255,0.2); }
+        .mood-btn.active { background: #ff5722; color: #000; border-color: #ff5722; box-shadow: 0 0 15px rgba(255,87,34,0.5); }
+
+        @media (max-width: 600px) {
+            .vinyl-record { width: 220px; height: 220px; border-width: 10px; }
+            .track-title { font-size: 22px; }
+            .mood-selector { gap: 8px; }
+            .mood-btn { padding: 8px 15px; font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="radio-header">
+        <a href="/" class="btn-back">← 메인 차트로 돌아가기</a>
+        <div class="radio-logo">RAM RADIO 📻</div>
+    </div>
+
+    <div class="radio-container">
+        <div class="vinyl-wrapper">
+            <img src="/logo.png" class="vinyl-record" id="radio-cover" alt="앨범아트">
+            <div class="vinyl-hole"></div>
+        </div>
+
+        <h2 class="track-title" id="radio-title">채널을 선택해주세요</h2>
+        <p class="track-artist" id="radio-artist">RAM 24/7 Mood Radio</p>
+
+        <div class="radio-controls">
+            <button class="btn-control" id="btn-radio-prev" title="이전 곡">⏮</button>
+            <button class="btn-control btn-play-huge" id="btn-radio-play" title="재생/일시정지">▶</button>
+            <button class="btn-control" id="btn-radio-next" title="다음 곡">⏭</button>
+        </div>
+
+        <div class="mood-selector">
+            <button class="mood-btn active" onclick="changeMood('all', this)">🌐 전체 랜덤</button>
+            <button class="mood-btn" onclick="changeMood('cafe', this)">☕ 카페</button>
+            <button class="mood-btn" onclick="changeMood('study', this)">💻 집중/스터디</button>
+            <button class="mood-btn" onclick="changeMood('healing', this)">🌿 힐링/명상</button>
+            <button class="mood-btn" onclick="changeMood('fitness', this)">🏋️ 헬스/운동</button>
+        </div>
+    </div>
+
+    <audio id="radio-audio" style="display:none;"></audio>
+
+    <script>
+        // 🌟 껍데기만 만들어둔 상태입니다! (2단계에서 서버랑 연결할 예정)
+        const vinyl = document.getElementById('radio-cover');
+        const playBtn = document.getElementById('btn-radio-play');
+        let isPlaying = false;
+
+        // 임시 재생 버튼 테스트용 마법
+        playBtn.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            if(isPlaying) {
+                playBtn.innerText = "⏸";
+                vinyl.classList.add('playing'); // LP판 돌기 시작!
+            } else {
+                playBtn.innerText = "▶";
+                vinyl.classList.remove('playing'); // LP판 멈춤!
+            }
+        });
+
+        // 무드(채널) 변경 버튼 시각 효과
+        function changeMood(mood, element) {
+            document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            
+            // 배경색 살짝씩 바꿔주는 감성 디테일
+            const body = document.body;
+            if(mood === 'cafe') body.style.background = 'linear-gradient(135deg, #1a1412, #2c1e16)';
+            else if(mood === 'study') body.style.background = 'linear-gradient(135deg, #0f171e, #1e293b)';
+            else if(mood === 'healing') body.style.background = 'linear-gradient(135deg, #141f18, #1c2e22)';
+            else if(mood === 'fitness') body.style.background = 'linear-gradient(135deg, #2b1111, #3f1616)';
+            else body.style.background = 'linear-gradient(135deg, #0b0c0d, #1a1111)';
+        }
+    </script>
+</body>
+</html>
