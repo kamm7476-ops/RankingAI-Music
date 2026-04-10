@@ -268,9 +268,11 @@
     </div>
 
     <script>
-        let observer;
+        let observer = null; // 🚨 처음에 비워둡니다
 
         function initObserver() {
+            if (observer) return; // 이미 켜져있으면 두 번 안 켭니다!
+            
             observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     const wrap = entry.target.querySelector('.modal-iframe-wrap');
@@ -303,6 +305,9 @@
             modal.style.display = 'block'; 
             document.body.style.overflow = 'hidden'; 
             
+            // 🚀🚀🚀 [핵심 해결책] 모달창이 눈에 보일 때 엔진을 확실하게 켭니다!
+            initObserver(); 
+            
             setTimeout(() => {
                 const target = document.getElementById('modal-item-' + index);
                 if(target) {
@@ -320,8 +325,8 @@
                 wrap.innerHTML = '';
             });
         }
-
-        document.addEventListener("DOMContentLoaded", initObserver);
+        
+        // 🚨 문제가 되었던 DOMContentLoaded 줄은 삭제했습니다!
     </script>
 </body>
 </html>
