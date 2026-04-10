@@ -226,6 +226,60 @@
         window.onload = () => {
             fetchTracks('all');
         };
+
+// ==========================================================
+        // 🚀 [오류 해결] 턴테이블 완벽 동기화 & 무한 리필 엔진 🚀
+        // ==========================================================
+        const radioAudio = document.querySelector('audio');
+        const vinylRecord = document.querySelector('.vinyl-record');
+
+        // 1. 진짜로 소리가 나기 시작할 때만 턴테이블 돌리기!
+        radioAudio.addEventListener('play', () => {
+            if(vinylRecord) vinylRecord.classList.add('playing');
+        });
+
+        // 2. 소리가 멈추면 무조건 턴테이블도 세우기!
+        radioAudio.addEventListener('pause', () => {
+            if(vinylRecord) vinylRecord.classList.remove('playing');
+        });
+
+        // 3. 곡이 무사히 끝나면 턴테이블 세우고 다음 곡 재생!
+        radioAudio.addEventListener('ended', () => {
+            if(vinylRecord) vinylRecord.classList.remove('playing');
+            playNextTrack(); 
+        });
+
+        // 4. 💀 [핵심] 음원이 깨졌거나 로딩 실패하면? -> 1초 뒤 무조건 강제 스킵!
+        radioAudio.addEventListener('error', () => {
+            console.log("🚨 깨진 음원 감지! 턴테이블을 멈추고 1초 뒤 스킵합니다.");
+            if(vinylRecord) vinylRecord.classList.remove('playing');
+            
+            // 무한 에러 루프 방지를 위해 1초 쉬고 다음 곡으로 넘어갑니다.
+            setTimeout(() => {
+                playNextTrack();
+            }, 1000);
+        });
+
+        // 5. 다음 곡 재생 함수 (곡이 다 떨어지면 무한 리필!)
+        function playNextTrack() {
+            currentIndex++;
+            
+            // 큐에 곡이 남아있으면 재생
+            if (currentIndex < playlist.length) {
+                loadTrack(currentIndex);
+            } else {
+                // 💿 곡이 다 떨어졌다면? 현재 분위기(Mood)로 20곡 꽉꽉 새로 채우기!
+                console.log("💿 라디오 재생 목록 끝! 새로운 곡을 리필합니다.");
+                
+                // 로딩 메시지 잠깐 띄워주기
+                document.getElementById('track-title').innerText = "채널 곡 리필 중... 📻";
+                document.getElementById('track-artist').innerText = "잠시만 기다려주세요";
+                
+                // 서버에서 새로 뽑아오기
+                fetchTracks(currentMood); 
+            }
+        }
+        // ==========================================================
     </script>
 </body>
 </html>
