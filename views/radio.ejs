@@ -172,7 +172,7 @@
             }
         });
 
-        // ⏭️ 4. 앞/뒤 곡 넘기기 버튼
+       // ⏭️ 4. 앞/뒤 곡 넘기기 버튼
         document.getElementById('btn-radio-next').addEventListener('click', () => {
             if(radioPlaylist.length > 0) playNextTrack();
         });
@@ -180,7 +180,8 @@
             if(currentIdx > 0) {
                 currentIdx--;
                 loadTrack(currentIdx);
-                if(isPlaying) audio.play();
+                // 🚨 뒤로가기 누르면 조건 없이 무조건 재생!
+                audio.play().catch(e => console.log(e)); 
             }
         });
 
@@ -214,29 +215,30 @@
         };
 
         // ==========================================================
-        // 🚀 [완벽 수정 완료!] 턴테이블 동기화 & 무한 리필 엔진
+        // 🚀 [함정 완벽 제거!] 턴테이블 동기화 & 무한 연속 재생 엔진
         // ==========================================================
         
-        // 1. 진짜로 소리가 나기 시작할 때 턴테이블 돌리기!
         audio.addEventListener('play', () => {
             vinyl.classList.add('playing');
             playBtn.innerText = "⏸";
             isPlaying = true;
         });
 
-        // 2. 소리가 멈추면 턴테이블 세우기!
         audio.addEventListener('pause', () => {
-            vinyl.classList.remove('playing');
-            playBtn.innerText = "▶";
-            isPlaying = false;
+            // 🚨 핵심 방어: 노래가 진짜 끝난게 아니라, 유저가 '일시정지'를 눌렀을 때만 멈춤 처리!
+            if (audio.currentTime !== audio.duration && audio.currentTime > 0) {
+                vinyl.classList.remove('playing');
+                playBtn.innerText = "▶";
+                isPlaying = false;
+            }
         });
 
-        // 3. 곡이 무사히 끝나면 다음 곡 재생!
+        // 🎵 곡이 끝나면 무조건 다음 곡 쏘기!
         audio.addEventListener('ended', () => {
             playNextTrack(); 
         });
 
-        // 4. 💀 깨진 음원 감지 시 1초 뒤 무조건 강제 스킵!
+        // 💀 깨진 음원 방어
         audio.addEventListener('error', () => {
             console.log("🚨 깨진 음원 감지! 1초 뒤 강제 스킵합니다.");
             vinyl.classList.remove('playing');
@@ -250,7 +252,14 @@
             currentIdx++;
             if (currentIdx < radioPlaylist.length) {
                 loadTrack(currentIdx);
-                if(isPlaying) audio.play().catch(e => console.log(e));
+                
+                // 🚨 핵심 해결책: isPlaying 조건 다 빼버리고 무조건 재생 발사!!!
+                const playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        isPlaying = true;
+                    }).catch(e => console.log("자동재생 에러:", e));
+                }
             } else {
                 console.log("💿 라디오 재생 목록 끝! 새로운 곡을 리필합니다.");
                 titleEl.innerText = "채널 곡 리필 중... 📻";
