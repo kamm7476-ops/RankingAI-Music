@@ -119,7 +119,7 @@
     <audio id="radio-audio" style="display:none;"></audio>
 
     <script>
-       const vinyl = document.getElementById('radio-cover');
+        const vinyl = document.getElementById('radio-cover');
         const playBtn = document.getElementById('btn-radio-play');
         const titleEl = document.getElementById('radio-title');
         const artistEl = document.getElementById('radio-artist');
@@ -151,7 +151,7 @@
         // 💿 2. 오디오 장전 및 화면(LP판/제목) 업데이트
         function loadTrack(index) {
             if(index >= radioPlaylist.length) {
-                // 리스트가 끝났으면 다시 자판기에서 새로운 랜덤 20곡을 뽑아옵니다! (무한반복 마법)
+                // 리스트가 끝났으면 다시 자판기에서 새로운 랜덤 20곡을 뽑아옵니다!
                 fetchTracks(currentMood);
                 return;
             }
@@ -165,34 +165,16 @@
         // ▶️ 3. 재생/일시정지 버튼
         playBtn.addEventListener('click', () => {
             if(radioPlaylist.length === 0) return alert("채널을 불러오는 중입니다...");
-            
             if(audio.paused) {
                 audio.play();
-                playBtn.innerText = "⏸";
-                vinyl.classList.add('playing');
-                isPlaying = true;
             } else {
                 audio.pause();
-                playBtn.innerText = "▶";
-                vinyl.classList.remove('playing');
-                isPlaying = false;
             }
         });
 
-        // ⏭️ 4. 노래가 끝나면 자동으로 다음 랜덤 곡!
-        audio.addEventListener('ended', () => {
-            currentIdx++;
-            loadTrack(currentIdx);
-            audio.play();
-        });
-
-        // 앞/뒤 곡 넘기기 버튼
+        // ⏭️ 4. 앞/뒤 곡 넘기기 버튼
         document.getElementById('btn-radio-next').addEventListener('click', () => {
-            if(radioPlaylist.length > 0) {
-                currentIdx++;
-                loadTrack(currentIdx);
-                if(isPlaying) audio.play();
-            }
+            if(radioPlaylist.length > 0) playNextTrack();
         });
         document.getElementById('btn-radio-prev').addEventListener('click', () => {
             if(currentIdx > 0) {
@@ -202,7 +184,7 @@
             }
         });
 
-        // 🎛️ 5. 무드(채널) 변경 버튼
+        // 🎛️ 5. 무드(채널) 변경 버튼 & 배경색 마법
         function changeMood(mood, element) {
             document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('active'));
             element.classList.add('active');
@@ -214,6 +196,10 @@
             else if(mood === 'study') body.style.background = 'linear-gradient(135deg, #0f171e, #1e293b)';
             else if(mood === 'healing') body.style.background = 'linear-gradient(135deg, #141f18, #1c2e22)';
             else if(mood === 'fitness') body.style.background = 'linear-gradient(135deg, #2b1111, #3f1616)';
+            else if(mood === 'drive') body.style.background = 'linear-gradient(135deg, #102a43, #0284c7)';
+            else if(mood === 'night') body.style.background = 'linear-gradient(135deg, #171010, #2e1065)';
+            else if(mood === 'rain') body.style.background = 'linear-gradient(135deg, #1e293b, #334155)';
+            else if(mood === 'work') body.style.background = 'linear-gradient(135deg, #141414, #047857)';
             else body.style.background = 'linear-gradient(135deg, #0b0c0d, #1a1111)';
 
             // 채널이 바뀌면 음악도 싹 새로 가져옵니다!
@@ -227,59 +213,51 @@
             fetchTracks('all');
         };
 
-// ==========================================================
-        // 🚀 [오류 해결] 턴테이블 완벽 동기화 & 무한 리필 엔진 🚀
         // ==========================================================
-        const radioAudio = document.querySelector('audio');
-        const vinylRecord = document.querySelector('.vinyl-record');
-
-        // 1. 진짜로 소리가 나기 시작할 때만 턴테이블 돌리기!
-        radioAudio.addEventListener('play', () => {
-            if(vinylRecord) vinylRecord.classList.add('playing');
+        // 🚀 [완벽 수정 완료!] 턴테이블 동기화 & 무한 리필 엔진
+        // ==========================================================
+        
+        // 1. 진짜로 소리가 나기 시작할 때 턴테이블 돌리기!
+        audio.addEventListener('play', () => {
+            vinyl.classList.add('playing');
+            playBtn.innerText = "⏸";
+            isPlaying = true;
         });
 
-        // 2. 소리가 멈추면 무조건 턴테이블도 세우기!
-        radioAudio.addEventListener('pause', () => {
-            if(vinylRecord) vinylRecord.classList.remove('playing');
+        // 2. 소리가 멈추면 턴테이블 세우기!
+        audio.addEventListener('pause', () => {
+            vinyl.classList.remove('playing');
+            playBtn.innerText = "▶";
+            isPlaying = false;
         });
 
-        // 3. 곡이 무사히 끝나면 턴테이블 세우고 다음 곡 재생!
-        radioAudio.addEventListener('ended', () => {
-            if(vinylRecord) vinylRecord.classList.remove('playing');
+        // 3. 곡이 무사히 끝나면 다음 곡 재생!
+        audio.addEventListener('ended', () => {
             playNextTrack(); 
         });
 
-        // 4. 💀 [핵심] 음원이 깨졌거나 로딩 실패하면? -> 1초 뒤 무조건 강제 스킵!
-        radioAudio.addEventListener('error', () => {
-            console.log("🚨 깨진 음원 감지! 턴테이블을 멈추고 1초 뒤 스킵합니다.");
-            if(vinylRecord) vinylRecord.classList.remove('playing');
-            
-            // 무한 에러 루프 방지를 위해 1초 쉬고 다음 곡으로 넘어갑니다.
+        // 4. 💀 깨진 음원 감지 시 1초 뒤 무조건 강제 스킵!
+        audio.addEventListener('error', () => {
+            console.log("🚨 깨진 음원 감지! 1초 뒤 강제 스킵합니다.");
+            vinyl.classList.remove('playing');
             setTimeout(() => {
                 playNextTrack();
             }, 1000);
         });
 
-        // 5. 다음 곡 재생 함수 (곡이 다 떨어지면 무한 리필!)
+        // 5. 다음 곡 재생 / 리필 함수
         function playNextTrack() {
-            currentIndex++;
-            
-            // 큐에 곡이 남아있으면 재생
-            if (currentIndex < playlist.length) {
-                loadTrack(currentIndex);
+            currentIdx++;
+            if (currentIdx < radioPlaylist.length) {
+                loadTrack(currentIdx);
+                if(isPlaying) audio.play().catch(e => console.log(e));
             } else {
-                // 💿 곡이 다 떨어졌다면? 현재 분위기(Mood)로 20곡 꽉꽉 새로 채우기!
                 console.log("💿 라디오 재생 목록 끝! 새로운 곡을 리필합니다.");
-                
-                // 로딩 메시지 잠깐 띄워주기
-                document.getElementById('track-title').innerText = "채널 곡 리필 중... 📻";
-                document.getElementById('track-artist').innerText = "잠시만 기다려주세요";
-                
-                // 서버에서 새로 뽑아오기
+                titleEl.innerText = "채널 곡 리필 중... 📻";
+                artistEl.innerText = "잠시만 기다려주세요";
                 fetchTracks(currentMood); 
             }
         }
-        // ==========================================================
     </script>
 </body>
 </html>
