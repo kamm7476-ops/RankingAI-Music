@@ -399,10 +399,13 @@
             </div>
         </div>
         
-        <div class="header-nav">
+       <div class="header-nav">
             <a href="/?sort=views" class="nav-item <%= (typeof sortQuery !== 'undefined' && sortQuery === 'views' && !genreQuery) ? 'active' : '' %>">RANKING AI 챠트</a>
             <a href="/?sort=latest" class="nav-item <%= (typeof sortQuery !== 'undefined' && sortQuery === 'latest') ? 'active' : '' %>">최신음악</a>
             <a href="/?genre=발라드" class="nav-item <%= (typeof genreQuery !== 'undefined' && genreQuery) ? 'active' : '' %>">장르별</a>
+            
+            <a href="/radio" class="nav-item" style="color: #ffb300; font-weight: 900;">📻 라디오</a>
+            
             <a href="/youtube" class="nav-item">유튜브</a>
             <a href="/shorts" class="nav-item">쇼츠</a>
             <a href="/board" class="nav-item">커뮤니티</a>
@@ -412,7 +415,6 @@
     <div class="container">
         <div class="main-layout">
             <div class="content-left">
-                
                 <% if (user) { %>
                 <div class="upload-section">
                     <h3 style="margin-top:0; color:#ff5722;">🎵 회원을 위한 음원 업로드</h3>
