@@ -683,6 +683,36 @@ app.get('/radio', (req, res) => {
     // 1단계에서는 우선 UI 화면만 띄워줍니다!
     res.render('radio');
 });
+// 🚀🚀🚀 [2단계 추가!] 라디오 전용 무한 랜덤 음악 자판기 🚀🚀🚀
+app.get('/api/radio-tracks', async (req, res) => {
+    try {
+        const mood = req.query.mood || 'all';
+        let filter = {};
+
+        // 무드별 장르 찰떡 매칭! (해당 장르의 곡들만 뽑아옵니다)
+        if (mood === 'cafe') filter = { genre: { $in: ['클래식/재즈', '인디음악', 'R&B/Soul', 'POP'] } };
+        else if (mood === 'study') filter = { genre: { $in: ['뉴에이지', '클래식/재즈', '인디음악'] } };
+        else if (mood === 'healing') filter = { genre: { $in: ['발라드', '뉴에이지', 'R&B/Soul'] } };
+        else if (mood === 'fitness') filter = { genre: { $in: ['댄스', '랩/힙합', '일렉트로니카', '록/메탈'] } };
+
+        // 🌟 MongoDB의 마법 ($sample): 조건에 맞는 곡 중 랜덤으로 20곡을 마구잡이로 섞어서 가져옵니다!
+        let tracks = await Music.aggregate([
+            { $match: filter },
+            { $sample: { size: 20 } }
+        ]);
+
+        // 만약 해당 채널에 아직 곡이 없으면? 멈추지 않게 전체 곡 중에서 랜덤으로 가져옵니다!
+        if (tracks.length === 0) {
+            tracks = await Music.aggregate([{ $sample: { size: 20 } }]);
+        }
+
+        res.json(tracks);
+    } catch (err) {
+        console.error("라디오 트랙 에러:", err);
+        res.json([]);
+    }
+});
+
 // =========================================
 // 🌟 커뮤니티 게시판 
 // =========================================
