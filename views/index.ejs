@@ -410,7 +410,7 @@
     <div class="container">
         <div class="main-layout">
             <div class="content-left">
-                <% if (user) { %>
+               <% if (user) { %>
                 <div class="upload-section">
                     <h3 style="margin-top:0; color:#ff5722;">🎵 회원을 위한 음원 업로드</h3>
                     <form action="/add-music" method="POST" enctype="multipart/form-data" id="musicForm">
@@ -419,7 +419,7 @@
                             <input type="text" name="artist" placeholder="아티스트" required>
                         </div>
                         
-                     <div class="genre-selector">                            
+                        <div class="genre-selector">                            
                             <button type="button" class="genre-btn" data-genre="K-POP">K-POP</button>
                             <button type="button" class="genre-btn" data-genre="POP">POP</button>
                             <button type="button" class="genre-btn" data-genre="발라드">발라드</button>
@@ -435,8 +435,9 @@
                             <button type="button" class="genre-btn" data-genre="트로트">트로트</button>
                             <button type="button" class="genre-btn" data-genre="인디음악">인디음악</button>
                             <button type="button" class="genre-btn" data-genre="밈 / 코미디">밈 / 코미디</button>
-                        </div>> 
-                        </div> <div id="vibe-container" style="margin-top: 15px; padding: 12px; background: #1a1b1c; border-radius: 8px; border: 1px solid #333; display: none;">
+                        </div> 
+
+                        <div id="vibe-container" style="margin-top: 15px; padding: 12px; background: #1a1b1c; border-radius: 8px; border: 1px solid #333; display: none;">
                             <span style="font-size: 12px; color: #ff5722; display: block; margin-bottom: 8px; font-weight: bold;">✨ 어떤 매장/상황에 어울리나요? (태그 선택)</span>
                             <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                                 <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="cafe"> ☕ 카페</label>
