@@ -431,11 +431,11 @@
                             <button type="button" class="genre-btn" data-genre="록/메탈">록/메탈</button>
                             <button type="button" class="genre-btn" data-genre="애니 / OST">애니 / OST</button>
                             <button type="button" class="genre-btn" data-genre="클래식 / 재즈">클래식 / 재즈</button>
-                            <button type="button" class="genre-btn" data-genre="뉴에이지 / 연주곡">뉴에이지 / 연주곡</button>
+                            <button type="button" class="genre-btn" data-genre="뉴에이지">뉴에이지</button>
                             <button type="button" class="genre-btn" data-genre="트로트">트로트</button>
                             <button type="button" class="genre-btn" data-genre="인디음악">인디음악</button>
                             <button type="button" class="genre-btn" data-genre="밈 / 코미디">밈 / 코미디</button>
-                        </div> 
+                        </div>
 
                         <div id="vibe-container" style="margin-top: 15px; padding: 12px; background: #1a1b1c; border-radius: 8px; border: 1px solid #333; display: none;">
                             <span style="font-size: 12px; color: #ff5722; display: block; margin-bottom: 8px; font-weight: bold;">✨ 어떤 매장/상황에 어울리나요? (태그 선택)</span>
@@ -514,7 +514,7 @@
                 </div>
 <% if (typeof genreQuery !== 'undefined' && genreQuery) { %>
     <div style="background: #161718; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; display: flex; gap: 8px; flex-wrap: wrap;">
-       <% const displayGenres = ['K-POP','POP','발라드','댄스','랩/힙합','R&B/Soul','Lo-Fi / 칠아웃','일렉트로니카','록/메탈','애니 / OST','클래식 / 재즈','뉴에이지 / 연주곡','트로트','인디음악','밈 / 코미디']; %>
+       <% const displayGenres = ['K-POP','POP','발라드','댄스','랩/힙합','R&B/Soul','Lo-Fi / 칠아웃','일렉트로니카','록/메탈','애니 / OST','클래식 / 재즈','뉴에이지','트로트','인디음악','밈 / 코미디']; %>
         <% displayGenres.forEach(g => { %>
             <a href="/?genre=<%= g %>" style="padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; border: 1px solid <%= genreQuery === g ? '#ff5722' : '#444' %>; background: <%= genreQuery === g ? '#ff5722' : '#222' %>; color: <%= genreQuery === g ? '#000' : '#aaa' %>; transition: 0.2s;"><%= g %></a>
         <% }) %>
@@ -816,8 +816,8 @@
                 const selectedGenre = this.getAttribute('data-genre');
                 if(hiddenInput) hiddenInput.value = selectedGenre;
 
-                // 감성적인 장르 3가지를 선택했을 때만 '매장/상황 무드 태그창'이 짠! 하고 나타납니다
-                if (selectedGenre === '뉴에이지 / 연주곡' || selectedGenre === 'Lo-Fi / 칠아웃' || selectedGenre === '클래식 / 재즈' || selectedGenre === '인디음악') {
+                // 감성적인 장르 4가지를 선택했을 때만 '매장/상황 무드 태그창'이 짠! 하고 나타납니다
+                if (selectedGenre === '뉴에이지' || selectedGenre === 'Lo-Fi / 칠아웃' || selectedGenre === '클래식 / 재즈' || selectedGenre === '인디음악') {
                     if(vibeContainer) vibeContainer.style.display = 'block';
                 } else {
                     if(vibeContainer) vibeContainer.style.display = 'none';
