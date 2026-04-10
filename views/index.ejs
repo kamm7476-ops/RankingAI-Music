@@ -1275,6 +1275,22 @@
             try {
                 const response = await fetch(href); const html = await response.text();
                 const newDoc = new DOMParser().parseFromString(html, 'text/html');
+                
+                // 🚀🚀🚀 [디자인 도둑 마법 추가!] 새 페이지의 CSS 옷을 현재 화면에 강제로 입혀줍니다!
+                const newStyles = newDoc.querySelectorAll('style');
+                newStyles.forEach(newStyle => {
+                    let isExist = false;
+                    document.querySelectorAll('style').forEach(existingStyle => {
+                        if(existingStyle.innerHTML === newStyle.innerHTML) isExist = true;
+                    });
+                    if(!isExist) {
+                        const s = document.createElement('style');
+                        s.innerHTML = newStyle.innerHTML;
+                        document.head.appendChild(s);
+                    }
+                });
+                // 🚀🚀🚀 =========================================================
+
                 const currentContainer = document.querySelector('.container'); const newContainer = newDoc.querySelector('.container');
                 if (currentContainer && newContainer) currentContainer.innerHTML = newContainer.innerHTML;
                 const currentNav = document.querySelector('.header-nav'); const newNav = newDoc.querySelector('.header-nav');
@@ -1288,9 +1304,8 @@
                 }
                 reattachEvents(); window.scrollTo(0, 0); 
 
-                // 🚀🚀🚀 [핵심 추가] 브라우저 강제 새로고침(꿀밤) 마법!
                 document.body.style.display = 'none';
-                document.body.offsetHeight; // 브라우저야, 높이 다시 계산해!
+                document.body.offsetHeight; 
                 document.body.style.display = '';
                 
             } catch (err) { location.href = href; }
