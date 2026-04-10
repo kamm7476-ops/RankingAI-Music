@@ -1263,6 +1263,12 @@
                     else playerBar.style.display = 'flex'; 
                 }
                 reattachEvents(); window.scrollTo(0, 0); 
+
+                // 🚀🚀🚀 [핵심 추가] 브라우저 강제 새로고침(꿀밤) 마법!
+                document.body.style.display = 'none';
+                document.body.offsetHeight; // 브라우저야, 높이 다시 계산해!
+                document.body.style.display = '';
+                
             } catch (err) { location.href = href; }
         }
 
