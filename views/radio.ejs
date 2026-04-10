@@ -5,13 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RAM 무드 라디오 📻</title>
     <style>
-        /* 🌟 라디오 전용 풀스크린 감성 배경 */
+        /* 🌟 라디오 전용 감성 배경 (PC화면 잘림 방지 스크롤 허용!) */
         body { 
-            margin: 0; padding: 0; height: 100vh; 
+            margin: 0; padding: 0; 
+            min-height: 100vh; /* 🚨 height를 min-height로 변경해서 화면이 좁아도 늘어나게 함 */
             background: linear-gradient(135deg, #0b0c0d, #1a1111); 
             color: #fff; font-family: 'Pretendard', sans-serif; 
-            display: flex; flex-direction: column; overflow: hidden; 
-            transition: background 1s ease; /* 배경색 부드럽게 변경 */
+            display: flex; flex-direction: column; 
+            overflow-x: hidden; 
+            overflow-y: auto; /* 🚨 PC에서 버튼이 잘리면 스크롤할 수 있도록 허용! */
+            transition: background 1s ease; 
         }
         
         /* 상단 뒤로가기 헤더 */
@@ -21,22 +24,22 @@
         .radio-logo { font-size: 20px; font-weight: 900; color: #ff5722; letter-spacing: 1px; }
 
         /* 메인 중앙 정렬 */
-        .radio-container { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 20px; position: relative; z-index: 5; }
+        .radio-container { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 20px 20px 50px 20px; position: relative; z-index: 5; }
         
-        /* 🌟 빙글빙글 블랙 LP판 & 가운데 라벨 마법 🌟 */
+        /* 🌟 빙글빙글 블랙 LP판 & 경계선 빛반사 효과 🌟 */
         .vinyl-wrapper { position: relative; margin-bottom: 40px; }
         .vinyl-record { 
             width: 280px; height: 280px; border-radius: 50%; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8); 
             
-            /* 🚨 블랙 턴테이블 바디 & 테두리 */
+            /* 🚨 [경계선 해결!] LP판 겉면에 은은한 하얀/회색 빛 테두리를 추가해서 배경과 분리! */
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15), 0 0 0 6px rgba(255, 255, 255, 0.03), 0 20px 50px rgba(0,0,0,0.8); 
+            
             background: #111; 
-            border: 10px solid #000; 
+            border: 10px solid #050505; 
             
-            /* 🚨 이미지를 가운데 원형 라벨 안에 쏙 넣기! */
             object-fit: contain; 
             object-position: center; 
-            padding: 80px; /* 이 여백이 블랙 턴테이블 영역을 만듭니다 */
+            padding: 80px; 
             box-sizing: border-box; 
             
             animation: spin 6s linear infinite; 
@@ -44,7 +47,7 @@
         }
         .vinyl-record.playing { animation-play-state: running; } 
         
-        /* 가운데 구멍 디테일 (작고 어둡게) */
+        /* 가운데 구멍 디테일 */
         .vinyl-hole { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 15px; height: 15px; background: #000; border-radius: 50%; border: 2px solid #222; z-index: 2; }
         
         @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -61,17 +64,18 @@
         .btn-play-huge:hover { transform: scale(1.05); background: #fff; }
 
         /* 무드(태그) 선택기 */
-        .mood-selector { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 400px; }
-        .mood-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #ccc; padding: 10px 20px; border-radius: 30px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.3s; backdrop-filter: blur(5px); }
-        .mood-btn:hover { background: rgba(255,255,255,0.2); }
+        .mood-selector { 
+            display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; 
+            max-width: 800px; /* 🚨 PC 화면에서 버튼들이 답답하게 안 뭉치도록 넓게 펼쳐줌! */
+        }
+        .mood-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #ccc; padding: 10px 20px; border-radius: 30px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.3s; backdrop-filter: blur(5px); }
+        .mood-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
         .mood-btn.active { background: #ff5722; color: #000; border-color: #ff5722; box-shadow: 0 0 15px rgba(255,87,34,0.5); }
 
         @media (max-width: 600px) {
-            /* 🚨 모바일에서는 턴테이블도 작아지니까, 패딩(블랙 영역)도 같이 줄여야 예쁩니다! */
             .vinyl-record { width: 220px; height: 220px; border-width: 8px; padding: 60px; } 
-            
             .track-title { font-size: 22px; }
-            .mood-selector { gap: 8px; }
+            .mood-selector { gap: 8px; max-width: 100%; }
             .mood-btn { padding: 8px 15px; font-size: 13px; }
         }
     </style>
@@ -98,12 +102,17 @@
             <button class="btn-control" id="btn-radio-next" title="다음 곡">⏭</button>
         </div>
 
-        <div class="mood-selector">
+       <div class="mood-selector">
             <button class="mood-btn active" onclick="changeMood('all', this)">🌐 전체 랜덤</button>
             <button class="mood-btn" onclick="changeMood('cafe', this)">☕ 카페</button>
             <button class="mood-btn" onclick="changeMood('study', this)">💻 집중/스터디</button>
             <button class="mood-btn" onclick="changeMood('healing', this)">🌿 힐링/명상</button>
             <button class="mood-btn" onclick="changeMood('fitness', this)">🏋️ 헬스/운동</button>
+            
+            <button class="mood-btn" onclick="changeMood('drive', this)">🚗 신나는 드라이브</button>
+            <button class="mood-btn" onclick="changeMood('night', this)">🌃 새벽 감성</button>
+            <button class="mood-btn" onclick="changeMood('rain', this)">☔ 비 오는 날</button>
+            <button class="mood-btn" onclick="changeMood('work', this)">🎧 노동요/코딩</button>
         </div>
     </div>
 
