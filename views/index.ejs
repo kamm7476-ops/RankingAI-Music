@@ -256,7 +256,45 @@
                 z-index: 2147483647 !important; /* 모바일에서도 노란 아이콘 완벽하게 덮음 */
             }
         }
-   
+/* 🌟 유튜브/쇼츠 전용 글로벌 디자인 (화면 넘어갈 때 안 깨지게 미리 입혀둠) 🌟 */
+        .upload-section { background: #161718; padding: 30px; border-radius: 15px; margin-bottom: 40px; border: 1px solid #333; }
+        .input-row { display: flex; gap: 15px; margin-bottom: 15px; }
+        .input-row input { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; }
+        .btn-upload { background: #ff5722; color: #000; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+        .video-card {
+            background: #161718; border: 1px solid #222; border-radius: 12px; overflow: hidden; transition: 0.2s;
+        }
+        .video-card:hover { border-color: #ff5722; transform: translateY(-5px); }
+        
+        .video-iframe-wrap {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9; /* 유튜브 가로 비율 */
+            background: #000;
+        }
+        .shorts-iframe-wrap {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 9 / 16; /* 쇼츠 세로 비율 */
+            background: #000;
+        }
+        .video-iframe-wrap iframe, .shorts-iframe-wrap iframe {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
+        }
+        
+        .video-info { padding: 15px; }
+        .video-title { font-size: 16px; font-weight: bold; margin: 0 0 10px 0; color: #fff; line-height: 1.4; }
+
+        @media (max-width: 768px) {
+            .input-row { flex-direction: column; }
+            .video-grid { grid-template-columns: 1fr; } 
+        }
    </style>
 </head>
 <body>
