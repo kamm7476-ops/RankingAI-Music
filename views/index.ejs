@@ -256,27 +256,48 @@
                 z-index: 2147483647 !important; /* 모바일에서도 노란 아이콘 완벽하게 덮음 */
             }
         }
-/* 🌟 유튜브/쇼츠 전용 글로벌 디자인 (화면 넘어갈 때 안 깨지게 미리 입혀둠) 🌟 */
+/* ========================================= */
+        /* 🌟 유튜브 전용 글로벌 디자인 🌟 */
+        /* ========================================= */
         .upload-section { background: #161718; padding: 30px; border-radius: 15px; margin-bottom: 40px; border: 1px solid #333; }
         .input-row { display: flex; gap: 15px; margin-bottom: 15px; }
         .input-row input { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; }
         .btn-upload { background: #ff5722; color: #000; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
 
-        /* 🚀 유튜브와 쇼츠 그리드를 한 번에 묶어서 바둑판 처리! */
-        .video-grid, .shorts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
-        .video-card, .shorts-card { background: #161718; border: 1px solid #222; border-radius: 12px; overflow: hidden; transition: 0.2s; }
-        .video-card:hover, .shorts-card:hover { border-color: #ff5722; transform: translateY(-5px); }
-        
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
+        .video-card { background: #161718; border: 1px solid #222; border-radius: 12px; overflow: hidden; transition: 0.2s; }
+        .video-card:hover { border-color: #ff5722; transform: translateY(-5px); }
         .video-iframe-wrap { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; }
-        .shorts-iframe-wrap { position: relative; width: 100%; aspect-ratio: 9 / 16; background: #000; }
-        .video-iframe-wrap iframe, .shorts-iframe-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
-        
-        .video-info, .shorts-info { padding: 15px; }
-        .video-title, .shorts-title { font-size: 16px; font-weight: bold; margin: 0 0 10px 0; color: #fff; line-height: 1.4; }
+        .video-iframe-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        .video-info { padding: 15px; }
+        .video-title { font-size: 16px; font-weight: bold; margin: 0 0 10px 0; color: #fff; line-height: 1.4; }
 
+        /* ========================================= */
+        /* 🌟 쇼츠(Shorts) 전용 오리지널 디자인 (PC 5칸 절대 고정!) 🌟 */
+        /* ========================================= */
+        .shorts-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; width: 100%; visibility: visible; }
+        .shorts-card { width: 100%; background: #111; border: 1px solid #222; border-radius: 12px; overflow: hidden; position: relative; cursor: pointer; transition: 0.2s; }
+        .shorts-card:hover { border-color: #ff5722; transform: translateY(-5px); box-shadow: 0 8px 20px rgba(255,87,34,0.3); }
+        .shorts-card-inner { width: 100%; padding-bottom: 177.77%; position: relative; }
+        .shorts-card-inner img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
+        .shorts-logo-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; pointer-events: none; z-index: 10; }
+        .grid-info { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); padding: 30px 12px 12px; box-sizing: border-box; pointer-events: none; z-index: 5; }
+        .grid-title { font-size: 14px; font-weight: bold; color: #fff; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 1px 1px 2px #000; }
+        .grid-uploader { font-size: 11px; color: #aaa; margin-bottom: 4px; text-shadow: 1px 1px 2px #000;}
+
+        /* 📱 반응형 (유튜브 + 쇼츠) */
+        @media (max-width: 1024px) { .shorts-grid { grid-template-columns: repeat(4, 1fr); } }
         @media (max-width: 768px) {
             .input-row { flex-direction: column; }
-            .video-grid, .shorts-grid { grid-template-columns: 1fr; } 
+            .video-grid { grid-template-columns: 1fr; } 
+            
+            /* 모바일 세로: 무조건 3칸으로 강력 고정! */
+            .shorts-grid { grid-template-columns: repeat(3, 1fr); gap: 9px; }
+            .shorts-card { border-radius: 8px; } 
+            .shorts-logo-box { width: 35px; height: 35px; }
+            .grid-info { padding: 20px 8px 8px; }
+            .grid-title { font-size: 12px; }
+            .grid-uploader { font-size: 10px; margin-bottom: 2px; }
         }
    </style>
 </head>
