@@ -1192,11 +1192,29 @@
             .then(res => res.json()).then(data => alert(data.message)).catch(err => alert("에러가 발생했습니다. 다시 시도해주세요."));
         }
 
+        // 🚀 1. 탭 이동 시 화면 부드럽게 넘기기 (유튜브, 쇼츠 포함)
         document.addEventListener('click', async (e) => {
             const link = e.target.closest('a'); if (!link) return;
             const href = link.getAttribute('href');
-            if (href && href.startsWith('/') && !href.includes('admin') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('edit') && !href.includes('shorts') && !href.includes('youtube')) { 
+            
+            // 기존에 있던 shorts와 youtube 예외를 지웠습니다! 이제 끊기지 않습니다.
+            if (href && href.startsWith('/') && !href.includes('admin') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('edit')) { 
                 e.preventDefault(); navigateTo(href); 
+            }
+        });
+
+        // 📺 2. [스마트 센서] 유튜브/쇼츠 영상(iframe)을 클릭해서 볼 때만 배경 음악을 멈춥니다!
+        window.addEventListener('blur', () => {
+            if (document.activeElement && document.activeElement.tagName === 'IFRAME') {
+                const mainAudio = document.getElementById('main-audio');
+                const btnPlay = document.getElementById('btn-play');
+                
+                if (mainAudio && !mainAudio.paused) {
+                    mainAudio.pause(); 
+                    if (typeof isPlaying !== 'undefined') isPlaying = false;
+                    if (btnPlay) btnPlay.innerText = "▶";
+                    console.log("📺 영상 시청 감지! 배경 음악을 정지합니다.");
+                }
             }
         });
 
