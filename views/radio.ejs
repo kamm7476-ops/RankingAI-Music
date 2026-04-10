@@ -23,17 +23,29 @@
         /* 메인 중앙 정렬 */
         .radio-container { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 20px; position: relative; z-index: 5; }
         
-        /* 🌟 빙글빙글 LP판 마법 🌟 */
+        /* 🌟 빙글빙글 블랙 LP판 & 가운데 라벨 마법 🌟 */
         .vinyl-wrapper { position: relative; margin-bottom: 40px; }
         .vinyl-record { 
             width: 280px; height: 280px; border-radius: 50%; 
             box-shadow: 0 20px 50px rgba(0,0,0,0.8); 
-            border: 15px solid #111; object-fit: cover; 
+            
+            /* 🚨 블랙 턴테이블 바디 & 테두리 */
+            background: #111; 
+            border: 10px solid #000; 
+            
+            /* 🚨 이미지를 가운데 원형 라벨 안에 쏙 넣기! */
+            object-fit: contain; 
+            object-position: center; 
+            padding: 80px; /* 이 여백이 블랙 턴테이블 영역을 만듭니다 */
+            box-sizing: border-box; 
+            
             animation: spin 6s linear infinite; 
-            animation-play-state: paused; /* 기본은 멈춤 상태 */
+            animation-play-state: paused; 
         }
-        .vinyl-record.playing { animation-play-state: running; } /* 재생 시 돌아감! */
-        .vinyl-hole { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 25px; height: 25px; background: #0b0c0d; border-radius: 50%; border: 3px solid #222; }
+        .vinyl-record.playing { animation-play-state: running; } 
+        
+        /* 가운데 구멍 디테일 (작고 어둡게) */
+        .vinyl-hole { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 15px; height: 15px; background: #000; border-radius: 50%; border: 2px solid #222; z-index: 2; }
         
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
@@ -55,7 +67,9 @@
         .mood-btn.active { background: #ff5722; color: #000; border-color: #ff5722; box-shadow: 0 0 15px rgba(255,87,34,0.5); }
 
         @media (max-width: 600px) {
-            .vinyl-record { width: 220px; height: 220px; border-width: 10px; }
+            /* 🚨 모바일에서는 턴테이블도 작아지니까, 패딩(블랙 영역)도 같이 줄여야 예쁩니다! */
+            .vinyl-record { width: 220px; height: 220px; border-width: 8px; padding: 60px; } 
+            
             .track-title { font-size: 22px; }
             .mood-selector { gap: 8px; }
             .mood-btn { padding: 8px 15px; font-size: 13px; }
