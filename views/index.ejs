@@ -1236,13 +1236,14 @@
             .then(res => res.json()).then(data => alert(data.message)).catch(err => alert("에러가 발생했습니다. 다시 시도해주세요."));
         }
 
-        // 🚀 1. 탭 이동 시 화면 부드럽게 넘기기 (유튜브, 쇼츠 포함)
+       / 🚀 1. 탭 이동 시 화면 부드럽게 넘기기 (유튜브, 쇼츠 포함)
         document.addEventListener('click', async (e) => {
             const link = e.target.closest('a'); if (!link) return;
             const href = link.getAttribute('href');
             
             // 기존에 있던 shorts와 youtube 예외를 지웠습니다! 이제 끊기지 않습니다.
-            if (href && href.startsWith('/') && !href.includes('admin') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('edit')) { 
+            // 🚨 [핵심 추가] 단, 'radio' 방은 풀스크린 전용이므로 부드러운 전환 마법에서 제외합니다!
+            if (href && href.startsWith('/') && !href.includes('admin') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('edit') && !href.includes('radio')) { 
                 e.preventDefault(); navigateTo(href); 
             }
         });
