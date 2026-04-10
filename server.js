@@ -164,9 +164,6 @@ const ChatMessage = mongoose.models.ChatMessage || mongoose.model('ChatMessage',
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static('public'));
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -182,10 +179,6 @@ app.use((req, res, next) => {
     next();
 });
 // 🚀🚀🚀 [출입증 코드 끝] 🚀🚀🚀
-
-app.use(session({
-    secret: 'ranking-admin-secure-key',
-// ... (아래는 기존 코드 그대로) ...
 
 app.use(session({
   secret: 'ranking_secret_key_1234', 
