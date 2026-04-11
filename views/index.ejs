@@ -481,13 +481,32 @@
                     </form>
                 </div>
                 <% } else { %>
-                <div class="upload-section" style="text-align: center; padding: 20px; display: flex; align-items: center; justify-content: center; gap: 20px; min-height: 80px; background: linear-gradient(90deg, #161718 0%, #1a1b1c 100%); border: 1px dashed #444;">
-                    <div style="font-size: 24px;">🔒</div>
-                    <div style="text-align: left;">
-                        <h3 style="margin: 0; color: #aaa; font-size: 16px;">음원 업로드는 회원 전용입니다</h3>
-                        <p style="color: #666; font-size: 13px; margin: 2px 0 0 0;">나만의 AI 음악을 차트에 올리고 싶다면 로그인해주세요!</p>
+                <style>
+                    .guest-banner { 
+                        display: flex; align-items: center; justify-content: center; gap: 20px; 
+                        padding: 20px; min-height: 80px; 
+                        background: linear-gradient(90deg, #161718 0%, #1a1b1c 100%); 
+                        border: 1px dashed #444; margin-bottom: 40px; border-radius: 15px;
+                    }
+                    .guest-text-box { text-align: left; }
+                    .guest-text-box h3 { margin: 0; color: #aaa; font-size: 16px; word-break: keep-all; }
+                    .guest-text-box p { color: #666; font-size: 13px; margin: 4px 0 0 0; word-break: keep-all; }
+                    
+                    /* 📱 모바일(좁은 화면)에서는 세로로 예쁘게 쌓이도록 변신! */
+                    @media (max-width: 600px) {
+                        .guest-banner { flex-direction: column; text-align: center; gap: 12px; padding: 25px 15px; }
+                        .guest-text-box { text-align: center; }
+                        .guest-text-box h3 { font-size: 15px; }
+                        .guest-text-box p { font-size: 12px; margin-top: 6px; }
+                    }
+                </style>
+                <div class="guest-banner">
+                    <div style="font-size: 28px; line-height: 1;">🔒</div>
+                    <div class="guest-text-box">
+                        <h3>음원 업로드는 회원 전용입니다</h3>
+                        <p>나만의 AI 음악을 차트에 올리고 싶다면 로그인해주세요!</p>
                     </div>
-                    <button onclick="location.href='/login'" class="btn-upload" style="width: auto; margin: 0; padding: 8px 20px; font-size: 13px; height: fit-content; border-radius: 20px;">로그인</button>
+                    <button onclick="location.href='/login'" class="btn-upload" style="width: auto; margin: 0; padding: 10px 30px; font-size: 13px; border-radius: 20px;">로그인</button>
                 </div>
                 <% } %>
 
