@@ -1128,8 +1128,20 @@ app.get('/admin', async (req, res) => {
             };
         });
         
+        // 🚨 [수정 완료] 신데렐라 버그 치료: 자정이 넘어도 '전체 누적'은 유지되도록 불사조 패치!
         const today = getTodayDate();
-        const stats = await Stats.findOne({ date: today }) || { dailyVisitors: 0, totalVisitors: 0, dailyPlays: 0, totalPlays: 0 };
+        let stats = await Stats.findOne({ date: today });
+        
+        if (!stats) {
+            // 오늘 데이터가 비어있다면? 가장 최근(어제) 데이터를 뒤져서 전체 누적값만 안전하게 복구!
+            const lastStats = await Stats.findOne().sort({ _id: -1 }); 
+            stats = { 
+                dailyVisitors: 0, 
+                dailyPlays: 0, 
+                totalVisitors: lastStats ? (lastStats.totalVisitors || 0) : 0, 
+                totalPlays: lastStats ? (lastStats.totalPlays || 0) : 0 
+            };
+        }
         
         res.render('admin', { users: usersWithMusic, stats: stats, user: req.session.user });
     } catch (err) {
@@ -1137,7 +1149,6 @@ app.get('/admin', async (req, res) => {
         res.status(500).send("관리자 페이지를 불러오는 중 에러가 났습니다.");
     }
 });
-
 app.get('/admin/users', async (req, res) => {
     try {
         if (!req.session.user || req.session.user.role !== 'admin') {
