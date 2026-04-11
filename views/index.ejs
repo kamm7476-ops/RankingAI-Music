@@ -483,48 +483,33 @@
                 <% } else { %>
                 <style>
                     .guest-banner { 
-                        display: flex; align-items: center; justify-content: center; gap: 20px; 
-                        padding: 20px; min-height: 80px; 
+                        display: flex; align-items: center; justify-content: space-between; gap: 15px; 
+                        padding: 15px 20px; min-height: 60px; 
                         background: linear-gradient(90deg, #161718 0%, #1a1b1c 100%); 
-                        border: 1px dashed #444; margin-bottom: 40px; border-radius: 15px;
+                        border: 1px dashed #444; margin-bottom: 40px; border-radius: 12px;
                     }
-                    .guest-text-box { text-align: left; }
-                    .guest-text-box h3 { margin: 0; color: #aaa; font-size: 16px; word-break: keep-all; }
-                    .guest-text-box p { color: #666; font-size: 13px; margin: 4px 0 0 0; word-break: keep-all; }
+                    .guest-lock { font-size: 24px; line-height: 1; flex-shrink: 0; }
+                    .guest-text-box { text-align: left; flex: 1; min-width: 0; }
+                    .guest-text-box h3 { margin: 0; color: #aaa; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                    .guest-text-box p { color: #666; font-size: 13px; margin: 4px 0 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                    .guest-btn { width: auto; margin: 0; padding: 8px 25px; font-size: 13px; border-radius: 20px; flex-shrink: 0; height: fit-content; }
                     
-                    /* 📱 모바일(좁은 화면)에서는 세로로 예쁘게 쌓이도록 변신! */
+                    /* 📱 모바일(좁은 화면): 세로로 안 쌓이고 가로로 얇고 타이트하게 압축! */
                     @media (max-width: 600px) {
-                        .guest-banner { flex-direction: column; text-align: center; gap: 12px; padding: 25px 15px; }
-                        .guest-text-box { text-align: center; }
-                        .guest-text-box h3 { font-size: 15px; }
-                        .guest-text-box p { font-size: 12px; margin-top: 6px; }
+                        .guest-banner { gap: 8px; padding: 12px 10px; min-height: auto; margin-bottom: 25px; }
+                        .guest-lock { font-size: 18px; }
+                        .guest-text-box h3 { font-size: 13px; }
+                        .guest-text-box p { font-size: 11px; margin-top: 2px; }
+                        .guest-btn { padding: 6px 14px; font-size: 12px; }
                     }
                 </style>
                 <div class="guest-banner">
-                    <div style="font-size: 28px; line-height: 1;">🔒</div>
+                    <div class="guest-lock">🔒</div>
                     <div class="guest-text-box">
                         <h3>음원 업로드는 회원 전용입니다</h3>
-                        <p>나만의 AI 음악을 차트에 올리고 싶다면 로그인해주세요!</p>
+                        <p>나만의 음악을 올리고 싶다면 로그인해주세요!</p>
                     </div>
-                    <button onclick="location.href='/login'" class="btn-upload" style="width: auto; margin: 0; padding: 10px 30px; font-size: 13px; border-radius: 20px;">로그인</button>
-                </div>
-                <% } %>
-
-                <% if (user && user.role === 'admin') { %>
-                <div class="upload-section" style="border-color: #ff4a4a; background: #1a1111;">
-                    <h3 style="margin-top:0; color:#ff4a4a;">👑 관리자 팝업 공지 설정</h3>
-                    <form action="/admin/popup" method="POST">
-                        <input type="text" name="title" placeholder="팝업 제목 (예: 긴급 서버 점검 안내)" required style="width: 100%; box-sizing: border-box; margin-bottom: 10px; border: 1px solid #ff4a4a; padding: 12px; border-radius: 8px; background: #222; color: #fff;">
-                        <textarea name="content" placeholder="팝업 내용을 적어주세요!" required style="border: 1px solid #ff4a4a; width: 100%; box-sizing: border-box; padding: 12px; border-radius: 8px; background: #222; color: #fff; height: 80px; margin-bottom: 15px;"></textarea>
-                        
-                        <div style="display: flex; align-items: center; justify-content: space-between;">
-                            <label style="color: #fff; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px;">
-                                <input type="checkbox" name="isActive" checked style="width: 20px; height: 20px; accent-color: #ff4a4a;"> 
-                                메인 화면에 팝업 띄우기 (ON/OFF)
-                            </label>
-                            <button type="submit" class="btn-upload" style="background: #ff4a4a; width: auto; margin-top: 0; padding: 10px 30px;">적용하기</button>
-                        </div>
-                    </form>
+                    <button onclick="location.href='/login'" class="btn-upload guest-btn">로그인</button>
                 </div>
                 <% } %>
 
