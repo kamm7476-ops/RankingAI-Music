@@ -1597,6 +1597,18 @@
     }
 </script>
 
+// 🚀 [실시간 레이더] 10초마다 서버에 생존 신고 & 재생 상태 보고
+        setInterval(() => {
+            // 현재 음악이 재생 중인지 확인
+            const currentlyPlaying = (typeof isPlaying !== 'undefined') ? isPlaying : false;
+            
+            fetch('/api/heartbeat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isPlaying: currentlyPlaying })
+            }).catch(e => {}); // 에러나도 조용히 무시 (유저 방해 안 함)
+        }, 10000);
+
 <% if (user) { %>
     <a href="/chatlist" style="position: fixed; bottom: 20px; right: 20px; background: #ffb300; color: #000; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 15px rgba(255, 179, 0, 0.4); z-index: 1000; text-decoration: none; transition: transform 0.2s;">
         💬
