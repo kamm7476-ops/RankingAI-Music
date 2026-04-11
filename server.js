@@ -1045,6 +1045,44 @@ app.post('/contact/delete/:id', async (req, res) => {
     }
 });
 
+// 🚀🚀🚀 [여기에 1단계 코드 추가!] 🚀🚀🚀
+// ==========================================================
+// 🚀 [관리자 전용] 실시간 접속자 & 플레이 레이더망
+// ==========================================================
+global.liveUsers = new Map(); 
+
+// 1. 10초마다 "저 살아있어요!" 생존신고 받기
+app.post('/api/heartbeat', (req, res) => {
+    const userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
+    const isPlaying = req.body.isPlaying; 
+    global.liveUsers.set(userIp, { time: Date.now(), isPlaying: isPlaying });
+    res.json({ success: true });
+});
+
+// 2. 15초 동안 소식 없는 유저 장부에서 지우기 (5초마다 검사)
+setInterval(() => {
+    const now = Date.now();
+    for (let [ip, data] of global.liveUsers.entries()) {
+        if (now - data.time > 15000) {
+            global.liveUsers.delete(ip);
+        }
+    }
+}, 5000);
+
+// 3. 관리자 페이지에 실시간 숫자 쏴주는 API
+app.get('/api/admin/live-stats', (req, res) => {
+    let playingCount = 0;
+    for (let [ip, data] of global.liveUsers.entries()) {
+        if (data.isPlaying) playingCount++;
+    }
+    res.json({
+        liveUsers: global.liveUsers.size,
+        playingUsers: playingCount
+    });
+});
+// 🚀🚀🚀 [1단계 코드 끝] 🚀🚀🚀
+
+
 // =========================================
 // 👑 관리자 전용 통제실 (Admin) 👑
 // =========================================
