@@ -405,6 +405,8 @@
             
             <a href="/radio" class="nav-item" style="color: #ffb300; font-weight: 900;">🎧상황별BGM</a>
             
+            <a href="#" id="pwa-install-btn" class="nav-item" style="color: #00e5ff; font-weight: 900; display: none;">📲앱 설치하기</a>
+            
             <a href="/youtube" class="nav-item">유튜브</a>
             <a href="/shorts" class="nav-item">쇼츠</a>
             <a href="/board" class="nav-item">커뮤니티</a>
@@ -1518,6 +1520,50 @@
     }
 </script>
 
+<script>
+    // 1. 파수꾼(서비스 워커) 등록 (앱으로 인정받기 위한 필수 조건)
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').then(reg => {
+                console.log('RAM 앱 엔진 가동 완료!', reg.scope);
+            }).catch(err => {
+                console.log('앱 엔진 가동 실패:', err);
+            });
+        });
+    }
+
+    // 2. PWA 수동 설치 유도 마법 (숨겨진 팝업 뺏어오기)
+    let deferredPrompt;
+    const installBtn = document.getElementById('pwa-install-btn');
+
+    // 브라우저가 "앱 설치 팝업 띄울까?" 하고 물어볼 때 낚아챕니다!
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault(); // 브라우저의 기본 팝업을 억제!
+        deferredPrompt = e; // 팝업 권한을 우리가 몰래 저장!
+        if(installBtn) installBtn.style.display = 'block'; // 숨겨놨던 [📲앱 설치하기] 버튼을 보여줌
+    });
+
+    // 유저가 우리 [📲앱 설치하기] 버튼을 클릭했을 때!
+    if(installBtn) {
+        installBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (deferredPrompt) {
+                deferredPrompt.prompt(); // 저장해둔 진짜 설치 팝업을 띄움!
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('유저가 앱 설치를 수락했습니다! 🎉');
+                    installBtn.style.display = 'none'; // 설치했으니 버튼 다시 숨김
+                }
+                deferredPrompt = null;
+            }
+        });
+    }
+    
+    // 이미 앱으로 설치해서 앱으로 접속한 유저라면? (버튼 숨김)
+    window.addEventListener('appinstalled', () => {
+        if(installBtn) installBtn.style.display = 'none';
+    });
+</script>
 <% if (user) { %>
     <a href="/chatlist" style="position: fixed; bottom: 20px; right: 20px; background: #ffb300; color: #000; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 15px rgba(255, 179, 0, 0.4); z-index: 1000; text-decoration: none; transition: transform 0.2s;">
         💬
