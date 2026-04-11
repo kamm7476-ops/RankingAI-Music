@@ -26,7 +26,6 @@
         .btn-delete { background: #e53935; color: #fff; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px; }
         .action-cell { display: flex; gap: 5px; align-items: center; }
 
-        /* 🌟 새로 추가된 펼침 목록 디자인 */
         .music-dropdown { background: #0f1011; }
         .music-item-li { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: #1c1d1e; margin-bottom: 5px; border-radius: 6px; border-left: 3px solid #ff5722; }
 
@@ -47,20 +46,12 @@
             td > div, td > span, td > strong { text-align: right; word-break: break-all; }
             .action-cell { width: 100%; justify-content: flex-end; }
             
-            /* 모바일에서 펼침 목록 예외 처리 */
             .music-dropdown { margin-top: -15px; border-top-left-radius: 0; border-top-right-radius: 0; }
             .music-dropdown td::before { display: none; }
             .music-dropdown td { display: block; padding: 5px 0 !important; }
         }
     </style>
 </head>
-<body>
-
-    <div class="header">
-        <h1>👑 RANKING AI 종합 통제실</h1>
-        <a href="/" style="color: #ff5722; text-decoration: underline; font-weight: bold; font-size: 14px;">← 메인으로 돌아가기</a>
-    </div>
-
 <body>
 
     <div class="header">
@@ -94,14 +85,11 @@
                 const userSpan = document.getElementById('live-user-count');
                 const playSpan = document.getElementById('live-play-count');
                 
-                // 숫자가 바뀌면 살짝 깜빡이는 애니메이션 효과
                 if (userSpan.innerText !== String(data.liveUsers)) {
-                    userSpan.style.opacity = 0.5;
-                    setTimeout(() => userSpan.style.opacity = 1, 200);
+                    userSpan.style.opacity = 0.5; setTimeout(() => userSpan.style.opacity = 1, 200);
                 }
                 if (playSpan.innerText !== String(data.playingUsers)) {
-                    playSpan.style.opacity = 0.5;
-                    setTimeout(() => playSpan.style.opacity = 1, 200);
+                    playSpan.style.opacity = 0.5; setTimeout(() => playSpan.style.opacity = 1, 200);
                 }
 
                 userSpan.innerText = data.liveUsers;
@@ -112,37 +100,21 @@
         updateLiveStats();
         setInterval(updateLiveStats, 3000); 
     </script>
+
     <div class="dashboard">
         <div class="card" style="text-align: center;">
             <h3 style="color: #ff5722; font-size: 16px; border-bottom: 1px solid #333; padding-bottom: 10px;">👥 오늘 방문자 (총 <%= stats ? stats.dailyVisitors : 0 %>명)</h3>
             <div style="display: flex; justify-content: space-between; padding: 10px 20px 0;">
-
-   <div class="dashboard">
-        <div class="card" style="text-align: center;">
-            <h3 style="color: #ff5722; font-size: 16px; border-bottom: 1px solid #333; padding-bottom: 10px;">👥 오늘 방문자 (총 <%= stats ? stats.dailyVisitors : 0 %>명)</h3>
-            <div style="display: flex; justify-content: space-between; padding: 10px 20px 0;">
-                <div>
-                    <span style="color: #ccc; font-size: 12px;">🔸 비회원</span><br>
-                    <strong style="font-size: 24px; color: #00e5ff;"><%= stats ? (stats.guestVisitors || 0) : 0 %></strong>
-                </div>
-                <div>
-                    <span style="color: #ccc; font-size: 12px;">🔹 회원</span><br>
-                    <strong style="font-size: 24px; color: #4caf50;"><%= stats ? (stats.memberVisitors || 0) : 0 %></strong>
-                </div>
+                <div><span style="color: #ccc; font-size: 12px;">🔸 비회원</span><br><strong style="font-size: 24px; color: #00e5ff;"><%= stats ? (stats.guestVisitors || 0) : 0 %></strong></div>
+                <div><span style="color: #ccc; font-size: 12px;">🔹 회원</span><br><strong style="font-size: 24px; color: #4caf50;"><%= stats ? (stats.memberVisitors || 0) : 0 %></strong></div>
             </div>
         </div>
 
         <div class="card" style="text-align: center;">
             <h3 style="color: #ff5722; font-size: 16px; border-bottom: 1px solid #333; padding-bottom: 10px;">🎧 오늘 재생수 (총 <%= stats ? stats.dailyPlays : 0 %>회)</h3>
             <div style="display: flex; justify-content: space-between; padding: 10px 20px 0;">
-                <div>
-                    <span style="color: #ccc; font-size: 12px;">🔸 비회원</span><br>
-                    <strong style="font-size: 24px; color: #00e5ff;"><%= stats ? (stats.guestPlays || 0) : 0 %></strong>
-                </div>
-                <div>
-                    <span style="color: #ccc; font-size: 12px;">🔹 회원</span><br>
-                    <strong style="font-size: 24px; color: #4caf50;"><%= stats ? (stats.memberPlays || 0) : 0 %></strong>
-                </div>
+                <div><span style="color: #ccc; font-size: 12px;">🔸 비회원</span><br><strong style="font-size: 24px; color: #00e5ff;"><%= stats ? (stats.guestPlays || 0) : 0 %></strong></div>
+                <div><span style="color: #ccc; font-size: 12px;">🔹 회원</span><br><strong style="font-size: 24px; color: #4caf50;"><%= stats ? (stats.memberPlays || 0) : 0 %></strong></div>
             </div>
         </div>
 
@@ -247,11 +219,9 @@
             }
         }
 
-        // 🌟 음악 리스트 쫙 펴고 접는 마법의 스크립트!
         function toggleMusicList(username) {
             const row = document.getElementById('music-list-' + username);
             if (row.style.display === 'none') {
-                // 모바일 화면일 땐 block으로 켜주고, PC일 땐 표 형식에 맞게 table-row로 켜줍니다!
                 row.style.display = window.innerWidth <= 768 ? 'block' : 'table-row';
             } else {
                 row.style.display = 'none';
