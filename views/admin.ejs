@@ -61,6 +61,62 @@
         <a href="/" style="color: #ff5722; text-decoration: underline; font-weight: bold; font-size: 14px;">← 메인으로 돌아가기</a>
     </div>
 
+<body>
+
+    <div class="header">
+        <h1>👑 RANKING AI 종합 통제실</h1>
+        <a href="/" style="color: #ff5722; text-decoration: underline; font-weight: bold; font-size: 14px;">← 메인으로 돌아가기</a>
+    </div>
+
+    <div style="display: flex; gap: 20px; margin-bottom: 30px; margin-top: 10px; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 250px; background: #161718; border: 1px solid #333; padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0,229,255,0.1);">
+            <div style="color: #aaa; font-size: 15px; font-weight: bold; margin-bottom: 10px;">🟢 현재 실시간 접속자</div>
+            <div style="font-size: 45px; color: #00e5ff; font-weight: 900; font-family: 'Pretendard', sans-serif;">
+                <span id="live-user-count">0</span><span style="font-size:18px; color:#aaa; font-weight:bold;">명</span>
+            </div>
+            <div style="font-size: 11px; color: #555; margin-top: 5px;">(10초 단위 갱신)</div>
+        </div>
+
+        <div style="flex: 1; min-width: 250px; background: #161718; border: 1px solid #333; padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(255,87,34,0.1);">
+            <div style="color: #aaa; font-size: 15px; font-weight: bold; margin-bottom: 10px;">🎧 실시간 음악 재생 중</div>
+            <div style="font-size: 45px; color: #ff5722; font-weight: 900; font-family: 'Pretendard', sans-serif;">
+                <span id="live-play-count">0</span><span style="font-size:18px; color:#aaa; font-weight:bold;">명</span>
+            </div>
+            <div style="font-size: 11px; color: #555; margin-top: 5px;">(실시간 플레이어 구동 기준)</div>
+        </div>
+    </div>
+
+    <script>
+        function updateLiveStats() {
+            fetch('/api/admin/live-stats')
+            .then(res => res.json())
+            .then(data => {
+                const userSpan = document.getElementById('live-user-count');
+                const playSpan = document.getElementById('live-play-count');
+                
+                // 숫자가 바뀌면 살짝 깜빡이는 애니메이션 효과
+                if (userSpan.innerText !== String(data.liveUsers)) {
+                    userSpan.style.opacity = 0.5;
+                    setTimeout(() => userSpan.style.opacity = 1, 200);
+                }
+                if (playSpan.innerText !== String(data.playingUsers)) {
+                    playSpan.style.opacity = 0.5;
+                    setTimeout(() => playSpan.style.opacity = 1, 200);
+                }
+
+                userSpan.innerText = data.liveUsers;
+                playSpan.innerText = data.playingUsers;
+            }).catch(e => {});
+        }
+        
+        updateLiveStats();
+        setInterval(updateLiveStats, 3000); 
+    </script>
+    <div class="dashboard">
+        <div class="card" style="text-align: center;">
+            <h3 style="color: #ff5722; font-size: 16px; border-bottom: 1px solid #333; padding-bottom: 10px;">👥 오늘 방문자 (총 <%= stats ? stats.dailyVisitors : 0 %>명)</h3>
+            <div style="display: flex; justify-content: space-between; padding: 10px 20px 0;">
+
    <div class="dashboard">
         <div class="card" style="text-align: center;">
             <h3 style="color: #ff5722; font-size: 16px; border-bottom: 1px solid #333; padding-bottom: 10px;">👥 오늘 방문자 (총 <%= stats ? stats.dailyVisitors : 0 %>명)</h3>
