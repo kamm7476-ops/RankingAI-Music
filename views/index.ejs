@@ -1564,6 +1564,25 @@
         if(installBtn) installBtn.style.display = 'none';
     });
 </script>
+
+<script>
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.setActionHandler('play', () => {
+            if (typeof mainAudio !== 'undefined' && mainAudio.paused) togglePlayPause();
+        });
+        navigator.mediaSession.setActionHandler('pause', () => {
+            if (typeof mainAudio !== 'undefined' && !mainAudio.paused) togglePlayPause();
+        });
+        navigator.mediaSession.setActionHandler('previoustrack', () => {
+            if (typeof playPrevTrack === 'function') playPrevTrack();
+        });
+        navigator.mediaSession.setActionHandler('nexttrack', () => {
+            if (typeof playNextTrack === 'function') playNextTrack();
+        });
+        console.log("🚘 블루투스 리모컨 수신기 장착 완료!");
+    }
+</script>
+
 <% if (user) { %>
     <a href="/chatlist" style="position: fixed; bottom: 20px; right: 20px; background: #ffb300; color: #000; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 15px rgba(255, 179, 0, 0.4); z-index: 1000; text-decoration: none; transition: transform 0.2s;">
         💬
