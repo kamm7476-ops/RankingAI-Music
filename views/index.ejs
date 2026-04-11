@@ -929,13 +929,6 @@
 
         function togglePlayPause() {
             if (playlist.length === 0) return alert("재생할 곡을 선택해주세요!");
-            
-            // 🚨 브라우저 방어막 해제 (터치했으니 빛나는 효과 제거)
-            if (btnPlay) {
-                btnPlay.style.boxShadow = "none";
-                btnPlay.style.background = "#fff";
-                btnPlay.style.color = "#000";
-            }
 
             if (mainAudio.paused) {
                 mainAudio.play().then(() => {
@@ -1036,12 +1029,7 @@
                     playPromise.then(() => {
                         // ✅ 브라우저가 자동재생을 허락함! (정상 재생)
                         errorCount = 0; isPlaying = true;
-                        if(btnPlay) {
-                            btnPlay.innerText = "⏸";
-                            btnPlay.style.boxShadow = "none"; // 빛나는 효과 끄기
-                            btnPlay.style.background = "#fff";
-                            btnPlay.style.color = "#000";
-                        }
+                        if(btnPlay) btnPlay.innerText = "⏸";
                         if(window.carrierWaveAudio) window.carrierWaveAudio.play().catch(()=>{});
 
                         // 오디오 안정화 후 UI 업데이트
@@ -1063,14 +1051,9 @@
                         // 💀 브라우저가 다음 곡 자동재생을 차단함! (유저 터치 유도 마법 작동!)
                         console.log("🚨 자동재생 차단됨! 유저 터치 대기 중...");
                         isPlaying = false; 
+                        if(btnPlay) btnPlay.innerText = "▶";
                         
-                        if(btnPlay) {
-                            btnPlay.innerText = "▶";
-                            // 버튼을 시선 강탈하게 오렌지색으로 번쩍이게 만듭니다
-                            btnPlay.style.boxShadow = "0 0 20px 8px #ff5722"; 
-                            btnPlay.style.background = "#ff5722";
-                            btnPlay.style.color = "#fff";
-                        }
+                        // 제목을 바꿔서 유저가 누르도록 유도
                         
                         // 제목을 바꿔서 유저가 누르도록 유도
                         document.getElementById('main-player-title').innerText = "👆 터치해서 다음 곡 재생";
@@ -1210,12 +1193,7 @@
                 mainAudio.currentTime = 0;
                 mainAudio.play().catch(e => { 
                     isPlaying = false; 
-                    if(btnPlay) {
-                        btnPlay.innerText = "▶"; 
-                        btnPlay.style.boxShadow = "0 0 20px 8px #ff5722"; 
-                        btnPlay.style.background = "#ff5722";
-                        btnPlay.style.color = "#fff";
-                    }
+                    if(btnPlay) btnPlay.innerText = "▶"; 
                     const track = playlist[currentIndex];
                     if(track) {
                         document.getElementById('main-player-title').innerText = "👆 터치해서 재생";
