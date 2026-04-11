@@ -267,6 +267,42 @@
                 fetchTracks(currentMood); 
             }
         }
+// ==========================================================
+        // 🚀 [브라우저 족쇄 풀기 꼼수] 전역 터치 권한 연장기
+        // ==========================================================
+        // 유저가 화면을 스크롤하거나, 댓글을 보거나, 아무 곳이나 터치할 때마다
+        // 브라우저에게 "나 이 사이트 계속 보고 있어!"라고 몰래 신고해서 
+        // 오디오 자동재생 권한을 끈질기게 연장시킵니다.
+        
+        document.addEventListener('touchstart', () => {
+            // 브라우저 몰래 무음 오디오 컨텍스트를 계속 깨워줍니다
+            if (typeof audioCtx !== 'undefined' && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            
+            // 만약 브라우저가 막아서 '대기 상태(isPlaying = false)'로 빠졌는데, 
+            // 재생 버튼이 번쩍거리고 있는 상황이라면? 
+            // 유저가 화면 아무 곳이나 터치하는 순간 바로 낚아채서 재생 시작!
+            const mainAudioEl = document.getElementById('main-audio'); // 라디오면 'radio-audio'
+            const playBtnEl = document.getElementById('btn-play'); // 라디오면 'btn-radio-play'
+            
+            if (mainAudioEl && mainAudioEl.paused && playBtnEl && playBtnEl.innerText === "▶" && document.getElementById('main-player-title').innerText.includes("터치해서")) {
+                console.log("👀 화면 터치 감지! 막혀있던 재생을 몰래 시작합니다.");
+                mainAudioEl.play().then(() => {
+                    isPlaying = true;
+                    playBtnEl.innerText = "⏸";
+                    playBtnEl.style.boxShadow = "none";
+                    playBtnEl.style.background = "#fff";
+                    playBtnEl.style.color = "#000";
+                    
+                    const currentTrack = playlist[currentIndex]; // 라디오면 radioPlaylist[currentIdx]
+                    if (currentTrack) {
+                        document.getElementById('main-player-title').innerText = currentTrack.title || currentTrack.name;
+                        document.getElementById('main-player-artist').innerText = currentTrack.artist;
+                    }
+                }).catch(e => {});
+            }
+        }, { passive: true });
     </script>
 </body>
 </html>
