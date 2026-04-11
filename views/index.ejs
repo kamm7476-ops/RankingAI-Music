@@ -480,12 +480,18 @@
                         <button type="submit" class="btn-upload">차트 등록하기</button>
                     </form>
                 </div>
+                <% if (user) { %>
+                <div class="upload-section">
+                    <h3 style="margin-top:0; color:#ff5722;">🎵 회원을 위한 음원 업로드</h3>
+                    </div>
                 <% } else { %>
-                <div class="upload-section" style="text-align: center; padding: 40px 20px;">
-                    <div style="font-size: 40px; margin-bottom: 10px;">🔒</div>
-                    <h3 style="margin-top:0; color:#aaa;">음원 업로드는 회원 전용입니다</h3>
-                    <p style="color: #777; font-size: 14px; margin-bottom: 20px;">나만의 AI 음악을 차트에 올리고 싶다면 로그인해주세요!</p>
-                    <button onclick="location.href='/login'" class="btn-upload" style="width: auto; padding: 10px 40px;">로그인하러 가기</button>
+                <div class="upload-section" style="text-align: center; padding: 20px; display: flex; align-items: center; justify-content: center; gap: 20px; min-height: 80px; background: linear-gradient(90deg, #161718 0%, #1a1b1c 100%); border: 1px dashed #444;">
+                    <div style="font-size: 24px;">🔒</div>
+                    <div style="text-align: left;">
+                        <h3 style="margin: 0; color: #aaa; font-size: 16px;">음원 업로드는 회원 전용입니다</h3>
+                        <p style="color: #666; font-size: 13px; margin: 2px 0 0 0;">나만의 AI 음악을 차트에 올리고 싶다면 로그인해주세요!</p>
+                    </div>
+                    <button onclick="location.href='/login'" class="btn-upload" style="width: auto; margin: 0; padding: 8px 20px; font-size: 13px; height: fit-content;">로그인</button>
                 </div>
                 <% } %>
 
