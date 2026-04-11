@@ -1521,48 +1521,62 @@
 </script>
 
 <script>
-    // 1. 파수꾼(서비스 워커) 등록 (앱으로 인정받기 위한 필수 조건)
+    // 1. 파수꾼(서비스 워커) 등록
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('/sw.js').then(reg => {
-                console.log('RAM 앱 엔진 가동 완료!', reg.scope);
-            }).catch(err => {
-                console.log('앱 엔진 가동 실패:', err);
-            });
+                console.log('RAM 앱 엔진 가동 완료!');
+            }).catch(err => console.log('앱 엔진 가동 실패:', err));
         });
     }
 
-    // 2. PWA 수동 설치 유도 마법 (숨겨진 팝업 뺏어오기)
+    // 2. 인앱 브라우저(네이버, 카카오 등) 감지기
+    const ua = navigator.userAgent.toLowerCase();
+    const isInAppBrowser = /naver|kakaotalk|line|instagram|facebook/i.test(ua);
+    
     let deferredPrompt;
     const installBtn = document.getElementById('pwa-install-btn');
 
-    // 브라우저가 "앱 설치 팝업 띄울까?" 하고 물어볼 때 낚아챕니다!
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault(); // 브라우저의 기본 팝업을 억제!
-        deferredPrompt = e; // 팝업 권한을 우리가 몰래 저장!
-        if(installBtn) installBtn.style.display = 'block'; // 숨겨놨던 [📲앱 설치하기] 버튼을 보여줌
-    });
-
-    // 유저가 우리 [📲앱 설치하기] 버튼을 클릭했을 때!
-    if(installBtn) {
-        installBtn.addEventListener('click', async (e) => {
+    if (isInAppBrowser) {
+        // 🚨 네이버/카톡 앱으로 들어왔을 때: 버튼은 보여주되, 누르면 안내창 띄우기!
+        if (installBtn) {
+            installBtn.style.display = 'block';
+            installBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                alert('🚨 네이버/카카오톡 등에서는 앱 설치가 차단되어 있습니다.\n\n화면 하단(또는 우측 상단)의 [점 3개 메뉴 ⋮]를 눌러\n🌐 [다른 브라우저로 열기(크롬/사파리)]를 선택하신 후 다시 눌러주세요!');
+            });
+        }
+    } else {
+        // ✅ 크롬, 사파리, 삼성 인터넷 등 정상 브라우저일 때: 진짜 설치 팝업 띄우기
+        window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
-            if (deferredPrompt) {
-                deferredPrompt.prompt(); // 저장해둔 진짜 설치 팝업을 띄움!
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    console.log('유저가 앱 설치를 수락했습니다! 🎉');
-                    installBtn.style.display = 'none'; // 설치했으니 버튼 다시 숨김
-                }
-                deferredPrompt = null;
-            }
+            deferredPrompt = e;
+            if(installBtn) installBtn.style.display = 'block'; 
         });
+
+        if(installBtn) {
+            installBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        installBtn.style.display = 'none'; 
+                    }
+                    deferredPrompt = null;
+                }
+            });
+        }
     }
     
-    // 이미 앱으로 설치해서 앱으로 접속한 유저라면? (버튼 숨김)
+    // 이미 앱으로 접속한 유저라면 숨김
     window.addEventListener('appinstalled', () => {
         if(installBtn) installBtn.style.display = 'none';
     });
+    // PWA 전용 모드(standalone)로 실행 중일 때도 숨김
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        if(installBtn) installBtn.style.display = 'none';
+    }
 </script>
 
 <script>
