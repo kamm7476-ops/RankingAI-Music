@@ -1192,6 +1192,36 @@ app.get('/admin/delete-user', (req, res) => {
     res.redirect('/admin');
 });
 
+// 🚑 [긴급 복구] 잃어버린 전체 누적 데이터 100% 복원 스위치 (1회용)
+app.get('/admin/recover-stats', async (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'admin') {
+        return res.send("<script>alert('관리자만 접근 가능합니다!'); location.href='/';</script>");
+    }
+    
+    try {
+        // 1. 흩어진 진짜 재생수 싹 긁어모으기
+        const allMusic = await Music.find();
+        const realTotalPlays = allMusic.reduce((sum, music) => sum + (music.views || 0), 0);
+
+        // 2. 과거의 진짜 방문자수 싹 긁어모으기
+        const allStats = await Stats.find();
+        const realTotalVisitors = allStats.reduce((sum, stat) => sum + (stat.dailyVisitors || 0), 0);
+
+        // 3. 오늘 기록에 진짜 누적치 강제 주입!
+        const today = getTodayDate();
+        await Stats.findOneAndUpdate(
+            { date: today },
+            { $set: { totalPlays: realTotalPlays, totalVisitors: realTotalVisitors } },
+            { upsert: true }
+        );
+
+        res.send("<script>alert('🎉 완벽하게 복구되었습니다! 관리자 화면으로 이동합니다.'); location.href='/admin';</script>");
+    } catch (err) {
+        console.error("복구 중 에러:", err);
+        res.status(500).send("복구 중 에러가 발생했습니다.");
+    }
+});
+
 // 🚨 관리자 통제실 개별 곡 강제 삭제 기능
 app.post('/admin/delete-music-only/:id', async (req, res) => {
     if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
