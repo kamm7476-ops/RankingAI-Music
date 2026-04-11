@@ -477,27 +477,44 @@ app.post('/verify-code', (req, res) => {
 // ==========================================
 app.get('/signup', (req, res) => res.render('signup'));
 app.get('/login', (req, res) => res.render('login'));
-// 🌟 약관 페이지 연결 마법 (이 줄을 추가하세요!)
+// 🌟 약관 페이지 연결 마법
 app.get('/terms', (req, res) => res.render('terms'));
 
+// 🚀 1. 대소문자 철벽 방어 회원가입!
 app.post('/signup', async (req, res) => {
   try {
-    const { username, password, nickname } = req.body;
+    // 앞뒤 공백 제거
+    const username = req.body.username.trim();
+    const password = req.body.password;
+    const nickname = req.body.nickname ? req.body.nickname.trim() : "";
     
-    const existingUser = await User.findOne({ username });
+    // 🌟 대소문자 완벽 무시 중복 검사! (Admin == admin)
+    const existingUser = await User.findOne({ 
+        username: { $regex: new RegExp('^' + username + '$', 'i') } 
+    });
+    
     if (existingUser) {
-      return res.send("<script>alert('이미 있는 아이디입니다!'); window.history.back();</script>");
+      return res.send("<script>alert('이미 사용 중인 아이디입니다! (대/소문자 구분 안 함)'); window.history.back();</script>");
     }
     
     if (nickname) {
-        const existingNickname = await User.findOne({ nickname });
+        // 🌟 닉네임도 대소문자 무시 중복 검사!
+        const existingNickname = await User.findOne({ 
+            nickname: { $regex: new RegExp('^' + nickname + '$', 'i') } 
+        });
         if (existingNickname) {
             return res.send("<script>alert('이미 사용 중인 닉네임입니다!'); window.history.back();</script>");
         }
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username: username, password: hashedPassword, nickname: nickname || "" });
+    
+    // 🌟 DB에는 무조건 깔끔하게 소문자로만 저장!
+    const newUser = new User({ 
+        username: username.toLowerCase(), 
+        password: hashedPassword, 
+        nickname: nickname 
+    });
     await newUser.save();
     
     res.send("<script>alert('회원가입 성공! 로그인해주세요.'); window.location.href='/login';</script>");
@@ -507,10 +524,16 @@ app.post('/signup', async (req, res) => {
   }
 });
 
+// 🚀 2. 대소문자 찰떡 인식 로그인!
 app.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body; 
-    const user = await User.findOne({ username: username });
+    const username = req.body.username.trim(); 
+    const password = req.body.password; 
+    
+    // 🌟 대소문자 섞어 쳐도 DB에서 소문자로 찰떡같이 찾아줌!
+    const user = await User.findOne({ 
+        username: { $regex: new RegExp('^' + username + '$', 'i') } 
+    });
     
     if (!user) {
       return res.send("<script>alert('없는 아이디입니다!'); window.history.back();</script>");
@@ -536,7 +559,7 @@ app.post('/login', async (req, res) => {
 
     req.session.user = { id: user.username, name: displayName, role: userRole };
     
-    // 🌟 일반 아이디 로그인 카운트 올리기! 🌟
+    // 🌟 로그인 카운트 올리기! 🌟
     await trackUserLogin(user.username);
     
     if (userRole === 'admin') {
