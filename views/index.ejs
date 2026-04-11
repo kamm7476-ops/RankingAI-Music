@@ -579,7 +579,7 @@
                                         }
                                     %>
                                     <div class="action-btn" id="like-btn-<%= music._id %>" onclick="likeMusic('<%= music._id %>')" style="<%= isLiked ? 'color:#ff4a4a; border-color:#ff4a4a;' : '' %>">
-                                        <%= isLiked ? '❤️' : '🤍' %> 좋아요 <span id="like-count-<%= music._id %>"><%= music.views || 0 %></span>
+                                        <%= isLiked ? '❤️' : '🤍' %> 좋아요 <span id="like-count-<%= music._id %>"><%= music.likes || 0 %></span>
                                     </div>
                                 </div>
 
