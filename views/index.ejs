@@ -1347,8 +1347,20 @@
                 });
                 // 🚀🚀🚀 =========================================================
 
-                const currentContainer = document.querySelector('.container'); const newContainer = newDoc.querySelector('.container');
-                if (currentContainer && newContainer) currentContainer.innerHTML = newContainer.innerHTML;
+               const currentContainer = document.querySelector('.container'); const newContainer = newDoc.querySelector('.container');
+        if (currentContainer && newContainer) {
+            currentContainer.innerHTML = newContainer.innerHTML;
+            
+            // 🚀 [마법의 스크립트 부활 주문] 쇼츠/유튜브 화면의 클릭 기능들을 강제로 깨워줍니다!
+            const scripts = currentContainer.querySelectorAll('script');
+            scripts.forEach(script => {
+                const newScript = document.createElement('script');
+                Array.from(script.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                newScript.innerHTML = script.innerHTML;
+                document.body.appendChild(newScript);
+                document.body.removeChild(newScript); // 실행만 시키고 흔적 지우기
+            });
+        }
                 const currentNav = document.querySelector('.header-nav'); const newNav = newDoc.querySelector('.header-nav');
                 if (currentNav && newNav) currentNav.innerHTML = newNav.innerHTML;
                 history.pushState(null, '', href); document.title = newDoc.title;
