@@ -1604,5 +1604,14 @@
     </a>
 <% } %>
 
+<script>
+    // ⏳ 1분마다 재생 시간을 서버에 적립하는 마법의 센서!
+    setInterval(() => {
+        // 음악이 재생 중일 때만 서버로 신호를 보냅니다
+        if (typeof isPlaying !== 'undefined' && isPlaying === true) {
+            fetch('/api/add-playtime', { method: 'POST' }).catch(e => console.log('시간 적립 에러:', e));
+        }
+    }, 60000); // 60000 밀리초 = 딱 1분
+</script>
 </body>
 </html>
