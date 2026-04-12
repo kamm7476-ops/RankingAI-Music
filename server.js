@@ -168,6 +168,7 @@ const VisitLogSchema = new mongoose.Schema({
     date: { type: String, required: true },
     country: { type: String, default: 'Unknown' },
     userId: { type: String, default: 'Guest' },
+    playTime: { type: Number, default: 0 },
     createdAt: { type: Date, default: Date.now }
 });
 const VisitLog = mongoose.models.VisitLog || mongoose.model('VisitLog', VisitLogSchema);
@@ -597,6 +598,7 @@ app.get('/logout', (req, res) => {
 app.get('/', async (req, res) => {
     // 🌍 [1단계] 국가 추적 센서 가동!
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    if (ip && ip.includes(',')) ip = ip.split(',')[0].trim();
     const geo = geoip.lookup(ip);
     const country = geo ? geo.country : 'Unknown';
     const today = getTodayDate();
@@ -1103,6 +1105,7 @@ global.liveUsers = new Map();
 // 1. 10초마다 "저 살아있어요!" 생존신고 받기 (+ 감상 시간 누적!)
 app.post('/api/heartbeat', async (req, res) => {
     const userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
+    if (userIp && userIp.includes(',')) userIp = userIp.split(',')[0].trim();
     const isPlaying = req.body.isPlaying; 
     global.liveUsers.set(userIp, { time: Date.now(), isPlaying: isPlaying });
 
