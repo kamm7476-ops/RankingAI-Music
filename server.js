@@ -19,7 +19,7 @@ const http = require('http');
 const { Server } = require("socket.io"); 
 
 // 🌟 클라우디너리 영구 금고 세팅
-const cloudinary = require('cloudinary').v2;
+cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const User = require('./user'); 
 const Stats = require('./models/Stats'); // 🌟 통계 DB
@@ -1204,9 +1204,16 @@ app.get('/admin', async (req, res) => {
         ]);
 
 // ⏳ [2단계] 오늘 전체 감상 시간(초)을 다 합쳐서 계산
-        const playTimeStats = await VisitLog.aggregate([
+       const playTimeStats = await VisitLog.aggregate([
             { $match: { date: today } },
-            { $group: { _id: null, totalSeconds: { $sum: "$totalPlayTime" } } } // 🚨 반드시 totalPlayTime 인지 확인!
+            { 
+                $group: { 
+                    _id: null, 
+                    totalSeconds: { 
+                        $sum: { $add: [{ $ifNull: ["$totalPlayTime", 0] }, { $ifNull: ["$playTime", 0] }] } 
+                    } 
+                } 
+            }
         ]);
         const totalSeconds = playTimeStats.length > 0 ? playTimeStats[0].totalSeconds : 0;
         
