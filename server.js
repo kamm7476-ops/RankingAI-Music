@@ -1125,7 +1125,7 @@ app.post('/api/heartbeat', async (req, res) => {
         try {
             await VisitLog.findOneAndUpdate(
                 { date: today, userId: userId },
-                { $inc: { playTime: 10 } }, // 10초씩 더하기!
+                { $inc: { totalPlayTime: 10 } }, // 10초씩 더하기!
                 { upsert: true }
             );
         } catch(e) { console.log("시간 누적 에러:", e); }
@@ -1206,19 +1206,19 @@ app.get('/admin', async (req, res) => {
 // ⏳ [2단계] 오늘 전체 감상 시간(초)을 다 합쳐서 계산
         const playTimeStats = await VisitLog.aggregate([
             { $match: { date: today } },
-            { $group: { _id: null, totalSeconds: { $sum: "$playTime" } } }
+            { $group: { _id: null, totalSeconds: { $sum: "$totalPlayTime" } } } // 🚨 반드시 totalPlayTime 인지 확인!
         ]);
         const totalSeconds = playTimeStats.length > 0 ? playTimeStats[0].totalSeconds : 0;
         
         // 🚀 초 단위까지 완벽하게 계산해서 예쁘게 포장하기!
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60; // 👈 남은 '초' 계산!
+        const seconds = totalSeconds % 60;
         
         let todayPlayTime = "";
         if (hours > 0) todayPlayTime += `${hours}시간 `;
         if (minutes > 0 || hours > 0) todayPlayTime += `${minutes}분 `;
-        todayPlayTime += `${seconds}초`; // 👈 화면에 '초'까지 띄워줍니다!
+        todayPlayTime += `${seconds}초`;
 
 // 📈 [3단계] 그래프용 '최근 7일' 데이터 긁어오기!
         const past7Stats = await Stats.find().sort({ _id: -1 }).limit(7);
