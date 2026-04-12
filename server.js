@@ -1099,11 +1099,25 @@ app.post('/contact/delete/:id', async (req, res) => {
 // ==========================================================
 global.liveUsers = new Map(); 
 
-// 1. 10초마다 "저 살아있어요!" 생존신고 받기
-app.post('/api/heartbeat', (req, res) => {
+// 1. 10초마다 "저 살아있어요!" 생존신고 받기 (+ 감상 시간 누적!)
+app.post('/api/heartbeat', async (req, res) => {
     const userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
     const isPlaying = req.body.isPlaying; 
     global.liveUsers.set(userIp, { time: Date.now(), isPlaying: isPlaying });
+
+    // ⏳ [2단계] 음악이 재생 중이라면 감상 시간을 10초씩 계속 누적합니다!
+    if (isPlaying) {
+        const today = getTodayDate();
+        const userId = req.session && req.session.user ? req.session.user.id : 'Guest';
+        try {
+            await VisitLog.findOneAndUpdate(
+                { date: today, userId: userId },
+                { $inc: { playTime: 10 } }, // 10초씩 더하기!
+                { upsert: true }
+            );
+        } catch(e) { console.log("시간 누적 에러:", e); }
+    }
+    
     res.json({ success: true });
 });
 
