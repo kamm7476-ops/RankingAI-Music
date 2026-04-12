@@ -1201,12 +1201,23 @@ app.get('/admin', async (req, res) => {
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         const todayPlayTime = hours > 0 ? `${hours}시간 ${minutes}분` : `${minutes}분`;
+
+// 📈 [3단계] 그래프용 '최근 7일' 데이터 긁어오기!
+        const past7Stats = await Stats.find().sort({ _id: -1 }).limit(7);
+        past7Stats.reverse(); // 과거부터 순서대로 보여주기 위해 정렬 뒤집기
+
+        const chartDates = past7Stats.map(s => s.date.substring(5)); // 연도 빼고 "04-12" 날짜만!
+        const chartVisitors = past7Stats.map(s => s.dailyVisitors || 0);
+        const chartPlays = past7Stats.map(s => s.dailyPlays || 0);
         
         res.render('admin', { 
             users: usersWithMusic, 
             stats: stats, 
             countryStats: countryStats, // 🌍 국가 정보 추가!
             todayPlayTime: todayPlayTime,
+            chartDates: chartDates,       // 👈 📈 차트 데이터 1
+            chartVisitors: chartVisitors, // 👈 📈 차트 데이터 2
+            chartPlays: chartPlays,       // 👈 📈 차트 데이터 3
             user: req.session.user 
         });
     } catch (err) {
