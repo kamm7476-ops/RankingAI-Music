@@ -160,7 +160,16 @@ const chatMessageSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 const ChatMessage = mongoose.models.ChatMessage || mongoose.model('ChatMessage', chatMessageSchema);
-
+// =========================================
+// 🚨 [복구!!] 8. 관리자 쪽지 알림 DB 주머니 
+// =========================================
+const messageSchema = new mongoose.Schema({
+    userId: String,
+    text: String,
+    isRead: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now }
+});
+const Message = mongoose.models.Message || mongoose.model('Message', messageSchema);
 // =========================================
 // 🌍 1단계: 국가 통계 DB 주머니 (추가됨!)
 // =========================================
