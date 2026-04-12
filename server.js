@@ -1210,10 +1210,15 @@ app.get('/admin', async (req, res) => {
         ]);
         const totalSeconds = playTimeStats.length > 0 ? playTimeStats[0].totalSeconds : 0;
         
-        // 초 단위의 시간을 "X시간 Y분"으로 예쁘게 포장하기
+        // 🚀 초 단위까지 완벽하게 계산해서 예쁘게 포장하기!
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const todayPlayTime = hours > 0 ? `${hours}시간 ${minutes}분` : `${minutes}분`;
+        const seconds = totalSeconds % 60; // 👈 남은 '초' 계산!
+        
+        let todayPlayTime = "";
+        if (hours > 0) todayPlayTime += `${hours}시간 `;
+        if (minutes > 0 || hours > 0) todayPlayTime += `${minutes}분 `;
+        todayPlayTime += `${seconds}초`; // 👈 화면에 '초'까지 띄워줍니다!
 
 // 📈 [3단계] 그래프용 '최근 7일' 데이터 긁어오기!
         const past7Stats = await Stats.find().sort({ _id: -1 }).limit(7);
