@@ -2,8 +2,6 @@
 <html lang="ko">
 <head>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5112383847606285" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
@@ -58,7 +56,18 @@
             .grid-uploader { font-size: 10px; margin-bottom: 2px; }
         }
 
-        .shorts-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 99999; display: none; }
+        /* 🚀 핵심: 화면에서 끄지 않고, 저 밑에(top: 100vh) 숨겨둡니다! (에러 완전 차단) */
+        .shorts-modal { 
+            position: fixed; top: 100vh; left: 0; width: 100vw; height: 100vh; 
+            background: #000; z-index: 99999; 
+            transition: top 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); /* 쫀득하게 올라옴 */
+            display: block; /* 절대 none 쓰지 않음 */
+        }
+        
+        .shorts-modal.show { 
+            top: 0; /* 클래스가 붙으면 화면으로 올라옵니다 */
+        }
+
         .btn-close-modal { position: fixed; top: 20px; left: 20px; z-index: 100000; background: rgba(255,255,255,0.2); border: none; color: white; font-size: 20px; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; }
         
         .modal-feed { width: 100%; max-width: 450px; height: 100vh; margin: 0 auto; overflow-y: scroll; scroll-snap-type: y mandatory; -ms-overflow-style: none; scrollbar-width: none; background: #000; }
@@ -79,7 +88,6 @@
     <header class="main-header">
         <div class="header-top">
             <img src="/logo.png" alt="RANKING AI 로고" style="height: 45px; cursor: pointer; object-fit: contain;" onclick="window.location.href='/?sort=views'">
-            
             <div class="auth-buttons">
                 <% if (user) { %>
                     <span style="color: #aaa; font-size: 14px;"><%= user.name || user.id %>님</span>
@@ -126,18 +134,16 @@
                 <% shorts.forEach(function(video, index) { 
                     const videoId = getYoutubeId(video.url);
                 %>
-                <div class="shorts-card" onclick="openModal(<%= index %>)">
+                <div class="shorts-card" onclick="openModal(<%= index %>, '<%= videoId %>')">
                     <% if (videoId) { %>
                         <div class="shorts-card-inner">
                             <img src="https://i.ytimg.com/vi/<%= videoId %>/hqdefault.jpg" alt="썸네일">
-                            
                             <div class="shorts-logo-box">
                                 <svg viewBox="0 0 32 32" width="100%" height="100%" style="filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.6));">
                                     <path d="M26.2,12.5l-2.6-1.5l2.6-1.5c2.4-1.4,3.2-4.5,1.8-6.9c-1.4-2.4-4.5-3.2-6.9-1.8l-15,8.7 c-2.4,1.4-3.2,4.5-1.8,6.9c0.9,1.5,2.4,2.3,4.1,2.4l2.5,1.5l-2.5,1.5c-2.4,1.4-3.2,4.5-1.8,6.9c1.4,2.4,4.5,3.2,6.9,1.8l15-8.7 C30.9,18.4,31.7,15.3,30.3,12.9C29.4,11.3,27.9,10.5,26.2,12.5z" fill="#ff0000"/>
                                     <polygon points="12.5,9.5 12.5,22.5 21.5,16" fill="#ffffff"/>
                                 </svg>
                             </div>
-
                             <div class="grid-info">
                                 <div class="grid-uploader">@<%= video.uploader %></div>
                                 <p class="grid-title"><%= video.title %></p>
@@ -182,75 +188,84 @@
     </div>
 
     <script>
-        // 🚀 센서 등 복잡한 최신 기술 전부 폐기!
-        // 가장 무식하고 100% 확실한 "수동 스크롤 계산법"으로 바꿨습니다.
+        let observer = null;
 
-        function playVideo(itemElem) {
-            const vid = itemElem.dataset.vid;
-            const wrap = itemElem.querySelector('.modal-iframe-wrap');
-            if (vid && wrap.innerHTML.trim() === '') {
-                // 아이프레임 즉시 주입
-                wrap.innerHTML = `
-                    <iframe 
-                        src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&playsinline=1&rel=0" 
-                        title="YouTube Shorts" 
-                        frameborder="0" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                        allowfullscreen
-                        style="width: 100%; height: 100%; border-radius: 12px; pointer-events: auto;">
-                    </iframe>
-                `;
-            }
-        }
-
-        function openModal(index) {
+        function openModal(index, vid) {
             const modal = document.getElementById('shortsModal');
             const feed = document.getElementById('modalFeed');
-            
-            modal.style.display = 'block'; 
-            document.body.style.overflow = 'hidden'; 
-            
-            // 🔥 [마법의 1줄] 모달이 열리자마자 브라우저에게 "새로고침한 것처럼 레이아웃 억지로 재계산해!" 라고 채찍질하는 코드입니다.
-            void modal.offsetWidth;
-
             const target = document.getElementById('modal-item-' + index);
-            if(target) {
-                // 에러가 잦은 최신 스크롤 방식 대신, 위에서부터 몇 픽셀인지 직접 계산해서 냅다 꽂아버립니다.
-                feed.scrollTop = target.offsetTop; 
-                playVideo(target); // 즉시 재생
+
+            // 1. 레이아웃이 이미 계산되어 있으므로, 오차 없이 무조건 완벽하게 스크롤 이동합니다.
+            if (target) {
+                feed.scrollTop = target.offsetTop;
+                
+                // 2. 화면이 올라오는 동시에 해당 위치에 유튜브 영상을 팍 꽂아넣습니다.
+                const wrap = target.querySelector('.modal-iframe-wrap');
+                if (wrap && wrap.innerHTML === '') {
+                    wrap.innerHTML = `
+                        <iframe 
+                            src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&playsinline=1&rel=0" 
+                            title="YouTube Shorts" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                            allowfullscreen
+                            style="width: 100%; height: 100%; border-radius: 12px; pointer-events: auto; position: absolute; top:0; left:0;">
+                        </iframe>
+                    `;
+                }
             }
+
+            // 3. 이제 모달을 밑에서 위로 부드럽게 끌어올립니다.
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+
+            // 4. 애니메이션이 끝나면(0.35초) 스와이프 센서를 가동합니다.
+            setTimeout(initObserver, 350);
+        }
+
+        function initObserver() {
+            if (observer) observer.disconnect();
+
+            observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const wrap = entry.target.querySelector('.modal-iframe-wrap');
+                    const vid = entry.target.dataset.vid;
+
+                    if (entry.isIntersecting) {
+                        if (vid && wrap.innerHTML === '') {
+                            wrap.innerHTML = `
+                                <iframe 
+                                    src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&playsinline=1&rel=0" 
+                                    title="YouTube Shorts" 
+                                    frameborder="0" 
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                    allowfullscreen
+                                    style="width: 100%; height: 100%; border-radius: 12px; pointer-events: auto; position: absolute; top:0; left:0;">
+                                </iframe>
+                            `;
+                        }
+                    } else {
+                        wrap.innerHTML = ''; // 화면 벗어나면 소리 차단을 위해 바로 삭제
+                    }
+                });
+            }, { root: document.getElementById('modalFeed'), threshold: 0.5 });
+
+            document.querySelectorAll('.modal-item').forEach(item => observer.observe(item));
         }
 
         function closeModal() {
             const modal = document.getElementById('shortsModal');
-            modal.style.display = 'none'; 
-            document.body.style.overflow = ''; 
-            
-            // 모든 영상 껍데기 파괴 (소리 차단)
-            document.querySelectorAll('.modal-iframe-wrap').forEach(wrap => {
-                wrap.innerHTML = '';
-            });
-        }
+            // 모달을 다시 밑으로 내려버립니다.
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
 
-        // 🔥 스와이프할 때마다 영상을 켜고 끄는 수동 엔진
-        document.getElementById('modalFeed').addEventListener('scroll', function() {
-            // 스크롤이 끝날 때까지 기다렸다가 딱 한번만 실행 (부하 방지)
-            clearTimeout(window.feedScrollTimeout);
-            window.feedScrollTimeout = setTimeout(() => {
-                const currentScroll = this.scrollTop;
-                const items = document.querySelectorAll('.modal-item');
-                
-                items.forEach(item => {
-                    // 현재 화면 스크롤 위치와 영상의 위치가 얼추 맞으면 재생!
-                    if (Math.abs(item.offsetTop - currentScroll) < 100) {
-                        playVideo(item);
-                    } else {
-                        // 안 보이면 삭제해서 폰 발열/렉 방지
-                        item.querySelector('.modal-iframe-wrap').innerHTML = '';
-                    }
-                });
-            }, 100); // 스크롤 멈추고 0.1초 뒤 실행
-        });
+            if (observer) observer.disconnect();
+            
+            // 모달이 완전히 다 내려간 뒤에(0.35초 후) 틀어져있던 영상을 싹 지웁니다.
+            setTimeout(() => {
+                document.querySelectorAll('.modal-iframe-wrap').forEach(wrap => wrap.innerHTML = '');
+            }, 350);
+        }
     </script>
 </body>
 </html>
