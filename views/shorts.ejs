@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5112383847606285"
-     crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5112383847606285" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>쇼츠 모아보기 - RANKING AI</title>
 
-    
     <style>
         body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; padding-bottom: 100px; }
         a { text-decoration: none; color: inherit; }
@@ -29,26 +27,22 @@
         .input-row input { flex: 1; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; }
         .btn-upload { background: #ff5722; color: #000; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
 
-        /* ========================================= */
-        /* 🌟 완벽 작동하는 Grid 마법 (PC 5칸 절대 고정!) 🌟 */
-        /* ========================================= */
         .shorts-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr); /* 🔥 PC에서는 무조건 5칸 강제 분할! */
+            grid-template-columns: repeat(5, 1fr); 
             gap: 15px;
             width: 100%;
-            visibility: visible; /* 숨김 방지 */
+            visibility: visible; 
         }
 
         .shorts-card {
-            width: 100%; /* Grid 안에서 꽉 차게 */
+            width: 100%; 
             background: #111; border: 1px solid #222; border-radius: 12px; 
             overflow: hidden; position: relative; cursor: pointer;
             transition: 0.2s;
         }
         .shorts-card:hover { border-color: #ff5722; transform: translateY(-5px); box-shadow: 0 8px 20px rgba(255,87,34,0.3); }
 
-        /* 🌟 9:16 철벽 방어 🌟 */
         .shorts-card-inner {
             width: 100%;
             padding-bottom: 177.77%; 
@@ -60,7 +54,6 @@
             object-fit: cover; opacity: 0.9; 
         }
 
-        /* 찐 쇼츠 로고 박스 */
         .shorts-logo-box {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
             width: 50px; height: 50px; pointer-events: none; z-index: 10;
@@ -74,11 +67,8 @@
         .grid-title { font-size: 14px; font-weight: bold; color: #fff; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 1px 1px 2px #000; }
         .grid-uploader { font-size: 11px; color: #aaa; margin-bottom: 4px; text-shadow: 1px 1px 2px #000;}
 
-        /* ========================================= */
-        /* 📱 모바일/태블릿 반응형 마법 (3칸 고정!) 📱 */
-        /* ========================================= */
         @media (max-width: 1024px) { 
-            .shorts-grid { grid-template-columns: repeat(4, 1fr); } /* 태블릿은 4칸 */
+            .shorts-grid { grid-template-columns: repeat(4, 1fr); } 
         }
         
         @media (max-width: 768px) { 
@@ -87,9 +77,8 @@
             .header-nav::-webkit-scrollbar { display: none; }
             .input-row { flex-direction: column; }
             
-            /* 🌟 모바일 세로: 무조건 3칸으로 강력 고정! 🌟 */
             .shorts-grid { 
-                grid-template-columns: repeat(3, 1fr); /* 🔥 모바일은 무조건 3칸! */
+                grid-template-columns: repeat(3, 1fr); 
                 gap: 9px; 
             }
             .shorts-card { border-radius: 8px; } 
@@ -100,9 +89,6 @@
             .grid-uploader { font-size: 10px; margin-bottom: 2px; }
         }
 
-        /* ========================================= */
-        /* 🌟 클릭 시 열리는 "쇼츠 극장 (스와이프)" 🌟 */
-        /* ========================================= */
         .shorts-modal {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #000; z-index: 99999; display: none; 
@@ -130,7 +116,7 @@
 
         .modal-iframe-wrap { width: 100%; height: 100%; position: relative; }
         .modal-iframe-wrap iframe {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; pointer-events: auto;
         }
 
         .modal-overlay-info {
@@ -261,10 +247,10 @@
     </div>
 
     <script>
-        let observer = null; // 🚨 처음에 비워둡니다
+        let observer = null;
 
         function initObserver() {
-            if (observer) return; // 이미 켜져있으면 두 번 안 켭니다!
+            if (observer) return;
             
             observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -272,15 +258,15 @@
                     const vid = entry.target.dataset.vid;
 
                     if (entry.isIntersecting && vid) {
+                        // 🚀 무음(mute=1) + 자동재생(autoplay=1) + 무한반복(loop=1) 완벽 세팅
                         wrap.innerHTML = `
                             <iframe 
-                               // 🚀 바꿀 코드 (무음으로 무조건 자동재생 성공!)
-src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&rel=0&enablejsapi=1"
+                                src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&rel=0&enablejsapi=1" 
                                 title="YouTube Shorts" 
                                 frameborder="0" 
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                                 allowfullscreen
-                                style="width: 100%; height: 100%; border-radius: 12px;">
+                                style="width: 100%; height: 100%; border-radius: 12px; pointer-events: auto;">
                             </iframe>
                         `;
                     } else {
@@ -302,15 +288,15 @@ src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&rel=0&enablejsapi=1"
             modal.style.display = 'block'; 
             document.body.style.overflow = 'hidden'; 
             
-            // 🚀🚀🚀 [핵심 해결책] 모달창이 눈에 보일 때 엔진을 확실하게 켭니다!
-            initObserver(); 
-            
+            const target = document.getElementById('modal-item-' + index);
+            if(target) {
+                target.scrollIntoView({ behavior: 'instant' });
+            }
+
+            // 🚀 브라우저가 모달을 완전히 그리고 스크롤을 맞춘 뒤에(100ms 후) 센서를 켭니다!
             setTimeout(() => {
-                const target = document.getElementById('modal-item-' + index);
-                if(target) {
-                    target.scrollIntoView({ behavior: 'instant' });
-                }
-            }, 10);
+                initObserver(); 
+            }, 100);
         }
 
         function closeModal() {
@@ -322,8 +308,6 @@ src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&rel=0&enablejsapi=1"
                 wrap.innerHTML = '';
             });
         }
-        
-        // 🚨 문제가 되었던 DOMContentLoaded 줄은 삭제했습니다!
     </script>
 </body>
 </html>
