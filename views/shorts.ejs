@@ -246,16 +246,16 @@
         </div>
     </div>
 
-    <script>
+   <script>
         let observer = null;
 
-        // 🚀 1. 영상을 화면에 쏘는 전용 함수 (중복 실행 방지)
+        // 🚀 1. 영상을 화면에 쏘는 전용 함수
         function loadIframe(wrap, vid) {
-            // 이미 영상이 들어있으면 무시 (깜빡임 방지)
             if (!wrap.innerHTML.trim()) {
+                // 🔥 playsinline=1 추가! (아이폰 자동재생 막힘 완벽 해결)
                 wrap.innerHTML = `
                     <iframe 
-                        src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&rel=0&enablejsapi=1" 
+                        src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&rel=0&playsinline=1" 
                         title="YouTube Shorts" 
                         frameborder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
@@ -266,7 +266,7 @@
             }
         }
 
-        // 🚀 2. 모달창 열기 (핵심 로직 수정!)
+        // 🚀 2. 모달창 열기
         function openModal(index) {
             const modal = document.getElementById('shortsModal');
             modal.style.display = 'block'; 
@@ -274,18 +274,16 @@
             
             const target = document.getElementById('modal-item-' + index);
             if(target) {
-                // 해당 영상 위치로 즉시 스크롤
-                target.scrollIntoView({ behavior: 'instant' });
+                // 🔥 사파리 에러 원인이었던 'instant' 제거! (가장 안전한 기본 방식으로 스크롤)
+                target.scrollIntoView(); 
                 
-                // 🔥 센서가 켜지길 기다리지 말고, 클릭한 영상부터 '즉시' 강제 로딩!
                 const wrap = target.querySelector('.modal-iframe-wrap');
                 const vid = target.dataset.vid;
                 if (wrap && vid) loadIframe(wrap, vid);
             }
 
-            // 화면이 완전히 켜진 후(100ms) 위/아래 스크롤 감지 센서 작동
+            // 화면 켜진 후 위/아래 스와이프 감지 센서 작동
             setTimeout(() => {
-                // 기존에 켜져있던 센서가 있다면 완전히 박살내고 새로 만듭니다. (에러 원인 차단)
                 if (observer) observer.disconnect(); 
 
                 observer = new IntersectionObserver((entries) => {
@@ -296,7 +294,7 @@
                         if (entry.isIntersecting && vid) {
                             loadIframe(wrap, vid);
                         } else {
-                            wrap.innerHTML = ''; // 화면에서 사라지면 영상 삭제
+                            wrap.innerHTML = ''; // 화면에서 사라지면 데이터 절약을 위해 영상 삭제
                         }
                     });
                 }, { 
@@ -310,19 +308,17 @@
             }, 100);
         }
 
-        // 🚀 3. 모달창 닫기 (초기화)
+        // 🚀 3. 모달창 닫기 (완전 초기화)
         function closeModal() {
             const modal = document.getElementById('shortsModal');
             modal.style.display = 'none'; 
             document.body.style.overflow = ''; 
             
-            // 🔥 창을 닫을 때 센서 전원 코드를 아예 뽑아버립니다! (다음 접속 시 100% 재가동 보장)
             if (observer) {
                 observer.disconnect();
                 observer = null;
             }
 
-            // 모든 영상 삭제 (소리 끄기)
             document.querySelectorAll('.modal-iframe-wrap').forEach(wrap => {
                 wrap.innerHTML = '';
             });
