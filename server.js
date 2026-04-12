@@ -47,6 +47,7 @@ const upload = multer({
 });
 
 const app = express();
+app.set('trust proxy', true);
 
 // =========================================
 // 🌟 [핵심 개조!] 일반 서버를 웹소켓 통신 서버로 감싸기
