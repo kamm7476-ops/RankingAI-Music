@@ -1,4 +1,5 @@
 require('dotenv').config(); // 🌟 .env 파일 읽어오는 핵심 마법!
+const geoip = require('geoip-lite');
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
@@ -158,6 +159,18 @@ const chatMessageSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 const ChatMessage = mongoose.models.ChatMessage || mongoose.model('ChatMessage', chatMessageSchema);
+
+// =========================================
+// 🌍 1단계: 국가 통계 DB 주머니 (추가됨!)
+// =========================================
+const VisitLogSchema = new mongoose.Schema({
+    date: { type: String, required: true },
+    country: { type: String, default: 'Unknown' },
+    userId: { type: String, default: 'Guest' },
+    createdAt: { type: Date, default: Date.now }
+});
+const VisitLog = mongoose.models.VisitLog || mongoose.model('VisitLog', VisitLogSchema);
+
 // =========================================
 // 🌟 서버 기본 설정
 // =========================================
@@ -581,6 +594,18 @@ app.get('/logout', (req, res) => {
 // 🌟 메인 화면 (차트 & 최신음악 & 팝업 데이터 통합)
 // =========================================
 app.get('/', async (req, res) => {
+    // 🌍 [1단계] 국가 추적 센서 가동!
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const geo = geoip.lookup(ip);
+    const country = geo ? geo.country : 'Unknown';
+    const today = getTodayDate();
+
+    new VisitLog({
+        date: today,
+        country: country,
+        userId: req.session.user ? req.session.user.id : 'Guest'
+    }).save().catch(err => console.error("로그 저장 실패:", err));
+
     try {
         const searchQuery = req.query.search || ''; 
         const genreQuery = req.query.genre || ''; 
@@ -1143,7 +1168,20 @@ app.get('/admin', async (req, res) => {
             };
         }
         
-        res.render('admin', { users: usersWithMusic, stats: stats, user: req.session.user });
+        // 📊 [1단계] 국가별 방문자 수 집계 (상위 5개국)
+        const countryStats = await VisitLog.aggregate([
+            { $match: { date: today } },
+            { $group: { _id: "$country", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: 5 }
+        ]);
+        
+        res.render('admin', { 
+            users: usersWithMusic, 
+            stats: stats, 
+            countryStats: countryStats, // 🌍 국가 정보 추가!
+            user: req.session.user 
+        });
     } catch (err) {
         console.error("관리자 페이지 로딩 에러:", err);
         res.status(500).send("관리자 페이지를 불러오는 중 에러가 났습니다.");
