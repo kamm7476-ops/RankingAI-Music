@@ -596,8 +596,8 @@ app.get('/logout', (req, res) => {
 // 🌟 메인 화면 (차트 & 최신음악 & 팝업 데이터 통합)
 // =========================================
 app.get('/', async (req, res) => {
-    // 🌍 [1단계] 국가 추적 센서 가동!
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+   // 🌍 [1단계] 국가 추적 센서 가동!
+    let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress; // 👈 const를 let으로!
     if (ip && ip.includes(',')) ip = ip.split(',')[0].trim();
     const geo = geoip.lookup(ip);
     const country = geo ? geo.country : 'Unknown';
@@ -1104,7 +1104,7 @@ global.liveUsers = new Map();
 
 // 1. 10초마다 "저 살아있어요!" 생존신고 받기 (+ 감상 시간 누적!)
 app.post('/api/heartbeat', async (req, res) => {
-    const userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
+    let userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip; // 👈 const를 let으로!
     if (userIp && userIp.includes(',')) userIp = userIp.split(',')[0].trim();
     const isPlaying = req.body.isPlaying; 
     global.liveUsers.set(userIp, { time: Date.now(), isPlaying: isPlaying });
