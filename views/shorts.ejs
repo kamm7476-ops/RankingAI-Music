@@ -246,55 +246,59 @@
         </div>
     </div>
 
-   <script>
+  <script>
         let observer = null;
 
-        // 🚀 1. 영상을 화면에 쏘는 전용 함수
-        function loadIframe(wrap, vid) {
-            if (!wrap.innerHTML.trim()) {
-                // 🔥 playsinline=1 추가! (아이폰 자동재생 막힘 완벽 해결)
-                wrap.innerHTML = `
-                    <iframe 
-                        src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&rel=0&playsinline=1" 
-                        title="YouTube Shorts" 
-                        frameborder="0" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                        allowfullscreen
-                        style="width: 100%; height: 100%; border-radius: 12px; pointer-events: auto;">
-                    </iframe>
-                `;
-            }
+        // 🚀 1. 가장 가볍고 순수한 유튜브 플레이어 생성 (버그 유발 옵션 전면 제거)
+        function getIframeHTML(vid) {
+            return `
+                <iframe 
+                    src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&rel=0&playsinline=1" 
+                    title="YouTube Shorts" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowfullscreen
+                    style="width: 100%; height: 100%; border-radius: 12px; pointer-events: auto;">
+                </iframe>
+            `;
         }
 
-        // 🚀 2. 모달창 열기
+        // 🚀 2. 모달창 열기 (브라우저 보안 뚫기)
         function openModal(index) {
             const modal = document.getElementById('shortsModal');
             modal.style.display = 'block'; 
-            document.body.style.overflow = 'hidden'; 
+            document.body.style.overflow = 'hidden'; // 배경 스크롤 방지
             
             const target = document.getElementById('modal-item-' + index);
             if(target) {
-                // 🔥 사파리 에러 원인이었던 'instant' 제거! (가장 안전한 기본 방식으로 스크롤)
-                target.scrollIntoView(); 
+                // 부드럽고 안전하게 타겟으로 이동
+                target.scrollIntoView({ behavior: 'auto' });
                 
+                // 🔥 [필살기] 센서 기다리지 않고 클릭 즉시 영상 강제 투입!! (유저 클릭 제스처 인정받음)
                 const wrap = target.querySelector('.modal-iframe-wrap');
                 const vid = target.dataset.vid;
-                if (wrap && vid) loadIframe(wrap, vid);
+                if (wrap && vid && !wrap.innerHTML.trim()) {
+                    wrap.innerHTML = getIframeHTML(vid);
+                }
             }
 
-            // 화면 켜진 후 위/아래 스와이프 감지 센서 작동
+            // 🔥 첫 영상이 안전하게 켜진 뒤(50ms 후)에, 아래쪽 영상들을 위한 스와이프 센서 가동
             setTimeout(() => {
-                if (observer) observer.disconnect(); 
+                if (observer) observer.disconnect(); // 기존 센서 파괴
 
                 observer = new IntersectionObserver((entries) => {
                     entries.forEach(entry => {
                         const wrap = entry.target.querySelector('.modal-iframe-wrap');
                         const vid = entry.target.dataset.vid;
 
-                        if (entry.isIntersecting && vid) {
-                            loadIframe(wrap, vid);
+                        if (entry.isIntersecting) {
+                            // 화면에 들어오면 로딩
+                            if (vid && !wrap.innerHTML.trim()) {
+                                wrap.innerHTML = getIframeHTML(vid);
+                            }
                         } else {
-                            wrap.innerHTML = ''; // 화면에서 사라지면 데이터 절약을 위해 영상 삭제
+                            // 화면에서 벗어나면 영상 삭제 (렉 방지 & 백그라운드 소리 차단)
+                            wrap.innerHTML = '';
                         }
                     });
                 }, { 
@@ -305,20 +309,22 @@
                 document.querySelectorAll('.modal-item').forEach(item => {
                     observer.observe(item);
                 });
-            }, 100);
+            }, 50);
         }
 
-        // 🚀 3. 모달창 닫기 (완전 초기화)
+        // 🚀 3. 모달창 닫기 (메모리 완전 초기화)
         function closeModal() {
             const modal = document.getElementById('shortsModal');
             modal.style.display = 'none'; 
             document.body.style.overflow = ''; 
             
+            // 센서 전원 코드를 뽑아버립니다. (다음 접속 시 100% 새 출발)
             if (observer) {
                 observer.disconnect();
                 observer = null;
             }
 
+            // 모든 유튜브 영상 삭제
             document.querySelectorAll('.modal-iframe-wrap').forEach(wrap => {
                 wrap.innerHTML = '';
             });
