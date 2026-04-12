@@ -1189,11 +1189,24 @@ app.get('/admin', async (req, res) => {
             { $sort: { count: -1 } },
             { $limit: 5 }
         ]);
+
+// ⏳ [2단계] 오늘 전체 감상 시간(초)을 다 합쳐서 계산
+        const playTimeStats = await VisitLog.aggregate([
+            { $match: { date: today } },
+            { $group: { _id: null, totalSeconds: { $sum: "$playTime" } } }
+        ]);
+        const totalSeconds = playTimeStats.length > 0 ? playTimeStats[0].totalSeconds : 0;
+        
+        // 초 단위의 시간을 "X시간 Y분"으로 예쁘게 포장하기
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const todayPlayTime = hours > 0 ? `${hours}시간 ${minutes}분` : `${minutes}분`;
         
         res.render('admin', { 
             users: usersWithMusic, 
             stats: stats, 
             countryStats: countryStats, // 🌍 국가 정보 추가!
+            todayPlayTime: todayPlayTime,
             user: req.session.user 
         });
     } catch (err) {
