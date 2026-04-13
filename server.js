@@ -1122,6 +1122,93 @@ app.get('/api/admin/live-stats', (req, res) => {
     });
 });
 
+// ==========================================================
+// 📈 [새로 추가됨] 기간별 통계 데이터 자판기 (일/월/년) API
+// ==========================================================
+app.get('/api/admin/chart-data', async (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'admin') {
+        return res.status(403).json({ error: "권한 없음" });
+    }
+
+    const period = req.query.period || 'daily';
+    
+    try {
+        let labels = [];
+        let visitorsData = [];
+        let playsData = [];
+
+        // 1. 차트 데이터 묶어서 뽑기
+        if (period === 'daily') {
+            // 최근 7일
+            const stats = await Stats.find().sort({ _id: -1 }).limit(7);
+            stats.reverse();
+            labels = stats.map(s => s.date.substring(5)); // "04-13" 형태
+            visitorsData = stats.map(s => s.dailyVisitors || 0);
+            playsData = stats.map(s => s.dailyPlays || 0);
+        } 
+        else if (period === 'monthly') {
+            // 월별 합산 (최근 12개월)
+            const stats = await Stats.aggregate([
+                { $group: { _id: { $substr: ["$date", 0, 7] }, visitors: { $sum: "$dailyVisitors" }, plays: { $sum: "$dailyPlays" } } },
+                { $sort: { _id: 1 } },
+                { $limit: 12 }
+            ]);
+            labels = stats.map(s => s._id); // "2026-04" 형태
+            visitorsData = stats.map(s => s.visitors);
+            playsData = stats.map(s => s.plays);
+        }
+        else if (period === 'yearly') {
+            // 연도별 합산
+            const stats = await Stats.aggregate([
+                { $group: { _id: { $substr: ["$date", 0, 4] }, visitors: { $sum: "$dailyVisitors" }, plays: { $sum: "$dailyPlays" } } },
+                { $sort: { _id: 1 } }
+            ]);
+            labels = stats.map(s => s._id + '년'); // "2026년" 형태
+            visitorsData = stats.map(s => s.visitors);
+            playsData = stats.map(s => s.plays);
+        }
+
+        // 2. 해당 기간의 총 체류시간 합산하기
+        let matchCondition = {};
+        const today = getTodayDate(); // "2026-04-13"
+        
+        if (period === 'daily') {
+            matchCondition = { date: today };
+        } else if (period === 'monthly') {
+            const currentMonth = today.substring(0, 7);
+            matchCondition = { date: { $regex: '^' + currentMonth } };
+        } else if (period === 'yearly') {
+            const currentYear = today.substring(0, 4);
+            matchCondition = { date: { $regex: '^' + currentYear } };
+        }
+
+        const playTimeStats = await VisitLog.aggregate([
+            { $match: matchCondition },
+            { $group: { 
+                _id: null, 
+                totalSeconds: { $sum: { $add: [{ $ifNull: ["$dwellTime", 0] }, { $ifNull: ["$totalPlayTime", 0] }, { $ifNull: ["$playTime", 0] }] } } 
+            }}
+        ]);
+
+        const totalSeconds = playTimeStats.length > 0 ? playTimeStats[0].totalSeconds : 0;
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        
+        let displayTime = ""; 
+        if (hours > 0) displayTime += `${hours}시간 `;
+        if (minutes > 0 || hours > 0) displayTime += `${minutes}분 `;
+        displayTime += `${seconds}초`;
+
+        // 3. 포장해서 화면(프론트엔드)으로 보내기
+        res.json({ labels, visitorsData, playsData, displayTime });
+
+    } catch (err) {
+        console.error("차트 데이터 에러:", err);
+        res.status(500).json({ error: "서버 에러" });
+    }
+});
+
 // =========================================
 // 👑 관리자 전용 통제실 (Admin) 👑
 // =========================================
