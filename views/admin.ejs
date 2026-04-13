@@ -160,7 +160,6 @@
         document.addEventListener("DOMContentLoaded", function() {
             const ctx = document.getElementById('trendChart').getContext('2d');
             
-            // 서버에서 보내준 데이터가 없으면 빈 배열로 처리하여 에러 방지
             const labels = <%- typeof chartDates !== 'undefined' ? JSON.stringify(chartDates) : '[]' %>;
             const visitorsData = <%- typeof chartVisitors !== 'undefined' ? JSON.stringify(chartVisitors) : '[]' %>;
             const playsData = <%- typeof chartPlays !== 'undefined' ? JSON.stringify(chartPlays) : '[]' %>;
@@ -306,5 +305,31 @@
         }
     </script>
 
-</body>
+    <div style="margin: 40px 0; padding: 25px; background: #161718; border-radius: 12px; border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+        <h2 style="color: #ff5722; margin-top: 0; margin-bottom: 5px;">📢 메인 화면 팝업 공지 설정</h2>
+        <p style="color: #aaa; font-size: 14px; margin-bottom: 20px;">사이트 메인 화면에 띄울 중요한 공지사항이나 추천 콘텐츠를 설정하세요.</p>
+        
+        <form action="/admin/popup" method="POST">
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight: bold; color: #fff; display: block; margin-bottom: 8px;">팝업 제목</label>
+                <input type="text" name="title" placeholder="예: 🔥 이번 주 강력 추천 AI K-POP!" required style="width: 100%; box-sizing: border-box; padding: 12px; background: #0f1011; color: #fff; border: 1px solid #444; border-radius: 6px; font-size: 16px;">
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight: bold; color: #fff; display: block; margin-bottom: 8px;">팝업 내용 (HTML 태그 사용 가능)</label>
+                <textarea name="content" rows="4" placeholder="예: 라디오 기능을 켜고 24시간 끊김 없이 들어보세요! <br><br> <a href='/radio' style='color:#ff5722;'>[라디오 바로가기]</a>" required style="width: 100%; box-sizing: border-box; padding: 12px; background: #0f1011; color: #fff; border: 1px solid #444; border-radius: 6px; font-size: 14px;"></textarea>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #1a1b1c; padding: 15px; border-radius: 6px; border: 1px solid #333; flex-wrap: wrap; gap: 15px;">
+                <label style="font-weight: bold; cursor: pointer; color: #ff5722; display: flex; align-items: center; font-size: 15px;">
+                    <input type="checkbox" name="isActive" style="width: 20px; height: 20px; margin-right: 10px; cursor: pointer;"> 
+                    🚨 이 팝업을 메인 화면에 즉시 띄우기
+                </label>
+                <button type="submit" style="background: #ff5722; color: #fff; padding: 12px 25px; border: none; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.3s;">
+                    💾 팝업 저장 및 적용
+                </button>
+            </div>
+        </form>
+    </div>
+    </body>
 </html>
