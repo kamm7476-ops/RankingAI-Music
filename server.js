@@ -19,7 +19,7 @@ const http = require('http');
 const { Server } = require("socket.io"); 
 
 // 🌟 클라우디너리 영구 금고 세팅
-cloudinary = require('cloudinary').v2;
+const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const User = require('./user'); 
 const Stats = require('./models/Stats'); // 🌟 통계 DB
@@ -1186,27 +1186,38 @@ app.get('/admin', async (req, res) => {
             { $limit: 5 }
         ]);
 
-// ⏳ [2단계] 오늘 전체 감상 시간(초)을 다 합쳐서 계산
-// ⏳ [최종 해결] 체류시간(dwellTime)까지 싹 다 합쳐서 계산합니다!
-const playTimeStats = await VisitLog.aggregate([
-    { $match: { date: today } },
-    { 
-        $group: { 
-            _id: null, 
-            totalSeconds: { 
-                $sum: { 
-                    $add: [
-                        { $ifNull: ["$dwellTime", 0] },     // 👈 [추가됨] 이 줄이 있어야 체류시간이 합쳐집니다!
-                        { $ifNull: ["$totalPlayTime", 0] }, 
-                        { $ifNull: ["$playTime", 0] }
-                    ] 
+// ⏳ [2단계] 오늘 전체 감상/체류 시간(초)을 다 합쳐서 계산
+        const playTimeStats = await VisitLog.aggregate([
+            { $match: { date: today } },
+            { 
+                $group: { 
+                    _id: null, 
+                    totalSeconds: { 
+                        $sum: { 
+                            $add: [
+                                { $ifNull: ["$dwellTime", 0] },
+                                { $ifNull: ["$totalPlayTime", 0] }, 
+                                { $ifNull: ["$playTime", 0] }
+                            ] 
+                        } 
+                    } 
                 } 
-            } 
-        } 
-    }
-]);
+            }
+        ]);
 
-// 📈 [3단계] 그래프용 '최근 7일' 데이터 긁어오기!
+        const totalSeconds = playTimeStats.length > 0 ? playTimeStats[0].totalSeconds : 0;
+
+        // 🚀 초 단위까지 완벽하게 계산해서 예쁘게 포장하기!
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        let todayPlayTime = ""; 
+        if (hours > 0) todayPlayTime += `${hours}시간 `;
+        if (minutes > 0 || hours > 0) todayPlayTime += `${minutes}분 `;
+        todayPlayTime += `${seconds}초`;
+
+        // 📈 [3단계] 그래프용 '최근 7일' 데이터 긁어오기!
         const past7Stats = await Stats.find().sort({ _id: -1 }).limit(7);
         past7Stats.reverse(); // 과거부터 순서대로 보여주기 위해 정렬 뒤집기
 
@@ -1238,7 +1249,62 @@ app.get('/admin/users', async (req, res) => {
         res.render('admin_users', { users: users });
     } catch (err) { res.status(500).send("유저 목록 에러"); }
 });
+// ⏳ [2단계] 오늘 전체 감상 시간(초)을 다 합쳐서 계산
+// ⏳ [최종 해결] 체류시간(dwellTime)까지 싹 다 합쳐서 계산합니다!
+const playTimeStats = await VisitLog.aggregate([
+    { $match: { date: today } },
+    { 
+        $group: { 
+            _id: null, 
+            totalSeconds: { 
+                $sum: { 
+                    $add: [
+                        { $ifNull: ["$dwellTime", 0] },     // 👈 체류시간
+                        { $ifNull: ["$totalPlayTime", 0] }, // 👈 새 감상시간
+                        { $ifNull: ["$playTime", 0] }       // 👈 옛날 감상시간
+                    ] 
+                } 
+            } 
+        } 
+    }
+]);
 
+// 👇 [이 부분이 통째로 지워져 있었습니다! 꼭 다시 넣어주세요!] 👇
+const totalSeconds = playTimeStats.length > 0 ? playTimeStats[0].totalSeconds : 0;
+
+const hours = Math.floor(totalSeconds / 3600);
+const minutes = Math.floor((totalSeconds % 3600) / 60);
+const seconds = totalSeconds % 60;
+
+let todayPlayTime = ""; 
+if (hours > 0) todayPlayTime += `${hours}시간 `;
+if (minutes > 0 || hours > 0) todayPlayTime += `${minutes}분 `;
+todayPlayTime += `${seconds}초`;
+// 👆 [여기까지가 복구된 계산 코드입니다] 👆
+
+// 📈 [3단계] 그래프용 '최근 7일' 데이터 긁어오기!
+        const past7Stats = await Stats.find().sort({ _id: -1 }).limit(7);
+        past7Stats.reverse(); // 과거부터 순서대로 보여주기 위해 정렬 뒤집기
+
+        const chartDates = past7Stats.map(s => s.date.substring(5)); // 연도 빼고 "04-12" 날짜만!
+        const chartVisitors = past7Stats.map(s => s.dailyVisitors || 0);
+        const chartPlays = past7Stats.map(s => s.dailyPlays || 0);
+        
+        res.render('admin', { 
+            users: usersWithMusic, 
+            stats: stats, 
+            countryStats: countryStats, // 🌍 국가 정보 추가!
+            todayPlayTime: todayPlayTime, // 🚨 이 변수가 위에서 꼭 계산되어야 합니다!
+            chartDates: chartDates,       // 👈 📈 차트 데이터 1
+            chartVisitors: chartVisitors, // 👈 📈 차트 데이터 2
+            chartPlays: chartPlays,       // 👈 📈 차트 데이터 3
+            user: req.session.user 
+        });
+    } catch (err) {
+        console.error("관리자 페이지 로딩 에러:", err);
+        res.status(500).send("관리자 페이지를 불러오는 중 에러가 났습니다.");
+    }
+});
 app.post('/admin/popup', async (req, res) => {
     if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
     try {
