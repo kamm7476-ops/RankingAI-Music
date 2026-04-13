@@ -18,7 +18,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const http = require('http'); 
 const { Server } = require("socket.io"); 
 
-// 🌟 클라우디너리 영구 금고 세팅
+// 🌟 클라우디너리 영구 금고 세팅 (🚨 const 누락 에러 해결 완료!)
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const User = require('./user'); 
@@ -144,7 +144,7 @@ const DM = mongoose.models.DM || mongoose.model('DM', dmSchema);
 
 // (1) 대화방 자체를 저장
 const chatRoomSchema = new mongoose.Schema({
-    participants: [String], // 참여자 두 명의 아이디 (예: ['내아이디', '작곡가아이디'])
+    participants: [String], // 참여자 두 명의 아이디
     lastMessage: String,    // 마지막 대화 내용
     updatedAt: { type: Date, default: Date.now }
 });
@@ -160,6 +160,7 @@ const chatMessageSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 const ChatMessage = mongoose.models.ChatMessage || mongoose.model('ChatMessage', chatMessageSchema);
+
 // =========================================
 // 🚨 [복구!!] 8. 관리자 쪽지 알림 DB 주머니 
 // =========================================
@@ -170,14 +171,17 @@ const messageSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 const Message = mongoose.models.Message || mongoose.model('Message', messageSchema);
+
 // =========================================
-// 🌍 1단계: 국가 통계 DB 주머니 (추가됨!)
+// 🌍 1단계: 국가 통계 DB 주머니 
 // =========================================
 const VisitLogSchema = new mongoose.Schema({
     date: { type: String, required: true },
     country: { type: String, default: 'Unknown' },
     userId: { type: String, default: 'Guest' },
     playTime: { type: Number, default: 0 },
+    totalPlayTime: { type: Number, default: 0 }, // 👈 추가된 새 감상시간
+    dwellTime: { type: Number, default: 0 },     // 👈 추가된 체류시간
     createdAt: { type: Date, default: Date.now }
 });
 const VisitLog = mongoose.models.VisitLog || mongoose.model('VisitLog', VisitLogSchema);
@@ -191,18 +195,15 @@ app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 🚀🚀🚀 [여기에 출입증 코드 추가!] 🚀🚀🚀
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*"); // 모든 외부 사이트의 택배 허용!
     res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     res.header("Access-Control-Allow-Headers", "Content-Type");
-    // 크롬이 '이 택배 받아도 돼?' 하고 미리 물어보는 것(OPTIONS)에 무조건 OK 사인 줌
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
     next();
 });
-// 🚀🚀🚀 [출입증 코드 끝] 🚀🚀🚀
 
 app.use(session({
   secret: 'ranking_secret_key_1234', 
@@ -240,7 +241,6 @@ app.use(async (req, res, next) => {
 
             // 🌟 오늘 처음 온 사람이라면 (쿠키가 없다면 카운트!)
             if (!req.cookies[cookieName]) {
-                // 자정까지 유지되는 쿠키 발급 (24시간)
                 res.cookie(cookieName, 'true', { maxAge: 24 * 60 * 60 * 1000 });
 
                 let stats = await Stats.findOne({ date: today });
@@ -275,7 +275,7 @@ app.use(async (req, res, next) => {
 });
 
 // ======================================================
-// 🌟 [새로 추가됨!] 유저 로그인 횟수 카운터 마법 함수 🌟
+// 🌟 유저 로그인 횟수 카운터 마법 함수 🌟
 // ======================================================
 async function trackUserLogin(username) {
     try {
@@ -284,18 +284,14 @@ async function trackUserLogin(username) {
         
         const todayStr = getTodayDate();
         
-        // 날짜가 바뀌었으면 오늘 횟수는 1로 초기화하고 날짜 갱신
         if (user.lastLoginDate !== todayStr) {
             user.todayLogins = 1;
             user.lastLoginDate = todayStr;
         } else {
-            // 같은 날 또 로그인한 거면 오늘 횟수 +1
             user.todayLogins = (user.todayLogins || 0) + 1;
         }
         
-        // 총 로그인 횟수는 언제나 +1
         user.totalLogins = (user.totalLogins || 0) + 1;
-        
         await user.save();
     } catch(err) { console.error("로그인 카운트 에러:", err); }
 }
@@ -340,10 +336,7 @@ app.get('/auth/naver/callback',
             res.send("<script>alert('환영합니다! 사이트에서 활동할 닉네임을 설정해주세요.'); window.location.href='/set-nickname';</script>");
         } else {
             req.session.user = req.user; 
-            
-            // 🌟 네이버 로그인 카운트 올리기! 🌟
             await trackUserLogin(req.user.id);
-            
             res.send("<script>alert('네이버 로그인 성공!'); window.location.href='/';</script>");
         }
     }
@@ -383,10 +376,7 @@ app.get('/auth/google/callback',
             res.send("<script>alert('환영합니다! 사이트에서 활동할 닉네임을 설정해주세요.'); window.location.href='/set-nickname';</script>");
         } else {
             req.session.user = req.user; 
-            
-            // 🌟 구글 로그인 카운트 올리기! 🌟
             await trackUserLogin(req.user.id);
-            
             res.send("<script>alert('초간단 구글 로그인 성공!'); window.location.href='/';</script>");
         }
     }
@@ -421,9 +411,7 @@ app.post('/set-nickname', async (req, res) => {
             role: req.session.tempUser.role 
         };
         
-        // 🌟 첫 닉네임 설정 후 로그인 처리될 때 카운트 올리기! 🌟
         await trackUserLogin(req.session.tempUser.id);
-        
         req.session.tempUser = null; 
 
         res.send(`<script>alert('${newNickname}님, 환영합니다! 멋진 활동 기대할게요.'); window.location.href='/';</script>`);
@@ -501,18 +489,14 @@ app.post('/verify-code', (req, res) => {
 // ==========================================
 app.get('/signup', (req, res) => res.render('signup'));
 app.get('/login', (req, res) => res.render('login'));
-// 🌟 약관 페이지 연결 마법
 app.get('/terms', (req, res) => res.render('terms'));
 
-// 🚀 1. 대소문자 철벽 방어 회원가입!
 app.post('/signup', async (req, res) => {
   try {
-    // 앞뒤 공백 제거
     const username = req.body.username.trim();
     const password = req.body.password;
     const nickname = req.body.nickname ? req.body.nickname.trim() : "";
     
-    // 🌟 대소문자 완벽 무시 중복 검사! (Admin == admin)
     const existingUser = await User.findOne({ 
         username: { $regex: new RegExp('^' + username + '$', 'i') } 
     });
@@ -522,7 +506,6 @@ app.post('/signup', async (req, res) => {
     }
     
     if (nickname) {
-        // 🌟 닉네임도 대소문자 무시 중복 검사!
         const existingNickname = await User.findOne({ 
             nickname: { $regex: new RegExp('^' + nickname + '$', 'i') } 
         });
@@ -533,7 +516,6 @@ app.post('/signup', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    // 🌟 DB에는 무조건 깔끔하게 소문자로만 저장!
     const newUser = new User({ 
         username: username.toLowerCase(), 
         password: hashedPassword, 
@@ -548,13 +530,11 @@ app.post('/signup', async (req, res) => {
   }
 });
 
-// 🚀 2. 대소문자 찰떡 인식 로그인!
 app.post('/login', async (req, res) => {
   try {
     const username = req.body.username.trim(); 
     const password = req.body.password; 
     
-    // 🌟 대소문자 섞어 쳐도 DB에서 소문자로 찰떡같이 찾아줌!
     const user = await User.findOne({ 
         username: { $regex: new RegExp('^' + username + '$', 'i') } 
     });
@@ -583,7 +563,6 @@ app.post('/login', async (req, res) => {
 
     req.session.user = { id: user.username, name: displayName, role: userRole };
     
-    // 🌟 로그인 카운트 올리기! 🌟
     await trackUserLogin(user.username);
     
     if (userRole === 'admin') {
@@ -605,74 +584,71 @@ app.get('/logout', (req, res) => {
 // 🌟 메인 화면 (차트 & 최신음악 & 팝업 데이터 통합)
 // =========================================
 app.get('/', async (req, res) => {
-   // 🌍 [1단계] 국가 추적 센서 가동!
-    let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress; // 👈 const를 let으로!
-    if (ip && ip.includes(',')) ip = ip.split(',')[0].trim();
-    const geo = geoip.lookup(ip);
-    const country = geo ? geo.country : 'Unknown';
-    const today = getTodayDate();
+   let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress; 
+   if (ip && ip.includes(',')) ip = ip.split(',')[0].trim();
+   const geo = geoip.lookup(ip);
+   const country = geo ? geo.country : 'Unknown';
+   const today = getTodayDate();
 
-    new VisitLog({
-        date: today,
-        country: country,
-        userId: req.session.user ? req.session.user.id : 'Guest'
-    }).save().catch(err => console.error("로그 저장 실패:", err));
+   new VisitLog({
+       date: today,
+       country: country,
+       userId: req.session.user ? req.session.user.id : 'Guest'
+   }).save().catch(err => console.error("로그 저장 실패:", err));
 
-    try {
-        const searchQuery = req.query.search || ''; 
-        const genreQuery = req.query.genre || ''; 
-        const sortQuery = req.query.sort || 'views'; 
-        const periodQuery = req.query.period || ''; 
-        
-        let filter = {};
-        if (searchQuery) filter.artist = { $regex: searchQuery, $options: 'i' };
-        if (genreQuery) filter.genre = genreQuery;
+   try {
+       const searchQuery = req.query.search || ''; 
+       const genreQuery = req.query.genre || ''; 
+       const sortQuery = req.query.sort || 'views'; 
+       const periodQuery = req.query.period || ''; 
+       
+       let filter = {};
+       if (searchQuery) filter.artist = { $regex: searchQuery, $options: 'i' };
+       if (genreQuery) filter.genre = genreQuery;
 
-        if (periodQuery) {
-            const now = new Date();
-            let pastDate = new Date();
-            if (periodQuery === 'daily') pastDate.setDate(now.getDate() - 1); 
-            else if (periodQuery === 'weekly') pastDate.setDate(now.getDate() - 7); 
-            else if (periodQuery === 'monthly') pastDate.setMonth(now.getMonth() - 1); 
-            filter.createdAt = { $gte: pastDate }; 
-        }
+       if (periodQuery) {
+           const now = new Date();
+           let pastDate = new Date();
+           if (periodQuery === 'daily') pastDate.setDate(now.getDate() - 1); 
+           else if (periodQuery === 'weekly') pastDate.setDate(now.getDate() - 7); 
+           else if (periodQuery === 'monthly') pastDate.setMonth(now.getMonth() - 1); 
+           filter.createdAt = { $gte: pastDate }; 
+       }
 
-        let sortOption = { views: -1 }; 
-        if (sortQuery === 'latest') sortOption = { createdAt: -1 }; 
+       let sortOption = { views: -1 }; 
+       if (sortQuery === 'latest') sortOption = { createdAt: -1 }; 
 
-        let artists = await Music.find(filter).sort(sortOption);
-        let popularArtists = await Music.aggregate([
-            { $group: { _id: "$artist", count: { $sum: 1 } } },
-            { $sort: { count: -1 } },
-            { $limit: 10 }
-        ]);
+       let artists = await Music.find(filter).sort(sortOption);
+       let popularArtists = await Music.aggregate([
+           { $group: { _id: "$artist", count: { $sum: 1 } } },
+           { $sort: { count: -1 } },
+           { $limit: 10 }
+       ]);
 
-        // 🔥 [중요] 팝업 데이터를 DB에서 명확하게 가져옵니다!
-        const activePopup = await Popup.findOne({ isActive: true }).sort({ updatedAt: -1 });
+       const activePopup = await Popup.findOne({ isActive: true }).sort({ updatedAt: -1 });
 
-        if (artists.length === 0 && !searchQuery && !genreQuery && !periodQuery) {
-            artists = [{
-                _id: "dummy", name: "첫 곡의 주인공이 되어보세요!", artist: "RANKING AI", genre: "안내", aiTool: "시스템",
-                lyrics: "아직 등록된 곡이 없습니다.", uploader: "admin", uploaderRealName: "관리자", audioUrl: "", views: 0,
-                imageUrl: "https://via.placeholder.com/150/222222/ff5722?text=No+Music"
-            }];
-            popularArtists = [{ _id: "비비(BIBI)", count: 1 }];
-        }
-        
-        // 🌟 render 할 때 'popup' 변수를 반드시 넘겨줍니다!
-        res.render('index', { 
-            artists: artists, 
-            searchQuery: searchQuery, 
-            genreQuery: genreQuery, 
-            sortQuery: sortQuery, 
-            periodQuery: periodQuery, 
-            popularArtists: popularArtists,
-            popup: activePopup // 👈 이 이름이 index.ejs의 popup과 같아야 합니다!
-        });
-    } catch (err) {
-        console.log("DB 에러:", err);
-        res.send("<h1>진짜 에러 원인: " + err.message + "</h1>");
-    }
+       if (artists.length === 0 && !searchQuery && !genreQuery && !periodQuery) {
+           artists = [{
+               _id: "dummy", name: "첫 곡의 주인공이 되어보세요!", artist: "RANKING AI", genre: "안내", aiTool: "시스템",
+               lyrics: "아직 등록된 곡이 없습니다.", uploader: "admin", uploaderRealName: "관리자", audioUrl: "", views: 0,
+               imageUrl: "https://via.placeholder.com/150/222222/ff5722?text=No+Music"
+           }];
+           popularArtists = [{ _id: "비비(BIBI)", count: 1 }];
+       }
+       
+       res.render('index', { 
+           artists: artists, 
+           searchQuery: searchQuery, 
+           genreQuery: genreQuery, 
+           sortQuery: sortQuery, 
+           periodQuery: periodQuery, 
+           popularArtists: popularArtists,
+           popup: activePopup
+       });
+   } catch (err) {
+       console.log("DB 에러:", err);
+       res.send("<h1>진짜 에러 원인: " + err.message + "</h1>");
+   }
 });
 
 // =========================================
@@ -738,30 +714,27 @@ app.post('/delete-video/:id', async (req, res) => {
     } catch (err) { res.redirect('/youtube'); }
 });
 
-// 🚀🚀🚀 [방금 추가할 4줄!] 라디오 페이지 접속 문 열어주기 🚀🚀🚀
+// =========================================
+// 🌟 라디오 전용 라우터
+// =========================================
 app.get('/radio', (req, res) => {
-    // 1단계에서는 우선 UI 화면만 띄워줍니다!
     res.render('radio');
 });
-// 🚀🚀🚀 [2단계 추가!] 라디오 전용 무한 랜덤 음악 자판기 🚀🚀🚀
 app.get('/api/radio-tracks', async (req, res) => {
     try {
         const mood = req.query.mood || 'all';
         let filter = {};
 
-        // 무드별 장르 찰떡 매칭! (해당 장르의 곡들만 뽑아옵니다)
         if (mood === 'cafe') filter = { genre: { $in: ['클래식/재즈', '인디음악', 'R&B/Soul', 'POP'] } };
         else if (mood === 'study') filter = { genre: { $in: ['뉴에이지', '클래식/재즈', '인디음악'] } };
         else if (mood === 'healing') filter = { genre: { $in: ['발라드', '뉴에이지', 'R&B/Soul'] } };
         else if (mood === 'fitness') filter = { genre: { $in: ['댄스', '랩/힙합', '일렉트로니카', '록/메탈'] } };
 
-        // 🌟 MongoDB의 마법 ($sample): 조건에 맞는 곡 중 랜덤으로 20곡을 마구잡이로 섞어서 가져옵니다!
         let tracks = await Music.aggregate([
             { $match: filter },
             { $sample: { size: 20 } }
         ]);
 
-        // 만약 해당 채널에 아직 곡이 없으면? 멈추지 않게 전체 곡 중에서 랜덤으로 가져옵니다!
         if (tracks.length === 0) {
             tracks = await Music.aggregate([{ $sample: { size: 20 } }]);
         }
@@ -970,7 +943,6 @@ app.post('/like/:id', async (req, res) => {
         if (!music) return res.json({ success: false, message: "노래를 찾을 수 없습니다." });
 
         if (isAdmin) {
-            // 🌟 수정됨: views 대신 likes(좋아요) 주머니를 올립니다!
             music.likes = (music.likes || 0) + 1; 
             await music.save();
             return res.json({ success: true, message: "👑 관리자 무제한 좋아요 완료!" });
@@ -979,7 +951,6 @@ app.post('/like/:id', async (req, res) => {
             if (music.likedBy.includes(username)) {
                 return res.json({ success: false, message: "이미 좋아요를 누르셨습니다! (1인 1회 제한)" });
             } else {
-                // 🌟 수정됨: views 대신 likes(좋아요) 주머니를 올립니다!
                 music.likes = (music.likes || 0) + 1; 
                 music.likedBy.push(username);
                 await music.save();
@@ -989,30 +960,22 @@ app.post('/like/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ success: false, message: "서버 에러가 발생했습니다." }); }
 });
 
-// 🌟 재생 버튼 누를 때마다 메인 재생수 + 통계 DB 재생수 둘 다 올리기!
 app.post('/play-count/:id', async (req, res) => {
     try {
         const musicId = req.params.id;
-        // 개별 음악의 조회수 1 증가
         await Music.findByIdAndUpdate(musicId, { $inc: { views: 1 } });
         
-        // Stats 재생수 업데이트!
         const today = getTodayDate();
-        
-        // 🌟 [핵심 추가] 현재 재생 누른 사람이 회원인지 비회원인지 확인!
         const isMember = (req.session && req.session.user) ? true : false;
         
-        // 총 재생수(dailyPlays, totalPlays)는 무조건 1 올리고,
         const incData = { dailyPlays: 1, totalPlays: 1 };
         
-        // 회원이면 memberPlays에 1 추가, 비회원이면 guestPlays에 1 추가!
         if (isMember) {
             incData.memberPlays = 1;
         } else {
             incData.guestPlays = 1;
         }
         
-        // 통계 DB에 한 번에 적용
         await Stats.findOneAndUpdate(
             { date: today }, 
             { $inc: incData },
@@ -1026,7 +989,6 @@ app.post('/play-count/:id', async (req, res) => {
     }
 });
 
-// 👇 아래 댓글 기능들은 대표님 코드 그대로 둔 것입니다! (건드릴 필요 없음)
 app.post('/add-comment/:id', async (req, res) => {
     if (!req.session || !req.session.user) {
         return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
@@ -1061,6 +1023,7 @@ app.post('/delete-music-comment/:musicId/:commentId', async (req, res) => {
         res.redirect('/'); 
     } catch (err) { res.redirect('/'); }
 });
+
 // =========================================
 // 🌟 1:1 관리자 문의 (DM / Contact)
 // =========================================
@@ -1105,41 +1068,59 @@ app.post('/contact/delete/:id', async (req, res) => {
     }
 });
 
-// 🚀🚀🚀 [여기에 1단계 코드 추가!] 🚀🚀🚀
 // ==========================================================
-// 🚀 [관리자 전용] 실시간 접속자 & 플레이 레이더망
+// 🚀 [관리자 전용] 실시간 접속자 & 플레이 레이더망 (체류시간/감상시간 저장)
 // ==========================================================
-// ⏳ [핵심 수정] 모든 이름표(totalPlayTime, playTime, dwellTime)를 다 뒤져서 합칩니다!
-        const timeStats = await VisitLog.aggregate([
-            { $match: { date: today } },
-            { 
-                $group: { 
-                    _id: null, 
-                    totalSeconds: { 
-                        $sum: { 
-                            $add: [
-                                { $ifNull: ["$totalPlayTime", 0] }, 
-                                { $ifNull: ["$playTime", 0] },
-                                { $ifNull: ["$dwellTime", 0] } // 👈 체류시간 주머니 추가 합산!
-                            ] 
-                        } 
-                    } 
-                } 
-            }
-        ]);
+global.liveUsers = new Map(); 
 
-        const totalSeconds = timeStats.length > 0 ? timeStats[0].totalSeconds : 0;
-        
-        // 🚀 초/분/시간 계산
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-        
-        let todayPlayTime = ""; 
-        if (hours > 0) todayPlayTime += `${hours}시간 `;
-        if (minutes > 0 || hours > 0) todayPlayTime += `${minutes}분 `;
-        todayPlayTime += `${seconds}초`; // 👈 이제 10초만 지나도 "10초"라고 뜹니다!
+app.post('/api/heartbeat', async (req, res) => {
+    let userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
+    if (userIp && userIp.includes(',')) userIp = userIp.split(',')[0].trim();
+    
+    const isPlaying = req.body.isPlaying; 
+    global.liveUsers.set(userIp, { time: Date.now(), isPlaying: isPlaying });
 
+    const today = getTodayDate();
+    const userId = req.session && req.session.user ? req.session.user.id : 'Guest';
+
+    try {
+        // 무조건 체류시간 10초 증가
+        let incData = { dwellTime: 10 }; 
+
+        // 만약 음악이 재생 중이라면 감상 시간도 10초 증가
+        if (isPlaying) {
+            incData.totalPlayTime = 10; 
+        }
+
+        await VisitLog.findOneAndUpdate(
+            { date: today, userId: userId },
+            { $inc: incData },
+            { upsert: true }
+        );
+    } catch(e) { console.log("시간 누적 에러:", e); }
+    
+    res.json({ success: true });
+});
+
+setInterval(() => {
+    const now = Date.now();
+    for (let [ip, data] of global.liveUsers.entries()) {
+        if (now - data.time > 15000) {
+            global.liveUsers.delete(ip);
+        }
+    }
+}, 5000);
+
+app.get('/api/admin/live-stats', (req, res) => {
+    let playingCount = 0;
+    for (let [ip, data] of global.liveUsers.entries()) {
+        if (data.isPlaying) playingCount++;
+    }
+    res.json({
+        liveUsers: global.liveUsers.size,
+        playingUsers: playingCount
+    });
+});
 
 // =========================================
 // 👑 관리자 전용 통제실 (Admin) 👑
@@ -1153,7 +1134,6 @@ app.get('/admin', async (req, res) => {
         const users = await User.find().sort({ createdAt: -1 }).lean();
         const allMusic = await Music.find().sort({ createdAt: -1 }).lean();
         
-        // 🌟 유저별 업로드 곡수 확인 및 목록 매칭
         const usersWithMusic = users.map(user => {
             const userMusic = allMusic.filter(m => m.uploader === user.username);
             return { 
@@ -1163,12 +1143,10 @@ app.get('/admin', async (req, res) => {
             };
         });
         
-        // 🚨 [수정 완료] 신데렐라 버그 치료: 자정이 넘어도 '전체 누적'은 유지되도록 불사조 패치!
         const today = getTodayDate();
         let stats = await Stats.findOne({ date: today });
         
         if (!stats) {
-            // 오늘 데이터가 비어있다면? 가장 최근(어제) 데이터를 뒤져서 전체 누적값만 안전하게 복구!
             const lastStats = await Stats.findOne().sort({ _id: -1 }); 
             stats = { 
                 dailyVisitors: 0, 
@@ -1178,7 +1156,6 @@ app.get('/admin', async (req, res) => {
             };
         }
         
-        // 📊 [1단계] 국가별 방문자 수 집계 (상위 5개국)
         const countryStats = await VisitLog.aggregate([
             { $match: { date: today } },
             { $group: { _id: "$country", count: { $sum: 1 } } },
@@ -1186,7 +1163,7 @@ app.get('/admin', async (req, res) => {
             { $limit: 5 }
         ]);
 
-// ⏳ [2단계] 오늘 전체 감상/체류 시간(초)을 다 합쳐서 계산
+        // ⏳ [최종 해결] 체류시간(dwellTime)까지 싹 다 합쳐서 계산합니다!
         const playTimeStats = await VisitLog.aggregate([
             { $match: { date: today } },
             { 
@@ -1195,9 +1172,9 @@ app.get('/admin', async (req, res) => {
                     totalSeconds: { 
                         $sum: { 
                             $add: [
-                                { $ifNull: ["$dwellTime", 0] },
+                                { $ifNull: ["$dwellTime", 0] },     
                                 { $ifNull: ["$totalPlayTime", 0] }, 
-                                { $ifNull: ["$playTime", 0] }
+                                { $ifNull: ["$playTime", 0] }       
                             ] 
                         } 
                     } 
@@ -1206,33 +1183,31 @@ app.get('/admin', async (req, res) => {
         ]);
 
         const totalSeconds = playTimeStats.length > 0 ? playTimeStats[0].totalSeconds : 0;
-
-        // 🚀 초 단위까지 완벽하게 계산해서 예쁘게 포장하기!
+        
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         const seconds = totalSeconds % 60;
-
+        
         let todayPlayTime = ""; 
         if (hours > 0) todayPlayTime += `${hours}시간 `;
         if (minutes > 0 || hours > 0) todayPlayTime += `${minutes}분 `;
-        todayPlayTime += `${seconds}초`;
+        todayPlayTime += `${seconds}초`; 
 
-        // 📈 [3단계] 그래프용 '최근 7일' 데이터 긁어오기!
         const past7Stats = await Stats.find().sort({ _id: -1 }).limit(7);
-        past7Stats.reverse(); // 과거부터 순서대로 보여주기 위해 정렬 뒤집기
+        past7Stats.reverse(); 
 
-        const chartDates = past7Stats.map(s => s.date.substring(5)); // 연도 빼고 "04-12" 날짜만!
+        const chartDates = past7Stats.map(s => s.date.substring(5)); 
         const chartVisitors = past7Stats.map(s => s.dailyVisitors || 0);
         const chartPlays = past7Stats.map(s => s.dailyPlays || 0);
         
         res.render('admin', { 
             users: usersWithMusic, 
             stats: stats, 
-            countryStats: countryStats, // 🌍 국가 정보 추가!
+            countryStats: countryStats, 
             todayPlayTime: todayPlayTime,
-            chartDates: chartDates,       // 👈 📈 차트 데이터 1
-            chartVisitors: chartVisitors, // 👈 📈 차트 데이터 2
-            chartPlays: chartPlays,       // 👈 📈 차트 데이터 3
+            chartDates: chartDates,       
+            chartVisitors: chartVisitors, 
+            chartPlays: chartPlays,       
             user: req.session.user 
         });
     } catch (err) {
@@ -1240,6 +1215,10 @@ app.get('/admin', async (req, res) => {
         res.status(500).send("관리자 페이지를 불러오는 중 에러가 났습니다.");
     }
 });
+
+// =========================================
+// 🚨 관리자 기능 라우터들
+// =========================================
 app.get('/admin/users', async (req, res) => {
     try {
         if (!req.session.user || req.session.user.role !== 'admin') {
@@ -1249,62 +1228,7 @@ app.get('/admin/users', async (req, res) => {
         res.render('admin_users', { users: users });
     } catch (err) { res.status(500).send("유저 목록 에러"); }
 });
-// ⏳ [2단계] 오늘 전체 감상 시간(초)을 다 합쳐서 계산
-// ⏳ [최종 해결] 체류시간(dwellTime)까지 싹 다 합쳐서 계산합니다!
-const playTimeStats = await VisitLog.aggregate([
-    { $match: { date: today } },
-    { 
-        $group: { 
-            _id: null, 
-            totalSeconds: { 
-                $sum: { 
-                    $add: [
-                        { $ifNull: ["$dwellTime", 0] },     // 👈 체류시간
-                        { $ifNull: ["$totalPlayTime", 0] }, // 👈 새 감상시간
-                        { $ifNull: ["$playTime", 0] }       // 👈 옛날 감상시간
-                    ] 
-                } 
-            } 
-        } 
-    }
-]);
 
-// 👇 [이 부분이 통째로 지워져 있었습니다! 꼭 다시 넣어주세요!] 👇
-const totalSeconds = playTimeStats.length > 0 ? playTimeStats[0].totalSeconds : 0;
-
-const hours = Math.floor(totalSeconds / 3600);
-const minutes = Math.floor((totalSeconds % 3600) / 60);
-const seconds = totalSeconds % 60;
-
-let todayPlayTime = ""; 
-if (hours > 0) todayPlayTime += `${hours}시간 `;
-if (minutes > 0 || hours > 0) todayPlayTime += `${minutes}분 `;
-todayPlayTime += `${seconds}초`;
-// 👆 [여기까지가 복구된 계산 코드입니다] 👆
-
-// 📈 [3단계] 그래프용 '최근 7일' 데이터 긁어오기!
-        const past7Stats = await Stats.find().sort({ _id: -1 }).limit(7);
-        past7Stats.reverse(); // 과거부터 순서대로 보여주기 위해 정렬 뒤집기
-
-        const chartDates = past7Stats.map(s => s.date.substring(5)); // 연도 빼고 "04-12" 날짜만!
-        const chartVisitors = past7Stats.map(s => s.dailyVisitors || 0);
-        const chartPlays = past7Stats.map(s => s.dailyPlays || 0);
-        
-        res.render('admin', { 
-            users: usersWithMusic, 
-            stats: stats, 
-            countryStats: countryStats, // 🌍 국가 정보 추가!
-            todayPlayTime: todayPlayTime, // 🚨 이 변수가 위에서 꼭 계산되어야 합니다!
-            chartDates: chartDates,       // 👈 📈 차트 데이터 1
-            chartVisitors: chartVisitors, // 👈 📈 차트 데이터 2
-            chartPlays: chartPlays,       // 👈 📈 차트 데이터 3
-            user: req.session.user 
-        });
-    } catch (err) {
-        console.error("관리자 페이지 로딩 에러:", err);
-        res.status(500).send("관리자 페이지를 불러오는 중 에러가 났습니다.");
-    }
-});
 app.post('/admin/popup', async (req, res) => {
     if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
     try {
@@ -1314,7 +1238,6 @@ app.post('/admin/popup', async (req, res) => {
     } catch (err) { res.redirect('/'); }
 });
 
-// 🚨 악성 유저 강제 탈퇴 (중복 에러 방지 - 하나로 통합)
 app.post('/admin/delete-user', async (req, res) => {
     if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
     
@@ -1323,8 +1246,8 @@ app.post('/admin/delete-user', async (req, res) => {
         const userToDelete = await User.findById(userId);
         
         if (userToDelete) {
-            await Music.deleteMany({ uploader: userToDelete.username }); // 올린 음악 전부 삭제
-            await User.findByIdAndDelete(userId); // 유저 계정 삭제
+            await Music.deleteMany({ uploader: userToDelete.username }); 
+            await User.findByIdAndDelete(userId); 
         }
         res.redirect('/admin');
     } catch (err) {
@@ -1333,27 +1256,22 @@ app.post('/admin/delete-user', async (req, res) => {
     }
 });
 
-// 🌟 혹시라도 새로고침해서 Cannot GET 하얀 화면 뜰 때 통제실로 돌려보내는 방어 코드!
 app.get('/admin/delete-user', (req, res) => {
     res.redirect('/admin');
 });
 
-// 🚑 [긴급 복구] 잃어버린 전체 누적 데이터 100% 복원 스위치 (1회용)
 app.get('/admin/recover-stats', async (req, res) => {
     if (!req.session.user || req.session.user.role !== 'admin') {
         return res.send("<script>alert('관리자만 접근 가능합니다!'); location.href='/';</script>");
     }
     
     try {
-        // 1. 흩어진 진짜 재생수 싹 긁어모으기
         const allMusic = await Music.find();
         const realTotalPlays = allMusic.reduce((sum, music) => sum + (music.views || 0), 0);
 
-        // 2. 과거의 진짜 방문자수 싹 긁어모으기
         const allStats = await Stats.find();
         const realTotalVisitors = allStats.reduce((sum, stat) => sum + (stat.dailyVisitors || 0), 0);
 
-        // 3. 오늘 기록에 진짜 누적치 강제 주입!
         const today = getTodayDate();
         await Stats.findOneAndUpdate(
             { date: today },
@@ -1368,7 +1286,6 @@ app.get('/admin/recover-stats', async (req, res) => {
     }
 });
 
-// 🚨 관리자 통제실 개별 곡 강제 삭제 기능
 app.post('/admin/delete-music-only/:id', async (req, res) => {
     if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
     try {
@@ -1378,7 +1295,6 @@ app.post('/admin/delete-music-only/:id', async (req, res) => {
     } catch (err) { res.status(500).send("음원 삭제 에러가 발생했습니다."); }
 });
 
-// 💌 관리자가 유저에게 다이렉트 쪽지 발송
 app.post('/admin/send-message', async (req, res) => {
     if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
     try {
@@ -1387,38 +1303,36 @@ app.post('/admin/send-message', async (req, res) => {
     } catch (err) { res.status(500).send("에러가 발생했습니다."); }
 });
 
-// 💌 유저가 쪽지를 읽고 확인 버튼 눌렀을 때
 app.post('/read-message/:id', async (req, res) => {
     try {
         await Message.findByIdAndUpdate(req.params.id, { isRead: true });
         res.redirect('back');
     } catch (err) { res.redirect('back'); }
 });
-// 💌 [여기서부터 갈아끼움!] 1:1 채팅방 생성 및 입장 라우터
+
+// =========================================
+// 💌 1:1 채팅방 기능 
 // =========================================
 app.post('/send-user-message', async (req, res) => {
     if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
     
-    const partnerId = req.body.receiverId; // 작곡가 아이디
-    const myId = req.session.user.id;      // 내 아이디
+    const partnerId = req.body.receiverId; 
+    const myId = req.session.user.id;      
 
     if (myId === partnerId) return res.send("<script>alert('나 자신과는 대화할 수 없습니다!'); history.back();</script>");
 
     try {
-        // 1. 이미 우리 둘이 만든 방이 있는지 확인
         let room = await ChatRoom.findOne({
             participants: { $all: [myId, partnerId] }
         });
 
-        // 2. 없으면 방을 새로 개설함
         if (!room) {
             room = await new ChatRoom({
                 participants: [myId, partnerId],
-                lastMessage: req.body.text // 첫 제안 메시지를 텍스트로 저장
+                lastMessage: req.body.text 
             }).save();
         }
 
-        // 3. 해당 채팅방으로 유저를 이동시킴!
         res.redirect(`/chat/${room._id}`);
     } catch (err) {
         console.error("채팅방 생성 에러:", err);
@@ -1426,19 +1340,13 @@ app.post('/send-user-message', async (req, res) => {
     }
 });
 
-// =========================================
-// 📱 내 채팅 목록 화면 라우터
-// =========================================
 app.get('/chatlist', async (req, res) => {
     if (!req.session.user) return res.redirect('/login');
     try {
-        // 1. 내가 참여 중인 모든 채팅방을 '최근 대화순(updatedAt: -1)'으로 불러옵니다.
         const rooms = await ChatRoom.find({ participants: req.session.user.id })
                                     .sort({ updatedAt: -1 });
 
-        // 2. 화면에 뿌려주기 좋게 데이터 가공 (상대방 아이디만 쏙 뽑아내기)
         const chatList = rooms.map(room => {
-            // participants 배열(나, 상대방)에서 '나'가 아닌 사람을 상대방으로 지정
             const partnerId = room.participants.find(id => id !== req.session.user.id);
             return {
                 _id: room._id,
@@ -1448,7 +1356,6 @@ app.get('/chatlist', async (req, res) => {
             };
         });
 
-        // 3. 화면 렌더링
         res.render('chatlist', { user: req.session.user, chatList: chatList });
     } catch (err) {
         console.error("채팅 목록 에러:", err);
@@ -1456,17 +1363,14 @@ app.get('/chatlist', async (req, res) => {
     }
 });
 
-// 📱 채팅방 화면 띄우기 라우터 (과거 메시지 불러오기 추가!)
 app.get('/chat/:roomId', async (req, res) => {
     if (!req.session.user) return res.redirect('/login');
     try {
         const room = await ChatRoom.findById(req.params.roomId);
         if (!room) return res.status(404).send("<script>alert('방을 찾을 수 없습니다.'); history.back();</script>");
         
-        // 🌟 [핵심 추가] 이 방에서 나눴던 과거 대화 내용들 시간순으로 전부 불러오기!
         const messages = await ChatMessage.find({ roomId: req.params.roomId }).sort({ createdAt: 1 });
 
-        // 화면(EJS)으로 방 정보와 함께 과거 메시지(messages)도 같이 던져줍니다!
         res.render('chat', { user: req.session.user, room: room, messages: messages });
     } catch (err) {
         res.status(500).send("<script>alert('에러가 발생했습니다.'); history.back();</script>");
@@ -1474,41 +1378,15 @@ app.get('/chat/:roomId', async (req, res) => {
 });
 
 // =========================================
-// 📱 내 채팅 목록 화면 라우터 (🌟 이것이 빠져있었습니다!)
-// =========================================
-app.get('/chatlist', async (req, res) => {
-    if (!req.session.user) return res.redirect('/login');
-    try {
-        const rooms = await ChatRoom.find({ participants: req.session.user.id }).sort({ updatedAt: -1 });
-        const chatList = rooms.map(room => {
-            const partnerId = room.participants.find(id => id !== req.session.user.id);
-            return {
-                _id: room._id,
-                partnerId: partnerId || "알 수 없음",
-                lastMessage: room.lastMessage || "대화 내용 없음",
-                updatedAt: room.updatedAt
-            };
-        });
-        res.render('chatlist', { user: req.session.user, chatList: chatList });
-    } catch (err) {
-        console.error("채팅 목록 에러:", err);
-        res.status(500).send("<script>alert('채팅 목록을 불러올 수 없습니다.'); history.back();</script>");
-    }
-});
-
-// =========================================
 // 🌟 8. 실시간 웹소켓(Socket.io) 우체국 로직
 // =========================================
 io.on('connection', (socket) => {
-    // 1. 누군가 채팅방 화면에 들어옴
     socket.on('joinRoom', ({ roomId, userId }) => {
-        socket.join(roomId); // 전용 방에 입장시킴
+        socket.join(roomId); 
     });
 
-    // 2. 누군가 메시지를 보냄!
     socket.on('chatMessage', async (data) => {
         try {
-            // (1) DB에 메시지 기록 저장 (나중에 다시 볼 수 있게)
             const newMsg = await new ChatMessage({
                 roomId: data.roomId,
                 senderId: data.senderId,
@@ -1516,10 +1394,8 @@ io.on('connection', (socket) => {
                 text: data.text
             }).save();
 
-            // (2) 해당 방에 있는 '모두'에게 메시지를 실시간으로 쏴줌!
             io.to(data.roomId).emit('message', newMsg);
             
-            // (3) 채팅방 목록에 띄울 '마지막 메시지' 업데이트
             await ChatRoom.findByIdAndUpdate(data.roomId, { 
                 lastMessage: data.text, 
                 updatedAt: Date.now() 
@@ -1531,7 +1407,7 @@ io.on('connection', (socket) => {
 });
 
 // =========================================
-// 🌟 9. 서버 실행 (이제 app 대신 server를 켭니다!)
+// 🌟 9. 서버 실행
 // =========================================
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {
