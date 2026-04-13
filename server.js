@@ -1247,7 +1247,7 @@ app.get('/admin', async (req, res) => {
             { $match: { date: today } },
             { $group: { _id: "$country", count: { $sum: 1 } } },
             { $sort: { count: -1 } },
-            { $limit: 5 }
+            { $limit: 20 }
         ]);
 
         // ⏳ [최종 해결] 체류시간(dwellTime)까지 싹 다 합쳐서 계산합니다!
