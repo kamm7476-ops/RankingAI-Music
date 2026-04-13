@@ -95,6 +95,7 @@ const postSchema = new mongoose.Schema({
     title: String,
     content: String,
     author: String,
+    imageUrl: String,
     likes: { type: Number, default: 0 },
     likedBy: [String], 
     createdAt: { type: Date, default: Date.now },
@@ -760,12 +761,25 @@ app.get('/board', async (req, res) => {
     }
 });
 
-app.post('/add-post', async (req, res) => {
+// 🌟 커뮤니티 게시글 작성 (이미지 업로드 기능 장착 완료!)
+app.post('/add-post', upload.single('image'), async (req, res) => {
     if (!req.session || !req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
     try {
-        await new Post({ title: req.body.title, content: req.body.content, author: req.session.user.name }).save();
+        // 🌟 유저가 사진을 올렸으면 그 금고 주소를 가져오고, 안 올렸으면 빈칸('')으로 둡니다.
+        const uploadedImageUrl = req.file ? req.file.path : ''; 
+
+        await new Post({ 
+            title: req.body.title, 
+            content: req.body.content, 
+            author: req.session.user.name,
+            imageUrl: uploadedImageUrl // 👈 DB에 사진 주소 저장!
+        }).save();
+        
         res.redirect('/board');
-    } catch (err) { console.log(err); }
+    } catch (err) { 
+        console.log("게시글 작성 에러:", err); 
+        res.status(500).send("<script>alert('글쓰기 중 에러가 발생했습니다. 첨부파일 크기를 확인해주세요.'); history.back();</script>");
+    }
 });
 
 app.post('/delete-post/:id', async (req, res) => {
