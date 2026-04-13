@@ -1497,7 +1497,9 @@ io.on('connection', (socket) => {
 // 🌟 9. 서버 실행
 // =========================================
 const PORT = process.env.PORT || 4000;
-server.listen(PORT, () => {
+
+// 🚨 [핵심 해결!] Render가 대문을 쉽게 찾을 수 있도록 '0.0.0.0' 마법의 주소를 추가했습니다!
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`📡 실시간 웹소켓 통합 서버 가동 완료! 포트: ${PORT}`);
     console.log(`💓 이제 전용 대화 채널(WebSockets)이 활성화되었습니다.`);
 });
