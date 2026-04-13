@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5112383847606285"
-     crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5112383847606285"
+         crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>커뮤니티 - RANKING AI</title>
@@ -128,9 +128,15 @@
         <% if (user) { %>
         <div class="write-box" id="writeBox">
             <h3>새로운 글 작성하기</h3>
-            <form action="/add-post" method="POST">
+            <form action="/add-post" method="POST" enctype="multipart/form-data">
                 <input type="text" name="title" class="write-input" placeholder="제목을 입력하세요." required>
                 <textarea name="content" class="write-input write-textarea" placeholder="내용을 입력하세요. 욕설 및 비방은 제재될 수 있습니다." required></textarea>
+                
+                <div style="margin-bottom: 20px; background: #222; padding: 12px; border-radius: 8px; border: 1px dashed #555;">
+                    <label style="color: #ff5722; font-size: 13px; font-weight: bold; margin-bottom: 8px; display: block;">📷 이미지 첨부 (선택사항)</label>
+                    <input type="file" name="image" accept="image/*" style="color: #aaa; font-size: 14px; width: 100%; cursor: pointer;">
+                </div>
+
                 <button type="submit" class="btn-submit">게시글 등록하기</button>
             </form>
         </div>
@@ -147,6 +153,12 @@
                         <h3 class="post-title"><%= post.title %></h3>
                         <p class="post-content" style="white-space: pre-wrap; line-height: 1.6; word-break: break-word;"><%= post.content %></p>
                         
+                        <% if (post.imageUrl) { %>
+                            <div style="margin-bottom: 20px; text-align: center;">
+                                <img src="<%= post.imageUrl %>" alt="게시글 이미지" style="max-width: 100%; max-height: 500px; border-radius: 12px; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+                            </div>
+                        <% } %>
+                        
                         <div class="post-actions">
                             <% 
                                 let isPostLiked = false;
@@ -161,14 +173,14 @@
                             <button class="action-btn" onclick="const box = document.getElementById('board-comments-<%= post._id %>'); box.style.display = (box.style.display === 'block') ? 'none' : 'block';">💬 댓글 <%= post.comments ? post.comments.length : 0 %></button>
                             
                             <% if (user && (user.id === post.author || user.role === 'admin')) { %>
-    <div style="display: flex; gap: 10px; margin-left: auto; align-items: center;">
-        <button onclick="location.href='/edit-post/<%= post._id %>'" class="action-btn" style="color: #00e5ff; background: none; border: none; cursor: pointer; padding: 0;">✏️ 수정</button>
-        
-        <form action="/delete-post/<%= post._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('정말 삭제할까요?');">
-            <button type="submit" class="action-btn" style="color: #ff4a4a; background: none; border: none; cursor: pointer; padding: 0;">🗑 삭제</button>
-        </form>
-    </div>
-<% } %>
+                                <div style="display: flex; gap: 10px; margin-left: auto; align-items: center;">
+                                    <button onclick="location.href='/edit-post/<%= post._id %>'" class="action-btn" style="color: #00e5ff; background: none; border: none; cursor: pointer; padding: 0;">✏️ 수정</button>
+                                    
+                                    <form action="/delete-post/<%= post._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('정말 삭제할까요?');">
+                                        <button type="submit" class="action-btn" style="color: #ff4a4a; background: none; border: none; cursor: pointer; padding: 0;">🗑 삭제</button>
+                                    </form>
+                                </div>
+                            <% } %>
                         </div>
 
                         <div id="board-comments-<%= post._id %>" style="display: none; background: #111; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #222;">
