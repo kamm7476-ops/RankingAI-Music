@@ -191,6 +191,9 @@
 let observer = null;
 let currentIndex = 0;
 
+/* =========================
+   🔧 iframe 생성 / 제거
+========================= */
 function createIframe(wrap, vid) {
     if (!vid || wrap.innerHTML !== '') return;
 
@@ -209,6 +212,9 @@ function removeIframe(wrap) {
     wrap.innerHTML = '';
 }
 
+/* =========================
+   🚀 모달 열기 (핵심)
+========================= */
 function openModal(index) {
     const modal = document.getElementById('shortsModal');
     const feed = document.getElementById('modalFeed');
@@ -219,7 +225,7 @@ function openModal(index) {
     // 기존 영상 제거
     document.querySelectorAll('.modal-iframe-wrap').forEach(wrap => wrap.innerHTML = '');
 
-    // 위치 이동
+    // 정확한 위치 이동
     feed.style.scrollBehavior = 'auto';
     feed.scrollTop = target.offsetTop;
     feed.style.scrollBehavior = '';
@@ -229,11 +235,44 @@ function openModal(index) {
 
     setTimeout(() => {
         initObserver();
-        playCurrent(index); // ✅ 첫 영상 강제 실행
-        preloadNext(index); // ✅ 다음 영상 미리 준비
+
+        // 🔥🔥 핵심: 무조건 첫 영상 강제 실행
+        forcePlay(index);
+
+        // 다음 영상 미리 로딩
+        preloadNext(index);
+
     }, 300);
 }
 
+/* =========================
+   🔥 강제 재생 (버그 해결 핵심)
+========================= */
+function forcePlay(index) {
+    const item = document.getElementById(`modal-item-${index}`);
+    if (!item) return;
+
+    const wrap = item.querySelector('.modal-iframe-wrap');
+    const vid = item.dataset.vid;
+
+    if (!vid) return;
+
+    wrap.innerHTML = '';
+
+    wrap.innerHTML = `
+        <iframe 
+            src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&playsinline=1&rel=0&controls=0&disablekb=1"
+            frameborder="0"
+            allow="autoplay; encrypted-media"
+            allowfullscreen
+            style="width:100%; height:100%; position:absolute; top:0; left:0;">
+        </iframe>
+    `;
+}
+
+/* =========================
+   👀 observer (스크롤 감지)
+========================= */
 function initObserver() {
     if (observer) observer.disconnect();
 
@@ -244,6 +283,7 @@ function initObserver() {
 
             if (entry.isIntersecting) {
                 currentIndex = index;
+
                 playCurrent(index);
                 preloadNext(index);
                 cleanupOld(index);
@@ -251,12 +291,16 @@ function initObserver() {
         });
     }, {
         root: document.getElementById('modalFeed'),
-        threshold: 0.5
+        threshold: 0.3,
+        rootMargin: "0px 0px -10% 0px"
     });
 
     document.querySelectorAll('.modal-item').forEach(item => observer.observe(item));
 }
 
+/* =========================
+   ▶ 현재 영상 재생
+========================= */
 function playCurrent(index) {
     const item = document.getElementById(`modal-item-${index}`);
     if (!item) return;
@@ -267,6 +311,9 @@ function playCurrent(index) {
     createIframe(wrap, vid);
 }
 
+/* =========================
+   ⏭ 다음 영상 preload
+========================= */
 function preloadNext(index) {
     const next = document.getElementById(`modal-item-${index + 1}`);
     if (!next) return;
@@ -277,18 +324,23 @@ function preloadNext(index) {
     createIframe(wrap, vid);
 }
 
+/* =========================
+   🧹 이전 영상 정리 (성능 핵심)
+========================= */
 function cleanupOld(index) {
     document.querySelectorAll('.modal-item').forEach(item => {
         const i = Number(item.id.replace('modal-item-', ''));
         const wrap = item.querySelector('.modal-iframe-wrap');
 
-        // 현재, 다음 빼고 전부 제거
         if (i !== index && i !== index + 1) {
             removeIframe(wrap);
         }
     });
 }
 
+/* =========================
+   ❌ 모달 닫기
+========================= */
 function closeModal() {
     const modal = document.getElementById('shortsModal');
 
