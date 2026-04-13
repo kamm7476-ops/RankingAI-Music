@@ -1109,53 +1109,36 @@ app.post('/contact/delete/:id', async (req, res) => {
 // ==========================================================
 // 🚀 [관리자 전용] 실시간 접속자 & 플레이 레이더망
 // ==========================================================
-global.liveUsers = new Map(); 
-
-// 1. 10초마다 "저 살아있어요!" 생존신고 받기 (+ 감상 시간 누적!)
+// 1. 10초마다 "저 사이트에 있어요!" 신호 받기 (+ 체류 및 감상 시간 누적)
 app.post('/api/heartbeat', async (req, res) => {
-    let userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip; // 👈 const를 let으로!
+    // 🌍 Render 서버의 진짜 유저 IP를 가져옵니다.
+    let userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
     if (userIp && userIp.includes(',')) userIp = userIp.split(',')[0].trim();
+    
     const isPlaying = req.body.isPlaying; 
     global.liveUsers.set(userIp, { time: Date.now(), isPlaying: isPlaying });
 
-    // ⏳ [2단계] 음악이 재생 중이라면 감상 시간을 10초씩 계속 누적합니다!
-    if (isPlaying) {
-        const today = getTodayDate();
-        const userId = req.session && req.session.user ? req.session.user.id : 'Guest';
-        try {
-            await VisitLog.findOneAndUpdate(
-                { date: today, userId: userId },
-                { $inc: { totalPlayTime: 10 } }, // 10초씩 더하기!
-                { upsert: true }
-            );
-        } catch(e) { console.log("시간 누적 에러:", e); }
-    }
+    const today = getTodayDate();
+    const userId = req.session && req.session.user ? req.session.user.id : 'Guest';
+
+    try {
+        // 🚀 [핵심 로직] 체류 시간은 무조건 10초 추가!
+        let incData = { dwellTime: 10 }; 
+
+        // 만약 음악이 재생 중이라면? 감상 시간도 10초 추가!
+        if (isPlaying) {
+            incData.totalPlayTime = 10; 
+        }
+
+        await VisitLog.findOneAndUpdate(
+            { date: today, userId: userId },
+            { $inc: incData },
+            { upsert: true }
+        );
+    } catch(e) { console.log("시간 누적 에러:", e); }
     
     res.json({ success: true });
 });
-
-// 2. 15초 동안 소식 없는 유저 장부에서 지우기 (5초마다 검사)
-setInterval(() => {
-    const now = Date.now();
-    for (let [ip, data] of global.liveUsers.entries()) {
-        if (now - data.time > 15000) {
-            global.liveUsers.delete(ip);
-        }
-    }
-}, 5000);
-
-// 3. 관리자 페이지에 실시간 숫자 쏴주는 API
-app.get('/api/admin/live-stats', (req, res) => {
-    let playingCount = 0;
-    for (let [ip, data] of global.liveUsers.entries()) {
-        if (data.isPlaying) playingCount++;
-    }
-    res.json({
-        liveUsers: global.liveUsers.size,
-        playingUsers: playingCount
-    });
-});
-// 🚀🚀🚀 [1단계 코드 끝] 🚀🚀🚀
 
 
 // =========================================
