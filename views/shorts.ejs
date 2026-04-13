@@ -187,7 +187,7 @@
         </div>
     </div>
 
-    <script>
+ <script>
         let observer = null;
 
         function openModal(index, vid) {
@@ -195,31 +195,23 @@
             const feed = document.getElementById('modalFeed');
             const target = document.getElementById('modal-item-' + index);
 
-            // 1. 레이아웃이 이미 계산되어 있으므로, 오차 없이 무조건 완벽하게 스크롤 이동합니다.
+            // 1. 기존에 틀어져 있던 비디오들을 싹 다 비웁니다. (메모리 찌꺼기 방지)
+            document.querySelectorAll('.modal-iframe-wrap').forEach(wrap => wrap.innerHTML = '');
+
+            // 2. 모달이 올라오기 전에 타겟 위치로 스크롤을 오차 없이 맞춥니다.
             if (target) {
+                // 스냅을 잠깐 풀고 이동해야 정확히 꽂힙니다.
+                feed.style.scrollBehavior = 'auto'; 
                 feed.scrollTop = target.offsetTop;
-                
-                // 2. 화면이 올라오는 동시에 해당 위치에 유튜브 영상을 팍 꽂아넣습니다.
-                const wrap = target.querySelector('.modal-iframe-wrap');
-                if (wrap && wrap.innerHTML === '') {
-                    wrap.innerHTML = `
-                        <iframe 
-                            src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&playsinline=1&rel=0" 
-                            title="YouTube Shorts" 
-                            frameborder="0" 
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                            allowfullscreen
-                            style="width: 100%; height: 100%; border-radius: 12px; pointer-events: auto; position: absolute; top:0; left:0;">
-                        </iframe>
-                    `;
-                }
+                feed.style.scrollBehavior = ''; 
             }
 
-            // 3. 이제 모달을 밑에서 위로 부드럽게 끌어올립니다.
+            // 3. 모달을 밑에서 위로 부드럽게 끌어올립니다.
             modal.classList.add('show');
-            document.body.style.overflow = 'hidden';
+            document.body.style.overflow = 'hidden'; // 배경 스크롤 방지
 
-            // 4. 애니메이션이 끝나면(0.35초) 스와이프 센서를 가동합니다.
+            // 4. 모달이 완전히 다 올라온 후(0.35초)에 스크롤 센서를 가동합니다!
+            // (이때 센서가 화면을 확인하고 비디오를 꽂아줍니다. 충돌 0%)
             setTimeout(initObserver, 350);
         }
 
@@ -231,37 +223,45 @@
                     const wrap = entry.target.querySelector('.modal-iframe-wrap');
                     const vid = entry.target.dataset.vid;
 
+                    // 🌟 화면에 60% 이상 들어왔을 때만 재생 (isIntersecting)
                     if (entry.isIntersecting) {
                         if (vid && wrap.innerHTML === '') {
+                            // 모바일 무조건 자동재생을 위한 최강 파라미터 조합 (mute=1, playsinline=1 필수)
                             wrap.innerHTML = `
                                 <iframe 
-                                    src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&playsinline=1&rel=0" 
+                                    src="https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&playsinline=1&rel=0&controls=0&disablekb=1" 
                                     title="YouTube Shorts" 
                                     frameborder="0" 
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                    allow="autoplay; encrypted-media; picture-in-picture; web-share" 
                                     allowfullscreen
                                     style="width: 100%; height: 100%; border-radius: 12px; pointer-events: auto; position: absolute; top:0; left:0;">
                                 </iframe>
                             `;
                         }
                     } else {
-                        wrap.innerHTML = ''; // 화면 벗어나면 소리 차단을 위해 바로 삭제
+                        // 화면에서 벗어나면 즉시 비디오 삭제 (백그라운드 소리 차단 & 폰 발열 방지)
+                        wrap.innerHTML = ''; 
                     }
                 });
-            }, { root: document.getElementById('modalFeed'), threshold: 0.5 });
+            }, { 
+                root: document.getElementById('modalFeed'), 
+                threshold: 0.6 // 👈 60% 이상 보여야 재생 (아주 안정적임)
+            });
 
             document.querySelectorAll('.modal-item').forEach(item => observer.observe(item));
         }
 
         function closeModal() {
             const modal = document.getElementById('shortsModal');
-            // 모달을 다시 밑으로 내려버립니다.
+            
+            // 1. 모달을 다시 밑으로 내려버립니다.
             modal.classList.remove('show');
-            document.body.style.overflow = '';
+            document.body.style.overflow = ''; // 배경 스크롤 원상복구
 
+            // 2. 스크롤 센서 퇴근시키기
             if (observer) observer.disconnect();
             
-            // 모달이 완전히 다 내려간 뒤에(0.35초 후) 틀어져있던 영상을 싹 지웁니다.
+            // 3. 모달이 완전히 다 내려간 뒤에(0.35초 후) 틀어져있던 영상을 싹 지웁니다.
             setTimeout(() => {
                 document.querySelectorAll('.modal-iframe-wrap').forEach(wrap => wrap.innerHTML = '');
             }, 350);
