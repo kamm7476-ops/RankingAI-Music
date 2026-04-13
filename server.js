@@ -1109,36 +1109,36 @@ app.post('/contact/delete/:id', async (req, res) => {
 // ==========================================================
 // 🚀 [관리자 전용] 실시간 접속자 & 플레이 레이더망
 // ==========================================================
-// 1. 10초마다 "저 사이트에 있어요!" 신호 받기 (+ 체류 및 감상 시간 누적)
-app.post('/api/heartbeat', async (req, res) => {
-    // 🌍 Render 서버의 진짜 유저 IP를 가져옵니다.
-    let userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
-    if (userIp && userIp.includes(',')) userIp = userIp.split(',')[0].trim();
-    
-    const isPlaying = req.body.isPlaying; 
-    global.liveUsers.set(userIp, { time: Date.now(), isPlaying: isPlaying });
+// ⏳ [핵심 수정] 모든 이름표(totalPlayTime, playTime, dwellTime)를 다 뒤져서 합칩니다!
+        const timeStats = await VisitLog.aggregate([
+            { $match: { date: today } },
+            { 
+                $group: { 
+                    _id: null, 
+                    totalSeconds: { 
+                        $sum: { 
+                            $add: [
+                                { $ifNull: ["$totalPlayTime", 0] }, 
+                                { $ifNull: ["$playTime", 0] },
+                                { $ifNull: ["$dwellTime", 0] } // 👈 체류시간 주머니 추가 합산!
+                            ] 
+                        } 
+                    } 
+                } 
+            }
+        ]);
 
-    const today = getTodayDate();
-    const userId = req.session && req.session.user ? req.session.user.id : 'Guest';
-
-    try {
-        // 🚀 [핵심 로직] 체류 시간은 무조건 10초 추가!
-        let incData = { dwellTime: 10 }; 
-
-        // 만약 음악이 재생 중이라면? 감상 시간도 10초 추가!
-        if (isPlaying) {
-            incData.totalPlayTime = 10; 
-        }
-
-        await VisitLog.findOneAndUpdate(
-            { date: today, userId: userId },
-            { $inc: incData },
-            { upsert: true }
-        );
-    } catch(e) { console.log("시간 누적 에러:", e); }
-    
-    res.json({ success: true });
-});
+        const totalSeconds = timeStats.length > 0 ? timeStats[0].totalSeconds : 0;
+        
+        // 🚀 초/분/시간 계산
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        
+        let todayPlayTime = ""; 
+        if (hours > 0) todayPlayTime += `${hours}시간 `;
+        if (minutes > 0 || hours > 0) todayPlayTime += `${minutes}분 `;
+        todayPlayTime += `${seconds}초`; // 👈 이제 10초만 지나도 "10초"라고 뜹니다!
 
 
 // =========================================
@@ -1187,28 +1187,24 @@ app.get('/admin', async (req, res) => {
         ]);
 
 // ⏳ [2단계] 오늘 전체 감상 시간(초)을 다 합쳐서 계산
-       const playTimeStats = await VisitLog.aggregate([
-            { $match: { date: today } },
-            { 
-                $group: { 
-                    _id: null, 
-                    totalSeconds: { 
-                        $sum: { $add: [{ $ifNull: ["$totalPlayTime", 0] }, { $ifNull: ["$playTime", 0] }] } 
-                    } 
+// ⏳ [최종 해결] 체류시간(dwellTime)까지 싹 다 합쳐서 계산합니다!
+const playTimeStats = await VisitLog.aggregate([
+    { $match: { date: today } },
+    { 
+        $group: { 
+            _id: null, 
+            totalSeconds: { 
+                $sum: { 
+                    $add: [
+                        { $ifNull: ["$dwellTime", 0] },     // 👈 [추가됨] 이 줄이 있어야 체류시간이 합쳐집니다!
+                        { $ifNull: ["$totalPlayTime", 0] }, 
+                        { $ifNull: ["$playTime", 0] }
+                    ] 
                 } 
-            }
-        ]);
-        const totalSeconds = playTimeStats.length > 0 ? playTimeStats[0].totalSeconds : 0;
-        
-        // 🚀 초 단위까지 완벽하게 계산해서 예쁘게 포장하기!
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-        
-        let todayPlayTime = "";
-        if (hours > 0) todayPlayTime += `${hours}시간 `;
-        if (minutes > 0 || hours > 0) todayPlayTime += `${minutes}분 `;
-        todayPlayTime += `${seconds}초`;
+            } 
+        } 
+    }
+]);
 
 // 📈 [3단계] 그래프용 '최근 7일' 데이터 긁어오기!
         const past7Stats = await Stats.find().sort({ _id: -1 }).limit(7);
