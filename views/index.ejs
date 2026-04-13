@@ -443,7 +443,7 @@
                             <button type="button" class="genre-btn" data-genre="뉴에이지">뉴에이지</button>
                             <button type="button" class="genre-btn" data-genre="트로트">트로트</button>
                             <button type="button" class="genre-btn" data-genre="인디음악">인디음악</button>
-                            <button type="button" class="genre-btn" data-genre="밈 / 코미디">밈 / 코미디</button>
+                            <button type="button" class="genre-btn" data-genre="Beats">Beats</button>
                         </div>
 
                         <div id="vibe-container" style="margin-top: 15px; padding: 12px; background: #1a1b1c; border-radius: 8px; border: 1px solid #333; display: none;">
@@ -529,7 +529,7 @@
                 </div>
 <% if (typeof genreQuery !== 'undefined' && genreQuery) { %>
     <div style="background: #161718; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; display: flex; gap: 8px; flex-wrap: wrap;">
-       <% const displayGenres = ['K-POP','POP','발라드','댄스','랩/힙합','R&B/Soul','Lo-Fi / 칠아웃','일렉트로니카','록/메탈','애니 / OST','클래식 / 재즈','뉴에이지','트로트','인디음악','밈 / 코미디']; %>
+       <% const displayGenres = ['K-POP','POP','발라드','댄스','랩/힙합','R&B/Soul','Lo-Fi / 칠아웃','일렉트로니카','록/메탈','애니 / OST','클래식 / 재즈','뉴에이지','트로트','인디음악','Beats']; %>
         <% displayGenres.forEach(g => { %>
             <a href="/?genre=<%= encodeURIComponent(g) %>" style="padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; border: 1px solid <%= genreQuery === g ? '#ff5722' : '#444' %>; background: <%= genreQuery === g ? '#ff5722' : '#222' %>; color: <%= genreQuery === g ? '#000' : '#aaa' %>; transition: 0.2s;"><%= g %></a>
         <% }) %>
