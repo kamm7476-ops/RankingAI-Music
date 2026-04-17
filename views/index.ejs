@@ -1601,10 +1601,16 @@
 <footer style="text-align: center; padding: 40px 20px; color: #666; border-top: 1px solid #222; margin-top: 50px;">
     <p style="margin-bottom: 10px;">© 2026 RANKING AI. All rights reserved.</p>
     <div style="font-size: 14px;">
-    <a href="/privacy?v=1" target="_blank" style="color: #888; text-decoration: none;">개인정보처리방침</a> 
-    <span style="margin: 0 10px;">|</span>
-    <a href="/terms?v=1" target="_blank" style="color: #888; text-decoration: none;">이용약관</a>
-</div>
+        <a href="/privacy" 
+           onclick="window.open('/privacy?t=' + Date.now(), '_blank'); return false;" 
+           style="color: #888; text-decoration: none; cursor: pointer;">개인정보처리방침</a> 
+        
+        <span style="margin: 0 10px;">|</span>
+        
+        <a href="/terms" 
+           onclick="window.open('/terms?t=' + Date.now(), '_blank'); return false;" 
+           style="color: #888; text-decoration: none; cursor: pointer;">이용약관</a>
+    </div>
 </footer>
 
 <% if (user) { %>
