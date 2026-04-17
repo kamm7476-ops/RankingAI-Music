@@ -11,36 +11,42 @@ const nodemailer = require('nodemailer'); // 🌟 이메일 우체부 소환!
 const passport = require('passport');
 const NaverStrategy = require('passport-naver').Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-
 // =========================================
 // 🌟 [추가됨!] 실시간 웹소켓(전화선) 부품
 // =========================================
 const http = require('http'); 
 const { Server } = require("socket.io"); 
 
-// 🌟 클라우디너리 영구 금고 세팅 (🚨 const 누락 에러 해결 완료!)
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
+// 🌟 [변경됨] Cloudflare R2 영구 금고 세팅 (클라우디너리 이사 완료!)
+const { S3Client } = require('@aws-sdk/client-s3');
+const multer = require('multer');
+const multerS3 = require('multer-s3');
 const User = require('./user'); 
 const Stats = require('./models/Stats'); // 🌟 통계 DB
 const bcrypt = require('bcrypt'); // 암호화 믹서기
 
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
-});
-
-const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: 'ranking-ai',
-        resource_type: 'auto',
-        allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'mp3', 'wav']
+// 🔑 R2 열쇠 꽂기
+const s3Client = new S3Client({
+    region: 'auto',
+    endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    credentials: {
+        accessKeyId: process.env.R2_ACCESS_KEY_ID,
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY
     }
 });
+
+// 📤 R2 업로드 규칙 설정
 const upload = multer({ 
-    storage: storage,
+    storage: multerS3({
+        s3: s3Client,
+        bucket: 'ram-music-storage',
+        acl: 'public-read', // 누구나 읽을 수 있게
+        contentType: multerS3.AUTO_CONTENT_TYPE, // 파일 형식(mp3, img 등) 자동 인식
+        key: function (req, file, cb) {
+            // 파일 이름이 겹치지 않게 '현재시간_원래이름'으로 저장
+            cb(null, Date.now() + '_' + file.originalname);
+        }
+    }),
     limits: { 
         fileSize: 10 * 1024 * 1024 // 🌟 파일 최대 10MB로 제한!
     } 
@@ -53,8 +59,7 @@ app.set('trust proxy', true);
 // 🌟 [핵심 개조!] 일반 서버를 웹소켓 통신 서버로 감싸기
 // =========================================
 const server = http.createServer(app); 
-const io = new Server(server);         
-
+const io = new Server(server);
 let currentPopup = { isActive: false, title: '', content: '' };
 
 app.use(cookieParser());// 🌟 2. 이거 한 줄 추가! (express() 아래쪽에 넣어주세요)
