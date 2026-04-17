@@ -1482,6 +1482,14 @@ app.get('/chat/:roomId', async (req, res) => {
     }
 });
 
+app.get('/privacy', (req, res) => {
+    res.render('privacy');
+});
+
+app.get('/terms', (req, res) => {
+    res.render('terms');
+});
+
 // =========================================
 // 🌟 8. 실시간 웹소켓(Socket.io) 우체국 로직
 // =========================================
