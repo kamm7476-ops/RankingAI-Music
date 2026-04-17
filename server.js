@@ -19,7 +19,6 @@ const { Server } = require("socket.io");
 
 // 🌟 [변경됨] Cloudflare R2 영구 금고 세팅 (클라우디너리 이사 완료!)
 const { S3Client } = require('@aws-sdk/client-s3');
-const multer = require('multer');
 const multerS3 = require('multer-s3');
 const User = require('./user'); 
 const Stats = require('./models/Stats'); // 🌟 통계 DB
