@@ -109,5 +109,13 @@ app.post('/delete/:id', async (req, res) => {
     res.redirect('/');
 });
 
+app.get('/terms', (req, res) => {
+    res.render('terms');
+});
+
+app.get('/privacy', (req, res) => {
+    res.render('privacy');
+});
+
 const port = process.env.PORT || 3000;
 app.listen(port, '0.0.0.0', () => console.log(`🚀 서버 가동 중 (관리자: kamm7476)`));
