@@ -1482,12 +1482,14 @@ app.get('/chat/:roomId', async (req, res) => {
     }
 });
 
+// server.js의 아랫부분에 넣었던 코드를 이걸로 교체하세요!
 app.get('/privacy', (req, res) => {
-    res.render('privacy');
+    // path.join을 사용해서 views 폴더 안의 파일을 확실하게 지목합니다.
+    res.render(path.join(__dirname, 'views', 'privacy.ejs'), { user: req.session.user });
 });
 
 app.get('/terms', (req, res) => {
-    res.render('terms');
+    res.render(path.join(__dirname, 'views', 'terms.ejs'), { user: req.session.user });
 });
 
 // =========================================
