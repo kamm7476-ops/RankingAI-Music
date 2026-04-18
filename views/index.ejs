@@ -323,7 +323,7 @@
                 </div>
 
                 <button id="btnPlayFromPopup" onclick="playAndClose()" style="background: #ff5722; color: #000; border: none; padding: 16px; font-size: 17px; font-weight: 800; border-radius: 35px; cursor: pointer; width: 100%; transition: 0.2s; box-shadow: 0 4px 15px rgba(255, 87, 34, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px;">
-    <span style="font-size: 13px; margin-bottom: 2px;">▶</span> 
+    <span style="font-size: 13px; margin-bottom: 5px;">▶</span> 
     Play All / 전체 듣기
 </button>
             </div>
@@ -441,9 +441,9 @@
             
             <a href="#" id="pwa-install-btn" class="nav-item" style="color: #00e5ff; font-weight: 900; display: none;">📲앱 설치하기</a>
             
-            <a href="/youtube" class="nav-item">유튜브</a>
-            <a href="/shorts" class="nav-item">쇼츠</a>
-            <a href="/board" class="nav-item">커뮤니티</a>
+            <a href="/youtube" class="nav-item" onclick="window.location.href='/youtube?t=' + Date.now(); return false;">유튜브</a>
+<a href="/shorts" class="nav-item" onclick="window.location.href='/shorts?t=' + Date.now(); return false;">쇼츠</a>
+<a href="/board" class="nav-item" onclick="window.location.href='/board?t=' + Date.now(); return false;">커뮤니티</a>
         </div>
     </header>
 
