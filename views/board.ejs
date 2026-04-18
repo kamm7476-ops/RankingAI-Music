@@ -79,6 +79,65 @@
             .header-nav::-webkit-scrollbar { display: none; }
             .board-header { flex-direction: column; align-items: flex-start; gap: 15px; }
             .btn-write-toggle { width: 100%; }
+
+            /* 🚨 여기서부터 게시판 카드형 변환 핵심 🚨 */
+            
+            /* 1. 표의 머리글(번호, 제목 등) 숨기기 */
+            .board-table thead { display: none; }
+
+            /* 2. 표의 구조를 해체해서 세로로 쌓기 */
+            .board-table, .board-table tbody, .board-row, .board-row td {
+                display: block;
+                width: 100%;
+            }
+
+            /* 3. 각 게시글 줄을 '카드 박스'로 만들기 */
+            .board-row {
+                background: #1c1d1e;
+                margin-bottom: 15px;
+                padding: 15px;
+                border-radius: 12px;
+                border: 1px solid #333;
+                text-align: left;
+            }
+
+            /* 4. 제목을 큼직하고 보기 좋게 */
+            .td-title {
+                padding: 0 !important;
+                margin-bottom: 10px;
+                font-size: 17px !important;
+                font-weight: bold;
+                color: #fff !important;
+                border: none !important;
+            }
+
+            /* 5. 나머지 정보(번호, 글쓴이, 날짜, 좋아요)를 한 줄에 작게 배치 */
+            .board-row td:not(.td-title) {
+                display: inline-block; /* 세로가 아닌 가로로 나열 */
+                width: auto;
+                padding: 0;
+                margin-right: 12px;
+                font-size: 12px;
+                color: #888;
+                border: none !important;
+            }
+
+            /* 번호 앞에 # 붙여서 구분하기 */
+            .board-row td:first-child::before { content: "No. "; }
+
+            /* 6. 게시글 클릭 시 열리는 상세 내용(댓글창) 디자인 */
+            .post-detail {
+                background: #111 !important;
+                margin-top: -15px; /* 카드와 붙어 보이게 */
+                margin-bottom: 15px;
+                border-radius: 0 0 12px 12px;
+                border: 1px solid #ff5722;
+                border-top: none;
+            }
+            .post-detail td { padding: 15px !important; }
+
+            /* 7. 글쓰기 에디터 높이 조정 */
+            .ql-container { height: 250px !important; }
         }
     </style>
 </head>

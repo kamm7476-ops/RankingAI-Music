@@ -305,65 +305,71 @@
 </head>
 <body>
 
-    <div class="popup-content" style="background:#1a1a1a; padding:35px 25px; border-radius:15px; text-align:center; max-width:400px; width:90%; border:1px solid #333;">
+   <% if (typeof popup !== 'undefined' && popup && popup.isActive) { %>
+    <div id="globalPopupOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:none; justify-content:center; align-items:center; z-index:1000000; backdrop-filter:blur(5px); padding:20px; box-sizing:border-box;">
+        <div id="globalPopupBox" style="background:#161718; border:2px solid #ff5722; border-radius:15px; width:100%; max-width:400px; box-shadow:0 15px 50px rgba(0,0,0,0.8); overflow:hidden; position:relative; display:flex; flex-direction:column;">
             
-            <h2 style="color:#ff7700; margin-top:0;">
-                <%= popup ? popup.title : '🚀 Welcome to AI Music!' %>
-            </h2>
-
-            <div style="color:#ddd; line-height:1.6; margin-bottom:20px; font-size:15px;">
-                <%- popup ? popup.content : '전 세계 유저들이 선택한 오늘의 1위 AI 음악을 감상해 보세요.<br><span style="color:#aaa; font-size:14px;">Listen to today\'s #1 AI music chosen by users worldwide.</span>' %>
+            <div style="background:#222; padding:12px 15px; border-bottom:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
+                <span style="color:#ff5722; font-weight:bold; font-size:14px;">📢 공지사항 (Notice)</span>
             </div>
 
-            <button id="btnPlayFromPopup" style="background:#ff7700; color:white; border:none; padding:15px 30px; font-size:1.2rem; font-weight:bold; border-radius:30px; cursor:pointer; width:100%; margin:20px 0;">▶ Play All / 전체 듣기</button>
-            
-            <div style="display:flex; justify-content:center; gap:15px; color:#888; font-size:13px;">
-                <label style="cursor:pointer;"><input type="checkbox" id="chkHideToday"> 오늘 하루 보지 않기</label>
-                <span id="btnClosePopup" style="cursor:pointer; text-decoration:underline;">닫기 (Close)</span>
+            <div style="padding:25px; text-align:center;">
+                <h2 style="color:#fff; margin-top:0; font-size:1.4rem;"><%= popup.title %></h2>
+                <div style="text-align:left; color:#ccc; font-size:14px; line-height:1.7; background:#0b0c0d; padding:15px; border-radius:8px; white-space:pre-wrap; max-height:250px; overflow-y:auto; border:1px solid #222;">
+                    <%- popup.content %>
+                </div>
+                <button id="btnPlayFromPopup" onclick="playAndClose()" style="background:#ff5722; color:#000; border:none; padding:15px; font-size:1.1rem; font-weight:bold; border-radius:30px; cursor:pointer; width:100%; margin-top:20px; transition:0.2s;">▶ Play All / 전체 듣기</button>
+            </div>
+
+            <div style="background:#222; padding:12px 15px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid #333;">
+                <label style="color:#888; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:5px;">
+                    <input type="checkbox" id="todayCheck" style="accent-color:#ff5722;"> 오늘 하루 보지 않기
+                </label>
+                <button onclick="closePopupWithCheck()" style="background:#444; color:#fff; border:none; padding:6px 16px; border-radius:4px; cursor:pointer; font-size:13px; font-weight:bold;">닫기</button>
             </div>
         </div>
+    </div>
+    <% } %>
 
     <% if (typeof unreadMessages !== 'undefined' && unreadMessages.length > 0) { %>
-        <div class="popup-overlay" style="z-index: 10000;">
-            <div class="popup-box" style="border-color: #4caf50;">
-                <h2 class="popup-title" style="color: #4caf50;">💌 관리자 쪽지 도착!</h2>
-                <div class="popup-content" style="color: #fff; font-size: 16px;"><%= unreadMessages[0].text %></div>
-                <form action="/read-message/<%= unreadMessages[0]._id %>" method="POST">
-                    <button type="submit" class="popup-close-btn" style="background: #4caf50; color: #fff;">확인했습니다</button>
-                </form>
-            </div>
+    <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center; z-index:1000001; padding:20px;">
+        <div style="width:100%; max-width:350px; background:#1a1a1a; padding:30px; border-radius:15px; border:2px solid #4caf50; text-align:center;">
+            <h2 style="color:#4caf50; margin-top:0; font-size:1.3rem;">💌 관리자 쪽지</h2>
+            <div style="color:#eee; font-size:15px; margin-bottom:25px; line-height:1.6;"><%= unreadMessages[0].text %></div>
+            <form action="/read-message/<%= unreadMessages[0]._id %>" method="POST" style="margin:0;">
+                <button type="submit" style="background:#4caf50; color:white; border:none; padding:12px 30px; border-radius:8px; font-weight:bold; cursor:pointer; width:100%;">확인했습니다</button>
+            </form>
         </div>
+    </div>
     <% } %>
 
-    <% if (typeof popup !== 'undefined' && popup && popup.isActive) { %>
-        <div id="mainPopup" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 400px; max-height: 80vh; z-index: 999999; background: #161718; border: 2px solid #ff5722; border-radius: 12px; box-shadow: 0 15px 50px rgba(0,0,0,0.9); display: flex; flex-direction: column; overflow: hidden;">
-            <div style="background: #222; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333;">
-                <span style="color: #ff5722; font-weight: bold; font-size: 15px;">📢 공지사항</span>
-            </div>
-            <div style="padding: 25px; text-align: center; overflow-y: auto; flex: 1;">
-                <h2 style="color: #fff; margin-top: 0; font-size: 20px;"><%= popup.title %></h2>
-                <div style="text-align: left; color: #ddd; font-size: 14px; line-height: 1.7; background: #0b0c0d; padding: 15px; border-radius: 8px; margin-bottom: 0; white-space: pre-wrap;"><%= popup.content %></div>
-            </div>
-            <div style="background: #222; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #333;">
-                <label style="color: #aaa; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                    <input type="checkbox" id="todayCheck" style="accent-color: #ff5722;"> 오늘 하루 이 창을 열지 않음
-                </label>
-                <button onclick="closePopupWithCheck()" style="background: #444; color: #fff; border: none; padding: 6px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;">닫기</button>
-            </div>
-        </div>
-
-        <script>
-            if (localStorage.getItem('hideMainPopup_melon') === new Date().toDateString()) {
-                document.getElementById("mainPopup").style.display = 'none';
+    <script>
+        function closePopupWithCheck() {
+            const chk = document.getElementById('todayCheck');
+            if (chk && chk.checked) {
+                localStorage.setItem('hideMainPopup_2026', new Date().toDateString());
             }
-            function closePopupWithCheck() {
-                if (document.getElementById('todayCheck').checked) {
-                    localStorage.setItem('hideMainPopup_melon', new Date().toDateString());
+            const overlay = document.getElementById('globalPopupOverlay');
+            if (overlay) overlay.style.display = 'none';
+        }
+
+        function playAndClose() {
+            closePopupWithCheck();
+            if (typeof playAll === 'function') {
+                playAll();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const overlay = document.getElementById('globalPopupOverlay');
+            if (overlay) {
+                const hideDate = localStorage.getItem('hideMainPopup_2026');
+                if (hideDate !== new Date().toDateString()) {
+                    overlay.style.display = 'flex'; 
                 }
-                document.getElementById("mainPopup").style.display = 'none';
             }
-        </script>
-    <% } %>
+        });
+    </script>
 
     <header class="main-header">
        <div class="header-top">
