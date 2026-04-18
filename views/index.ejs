@@ -530,20 +530,15 @@
              <% 
             let currentTitle = "🏆 RANKING AI 챠트 TOP 100";
             let isMainChart = true;
+                    if ((typeof sort !== 'undefined' && sort === 'latest') || (typeof genreQuery !== 'undefined' && genreQuery)) {
+                        isMainChart = false;
+                    }
 
-            if (typeof sort !== 'undefined' && sort === 'latest') {
-                currentTitle = "✨ 전체 최신 음악";
-                isMainChart = false;
-            } else if (typeof genre !== 'undefined' && genre) {
-                currentTitle = "🎧 " + genre + " 차트";
-                isMainChart = false;
-            }
-
-            let displaySongs = [];
-            if (typeof songs !== 'undefined' && songs.length > 0) {
-                // 핵심: 메인 차트일 때만 딱 100개에서 자르고, 나머지는 전부 둔다!
-                displaySongs = isMainChart ? songs.slice(0, 100) : songs;
-            }
+                    let displaySongs = [];
+                    // 🚨 songs를 모두 artists로 변경했습니다! 🚨
+                    if (typeof artists !== 'undefined' && artists.length > 0) {
+                        displaySongs = isMainChart ? artists.slice(0, 100) : artists;
+                    }
         %>
 
                 <div class="chart-header">
