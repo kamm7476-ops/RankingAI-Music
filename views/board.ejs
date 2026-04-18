@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>커뮤니티 - RANKING AI</title>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <style>
         /* 🌟 글로벌 기본 설정 */
         body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; padding-bottom: 100px; }
@@ -127,7 +128,11 @@
             <h3>새로운 글 작성하기</h3>
             <form action="/add-post" method="POST" enctype="multipart/form-data">
                 <input type="text" name="title" class="write-input" placeholder="제목을 입력하세요." required>
-                <textarea name="content" class="write-input write-textarea" placeholder="내용을 입력하세요. 욕설 및 비방은 제재될 수 있습니다." required></textarea>
+                <input type="hidden" name="content" id="hidden-content">
+
+<div style="background: white; border-radius: 8px; margin-bottom: 15px;">
+    <div id="editor-container" style="height: 200px; color: black; font-family: 'Pretendard', sans-serif; font-size: 15px;"></div>
+</div>
                 
                 <div style="margin-bottom: 20px; background: #222; padding: 12px; border-radius: 8px; border: 1px dashed #555;">
                     <label style="color: #ff5722; font-size: 13px; font-weight: bold; margin-bottom: 8px; display: block;">📷 이미지 첨부 (선택사항)</label>
@@ -177,7 +182,9 @@
                         <tr id="post-detail-<%= post._id %>" class="post-detail page-<%= pageNum %>" style="display: none; background: #0e0e0f;">
                             <td colspan="5" style="padding: 25px; text-align: left; border-bottom: 2px solid #ff5722;">
                                 
-                                <p class="post-content" style="white-space: pre-wrap; line-height: 1.6; word-break: break-word; color: #ccc; margin-top: 0; font-size: 15px;"><%= post.content %></p>
+                                <div class="post-content" style="line-height: 1.6; word-break: break-word; color: #ccc; margin-top: 0; font-size: 15px;">
+    <%- post.content %>
+</div>
                                 
                                 <% if (post.imageUrl) { %>
                                     <div style="margin-bottom: 20px; text-align: center;">
@@ -265,6 +272,33 @@
         <% } %>
 
     </div>
+
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script>
+        // 1. 에디터 화면에 그리기
+        var quill = new Quill('#editor-container', {
+            theme: 'snow',
+            placeholder: '여기에 내용을 입력하세요. (사진도 드래그해서 넣을 수 있습니다!)',
+            modules: {
+                toolbar: [
+                    [{ 'size': ['small', false, 'large', 'huge'] }], // 글씨 크기
+                    ['bold', 'italic', 'underline', 'strike'],       // 글씨 꾸미기
+                    [{ 'color': [] }, { 'background': [] }],         // 글씨 색깔
+                    ['image', 'video', 'link'],                      // 📷 사진, 동영상, 링크!
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }]     // 리스트
+                ]
+            }
+        });
+
+        // 2. [게시글 등록하기] 버튼 누를 때 에디터 내용을 주머니에 옮겨 담기
+        const writeForm = document.querySelector('form[action="/add-post"]');
+        if(writeForm) {
+            writeForm.addEventListener('submit', function(e) {
+                // 에디터 안의 HTML(사진+글꼴 포함)을 아까 만든 숨겨진 주머니에 쏙 넣습니다!
+                document.getElementById('hidden-content').value = quill.root.innerHTML;
+            });
+        }
+    </script>
 
     <script>
         function changePage(targetPage) {
