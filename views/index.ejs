@@ -527,19 +527,19 @@
                 </div>
                 <% } %>
 
-             <% 
+          <% 
             let currentTitle = "🏆 RANKING AI 챠트 TOP 100";
             let isMainChart = true;
-                    if ((typeof sort !== 'undefined' && sort === 'latest') || (typeof genreQuery !== 'undefined' && genreQuery)) {
+                    // 🚨 sort를 sortQuery로 4글자 추가했습니다! 🚨
+                    if ((typeof sortQuery !== 'undefined' && sortQuery === 'latest') || (typeof genreQuery !== 'undefined' && genreQuery)) {
                         isMainChart = false;
                     }
 
                     let displaySongs = [];
-                    // 🚨 songs를 모두 artists로 변경했습니다! 🚨
                     if (typeof artists !== 'undefined' && artists.length > 0) {
                         displaySongs = isMainChart ? artists.slice(0, 100) : artists;
                     }
-        %>
+   %>
 
                 <div class="chart-header">
                     <div class="chart-title">랭킹AI 100 
