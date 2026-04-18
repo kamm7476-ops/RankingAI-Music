@@ -576,7 +576,7 @@
                         
                         <% const pageNum = Math.floor(index / 100) + 1; %>
 
-                        <tr class="music-item <%= !isMainChart ? 'page-' + pageNum : '' %>" 
+                        <tr class="music-item <%= !isMainChart ? 'song-page-' + pageNum : '' %>"
                             style="<%= !isMainChart && pageNum > 1 ? 'display: none;' : '' %>"
                             data-id="<%= music._id %>" data-title="<%= music.name %>" data-artist="<%= music.artist %>" data-cover="<%= music.imageUrl || 'https://via.placeholder.com/512/1a1a1a/ff5722?text=RANKING+AI' %>" data-audio="<%= music.audioUrl %>" data-lyrics="<%= encodeURIComponent(music.lyrics || '') %>">
                             
@@ -1672,12 +1672,17 @@
 </script>
 
 <script>
-        // 🌟 1. 100개씩 페이지 넘기는 기능 (무한 페이징)
+       // 🌟 1. 100개씩 페이지 넘기는 기능 (테이블 맞춤형 수정 완료!)
         function changeSongPage(targetPage) {
-            // 모든 곡 숨기기
-            document.querySelectorAll('.song-item').forEach(row => row.style.display = 'none');
-            // 선택한 페이지의 곡만 보이기
-            document.querySelectorAll('.song-item.page-' + targetPage).forEach(row => row.style.display = '');
+            // 모든 곡 숨기기 (.music-item 으로 수정)
+            document.querySelectorAll('.music-item').forEach(row => {
+                row.style.display = 'none';
+            });
+
+            // 선택한 페이지의 곡만 보이기 (.song-page- 와 table-row 로 수정!)
+            document.querySelectorAll('.song-page-' + targetPage).forEach(row => {
+                row.style.display = 'table-row';
+            });
 
             // 버튼 색상 초기화
             document.querySelectorAll('.page-btn').forEach(btn => {
@@ -1700,7 +1705,7 @@
             window.scrollTo({ top: chartTop - 80, behavior: 'smooth' });
         }
 
-        // 🌟 2. 글로벌 환영 팝업창 제어 기능
+        // 🌟 2. 글로벌 환영 팝업창 제어 기능 (대표님이 만드신 소중한 30줄 무사히 복구!!)
         document.addEventListener("DOMContentLoaded", function() {
             const popup = document.getElementById('globalWelcomePopup');
             if(!popup) return; // 팝업 코드가 없으면 패스
