@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>커뮤니티 - RANKING AI</title>
     <style>
-        /* 🌟 글로벌 기본 설정 (메인 화면과 동일) */
+        /* 🌟 글로벌 기본 설정 */
         body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; padding-bottom: 100px; }
         a { text-decoration: none; color: inherit; }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -15,7 +15,7 @@
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #ff5722; }
 
-        /* 🌟 상단바 디자인 (메인 화면과 완벽 일치) */
+        /* 🌟 상단바 디자인 */
         .main-header { background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
         .header-top { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; border-bottom: 1px solid #1a1b1c; }
         .logo { font-size: 28px; font-weight: 900; letter-spacing: -1px; background: linear-gradient(45deg, #ff5722, #ffb300); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 2px 10px rgba(255, 87, 34, 0.2); }
@@ -33,18 +33,14 @@
         .nav-item:hover, .nav-item.active { color: #ff5722; }
         .nav-item.active::after { content: ''; position: absolute; bottom: -12px; left: 0; width: 100%; height: 3px; background: #ff5722; }
 
-        /* ========================================= */
-        /* 🌟 커뮤니티 전용 프리미엄 디자인 🌟 */
-        /* ========================================= */
+        /* 🌟 커뮤니티 기본 설정 */
         .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
-        
-        /* 게시판 헤더 & 글쓰기 버튼 */
         .board-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #222; padding-bottom: 15px; margin-bottom: 30px; }
         .board-title { font-size: 28px; font-weight: bold; margin: 0; display: flex; align-items: center; gap: 10px; }
         .btn-write-toggle { background: #ff5722; color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; }
         .btn-write-toggle:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(255, 87, 34, 0.3); }
 
-        /* 글쓰기 입력 상자 */
+        /* 🌟 글쓰기 상자 */
         .write-box { background: #161718; padding: 25px; border-radius: 12px; border: 1px solid #333; margin-bottom: 40px; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .write-box h3 { margin-top: 0; color: #ff5722; font-size: 18px; margin-bottom: 20px; }
         .write-input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; margin-bottom: 15px; font-family: inherit; font-size: 15px; transition: 0.2s; }
@@ -53,18 +49,25 @@
         .btn-submit { width: 100%; background: #ff5722; color: #000; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
         .btn-submit:hover { background: #ffb300; }
 
+        /* 🌟 버튼 및 기능 요소 */
         .post-list { display: flex; flex-direction: column; gap: 20px; }
         .post-actions { display: flex; gap: 15px; align-items: center; border-top: 1px solid #222; padding-top: 15px; }
         .action-btn { background: none; border: none; color: #aaa; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; padding: 0; }
         .action-btn:hover { color: #ff5722; }
 
-        /* 🌟 보배드림 스타일 테이블 전용 CSS 추가 */
+        /* 🌟 보배드림 스타일 테이블 */
         .board-table { width: 100%; border-collapse: collapse; background: #161718; border-radius: 8px; overflow: hidden; margin-top: 15px; }
         .board-table thead { background: #222; color: #888; font-size: 14px; }
         .board-table th { padding: 15px 10px; border-bottom: 1px solid #333; font-weight: 500; }
         .board-table td { padding: 12px 10px; border-bottom: 1px solid #222; text-align: center; font-size: 14px; color: #ccc; }
         .board-row:hover { background: rgba(255, 87, 34, 0.05); cursor: pointer; }
         .td-title { text-align: left !important; padding-left: 20px !important; color: #fff; font-size: 15px; }
+
+        /* 🌟 [NEW] 하단 페이지 번호 (페이징) 디자인 */
+        .pagination-container { text-align: center; margin-top: 40px; padding-bottom: 20px; }
+        .page-btn { background: #222; color: #aaa; border: 1px solid #333; padding: 8px 14px; margin: 0 4px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .page-btn:hover { background: #333; color: #fff; }
+        .page-btn.active { background: #ff5722; color: #000; font-weight: bold; border-color: #ff5722; pointer-events: none; }
 
         /* 📱 모바일 최적화 */
         @media (max-width: 900px) {
@@ -150,8 +153,12 @@
                 <tbody>
                 <% if (typeof posts !== 'undefined' && posts.length > 0) { %>
                     <% posts.forEach((post, index) => { %>
-                        
-                        <tr class="board-row" onclick="const detail = document.getElementById('post-detail-<%= post._id %>'); detail.style.display = (detail.style.display === 'none' || detail.style.display === '') ? 'table-row' : 'none';">
+                        <% const pageNum = Math.floor(index / 20) + 1; %>
+
+                        <tr class="board-row page-<%= pageNum %>" 
+                            style="<%= pageNum > 1 ? 'display: none;' : '' %>"
+                            onclick="const detail = document.getElementById('post-detail-<%= post._id %>'); detail.style.display = (detail.style.display === 'none' || detail.style.display === '') ? 'table-row' : 'none';">
+                            
                             <td><%= posts.length - index %></td>
                             <td class="td-title">
                                 <%= post.title %>
@@ -167,7 +174,7 @@
                             <td style="color: #ff5722;"><%= post.likes || 0 %></td>
                         </tr>
 
-                        <tr id="post-detail-<%= post._id %>" style="display: none; background: #0e0e0f;">
+                        <tr id="post-detail-<%= post._id %>" class="post-detail page-<%= pageNum %>" style="display: none; background: #0e0e0f;">
                             <td colspan="5" style="padding: 25px; text-align: left; border-bottom: 2px solid #ff5722;">
                                 
                                 <p class="post-content" style="white-space: pre-wrap; line-height: 1.6; word-break: break-word; color: #ccc; margin-top: 0; font-size: 15px;"><%= post.content %></p>
@@ -248,12 +255,39 @@
             </table>
         </div>
 
+        <% if (typeof posts !== 'undefined' && posts.length > 20) { %>
+            <div class="pagination-container">
+                <% const totalPages = Math.ceil(posts.length / 20); %>
+                <% for(let i=1; i<=totalPages; i++) { %>
+                    <button class="page-btn <%= i === 1 ? 'active' : '' %>" onclick="changePage(<%= i %>)"><%= i %></button>
+                <% } %>
+            </div>
+        <% } %>
+
     </div>
 
     <script>
+        // 🌟 [NEW] 페이지 이동 스크립트
+        function changePage(targetPage) {
+            // 1. 현재 열려있는 모든 게시글 줄과 상세 내용을 싹 숨깁니다.
+            document.querySelectorAll('.board-row').forEach(row => row.style.display = 'none');
+            document.querySelectorAll('.post-detail').forEach(row => row.style.display = 'none');
+
+            // 2. 내가 클릭한 번호(targetPage)에 해당하는 20개의 글만 화면에 다시 보여줍니다.
+            document.querySelectorAll('.board-row.page-' + targetPage).forEach(row => row.style.display = '');
+
+            // 3. 페이지 버튼 색상 변경 (기존 오렌지색 빼고, 내가 누른 버튼에 오렌지색 칠하기)
+            document.querySelectorAll('.page-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 4. 페이지가 바뀌었으니 화면을 다시 게시판 꼭대기로 살짝 올려줍니다.
+            const boardTop = document.querySelector('.board-header').offsetTop;
+            window.scrollTo({ top: boardTop - 80, behavior: 'smooth' });
+        }
+
+        // 기존 좋아요 기능 유지
         async function likePost(postId) {
             try {
-                // 게시글 좋아요 주소로 요청 쏘기!
                 const response = await fetch('/like-post/' + postId, { method: 'POST' });
                 const data = await response.json();
 
