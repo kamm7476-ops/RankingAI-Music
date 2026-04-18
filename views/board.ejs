@@ -44,7 +44,7 @@
         .btn-write-toggle { background: #ff5722; color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s; }
         .btn-write-toggle:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(255, 87, 34, 0.3); }
 
-        /* 글쓰기 입력 상자 (초기엔 숨겨짐) */
+        /* 글쓰기 입력 상자 */
         .write-box { background: #161718; padding: 25px; border-radius: 12px; border: 1px solid #333; margin-bottom: 40px; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .write-box h3 { margin-top: 0; color: #ff5722; font-size: 18px; margin-bottom: 20px; }
         .write-input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; margin-bottom: 15px; font-family: inherit; font-size: 15px; transition: 0.2s; }
@@ -53,21 +53,18 @@
         .btn-submit { width: 100%; background: #ff5722; color: #000; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
         .btn-submit:hover { background: #ffb300; }
 
-        /* 프리미엄 카드형 게시글 리스트 */
         .post-list { display: flex; flex-direction: column; gap: 20px; }
-        .post-card { background: #161718; border-radius: 12px; padding: 25px; border: 1px solid #222; transition: all 0.3s ease; border-left: 4px solid transparent; }
-        .post-card:hover { background: rgba(255, 87, 34, 0.03); border-left: 4px solid #ff5722; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
-        
-        .post-header-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .post-author { font-weight: bold; color: #ff5722; font-size: 14px; background: rgba(255, 87, 34, 0.1); padding: 4px 10px; border-radius: 12px; }
-        .post-date { font-size: 12px; color: #777; }
-        
-        .post-title { font-size: 20px; font-weight: bold; margin: 0 0 10px 0; color: #fff; }
-        .post-content { font-size: 15px; color: #ccc; line-height: 1.6; margin: 0 0 20px 0; word-break: break-all; }
-        
         .post-actions { display: flex; gap: 15px; align-items: center; border-top: 1px solid #222; padding-top: 15px; }
         .action-btn { background: none; border: none; color: #aaa; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; padding: 0; }
         .action-btn:hover { color: #ff5722; }
+
+        /* 🌟 보배드림 스타일 테이블 전용 CSS 추가 */
+        .board-table { width: 100%; border-collapse: collapse; background: #161718; border-radius: 8px; overflow: hidden; margin-top: 15px; }
+        .board-table thead { background: #222; color: #888; font-size: 14px; }
+        .board-table th { padding: 15px 10px; border-bottom: 1px solid #333; font-weight: 500; }
+        .board-table td { padding: 12px 10px; border-bottom: 1px solid #222; text-align: center; font-size: 14px; color: #ccc; }
+        .board-row:hover { background: rgba(255, 87, 34, 0.05); cursor: pointer; }
+        .td-title { text-align: left !important; padding-left: 20px !important; color: #fff; font-size: 15px; }
 
         /* 📱 모바일 최적화 */
         @media (max-width: 900px) {
@@ -76,11 +73,8 @@
             .auth-buttons { width: 100%; justify-content: center; }
             .header-nav { justify-content: flex-start; overflow-x: auto; white-space: nowrap; padding: 12px 15px; gap: 20px; }
             .header-nav::-webkit-scrollbar { display: none; }
-            
             .board-header { flex-direction: column; align-items: flex-start; gap: 15px; }
             .btn-write-toggle { width: 100%; }
-            .post-card { padding: 15px; }
-            .post-title { font-size: 18px; }
         }
     </style>
 </head>
@@ -143,86 +137,115 @@
         <% } %>
 
         <div class="post-list">
-            <% if (typeof posts !== 'undefined' && posts.length > 0) { %>
-                <% posts.forEach(post => { %>
-                    <div class="post-card">
-                        <div class="post-header-info">
-                            <span class="post-author">@<%= post.author %></span>
-                            <span class="post-date"><%= new Date(post.createdAt).toLocaleDateString() %></span>
-                        </div>
-                        <h3 class="post-title"><%= post.title %></h3>
-                        <p class="post-content" style="white-space: pre-wrap; line-height: 1.6; word-break: break-word;"><%= post.content %></p>
+            <table class="board-table">
+                <thead>
+                    <tr>
+                        <th width="10%">번호</th>
+                        <th width="50%">제목</th>
+                        <th width="15%">글쓴이</th>
+                        <th width="15%">날짜</th>
+                        <th width="10%">좋아요</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <% if (typeof posts !== 'undefined' && posts.length > 0) { %>
+                    <% posts.forEach((post, index) => { %>
                         
-                        <% if (post.imageUrl) { %>
-                            <div style="margin-bottom: 20px; text-align: center;">
-                                <img src="<%= post.imageUrl %>" alt="게시글 이미지" style="max-width: 100%; max-height: 500px; border-radius: 12px; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
-                            </div>
-                        <% } %>
-                        
-                        <div class="post-actions">
-                            <% 
-                                let isPostLiked = false;
-                                if (user && post.likedBy && post.likedBy.includes(user.id)) {
-                                    isPostLiked = true;
-                                }
-                            %>
-                            <button class="action-btn" id="like-post-btn-<%= post._id %>" onclick="likePost('<%= post._id %>')" style="<%= isPostLiked ? 'color:#ff4a4a;' : '' %>">
-                                <%= isPostLiked ? '❤️' : '🤍' %> 좋아요 <span id="like-post-count-<%= post._id %>"><%= post.likes || 0 %></span>
-                            </button>
-                            
-                            <button class="action-btn" onclick="const box = document.getElementById('board-comments-<%= post._id %>'); box.style.display = (box.style.display === 'block') ? 'none' : 'block';">💬 댓글 <%= post.comments ? post.comments.length : 0 %></button>
-                            
-                            <% if (user && (user.id === post.author || user.role === 'admin')) { %>
-                                <div style="display: flex; gap: 10px; margin-left: auto; align-items: center;">
-                                    <button onclick="location.href='/edit-post/<%= post._id %>'" class="action-btn" style="color: #00e5ff; background: none; border: none; cursor: pointer; padding: 0;">✏️ 수정</button>
-                                    
-                                    <form action="/delete-post/<%= post._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('정말 삭제할까요?');">
-                                        <button type="submit" class="action-btn" style="color: #ff4a4a; background: none; border: none; cursor: pointer; padding: 0;">🗑 삭제</button>
-                                    </form>
-                                </div>
-                            <% } %>
-                        </div>
-
-                        <div id="board-comments-<%= post._id %>" style="display: none; background: #111; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #222;">
-                            <div style="max-height: 200px; overflow-y: auto; margin-bottom: 15px;">
+                        <tr class="board-row" onclick="const detail = document.getElementById('post-detail-<%= post._id %>'); detail.style.display = (detail.style.display === 'none' || detail.style.display === '') ? 'table-row' : 'none';">
+                            <td><%= posts.length - index %></td>
+                            <td class="td-title">
+                                <%= post.title %>
                                 <% if (post.comments && post.comments.length > 0) { %>
-                                    <% post.comments.forEach(function(c) { %>
-                                        <div style="border-bottom: 1px solid #333; padding: 10px 0; display: flex; justify-content: space-between; align-items: center;">
-                                            <div>
-                                                <span style="color:#ff5722; font-weight:bold; font-size:13px;">@<%= c.author %></span>
-                                                <span style="font-size:14px; margin-left:8px; color:#ddd;"><%= c.text %></span>
-                                                <div style="font-size:11px; color:#555; margin-top:4px;"><%= new Date(c.createdAt).toLocaleString() %></div>
-                                            </div>
-                                            <% if (user && (user.role === 'admin' || user.id === c.author)) { %>
-                                                <form action="/delete-board-comment/<%= post._id %>/<%= c._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('이 댓글을 삭제할까요?');">
-                                                    <button type="submit" style="background: none; border: none; color: #ff4a4a; font-size: 11px; cursor: pointer;">❌삭제</button>
-                                                </form>
-                                            <% } %>
-                                        </div>
-                                    <% }); %>
-                                <% } else { %>
-                                    <p style="font-size:13px; color:#777; text-align:center; padding: 10px 0;">아직 댓글이 없습니다. 첫 번째 댓글을 남겨보세요!</p>
+                                    <span style="color: #ff5722; font-size: 12px; font-weight: bold; margin-left: 5px;">[<%= post.comments.length %>]</span>
                                 <% } %>
-                            </div>
-                            
-                            <% if (user) { %>
-                                <form action="/add-board-comment/<%= post._id %>" method="POST" style="display:flex; gap:10px;">
-                                    <input type="text" name="commentText" placeholder="따뜻한 댓글을 남겨주세요..." style="flex:1; padding:10px; border-radius:6px; border:1px solid #444; background:#222; color:white; font-family:inherit;" required>
-                                    <button type="submit" style="background:#ff5722; color:black; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer;">등록</button>
-                                </form>
-                            <% } else { %>
-                                <div style="text-align:center; font-size:13px; color:#777; padding:10px; background:#222; border-radius:6px;">댓글을 작성하려면 <a href="/login" style="color:#ff5722; text-decoration:underline;">로그인</a>이 필요합니다.</div>
-                            <% } %>
-                        </div>
+                                <% if (post.imageUrl) { %>
+                                    <span style="font-size: 12px; margin-left: 5px;">📷</span>
+                                <% } %>
+                            </td>
+                            <td style="color: #aaa;">@<%= post.author %></td>
+                            <td style="font-size: 13px;"><%= new Date(post.createdAt).toLocaleDateString() %></td>
+                            <td style="color: #ff5722;"><%= post.likes || 0 %></td>
+                        </tr>
 
-                    </div>
-                <% }) %>
-            <% } else { %>
-                <div style="text-align:center; padding: 80px 0; color:#555; background:#161718; border-radius:12px; border:1px dashed #333;">
-                    <div style="font-size: 40px; margin-bottom:15px;">📝</div>
-                    아직 등록된 게시글이 없습니다.<br>첫 번째 글을 남겨보세요!
-                </div>
-            <% } %>
+                        <tr id="post-detail-<%= post._id %>" style="display: none; background: #0e0e0f;">
+                            <td colspan="5" style="padding: 25px; text-align: left; border-bottom: 2px solid #ff5722;">
+                                
+                                <p class="post-content" style="white-space: pre-wrap; line-height: 1.6; word-break: break-word; color: #ccc; margin-top: 0; font-size: 15px;"><%= post.content %></p>
+                                
+                                <% if (post.imageUrl) { %>
+                                    <div style="margin-bottom: 20px; text-align: center;">
+                                        <img src="<%= post.imageUrl %>" alt="게시글 이미지" style="max-width: 100%; max-height: 500px; border-radius: 12px; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+                                    </div>
+                                <% } %>
+                                
+                                <div class="post-actions">
+                                    <% 
+                                        let isPostLiked = false;
+                                        if (user && post.likedBy && post.likedBy.includes(user.id)) {
+                                            isPostLiked = true;
+                                        }
+                                    %>
+                                    <button class="action-btn" id="like-post-btn-<%= post._id %>" onclick="event.stopPropagation(); likePost('<%= post._id %>')" style="<%= isPostLiked ? 'color:#ff4a4a;' : '' %>">
+                                        <%= isPostLiked ? '❤️' : '🤍' %> 좋아요 <span id="like-post-count-<%= post._id %>"><%= post.likes || 0 %></span>
+                                    </button>
+                                    
+                                    <button class="action-btn" onclick="event.stopPropagation(); const box = document.getElementById('board-comments-<%= post._id %>'); box.style.display = (box.style.display === 'block') ? 'none' : 'block';">💬 댓글 <%= post.comments ? post.comments.length : 0 %></button>
+                                    
+                                    <% if (user && (user.id === post.author || user.role === 'admin')) { %>
+                                        <div style="display: flex; gap: 10px; margin-left: auto; align-items: center;">
+                                            <button onclick="event.stopPropagation(); location.href='/edit-post/<%= post._id %>'" class="action-btn" style="color: #00e5ff; background: none; border: none; cursor: pointer; padding: 0;">✏️ 수정</button>
+                                            
+                                            <form action="/delete-post/<%= post._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('정말 삭제할까요?');">
+                                                <button type="submit" class="action-btn" style="color: #ff4a4a; background: none; border: none; cursor: pointer; padding: 0;">🗑 삭제</button>
+                                            </form>
+                                        </div>
+                                    <% } %>
+                                </div>
+
+                                <div id="board-comments-<%= post._id %>" style="display: none; background: #111; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #222;">
+                                    <div style="max-height: 200px; overflow-y: auto; margin-bottom: 15px;">
+                                        <% if (post.comments && post.comments.length > 0) { %>
+                                            <% post.comments.forEach(function(c) { %>
+                                                <div style="border-bottom: 1px solid #333; padding: 10px 0; display: flex; justify-content: space-between; align-items: center;">
+                                                    <div>
+                                                        <span style="color:#ff5722; font-weight:bold; font-size:13px;">@<%= c.author %></span>
+                                                        <span style="font-size:14px; margin-left:8px; color:#ddd;"><%= c.text %></span>
+                                                        <div style="font-size:11px; color:#555; margin-top:4px;"><%= new Date(c.createdAt).toLocaleString() %></div>
+                                                    </div>
+                                                    <% if (user && (user.role === 'admin' || user.id === c.author)) { %>
+                                                        <form action="/delete-board-comment/<%= post._id %>/<%= c._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('이 댓글을 삭제할까요?');">
+                                                            <button type="submit" style="background: none; border: none; color: #ff4a4a; font-size: 11px; cursor: pointer;">❌삭제</button>
+                                                        </form>
+                                                    <% } %>
+                                                </div>
+                                            <% }); %>
+                                        <% } else { %>
+                                            <p style="font-size:13px; color:#777; text-align:center; padding: 10px 0;">아직 댓글이 없습니다. 첫 번째 댓글을 남겨보세요!</p>
+                                        <% } %>
+                                    </div>
+                                    
+                                    <% if (user) { %>
+                                        <form action="/add-board-comment/<%= post._id %>" method="POST" style="display:flex; gap:10px;">
+                                            <input type="text" name="commentText" placeholder="따뜻한 댓글을 남겨주세요..." style="flex:1; padding:10px; border-radius:6px; border:1px solid #444; background:#222; color:white; font-family:inherit;" required>
+                                            <button type="submit" style="background:#ff5722; color:black; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer;">등록</button>
+                                        </form>
+                                    <% } else { %>
+                                        <div style="text-align:center; font-size:13px; color:#777; padding:10px; background:#222; border-radius:6px;">댓글을 작성하려면 <a href="/login" style="color:#ff5722; text-decoration:underline;">로그인</a>이 필요합니다.</div>
+                                    <% } %>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="5" style="padding: 80px 0; color:#555; background:#161718;">
+                            <div style="font-size: 40px; margin-bottom:15px;">📝</div>
+                            아직 등록된 게시글이 없습니다.<br>첫 번째 글을 남겨보세요!
+                        </td>
+                    </tr>
+                <% } %>
+                </tbody>
+            </table>
         </div>
 
     </div>
