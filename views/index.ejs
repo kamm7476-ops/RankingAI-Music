@@ -305,18 +305,23 @@
 </head>
 <body>
 
-    <div id="globalWelcomePopup" class="popup-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:none; justify-content:center; align-items:center; z-index:9999;">
-        <div class="popup-content" style="background:#1a1a1a; padding:35px 25px; border-radius:15px; text-align:center; max-width:400px; width:90%; border:1px solid #333;">
-            <h2 style="color:#ff7700; margin-top:0;">🚀 Welcome to AI Music!</h2>
-            <p style="color:#ddd; line-height:1.6; margin-bottom:10px;">전 세계 유저들이 선택한 오늘의 1위 AI 음악을 감상해 보세요.</p>
-            <p style="color:#aaa; font-size:14px; margin-top:0;">Listen to today's #1 AI music chosen by users worldwide.</p>
+    <div class="popup-content" style="background:#1a1a1a; padding:35px 25px; border-radius:15px; text-align:center; max-width:400px; width:90%; border:1px solid #333;">
+            
+            <h2 style="color:#ff7700; margin-top:0;">
+                <%= popup ? popup.title : '🚀 Welcome to AI Music!' %>
+            </h2>
+
+            <div style="color:#ddd; line-height:1.6; margin-bottom:20px; font-size:15px;">
+                <%- popup ? popup.content : '전 세계 유저들이 선택한 오늘의 1위 AI 음악을 감상해 보세요.<br><span style="color:#aaa; font-size:14px;">Listen to today\'s #1 AI music chosen by users worldwide.</span>' %>
+            </div>
+
             <button id="btnPlayFromPopup" style="background:#ff7700; color:white; border:none; padding:15px 30px; font-size:1.2rem; font-weight:bold; border-radius:30px; cursor:pointer; width:100%; margin:20px 0;">▶ Play All / 전체 듣기</button>
+            
             <div style="display:flex; justify-content:center; gap:15px; color:#888; font-size:13px;">
                 <label style="cursor:pointer;"><input type="checkbox" id="chkHideToday"> 오늘 하루 보지 않기</label>
                 <span id="btnClosePopup" style="cursor:pointer; text-decoration:underline;">닫기 (Close)</span>
             </div>
         </div>
-    </div>
 
     <% if (typeof unreadMessages !== 'undefined' && unreadMessages.length > 0) { %>
         <div class="popup-overlay" style="z-index: 10000;">
