@@ -770,7 +770,8 @@ app.post('/add-post', upload.single('image'), async (req, res) => {
     if (!req.session || !req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
     try {
         // 🌟 유저가 사진을 올렸으면 그 금고 주소를 가져오고, 안 올렸으면 빈칸('')으로 둡니다.
-        const uploadedImageUrl = req.file ? req.file.path : ''; 
+        // 🌟 게시판 사진도 R2 주소로 저장!
+const uploadedImageUrl = req.file ? `${process.env.R2_PUBLIC_URL}/${req.file.key}` : '';
 
         await new Post({ 
             title: req.body.title, 
@@ -895,8 +896,10 @@ app.post('/add-music', (req, res, next) => {
     try {
         const { name, artist, genre, aiTool, lyrics, realName } = req.body;
         const uploader = req.session.user.id; 
-        const imageUrl = req.files && req.files['image'] ? req.files['image'][0].path : 'https://via.placeholder.com/150';
-        const audioUrl = req.files && req.files['audio'] ? req.files['audio'][0].path : '';
+        // 🌟 R2의 진짜 주소와 파일 이름을 합쳐서 저장합니다.
+const baseUrl = process.env.R2_PUBLIC_URL;
+const imageUrl = req.files && req.files['image'] ? `${baseUrl}/${req.files['image'][0].key}` : 'https://via.placeholder.com/150';
+const audioUrl = req.files && req.files['audio'] ? `${baseUrl}/${req.files['audio'][0].key}` : '';
         
         const newMusic = new Music({ name, artist, genre, aiTool, lyrics, uploaderRealName: realName, uploader, imageUrl, audioUrl });
         await newMusic.save();
