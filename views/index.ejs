@@ -305,6 +305,19 @@
 </head>
 <body>
 
+    <div id="globalWelcomePopup" class="popup-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:none; justify-content:center; align-items:center; z-index:9999;">
+        <div class="popup-content" style="background:#1a1a1a; padding:35px 25px; border-radius:15px; text-align:center; max-width:400px; width:90%; border:1px solid #333;">
+            <h2 style="color:#ff7700; margin-top:0;">🚀 Welcome to AI Music!</h2>
+            <p style="color:#ddd; line-height:1.6; margin-bottom:10px;">전 세계 유저들이 선택한 오늘의 1위 AI 음악을 감상해 보세요.</p>
+            <p style="color:#aaa; font-size:14px; margin-top:0;">Listen to today's #1 AI music chosen by users worldwide.</p>
+            <button id="btnPlayFromPopup" style="background:#ff7700; color:white; border:none; padding:15px 30px; font-size:1.2rem; font-weight:bold; border-radius:30px; cursor:pointer; width:100%; margin:20px 0;">▶ Play All / 전체 듣기</button>
+            <div style="display:flex; justify-content:center; gap:15px; color:#888; font-size:13px;">
+                <label style="cursor:pointer;"><input type="checkbox" id="chkHideToday"> 오늘 하루 보지 않기</label>
+                <span id="btnClosePopup" style="cursor:pointer; text-decoration:underline;">닫기 (Close)</span>
+            </div>
+        </div>
+    </div>
+
     <% if (typeof unreadMessages !== 'undefined' && unreadMessages.length > 0) { %>
         <div class="popup-overlay" style="z-index: 10000;">
             <div class="popup-box" style="border-color: #4caf50;">
@@ -514,6 +527,25 @@
                 </div>
                 <% } %>
 
+             <% 
+            let currentTitle = "🏆 RANKING AI 챠트 TOP 100";
+            let isMainChart = true;
+
+            if (typeof sort !== 'undefined' && sort === 'latest') {
+                currentTitle = "✨ 전체 최신 음악";
+                isMainChart = false;
+            } else if (typeof genre !== 'undefined' && genre) {
+                currentTitle = "🎧 " + genre + " 차트";
+                isMainChart = false;
+            }
+
+            let displaySongs = [];
+            if (typeof songs !== 'undefined' && songs.length > 0) {
+                // 핵심: 메인 차트일 때만 딱 100개에서 자르고, 나머지는 전부 둔다!
+                displaySongs = isMainChart ? songs.slice(0, 100) : songs;
+            }
+        %>
+
                 <div class="chart-header">
                     <div class="chart-title">랭킹AI 100 
                         <% if (typeof searchQuery !== 'undefined' && searchQuery) { %>
@@ -544,9 +576,15 @@
                 </div>
 
                 <table class="music-list">
-                    <% if (artists && artists.length > 0) { %>
-                        <% artists.forEach(function(music, index) { %>
-                        <tr class="music-item" data-id="<%= music._id %>" data-title="<%= music.name %>" data-artist="<%= music.artist %>" data-cover="<%= music.imageUrl || 'https://via.placeholder.com/512/1a1a1a/ff5722?text=RANKING+AI' %>" data-audio="<%= music.audioUrl %>" data-lyrics="<%= encodeURIComponent(music.lyrics || '') %>">
+                    <% if (typeof displaySongs !== 'undefined' && displaySongs.length > 0) { %>
+                        <% displaySongs.forEach(function(music, index) { %>
+                        
+                        <% const pageNum = Math.floor(index / 100) + 1; %>
+
+                        <tr class="music-item <%= !isMainChart ? 'page-' + pageNum : '' %>" 
+                            style="<%= !isMainChart && pageNum > 1 ? 'display: none;' : '' %>"
+                            data-id="<%= music._id %>" data-title="<%= music.name %>" data-artist="<%= music.artist %>" data-cover="<%= music.imageUrl || 'https://via.placeholder.com/512/1a1a1a/ff5722?text=RANKING+AI' %>" data-audio="<%= music.audioUrl %>" data-lyrics="<%= encodeURIComponent(music.lyrics || '') %>">
+                            
                             <td class="check-col"><input type="checkbox" class="custom-checkbox song-check" value="<%= music._id %>"></td>
                             <td class="rank"><%= index + 1 %></td>
                             <td style="width: 80px;"><img src="<%= music.imageUrl || 'https://via.placeholder.com/512/1a1a1a/ff5722?text=RANKING+AI' %>" class="album-art"></td>
@@ -629,9 +667,18 @@
                         <tr><td colspan="4" style="text-align:center; padding:100px; color:#555;">검색된 곡이 없습니다.</td></tr>
                     <% } %>
                 </table>
-            </div>
 
-            <div class="sidebar-right">
+                <% if (!isMainChart && displaySongs.length > 100) { %>
+                    <div class="pagination-container" style="text-align:center; margin-top:40px; margin-bottom:40px;">
+                        <% const totalPages = Math.ceil(displaySongs.length / 100); %>
+                        <% for(let i=1; i<=totalPages; i++) { %>
+                            <button class="page-btn <%= i === 1 ? 'active' : '' %>" 
+                                    style="background:<%= i === 1 ? '#ff5722' : '#222' %>; color:<%= i === 1 ? '#000' : '#aaa' %>; font-weight:<%= i === 1 ? 'bold' : 'normal' %>; border:1px solid <%= i === 1 ? '#ff5722' : '#333' %>; padding:8px 14px; margin:0 4px; border-radius:6px; cursor:pointer; transition:0.2s;"
+                                    onclick="changeSongPage(<%= i %>)"><%= i %></button>
+                        <% } %>
+                    </div>
+                <% } %>
+                </div> <div class="sidebar-right">
                 <h3 class="sidebar-title">🏆 인기 아티스트</h3>
                 <ul class="artist-list">
                     <% popularArtists.forEach(function(artist, idx) { %>
@@ -1628,5 +1675,71 @@
         }
     }, 60000); // 60000 밀리초 = 딱 1분
 </script>
+
+<script>
+        // 🌟 1. 100개씩 페이지 넘기는 기능 (무한 페이징)
+        function changeSongPage(targetPage) {
+            // 모든 곡 숨기기
+            document.querySelectorAll('.song-item').forEach(row => row.style.display = 'none');
+            // 선택한 페이지의 곡만 보이기
+            document.querySelectorAll('.song-item.page-' + targetPage).forEach(row => row.style.display = '');
+
+            // 버튼 색상 초기화
+            document.querySelectorAll('.page-btn').forEach(btn => {
+                btn.style.background = '#222';
+                btn.style.color = '#aaa';
+                btn.style.fontWeight = 'normal';
+                btn.style.border = '1px solid #333';
+                btn.classList.remove('active');
+            });
+
+            // 내가 누른 버튼만 오렌지색으로 강조!
+            event.target.style.background = '#ff5722';
+            event.target.style.color = '#000';
+            event.target.style.fontWeight = 'bold';
+            event.target.style.border = '1px solid #ff5722';
+            event.target.classList.add('active');
+
+            // 페이지를 넘기면 차트 맨 위로 부드럽게 스크롤 스윽~
+            const chartTop = document.querySelector('.chart-header').offsetTop;
+            window.scrollTo({ top: chartTop - 80, behavior: 'smooth' });
+        }
+
+        // 🌟 2. 글로벌 환영 팝업창 제어 기능
+        document.addEventListener("DOMContentLoaded", function() {
+            const popup = document.getElementById('globalWelcomePopup');
+            if(!popup) return; // 팝업 코드가 없으면 패스
+
+            const hideUntil = localStorage.getItem('hideWelcomePopupUntil');
+            const now = new Date().getTime();
+
+            // '오늘 하루 보지 않기' 시간이 안 지났으면 팝업 띄움
+            if (!hideUntil || now > parseInt(hideUntil)) {
+                popup.style.display = 'flex';
+            }
+
+            // 닫기 버튼 눌렀을 때
+            document.getElementById('btnClosePopup').addEventListener('click', function() {
+                if (document.getElementById('chkHideToday').checked) {
+                    // 24시간 동안 숨기기 저장
+                    localStorage.setItem('hideWelcomePopupUntil', now + (24 * 60 * 60 * 1000));
+                }
+                popup.style.display = 'none';
+            });
+
+            // 팝업 안의 [▶ Play All] 버튼 눌렀을 때
+            document.getElementById('btnPlayFromPopup').addEventListener('click', function() {
+                popup.style.display = 'none';
+                
+                // 대표님의 기존 '전체듣기' 함수를 찾아서 자동으로 실행!
+                if (typeof playAll === 'function') {
+                    playAll();
+                } else {
+                    alert("재생을 시작합니다!");
+                }
+            });
+        });
+    </script>
+
 </body>
 </html>
