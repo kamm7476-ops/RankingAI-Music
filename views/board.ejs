@@ -64,6 +64,10 @@
         .board-row:hover { background: rgba(255, 87, 34, 0.05); cursor: pointer; }
         .td-title { text-align: left !important; padding-left: 20px !important; color: #fff; font-size: 15px; }
 
+/* 🌟 [NEW] 커뮤니티 본문 가독성 최적화 (숨통 틔우기) */
+        .post-content p { margin-bottom: 20px !important; margin-top: 0; }
+        .post-content img { max-width: 100%; border-radius: 8px; margin: 15px 0; }
+
         /* 🌟 [NEW] 하단 페이지 번호 (페이징) 디자인 */
         .pagination-container { text-align: center; margin-top: 40px; padding-bottom: 20px; }
         .page-btn { background: #222; color: #aaa; border: 1px solid #333; padding: 8px 14px; margin: 0 4px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s; }
@@ -237,9 +241,10 @@
             </tr>
 
             <tr id="post-detail-<%= post._id %>" class="post-detail page-<%= pageNum %>" style="display: none; background: #0e0e0f;">
-                <td colspan="6" style="padding: 25px; text-align: left; border-bottom: 2px solid #ff5722;"> <div class="post-content" style="line-height: 1.6; word-break: break-word; color: #ccc; margin-top: 0; font-size: 15px;">
-                        <%- post.content %>
-                    </div>
+                <td colspan="6" style="padding: 30px; text-align: left; border-bottom: 2px solid #ff5722;"> 
+    <div class="post-content" style="line-height: 1.9; word-break: keep-all; color: #e5e5e5; margin-top: 0; font-size: 15px; letter-spacing: -0.4px;">
+        <%- post.content %>
+    </div>
                     
                     <% if (post.imageUrl) { %>
                         <div style="margin-bottom: 20px; text-align: center; margin-top: 20px;">
