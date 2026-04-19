@@ -1196,16 +1196,25 @@
             }
         }
 
-       // 🌟 4. 마법의 똑똑한 다음 곡 넘기기 기능! (4가지 모드 완벽 대응)
+       // 🌟 4. 마법의 똑똑한 다음 곡 넘기기 기능! (4가지 모드 완벽 대응 통합본)
         function playNextTrack() {
+            // [1] 한 곡 무한반복 ('one'): 무슨 일이 있어도 현재 곡을 다시 재생합니다.
+            if (loopMode === 'one') {
+                loadTrack(currentIndex);
+                return; // 여기서 명령 끝!
+            }
+
+            // [2] 다음 곡이 플레이리스트에 있을 때: 얌전히 다음 곡으로 이동합니다.
             if (currentIndex < playlist.length - 1) {
                 loadTrack(currentIndex + 1);
-            } else { 
-                // 플레이리스트의 맨 마지막 곡일 때
+            } 
+            // [3] 리스트의 맨 마지막 곡일 때: 모드에 따라 갈림길을 정해줍니다.
+            else { 
                 if (loopMode === 'all') {
-                    loadTrack(0); // 전체 무한재생: 1번 곡으로 돌아감
+                    // 전체 반복: 망설임 없이 1번(0번) 곡으로 돌려보냅니다.
+                    loadTrack(0); 
                 } else if (loopMode === 'auto') {
-                    // 추천 자동재생(✨): 현재 화면에서 안 깨진 음원 중 랜덤으로 뽑아서 계속 틀어줌!
+                    // 추천 자동재생(✨): 새로운 곡을 추가하고 재생합니다.
                     const rows = document.querySelectorAll('.music-item');
                     const validRows = Array.from(rows).filter(tr => tr.dataset.audio && tr.dataset.audio.trim() !== "" && tr.dataset.audio !== "undefined");
                     
@@ -1220,7 +1229,7 @@
                         mainAudio.pause(); isPlaying = false; if(btnPlay) btnPlay.innerText = "▶";
                     }
                 } else {
-                    // 기본 모드 -> 얌전히 정지
+                    // 기본 모드 (반복 없음): 노래 끝! 음악 정지!
                     mainAudio.pause(); isPlaying = false;
                     if(btnPlay) btnPlay.innerText = "▶"; 
                     if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
@@ -1228,13 +1237,14 @@
             }
         }
 
+        // 재생 바 실시간 업데이트 마법
         mainAudio.addEventListener('timeupdate', () => {
             const current = mainAudio.currentTime; const duration = mainAudio.duration;
             if (duration && !isNaN(duration)) {
                 const progressPercent = (current / duration) * 100;
                 progressBar.value = progressPercent;
                 
-                // 🚀 [핵심] 재생되는 퍼센트만큼 실시간으로 주황색 배경 채우기!
+                // 🚀 재생되는 퍼센트만큼 실시간으로 주황색 배경 채우기
                 progressBar.style.background = `linear-gradient(to right, #ff5722 ${progressPercent}%, #4d4d4d ${progressPercent}%)`;
 
                 let minC = Math.floor(current / 60); let secC = Math.floor(current % 60);
@@ -1262,31 +1272,15 @@
             }
         });
 
+        // 재생 바 드래그 마법
         progressBar.addEventListener('input', () => { 
             if (mainAudio.duration) {
                 mainAudio.currentTime = (progressBar.value / 100) * mainAudio.duration; 
-                // 🚀 사용자가 마우스로 드래그 할 때도 즉시 색깔 채우기
                 progressBar.style.background = `linear-gradient(to right, #ff5722 ${progressBar.value}%, #4d4d4d ${progressBar.value}%)`;
             }
         });
 
-       // 🌟 1곡 무한재생 대응
-        mainAudio.addEventListener('ended', () => {
-            if (loopMode === 'one') {
-                mainAudio.currentTime = 0;
-                mainAudio.play().catch(e => { 
-                    isPlaying = false; 
-                    if(btnPlay) btnPlay.innerText = "▶"; 
-                    const track = playlist[currentIndex];
-                    if(track) {
-                        document.getElementById('main-player-title').innerText = "👆 터치해서 재생";
-                        document.getElementById('main-player-artist').innerText = track.title + " (대기중)";
-                    }
-                });
-            } else {
-                playNextTrack(); // 나머지는 이 녀석이 똑똑하게 처리
-            }
-        });
+        // 🚨 기존에 문제를 일으키던 "1곡 무한재생 대응 (ended 감지기)" 구역은 완전히 소각시켰습니다! 🚨
 
         // 🌟 [수정완료] 재생 중 끊김/에러 발생 시 멋대로 다음 곡으로 넘어가지 않음!
         mainAudio.addEventListener('error', (e) => { 
