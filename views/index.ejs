@@ -1183,6 +1183,19 @@
             }
         }
         
+// 🌟 [핵심 보수] 아예 빠져있던 '이전 곡 넘기기' 기능 부활!
+        function playPrevTrack() {
+            if (currentIndex > 0) {
+                loadTrack(currentIndex - 1);
+            } else {
+                mainAudio.currentTime = 0; // 첫 곡이면 맨 앞으로 되감기
+                mainAudio.play().catch(e => {});
+                isPlaying = true;
+                const btnPlay = document.getElementById('btn-play');
+                if (btnPlay) btnPlay.innerText = "⏸";
+            }
+        }
+
        // 🌟 4. 마법의 똑똑한 다음 곡 넘기기 기능! (4가지 모드 완벽 대응)
         function playNextTrack() {
             if (currentIndex < playlist.length - 1) {
@@ -1636,20 +1649,13 @@
 </script>
 
 <script>
+    // 🚘 자동차 핸들 리모컨 100% 강제 연결 마법!
     if ('mediaSession' in navigator) {
-        navigator.mediaSession.setActionHandler('play', () => {
-            if (typeof mainAudio !== 'undefined' && mainAudio.paused) togglePlayPause();
-        });
-        navigator.mediaSession.setActionHandler('pause', () => {
-            if (typeof mainAudio !== 'undefined' && !mainAudio.paused) togglePlayPause();
-        });
-        navigator.mediaSession.setActionHandler('previoustrack', () => {
-            if (typeof playPrevTrack === 'function') playPrevTrack();
-        });
-        navigator.mediaSession.setActionHandler('nexttrack', () => {
-            if (typeof playNextTrack === 'function') playNextTrack();
-        });
-        console.log("🚘 블루투스 리모컨 수신기 장착 완료!");
+        navigator.mediaSession.setActionHandler('play', () => { togglePlayPause(); });
+        navigator.mediaSession.setActionHandler('pause', () => { togglePlayPause(); });
+        navigator.mediaSession.setActionHandler('previoustrack', () => { playPrevTrack(); });
+        navigator.mediaSession.setActionHandler('nexttrack', () => { playNextTrack(); });
+        console.log("🚘 블루투스 다음곡/이전곡 수신기 완벽 작동 중!");
     }
 </script>
 
