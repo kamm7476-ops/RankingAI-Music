@@ -311,8 +311,26 @@
         @media (max-width: 900px) {
             .floating-chat-btn { width: 38px; height: 38px; font-size: 18px; bottom: 150px; right: 15px; }
         }
-       // 🚀 최종 진화형: 화면 멈춤 방지 + 모바일 클릭 강제 기상 마법
-        async function navigateTo(href) {
+       // 🚀 1. 탭 이동 시 화면 부드럽게 넘기기 (음악 안 끊김 완벽 복구)
+        document.addEventListener('click', async (e) => {
+            const link = e.target.closest('a'); if (!link) return;
+            const href = link.getAttribute('href');
+            
+            if (href && href.startsWith('/') && !href.includes('admin') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('edit')) { 
+                e.preventDefault(); navigateTo(href); 
+            }
+        });
+
+        document.addEventListener('submit', async (e) => {
+            const form = e.target;
+            if (form.method.toLowerCase() === 'get') {
+                e.preventDefault(); const formData = new FormData(form);
+                navigateTo(form.getAttribute('action') + '?' + new URLSearchParams(formData).toString());
+            }
+        });
+
+        // 🚀 최종 진화형: 뒤로가기 음악 끊김 방어 + 화면 교체 마법
+        async function navigateTo(href, isPopState = false) {
             try {
                 const response = await fetch(href); 
                 const html = await response.text();
@@ -332,7 +350,7 @@
                     }
                 });
 
-                // 2. 화면 교체 (헤더 다음 덩어리를 무조건 교체하여 박스 이름 상관없이 100% 작동)
+                // 2. 화면 교체 (헤더 다음 DIV 덩어리를 무조건 교체)
                 const currentHeader = document.querySelector('.main-header');
                 const newHeader = newDoc.querySelector('.main-header');
 
@@ -340,10 +358,10 @@
                     const currentContent = currentHeader.nextElementSibling;
                     const newContent = newHeader.nextElementSibling;
 
-                    if (currentContent && newContent) {
-                        currentContent.replaceWith(newContent); // 화면 덩어리 통째로 교체
+                    if (currentContent && newContent && currentContent.tagName === 'DIV') {
+                        currentContent.replaceWith(newContent); 
 
-                        // 3. 스크립트 안전 부활 (에러 방어막 적용)
+                        // 3. 스크립트 안전 부활
                         const scripts = newContent.querySelectorAll('script');
                         scripts.forEach(script => {
                             try {
@@ -351,9 +369,13 @@
                                 Array.from(script.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
                                 newScript.text = script.text;
                                 document.body.appendChild(newScript);
-                            } catch(e) { console.warn("스크립트 오류 무시"); }
+                            } catch(e) {}
                         });
+                    } else {
+                        throw new Error("본문 매칭 실패");
                     }
+                } else {
+                    throw new Error("헤더 매칭 실패");
                 }
 
                 // 4. 메뉴바 및 주소창 업데이트
@@ -361,10 +383,13 @@
                 const newNav = newDoc.querySelector('.header-nav');
                 if (currentNav && newNav) currentNav.innerHTML = newNav.innerHTML;
                 
-                history.pushState(null, '', href); 
+                // 🚨 '뒤로 가기'가 아닐 때만 방문 기록을 남김 (무한 루프 방어)
+                if (!isPopState) {
+                    history.pushState(null, '', href); 
+                }
                 document.title = newDoc.title;
                 
-                // 5. 하단 플레이어 숨기기/보이기
+                // 5. 하단 플레이어 제어
                 const playerBar = document.getElementById('bottomPlayerBar');
                 if (playerBar) {
                     if (href.includes('/youtube') || href.includes('/shorts') || href.includes('/board')) playerBar.style.display = 'none';
@@ -373,7 +398,7 @@
                 
                 window.scrollTo(0, 0); 
 
-                // 🚨 [가장 중요] 잠자는 클릭 버튼들을 강제로 깨우는 '로딩 완료' 알람 울리기!
+                // 🚨 잠자는 버튼 강제 기상!
                 setTimeout(() => {
                     document.dispatchEvent(new Event('DOMContentLoaded'));
                     window.dispatchEvent(new Event('load'));
@@ -381,11 +406,15 @@
                 }, 100);
 
             } catch (err) { 
-                // 🚨 화면 투명화 버그 완벽 제거. 마법 실패 시 무조건 정상적인 새로고침 방식으로 페이지 이동!
-                console.log("마법 이동 실패, 일반 이동으로 전환합니다.");
-                location.href = href; 
+                console.log("SPA 마법 실패, 일반 이동:", err);
+                location.href = href; // 최후의 보루
             }
         }
+
+        // 🚨 [가장 중요] 모바일 '뒤로 가기' 누를 때 음악 안 끊기게 방어! (isPopState = true 전달)
+        window.addEventListener('popstate', async () => {
+            navigateTo(location.pathname + location.search, true);
+        });
 
     </style>
 </head>
