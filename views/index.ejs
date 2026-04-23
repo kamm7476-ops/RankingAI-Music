@@ -1383,12 +1383,13 @@
             }
         });
 
+        // 🚀 화면 전환 마법 (어떤 페이지든 꼬이지 않고 안전하게 바꿔치기)
         async function navigateTo(href) {
             try {
                 const response = await fetch(href); const html = await response.text();
                 const newDoc = new DOMParser().parseFromString(html, 'text/html');
                 
-                // 🚀🚀🚀 [디자인 도둑 마법 추가!] 새 페이지의 CSS 옷을 현재 화면에 강제로 입혀줍니다!
+                // 🚀 [기존 유지] 디자인 도둑 마법
                 const newStyles = newDoc.querySelectorAll('style');
                 newStyles.forEach(newStyle => {
                     let isExist = false;
@@ -1401,38 +1402,60 @@
                         document.head.appendChild(s);
                     }
                 });
-                // 🚀🚀🚀 =========================================================
 
-               const currentContainer = document.querySelector('.container'); const newContainer = newDoc.querySelector('.container');
-        if (currentContainer && newContainer) {
-            currentContainer.innerHTML = newContainer.innerHTML;
-            
-            // 🚀 [마법의 스크립트 부활 주문] 쇼츠/유튜브 화면의 클릭 기능들을 강제로 깨워줍니다!
-            const scripts = currentContainer.querySelectorAll('script');
-            scripts.forEach(script => {
-                const newScript = document.createElement('script');
-                Array.from(script.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-                newScript.innerHTML = script.innerHTML;
-                document.body.appendChild(newScript);
-                document.body.removeChild(newScript); // 실행만 시키고 흔적 지우기
-            });
-        }
+                // 🚨 [핵심 업그레이드] 본문 찾기 마법 (플랜 A와 플랜 B)
+                let currentContent = document.querySelector('.container');
+                let newContent = newDoc.querySelector('.container');
+
+                // 플랜 B: 만약 .container가 없다면? 헤더(.main-header) 바로 다음 덩어리를 본문으로 간주함!
+                const currentHeader = document.querySelector('.main-header');
+                const newHeader = newDoc.querySelector('.main-header');
+
+                if (!currentContent && currentHeader) currentContent = currentHeader.nextElementSibling;
+                if (!newContent && newHeader) newContent = newHeader.nextElementSibling;
+
+                if (currentContent && newContent) {
+                    // 알맹이(innerHTML)와 껍데기 이름(className)을 모두 새 페이지의 것으로 교체
+                    currentContent.className = newContent.className;
+                    currentContent.innerHTML = newContent.innerHTML;
+                    
+                    // 🚀 [기존 유지] 스크립트 부활 주문
+                    const scripts = currentContent.querySelectorAll('script');
+                    scripts.forEach(script => {
+                        const newScript = document.createElement('script');
+                        Array.from(script.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                        newScript.innerHTML = script.innerHTML;
+                        document.body.appendChild(newScript);
+                        document.body.removeChild(newScript); 
+                    });
+                } else {
+                    // 플랜 B까지 실패하면 에러를 던져서 안전장치(일반 이동)를 작동시킴
+                    throw new Error("본문 박스를 찾을 수 없습니다.");
+                }
+
+                // 🚀 [기존 유지] 상단 메뉴바 교체 및 주소/제목 업데이트
                 const currentNav = document.querySelector('.header-nav'); const newNav = newDoc.querySelector('.header-nav');
                 if (currentNav && newNav) currentNav.innerHTML = newNav.innerHTML;
                 history.pushState(null, '', href); document.title = newDoc.title;
                 
+                // 🚀 [기존 유지] 하단 플레이어 숨기기/보이기
                 const playerBar = document.getElementById('bottomPlayerBar');
                 if (playerBar) {
                     if (href.includes('/youtube') || href.includes('/shorts') || href.includes('/board')) playerBar.style.display = 'none';
                     else playerBar.style.display = 'flex'; 
                 }
+                
                 reattachEvents(); window.scrollTo(0, 0); 
 
+                // 🚀 [기존 유지] 화면 깜빡임 방지
                 document.body.style.display = 'none';
                 document.body.offsetHeight; 
                 document.body.style.display = '';
                 
-            } catch (err) { location.href = href; }
+            } catch (err) { 
+                // 🚨 [안전장치] 마법이 실패하면? 음악이 끊기더라도 무조건 페이지 이동은 되도록 강제 이동시킴
+                location.href = href; 
+            }
         }
 
         window.addEventListener('popstate', async () => navigateTo(location.pathname + location.search));
