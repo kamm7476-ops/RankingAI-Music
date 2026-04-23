@@ -311,20 +311,80 @@
         @media (max-width: 900px) {
             .floating-chat-btn { width: 38px; height: 38px; font-size: 18px; bottom: 150px; right: 15px; }
         }
-       /* 🌟 모바일 스크롤 부드러움 유지 + [추가] 터치(클릭) 씹힘 완벽 해결 마법 */
-        .shorts-grid, .video-grid {
-            -webkit-overflow-scrolling: touch !important;
-        }
-        
-        /* 🚨 핵심: manipulation을 쓰면 스크롤과 짧은 터치를 완벽하게 구분해서 즉각 클릭됩니다! */
-        .shorts-card, .shorts-card-inner, .nav-item {
-            touch-action: manipulation !important; 
-            cursor: pointer !important;
-            -webkit-tap-highlight-color: transparent; /* 터치 시 번쩍거리는 방해 효과 제거 */
-        }
-        
-        .video-iframe-wrap iframe {
-            pointer-events: auto !important;
+       // 🚀 최종 진화형: 화면 멈춤 방지 + 모바일 클릭 강제 기상 마법
+        async function navigateTo(href) {
+            try {
+                const response = await fetch(href); 
+                const html = await response.text();
+                const newDoc = new DOMParser().parseFromString(html, 'text/html');
+                
+                // 1. 디자인(CSS) 안전하게 복사
+                const newStyles = newDoc.querySelectorAll('style');
+                newStyles.forEach(newStyle => {
+                    let isExist = false;
+                    document.querySelectorAll('style').forEach(existingStyle => {
+                        if(existingStyle.innerHTML === newStyle.innerHTML) isExist = true;
+                    });
+                    if(!isExist) {
+                        const s = document.createElement('style');
+                        s.innerHTML = newStyle.innerHTML;
+                        document.head.appendChild(s);
+                    }
+                });
+
+                // 2. 화면 교체 (헤더 다음 덩어리를 무조건 교체하여 박스 이름 상관없이 100% 작동)
+                const currentHeader = document.querySelector('.main-header');
+                const newHeader = newDoc.querySelector('.main-header');
+
+                if (currentHeader && newHeader) {
+                    const currentContent = currentHeader.nextElementSibling;
+                    const newContent = newHeader.nextElementSibling;
+
+                    if (currentContent && newContent) {
+                        currentContent.replaceWith(newContent); // 화면 덩어리 통째로 교체
+
+                        // 3. 스크립트 안전 부활 (에러 방어막 적용)
+                        const scripts = newContent.querySelectorAll('script');
+                        scripts.forEach(script => {
+                            try {
+                                const newScript = document.createElement('script');
+                                Array.from(script.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                                newScript.text = script.text;
+                                document.body.appendChild(newScript);
+                            } catch(e) { console.warn("스크립트 오류 무시"); }
+                        });
+                    }
+                }
+
+                // 4. 메뉴바 및 주소창 업데이트
+                const currentNav = document.querySelector('.header-nav');
+                const newNav = newDoc.querySelector('.header-nav');
+                if (currentNav && newNav) currentNav.innerHTML = newNav.innerHTML;
+                
+                history.pushState(null, '', href); 
+                document.title = newDoc.title;
+                
+                // 5. 하단 플레이어 숨기기/보이기
+                const playerBar = document.getElementById('bottomPlayerBar');
+                if (playerBar) {
+                    if (href.includes('/youtube') || href.includes('/shorts') || href.includes('/board')) playerBar.style.display = 'none';
+                    else playerBar.style.display = 'flex'; 
+                }
+                
+                window.scrollTo(0, 0); 
+
+                // 🚨 [가장 중요] 잠자는 클릭 버튼들을 강제로 깨우는 '로딩 완료' 알람 울리기!
+                setTimeout(() => {
+                    document.dispatchEvent(new Event('DOMContentLoaded'));
+                    window.dispatchEvent(new Event('load'));
+                    if (typeof reattachEvents === 'function') reattachEvents();
+                }, 100);
+
+            } catch (err) { 
+                // 🚨 화면 투명화 버그 완벽 제거. 마법 실패 시 무조건 정상적인 새로고침 방식으로 페이지 이동!
+                console.log("마법 이동 실패, 일반 이동으로 전환합니다.");
+                location.href = href; 
+            }
         }
 
     </style>
