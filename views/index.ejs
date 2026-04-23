@@ -416,6 +416,17 @@
             navigateTo(location.pathname + location.search, true);
         });
 
+     /* 🚀 [새로운 아이디어] 모바일 쇼츠/영상 직접 터치 하이패스 */
+        .shorts-card-inner iframe, .video-iframe-wrap iframe {
+            z-index: 10 !important; /* 영상 우선순위 올림 */
+            pointer-events: auto !important; /* 영상이 직접 터치를 흡수함 */
+        }
+        
+        .grid-info, .shorts-logo-box, .video-info {
+            z-index: 20 !important; /* 글자와 로고는 영상 위로 보이게 함 */
+            pointer-events: none !important; /* 🚨 핵심: 글자에 닿은 터치는 통과시켜서 영상에 꽂히게 만듦 */
+        }   
+
     </style>
 </head>
 <body>
@@ -1511,6 +1522,13 @@
                         document.body.appendChild(newScript);
                         document.body.removeChild(newScript); 
                     });
+                    // 🚀🚀🚀 [새로운 아이디어 추가!] 죽어버린 쇼츠/유튜브 영상 강제 부활 마법!
+                    const iframes = currentContainer.querySelectorAll('iframe');
+                    iframes.forEach(iframe => {
+                        const clone = iframe.cloneNode(true);
+                        iframe.parentNode.replaceChild(clone, iframe);
+                    });
+                
                 }
                 const currentNav = document.querySelector('.header-nav'); 
                 const newNav = newDoc.querySelector('.header-nav');
