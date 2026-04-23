@@ -311,6 +311,15 @@
         @media (max-width: 900px) {
             .floating-chat-btn { width: 38px; height: 38px; font-size: 18px; bottom: 150px; right: 15px; }
         }
+        /* 🌟 모바일 쇼츠/영상 스크롤 먹통(블랙홀) 완벽 방어 마법 */
+        .shorts-grid, .shorts-card, .shorts-card-inner, .video-iframe-wrap {
+            touch-action: pan-y !important; 
+            -webkit-overflow-scrolling: touch !important;
+        }
+        .video-iframe-wrap iframe {
+            touch-action: pan-y !important;
+        }
+
     </style>
 </head>
 <body>
@@ -451,9 +460,9 @@
             
             <a href="#" id="pwa-install-btn" class="nav-item" style="color: #00e5ff; font-weight: 900; display: none;">📲앱 설치하기</a>
             
-            <a href="/youtube" class="nav-item" onclick="window.location.href='/youtube?t=' + Date.now(); return false;">유튜브</a>
-<a href="/shorts" class="nav-item" onclick="window.location.href='/shorts?t=' + Date.now(); return false;">쇼츠</a>
-<a href="/board" class="nav-item" onclick="window.location.href='/board?t=' + Date.now(); return false;">커뮤니티</a>
+           <a href="/youtube" class="nav-item">유튜브</a>
+            <a href="/shorts" class="nav-item">쇼츠</a>
+            <a href="/board" class="nav-item">커뮤니티</a>
         </div>
     </header>
 
@@ -1340,14 +1349,13 @@
             .then(res => res.json()).then(data => alert(data.message)).catch(err => alert("에러가 발생했습니다. 다시 시도해주세요."));
         }
 
-       // 🚀 1. 탭 이동 시 화면 부드럽게 넘기기 (유튜브, 쇼츠 포함)
+       // 🚀 1. 탭 이동 시 화면 부드럽게 넘기기 (음악 안 끊김 완벽 복구)
         document.addEventListener('click', async (e) => {
             const link = e.target.closest('a'); if (!link) return;
             const href = link.getAttribute('href');
             
-            // 기존에 있던 shorts와 youtube 예외를 지웠습니다! 이제 끊기지 않습니다.
-            // 🚨 [핵심 추가] 단, 'radio' 방은 풀스크린 전용이므로 부드러운 전환 마법에서 제외합니다!
-            if (href && href.startsWith('/') && !href.includes('admin') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('edit') && !href.includes('radio')) { 
+            // 🚨 라디오 방 제외 조건을 삭제했습니다! 이제 부드럽게 넘어갑니다.
+            if (href && href.startsWith('/') && !href.includes('admin') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('edit')) { 
                 e.preventDefault(); navigateTo(href); 
             }
         });
