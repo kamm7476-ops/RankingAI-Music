@@ -1468,70 +1468,99 @@
             .then(res => res.json()).then(data => alert(data.message)).catch(err => alert("에러가 발생했습니다. 다시 시도해주세요."));
         }
 
-      // 🚀 1. 모든 메뉴 클릭 시 음악 유지 (SPA)
-        document.addEventListener('click', async (e) => {
-            const link = e.target.closest('a'); 
-            if (!link) return;
-            const href = link.getAttribute('href');
+      /* ============================================================
+   멜론/지니 스타일: 화면만 바뀌고 음악은 계속되는 마법의 엔진
+   ============================================================ */
+
+// 1. 모든 메뉴 클릭 가로채기 (음악 끊김 방지)
+document.addEventListener('click', async (e) => {
+    const link = e.target.closest('a'); 
+    if (!link) return;
+    
+    const href = link.getAttribute('href');
+    
+    // 외부 링크나 시스템 링크(로그아웃 등)는 자바스크립트가 관여하지 않음
+    if (!href || !href.startsWith('/') || href.includes('logout') || href.includes('admin') || href.includes('delete') || href.includes('edit')) {
+        return; 
+    }
+
+    // 🚨 쇼츠, 유튜브, 라디오는 엔진 보호를 위해 '진짜 이동(새로고침)' 시킴
+    if (href.includes('shorts') || href.includes('youtube') || href.includes('radio')) {
+        window.location.assign(href);
+        return;
+    }
+
+    // 그 외 일반 메뉴는 '새로고침'을 막고 본문만 바꿔치기함
+    e.preventDefault();
+    navigateTo(href);
+});
+
+// 2. 핵심 본문 교체 엔진 (navigateTo)
+async function navigateTo(href, isPopState = false) {
+    try {
+        const response = await fetch(href); 
+        const html = await response.text();
+        const newDoc = new DOMParser().parseFromString(html, 'text/html');
+        
+        // [A] 본문 알맹이(.container)만 쏙 교체
+        const currentContainer = document.querySelector('.container');
+        const newContainer = newDoc.querySelector('.container');
+        if (currentContainer && newContainer) {
+            currentContainer.innerHTML = newContainer.innerHTML;
             
-            // 시스템 관련 링크는 제외
-            if (href && href.startsWith('/') && !href.includes('admin') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('edit')) { 
-                e.preventDefault(); 
-                navigateTo(href); 
-            }
-        });
-
-        // 🚀 2. [완전체] 뒤로가기 완벽 대응 화면 전환 함수
-        async function navigateTo(href, isPopState = false) {
-            try {
-                const response = await fetch(href); 
-                const html = await response.text();
-                const newDoc = new DOMParser().parseFromString(html, 'text/html');
-                
-                // 본문 알맹이만 교체
-                const currentContainer = document.querySelector('.container');
-                const newContainer = newDoc.querySelector('.container');
-                if (currentContainer && newContainer) {
-                    currentContainer.innerHTML = newContainer.innerHTML;
-                    
-                    // 새 페이지의 스크립트(댓글 등) 부활
-                    const scripts = currentContainer.querySelectorAll('script');
-                    scripts.forEach(script => {
-                        const newScript = document.createElement('script');
-                        Array.from(script.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-                        newScript.text = script.text;
-                        document.body.appendChild(newScript);
-                        document.body.removeChild(newScript);
-                    });
-                }
-
-                // 🚨 핵심: 뒤로가기 버튼으로 온 게 아닐 때만 주소창 기록 추가
-                if (!isPopState) {
-                    history.pushState(null, '', href); 
-                }
-                document.title = newDoc.title;
-                
-                // 메뉴바 활성화 상태 업데이트
-                const currentNav = document.querySelector('.header-nav');
-                const newNav = newDoc.querySelector('.header-nav');
-                if (currentNav && newNav) currentNav.innerHTML = newNav.innerHTML;
-
-                if (typeof reattachEvents === 'function') reattachEvents();
-                window.scrollTo(0, 0); 
-                
-            } catch (err) { 
-                // 에러 나면 안전하게 새로고침 이동
-                location.href = href; 
-            }
+            // 새 본문에 들어있는 스크립트(댓글, 좋아요 등) 강제 부활
+            const scripts = currentContainer.querySelectorAll('script');
+            scripts.forEach(script => {
+                const newScript = document.createElement('script');
+                Array.from(script.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                newScript.text = script.text;
+                document.body.appendChild(newScript);
+                document.body.removeChild(newScript); // 실행 후 메모리 정리
+            });
         }
 
-        // 🚀 3. [멜론/지니 방식] 모바일 뒤로가기 가로채기 (음악 유지 밧줄)
-        window.addEventListener('popstate', async () => {
-            const targetUrl = location.pathname + location.search;
-            console.log("뒤로가기 감지: 음악을 끊지 않고 화면만 바꿉니다.");
-            // true를 보내서 주소창이 또 쌓이는 걸 막음
-            navigateTo(targetUrl, true); 
-        });
+        // [B] 주소창 업데이트 (🚨 핵심: 뒤로가기 버튼 눌렀을 땐 기록을 또 쌓지 않음!)
+        if (!isPopState) {
+            history.pushState(null, '', href); 
+        }
+        document.title = newDoc.title;
+        
+        // [C] 상단 네비게이션바 활성화 상태 업데이트
+        const currentNav = document.querySelector('.header-nav');
+        const newNav = newDoc.querySelector('.header-nav');
+        if (currentNav && newNav) currentNav.innerHTML = newNav.innerHTML;
+
+        // [D] 페이지별 플레이어바 노출 여부 결정
+        const playerBar = document.getElementById('bottomPlayerBar');
+        if (playerBar) {
+            if (href.includes('/board')) playerBar.style.display = 'none';
+            else playerBar.style.display = 'flex'; 
+        }
+        
+        // 이벤트 재연결 및 스크롤 상단 이동
+        if (typeof reattachEvents === 'function') reattachEvents();
+        window.scrollTo(0, 0); 
+
+    } catch (err) { 
+        // 네트워크 에러 등 비상시에는 일반 페이지 이동으로 전환
+        console.error("이동 에러, 일반 페이지로 연결:", err);
+        location.href = href; 
+    }
+}
+
+// 3. 모바일 뒤로가기/앞으로가기 완벽 가로채기 (popstate)
+window.addEventListener('popstate', async () => {
+    const targetUrl = location.pathname + location.search;
+    
+    // 뒤로 갔을 때 쇼츠나 유튜브라면 새로고침 이동
+    if (targetUrl.includes('shorts') || targetUrl.includes('youtube') || targetUrl.includes('radio')) {
+        location.href = targetUrl;
+    } else {
+        // ✅ 핵심: 음악 유지하며 본문만 바꿔치기 (isPopState = true 전달)
+        console.log("뒤로가기 감지: 음악을 유지하며 화면을 교체합니다.");
+        navigateTo(targetUrl, true); 
+    }
+});
 
         // 주의: 이전에 있던 window.addEventListener('popstate', ...) 줄은 아예 없앴습니다. 이게 뒤로 가기 충돌의 원인이었습니다!
 
