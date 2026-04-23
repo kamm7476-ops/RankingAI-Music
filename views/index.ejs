@@ -411,9 +411,20 @@
             }
         }
 
-        // 🚨 [가장 중요] 모바일 '뒤로 가기' 누를 때 음악 안 끊기게 방어! (isPopState = true 전달)
+        // 🚨 [가장 중요] 뒤로가기/앞으로가기 시 음악 끊김 방어 (쇼츠 로직 제외)
         window.addEventListener('popstate', async () => {
-            navigateTo(location.pathname + location.search, true);
+            const targetUrl = location.pathname + location.search;
+
+            // 1. 뒤로 간 페이지가 쇼츠, 유튜브, 라디오라면? 브라우저의 기본 동작(새로고침)에 맡깁니다.
+            // (이 부분은 대표님의 기존 쇼츠 정책을 지켜드리기 위함입니다.)
+            if (targetUrl.includes('shorts') || targetUrl.includes('youtube') || targetUrl.includes('radio')) {
+                location.href = targetUrl; 
+                return;
+            }
+
+            // 2. 그 외 일반 메뉴(차트, 커뮤니티 등)는 'navigateTo'를 실행해서 
+            // 새로고침 없이 화면만 바꿉니다. 그래야 노래가 안 끊깁니다!
+            navigateTo(targetUrl, true); 
         });
 
      /* 🚀 [새로운 아이디어] 모바일 쇼츠/영상 직접 터치 하이패스 */
