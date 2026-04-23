@@ -1456,9 +1456,9 @@ document.addEventListener('click', async (e) => {
     
     const href = link.getAttribute('href');
     
-    // 외부 링크나 시스템 링크(로그아웃 등)는 자바스크립트가 관여하지 않음
-    if (!href || !href.startsWith('/') || href.includes('logout') || href.includes('admin') || href.includes('delete') || href.includes('edit')) {
-        return; 
+    // 🚨 [여기가 원인!] 로그인(login), 회원가입(signup)을 다시 예외 명단에 추가했습니다!
+    if (!href || !href.startsWith('/') || href.includes('logout') || href.includes('admin') || href.includes('delete') || href.includes('edit') || href.includes('login') || href.includes('signup')) {
+        return; // 브라우저야, 이건 네가 원래 하던 대로 진짜 페이지 이동을 해!
     }
 
     // 🚨 쇼츠, 유튜브, 라디오는 엔진 보호를 위해 '진짜 이동(새로고침)' 시킴
