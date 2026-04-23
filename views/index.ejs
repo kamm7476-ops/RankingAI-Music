@@ -311,13 +311,20 @@
         @media (max-width: 900px) {
             .floating-chat-btn { width: 38px; height: 38px; font-size: 18px; bottom: 150px; right: 15px; }
         }
-        /* 🌟 모바일 쇼츠/영상 스크롤 먹통(블랙홀) 완벽 방어 마법 */
-        .shorts-grid, .shorts-card, .shorts-card-inner, .video-iframe-wrap {
-            touch-action: pan-y !important; 
+       /* 🌟 모바일 스크롤 부드러움 유지 + [추가] 터치(클릭) 씹힘 완벽 해결 마법 */
+        .shorts-grid, .video-grid {
             -webkit-overflow-scrolling: touch !important;
         }
+        
+        /* 🚨 핵심: manipulation을 쓰면 스크롤과 짧은 터치를 완벽하게 구분해서 즉각 클릭됩니다! */
+        .shorts-card, .shorts-card-inner, .nav-item {
+            touch-action: manipulation !important; 
+            cursor: pointer !important;
+            -webkit-tap-highlight-color: transparent; /* 터치 시 번쩍거리는 방해 효과 제거 */
+        }
+        
         .video-iframe-wrap iframe {
-            touch-action: pan-y !important;
+            pointer-events: auto !important;
         }
 
     </style>
