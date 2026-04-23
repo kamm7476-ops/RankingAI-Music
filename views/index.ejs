@@ -426,6 +426,7 @@
             z-index: 20 !important; /* 글자와 로고는 영상 위로 보이게 함 */
             pointer-events: none !important; /* 🚨 핵심: 글자에 닿은 터치는 통과시켜서 영상에 꽂히게 만듦 */
         }   
+        
 
     </style>
 </head>
@@ -1456,46 +1457,36 @@
             .then(res => res.json()).then(data => alert(data.message)).catch(err => alert("에러가 발생했습니다. 다시 시도해주세요."));
         }
 
-       // 🚀 1. 탭 이동 시 화면 부드럽게 넘기기
+       // 🚀 1. 탭 이동 처리 (쇼츠/유튜브는 '절대적 로딩'을 위해 진짜 페이지 이동 사용)
         document.addEventListener('click', async (e) => {
-            const link = e.target.closest('a'); if (!link) return;
-            const href = link.getAttribute('href');
+            const link = e.target.closest('a'); 
+            if (!link) return;
             
-            // 라디오 방은 새로고침 되도록 안전하게 예외처리
-            if (href && href.startsWith('/') && !href.includes('admin') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('edit') && !href.includes('radio')) { 
-                e.preventDefault(); navigateTo(href); 
+            const href = link.getAttribute('href');
+            if (!href || !href.startsWith('/')) return;
+
+            // 🚨 [절대적 해결책] 쇼츠, 유튜브, 상황별BGM은 '진짜 이동'을 시킵니다.
+            // 이렇게 하면 브라우저가 영상을 새로 그려내므로 PC/모바일 로딩 문제가 100% 해결됩니다.
+            if (href.includes('shorts') || href.includes('youtube') || href.includes('radio')) {
+                window.location.assign(href); // 껍데기 교체가 아닌 진짜 페이지 이동 강제
+                return;
+            }
+
+            // 나머지 일반 메뉴(차트, 커뮤니티 등)만 음악이 안 끊기는 '부드러운 전환' 사용
+            if (href && href.startsWith('/') && !href.includes('admin') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('edit')) { 
+                e.preventDefault(); 
+                navigateTo(href); 
             }
         });
 
-        // 📺 2. [스마트 센서] 유튜브/쇼츠 영상(iframe)을 클릭해서 볼 때만 배경 음악을 멈춥니다!
-        window.addEventListener('blur', () => {
-            if (document.activeElement && document.activeElement.tagName === 'IFRAME') {
-                const mainAudio = document.getElementById('main-audio');
-                const btnPlay = document.getElementById('btn-play');
-                
-                if (mainAudio && !mainAudio.paused) {
-                    mainAudio.pause(); 
-                    if (typeof isPlaying !== 'undefined') isPlaying = false;
-                    if (btnPlay) btnPlay.innerText = "▶";
-                    console.log("📺 영상 시청 감지! 배경 음악을 정지합니다.");
-                }
-            }
-        });
-
-        document.addEventListener('submit', async (e) => {
-            const form = e.target;
-            if (form.method.toLowerCase() === 'get') {
-                e.preventDefault(); const formData = new FormData(form);
-                navigateTo(form.getAttribute('action') + '?' + new URLSearchParams(formData).toString());
-            }
-        });
-
-        // 🚀 화면 전환 마법 (오리지널 원본 - 오류 0%)
+        // 🚀 화면 전환 마법 (일반 페이지 전용)
         async function navigateTo(href) {
             try {
-                const response = await fetch(href); const html = await response.text();
+                const response = await fetch(href); 
+                const html = await response.text();
                 const newDoc = new DOMParser().parseFromString(html, 'text/html');
                 
+                // 1. 디자인(CSS) 복사
                 const newStyles = newDoc.querySelectorAll('style');
                 newStyles.forEach(newStyle => {
                     let isExist = false;
@@ -1509,11 +1500,13 @@
                     }
                 });
 
-               const currentContainer = document.querySelector('.container'); 
-               const newContainer = newDoc.querySelector('.container');
+                // 2. 본문 내용 교체
+                const currentContainer = document.querySelector('.container'); 
+                const newContainer = newDoc.querySelector('.container');
                 if (currentContainer && newContainer) {
                     currentContainer.innerHTML = newContainer.innerHTML;
                     
+                    // 스크립트 부활 주문
                     const scripts = currentContainer.querySelectorAll('script');
                     scripts.forEach(script => {
                         const newScript = document.createElement('script');
@@ -1522,32 +1515,27 @@
                         document.body.appendChild(newScript);
                         document.body.removeChild(newScript); 
                     });
-                    // 🚀🚀🚀 [새로운 아이디어 추가!] 죽어버린 쇼츠/유튜브 영상 강제 부활 마법!
-                    const iframes = currentContainer.querySelectorAll('iframe');
-                    iframes.forEach(iframe => {
-                        const clone = iframe.cloneNode(true);
-                        iframe.parentNode.replaceChild(clone, iframe);
-                    });
-                
                 }
+
                 const currentNav = document.querySelector('.header-nav'); 
                 const newNav = newDoc.querySelector('.header-nav');
                 if (currentNav && newNav) currentNav.innerHTML = newNav.innerHTML;
                 
-                history.pushState(null, '', href); document.title = newDoc.title;
+                history.pushState(null, '', href); 
+                document.title = newDoc.title;
                 
                 const playerBar = document.getElementById('bottomPlayerBar');
                 if (playerBar) {
-                    if (href.includes('/youtube') || href.includes('/shorts') || href.includes('/board')) playerBar.style.display = 'none';
+                    if (href.includes('/board')) playerBar.style.display = 'none';
                     else playerBar.style.display = 'flex'; 
                 }
-                reattachEvents(); window.scrollTo(0, 0); 
-
-                document.body.style.display = 'none';
-                document.body.offsetHeight; 
-                document.body.style.display = '';
                 
-            } catch (err) { location.href = href; }
+                reattachEvents(); 
+                window.scrollTo(0, 0); 
+                
+            } catch (err) { 
+                location.href = href; 
+            }
         }
 
         // 주의: 이전에 있던 window.addEventListener('popstate', ...) 줄은 아예 없앴습니다. 이게 뒤로 가기 충돌의 원인이었습니다!
