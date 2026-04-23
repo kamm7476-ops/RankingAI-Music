@@ -1445,13 +1445,13 @@
             .then(res => res.json()).then(data => alert(data.message)).catch(err => alert("에러가 발생했습니다. 다시 시도해주세요."));
         }
 
-       // 🚀 1. 탭 이동 시 화면 부드럽게 넘기기 (음악 안 끊김 완벽 복구)
+       // 🚀 1. 탭 이동 시 화면 부드럽게 넘기기
         document.addEventListener('click', async (e) => {
             const link = e.target.closest('a'); if (!link) return;
             const href = link.getAttribute('href');
             
-            // 🚨 라디오 방 제외 조건을 삭제했습니다! 이제 부드럽게 넘어갑니다.
-            if (href && href.startsWith('/') && !href.includes('admin') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('edit')) { 
+            // 라디오 방은 새로고침 되도록 안전하게 예외처리
+            if (href && href.startsWith('/') && !href.includes('admin') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('edit') && !href.includes('radio')) { 
                 e.preventDefault(); navigateTo(href); 
             }
         });
@@ -1479,13 +1479,12 @@
             }
         });
 
-        // 🚀 화면 전환 마법 (투명 태그 무시하고 진짜 본문만 바꿔치기!)
+        // 🚀 화면 전환 마법 (오리지널 원본 - 오류 0%)
         async function navigateTo(href) {
             try {
                 const response = await fetch(href); const html = await response.text();
                 const newDoc = new DOMParser().parseFromString(html, 'text/html');
                 
-                // 1. 디자인 도둑 마법
                 const newStyles = newDoc.querySelectorAll('style');
                 newStyles.forEach(newStyle => {
                     let isExist = false;
@@ -1499,35 +1498,12 @@
                     }
                 });
 
-                // 🚨 2. [핵심 업그레이드] 진짜 화면(본문)만 찾아내는 레이더 마법
-                function getRealContent(doc) {
-                    // 1순위: 우리가 아는 본문 박스 이름표들 먼저 수색
-                    let el = doc.querySelector('.container, .shorts-grid, .video-grid, main');
-                    if (el && !el.closest('.main-header')) return el;
-
-                    // 2순위: 헤더 밑에 숨어있는 투명 태그(script, style) 싹 다 무시하고 '진짜 DIV 박스'만 찾기!
-                    const header = doc.querySelector('.main-header');
-                    if (header) {
-                        let next = header.nextElementSibling;
-                        while (next) {
-                            if (next.tagName === 'DIV' && next.id !== 'bottomPlayerBar' && !next.className.includes('popup-overlay')) {
-                                return next;
-                            }
-                            next = next.nextElementSibling;
-                        }
-                    }
-                    return null;
-                }
-
-                let currentContent = getRealContent(document);
-                let newContent = getRealContent(newDoc);
-
-                if (currentContent && newContent) {
-                    // 🌟 껍데기만 바꾸는 게 아니라, 아예 박스 자체를 새 페이지의 박스로 '통째로' 교체해 버림!
-                    currentContent.replaceWith(newContent);
+               const currentContainer = document.querySelector('.container'); 
+               const newContainer = newDoc.querySelector('.container');
+                if (currentContainer && newContainer) {
+                    currentContainer.innerHTML = newContainer.innerHTML;
                     
-                    // 스크립트 부활 주문
-                    const scripts = newContent.querySelectorAll('script');
+                    const scripts = currentContainer.querySelectorAll('script');
                     scripts.forEach(script => {
                         const newScript = document.createElement('script');
                         Array.from(script.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
@@ -1535,38 +1511,28 @@
                         document.body.appendChild(newScript);
                         document.body.removeChild(newScript); 
                     });
-                } else {
-                    throw new Error("진짜 본문 박스를 찾을 수 없습니다.");
                 }
-
-                // 3. 상단 메뉴바 교체 및 주소/제목 업데이트
-                const currentNav = document.querySelector('.header-nav'); const newNav = newDoc.querySelector('.header-nav');
+                const currentNav = document.querySelector('.header-nav'); 
+                const newNav = newDoc.querySelector('.header-nav');
                 if (currentNav && newNav) currentNav.innerHTML = newNav.innerHTML;
                 
                 history.pushState(null, '', href); document.title = newDoc.title;
                 
-                // 4. 하단 플레이어 숨기기/보이기
                 const playerBar = document.getElementById('bottomPlayerBar');
                 if (playerBar) {
                     if (href.includes('/youtube') || href.includes('/shorts') || href.includes('/board')) playerBar.style.display = 'none';
                     else playerBar.style.display = 'flex'; 
                 }
-                
-                if (typeof reattachEvents === 'function') reattachEvents(); 
-                window.scrollTo(0, 0); 
+                reattachEvents(); window.scrollTo(0, 0); 
 
-                // 화면 깜빡임 방지
                 document.body.style.display = 'none';
                 document.body.offsetHeight; 
                 document.body.style.display = '';
                 
-            } catch (err) { 
-                console.log("SPA 마법 실패, 안전하게 새로고침으로 이동합니다.", err);
-                location.href = href; // 🚨 안전장치: 마법이 안 먹히면 기존처럼 강제로라도 입장시킴!
-            }
+            } catch (err) { location.href = href; }
         }
 
-        window.addEventListener('popstate', async () => navigateTo(location.pathname + location.search));
+        // 주의: 이전에 있던 window.addEventListener('popstate', ...) 줄은 아예 없앴습니다. 이게 뒤로 가기 충돌의 원인이었습니다!
 
         function reattachEvents() {
             const genreBtns = document.querySelectorAll('.genre-btn'); const hiddenInput = document.getElementById('hiddenGenreInput');
@@ -1579,18 +1545,6 @@
             const musicForm = document.getElementById('musicForm');
             if(musicForm) musicForm.addEventListener('submit', function(e) { if (hiddenInput && !hiddenInput.value) { e.preventDefault(); alert('장르를 선택해주세요!'); } });
         }
-
-        async function likeMusic(musicId) {
-            try {
-                const response = await fetch('/like/' + musicId, { method: 'POST' }); const data = await response.json();
-                if (data.success) {
-                    const countSpan = document.getElementById('like-count-' + musicId); countSpan.innerText = parseInt(countSpan.innerText) + 1;
-                    const btn = document.getElementById('like-btn-' + musicId);
-                    btn.innerHTML = '❤️ 좋아요 <span id="like-count-' + musicId + '">' + countSpan.innerText + '</span>';
-                    btn.style.color = '#ff4a4a'; btn.style.borderColor = '#ff4a4a';
-                } else alert(data.message);
-            } catch (err) { alert("에러가 발생했습니다."); }
-        } 
 
         function copyMusicLink(musicId) {
             navigator.clipboard.writeText(window.location.origin + '/?play=' + encodeURIComponent(musicId)).then(() => alert("노래 공유 링크가 복사되었습니다! 🔗"));
