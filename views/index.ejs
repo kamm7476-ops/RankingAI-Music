@@ -311,27 +311,22 @@
         @media (max-width: 900px) {
             .floating-chat-btn { width: 38px; height: 38px; font-size: 18px; bottom: 150px; right: 15px; }
         }
-      // 🚀 1. 탭 이동 처리 (쇼츠/유튜브는 '절대적 로딩'을 위해 진짜 페이지 이동 사용)
-        document.addEventListener('click', async (e) => {
-            const link = e.target.closest('a'); 
-            if (!link) return;
-            
-            const href = link.getAttribute('href');
-            if (!href || !href.startsWith('/')) return;
+      // 1. 모든 메뉴 클릭 가로채기 (기록 연결 유지)
+document.addEventListener('click', async (e) => {
+    const link = e.target.closest('a'); 
+    if (!link) return;
+    
+    const href = link.getAttribute('href');
+    
+    // 시스템 링크는 제외
+    if (!href || !href.startsWith('/') || href.includes('logout') || href.includes('admin') || href.includes('delete') || href.includes('edit')) {
+        return; 
+    }
 
-            // 🚨 [절대적 해결책] 쇼츠, 유튜브, 상황별BGM은 '진짜 이동'을 시킵니다.
-            // 이렇게 하면 브라우저가 영상을 새로 그려내므로 PC/모바일 로딩 문제가 100% 해결됩니다.
-            if (href.includes('shorts') || href.includes('youtube') || href.includes('radio')) {
-                window.location.assign(href); // 껍데기 교체가 아닌 진짜 페이지 이동 강제
-                return;
-            }
-
-            // 나머지 일반 메뉴(차트, 커뮤니티 등)만 음악이 안 끊기는 '부드러운 전환' 사용
-            if (href && href.startsWith('/') && !href.includes('admin') && !href.includes('delete') && !href.includes('logout') && !href.includes('login') && !href.includes('signup') && !href.includes('edit')) { 
-                e.preventDefault(); 
-                navigateTo(href); 
-            }
-        });
+    // 🚨 [수정] 쇼츠/유튜브도 일단 navigateTo로 보냅니다. (그래야 '앞으로 가기' 기록이 삽니다)
+    e.preventDefault();
+    navigateTo(href);
+});
 
         // 🚀 화면 전환 마법 (일반 페이지 전용)
         async function navigateTo(href) {
@@ -359,7 +354,15 @@
                 const newContainer = newDoc.querySelector('.container');
                 if (currentContainer && newContainer) {
                     currentContainer.innerHTML = newContainer.innerHTML;
-                    
+                 // 👈 바로 여기에 아래 8줄을 넣으세요!
+                    if (href.includes('shorts') || href.includes('youtube')) {
+                        const iframes = currentContainer.querySelectorAll('iframe');
+                        iframes.forEach(iframe => {
+                            const src = iframe.src;
+                            iframe.src = ''; 
+                            iframe.src = src; 
+                        });
+                    }   
                     // 스크립트 부활 주문
                     const scripts = currentContainer.querySelectorAll('script');
                     scripts.forEach(script => {
@@ -393,20 +396,13 @@
         }
 
         // 🚨 [가장 중요] 뒤로가기/앞으로가기 시 음악 끊김 방어 (쇼츠 로직 제외)
-        window.addEventListener('popstate', async () => {
-            const targetUrl = location.pathname + location.search;
-
-            // 1. 뒤로 간 페이지가 쇼츠, 유튜브, 라디오라면? 브라우저의 기본 동작(새로고침)에 맡깁니다.
-            // (이 부분은 대표님의 기존 쇼츠 정책을 지켜드리기 위함입니다.)
-            if (targetUrl.includes('shorts') || targetUrl.includes('youtube') || targetUrl.includes('radio')) {
-                location.href = targetUrl; 
-                return;
-            }
-
-            // 2. 그 외 일반 메뉴(차트, 커뮤니티 등)는 'navigateTo'를 실행해서 
-            // 새로고침 없이 화면만 바꿉니다. 그래야 노래가 안 끊깁니다!
-            navigateTo(targetUrl, true); 
-        });
+       window.addEventListener('popstate', async () => {
+    const targetUrl = location.pathname + location.search;
+    
+    // ✅ 쇼츠도 새로고침 없이 마법(navigateTo)을 써야 '앞으로 가기' 기록이 안 깨집니다!
+    console.log("뒤로/앞으로 가기 감지: 음악 유지하며 부드럽게 이동합니다.");
+    navigateTo(targetUrl, true); 
+});
 
      /* 🚀 [새로운 아이디어] 모바일 쇼츠/영상 직접 터치 하이패스 */
         .shorts-card-inner iframe, .video-iframe-wrap iframe {
@@ -1488,6 +1484,16 @@ async function navigateTo(href, isPopState = false) {
         const newContainer = newDoc.querySelector('.container');
         if (currentContainer && newContainer) {
             currentContainer.innerHTML = newContainer.innerHTML;
+        
+         // 🔥 쇼츠/유튜브 영상 강제 부활 (추가된 부분)
+        if (href.includes('shorts') || href.includes('youtube')) {
+            const iframes = currentContainer.querySelectorAll('iframe');
+            iframes.forEach(iframe => {
+                const src = iframe.src;
+                iframe.src = ''; 
+                iframe.src = src; 
+            });
+        }
             
             // 새 본문에 들어있는 스크립트(댓글, 좋아요 등) 강제 부활
             const scripts = currentContainer.querySelectorAll('script');
