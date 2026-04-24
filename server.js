@@ -129,6 +129,7 @@ const popupSchema = new mongoose.Schema({
     content: String,
     isActive: { type: Boolean, default: false },
     updatedAt: { type: Date, default: Date.now }
+    recommendedTrackId: String
 });
 const Popup = mongoose.models.Popup || mongoose.model('Popup', popupSchema);
 
@@ -1341,27 +1342,15 @@ app.post('/admin/popup', async (req, res) => {
     if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
     try {
         await Popup.deleteMany({}); 
-        await new Popup({ title: req.body.title, content: req.body.content, isActive: req.body.isActive === 'on' }).save();
+        // 🚨 새로 추가된 recommendedTrackId 를 같이 저장하도록 수정했습니다!
+        await new Popup({ 
+            title: req.body.title, 
+            content: req.body.content, 
+            isActive: req.body.isActive === 'on',
+            recommendedTrackId: req.body.recommendedTrackId || '' // 👈 핵심 추가 부분
+        }).save();
         res.send("<script>alert('팝업 설정 완료!'); window.location.href='/';</script>");
     } catch (err) { res.redirect('/'); }
-});
-
-app.post('/admin/delete-user', async (req, res) => {
-    if (!req.session.user || req.session.user.role !== 'admin') return res.redirect('/');
-    
-    try {
-        const userId = req.body.userId; 
-        const userToDelete = await User.findById(userId);
-        
-        if (userToDelete) {
-            await Music.deleteMany({ uploader: userToDelete.username }); 
-            await User.findByIdAndDelete(userId); 
-        }
-        res.redirect('/admin');
-    } catch (err) {
-        console.error("강제 탈퇴 에러:", err);
-        res.status(500).send("회원 삭제 중 오류가 발생했습니다.");
-    }
 });
 
 app.get('/admin/delete-user', (req, res) => {
