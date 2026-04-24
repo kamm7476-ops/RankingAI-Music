@@ -425,22 +425,24 @@ document.addEventListener('click', async (e) => {
         <div id="globalPopupBox" style="background:#161718; border:2px solid #ff5722; border-radius:15px; width:100%; max-width:400px; box-shadow:0 15px 50px rgba(0,0,0,0.8); overflow:hidden; position:relative; display:flex; flex-direction:column;">
             
             <div style="background:#222; padding:12px 15px; border-bottom:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
-                <span style="color:#ff5722; font-weight:bold; font-size:14px;">📢 공지사항 (Notice)</span>
+                <span style="color:#ffb300; font-weight:bold; font-size:14px;">✨ Welcome to RAM</span>
             </div>
 
             <div style="padding: 30px 25px; text-align: center;">
-                <h2 style="color: #fff; margin-top: 0; font-size: 22px; font-weight: 800; line-height: 1.4; letter-spacing: -0.5px; word-break: keep-all;">
-                    <%= popup.title %>
+                <h2 style="color: #fff; margin-top: 0; font-size: 20px; font-weight: 800; line-height: 1.4; word-break: keep-all;">
+                    Step into a Whole New World of AI Music 🚀
                 </h2>
 
-                <div style="text-align: center; color: #bbb; font-size: 15px; line-height: 1.8; background: rgba(0,0,0,0.4); padding: 25px 20px; border-radius: 12px; white-space: pre-wrap; word-break: keep-all; border: 1px solid #282828; margin: 20px 0; display: flex; flex-direction: column; gap: 10px; align-items: center;">
-    <%- popup.content %>
-</div>
+                <div style="text-align: center; color: #bbb; font-size: 14px; line-height: 1.6; background: rgba(0,0,0,0.4); padding: 20px 15px; border-radius: 12px; border: 1px solid #282828; margin: 20px 0; word-break: keep-all;">
+                    <span style="color:#fff; font-weight:bold;">회원가입하고 당신만의 AI 음원을 전 세계에 공유하고 판매해 보세요!</span><br><br>
+                    지금 RAM의 크리에이터가 되어 무한한 가능성을 언락(Unlock) 하세요.<br><br>
+                    <span style="color:#ff5722; font-size:12px; font-weight:bold;">Sign up today to share, monetize your tracks, and unlock exclusive creator features!</span>
+                </div>
 
-                <button id="btnPlayFromPopup" onclick="playAndClose()" style="background: #ff5722; color: #000; border: none; padding: 16px; font-size: 17px; font-weight: 800; border-radius: 35px; cursor: pointer; width: 100%; transition: 0.2s; box-shadow: 0 4px 15px rgba(255, 87, 34, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px;">
-    <span style="font-size: 13px; margin-bottom: 5px;">▶</span> 
-    Play All / 전체 듣기
-</button>
+                <button onclick="playTodaysPick()" style="background: linear-gradient(90deg, #ff5722, #ffb300); color: #000; border: none; padding: 15px; border-radius: 35px; cursor: pointer; width: 100%; transition: 0.2s; box-shadow: 0 4px 15px rgba(255, 87, 34, 0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;">
+                    <span style="font-size: 16px; font-weight: 900;">🎧 RAM Today's Pick</span>
+                    <span style="font-size: 12px; font-weight: 700; color: #222;">(오늘의 에디터 추천곡 듣기)</span>
+                </button>
             </div>
 
             <div style="background:#222; padding:12px 15px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid #333;">
@@ -451,7 +453,7 @@ document.addEventListener('click', async (e) => {
             </div>
         </div>
     </div>
-    <% } %>
+<% } %>
 
     <% if (typeof unreadMessages !== 'undefined' && unreadMessages.length > 0) { %>
     <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center; z-index:1000001; padding:20px;">
