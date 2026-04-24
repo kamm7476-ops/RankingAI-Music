@@ -471,19 +471,47 @@ document.addEventListener('click', async (e) => {
         function closePopupWithCheck() {
             const chk = document.getElementById('todayCheck');
             if (chk && chk.checked) {
+                // '오늘 하루 보지 않기' 체크 시 내일까지 숨김
                 localStorage.setItem('hideMainPopup_2026', new Date().toDateString());
             }
             const overlay = document.getElementById('globalPopupOverlay');
             if (overlay) overlay.style.display = 'none';
         }
 
-        function playAndClose() {
-            closePopupWithCheck();
-            if (typeof playAll === 'function') {
-                playAll();
+        // 🚀 2단계 핵심: 오늘의 추천곡 재생 마법 엔진
+        function playTodaysPick() {
+            closePopupWithCheck(); // 1. 일단 팝업을 스르륵 닫습니다.
+            
+            const rows = document.querySelectorAll('.music-item');
+            if (rows.length === 0) return alert("재생할 곡이 아직 없습니다.");
+            
+            // 2. 화면에 있는 모든 곡을 싹 쓸어서 플레이리스트 큐(Queue)에 담습니다.
+            playlist = Array.from(rows).map(row => ({ 
+                id: row.dataset.id, title: row.dataset.title, artist: row.dataset.artist, 
+                cover: row.dataset.cover, audio: row.dataset.audio, lyrics: row.dataset.lyrics 
+            })).filter(t => t.audio && t.audio.trim() !== "" && t.audio !== "undefined");
+            
+            if (playlist.length === 0) return;
+
+            // 👑 관리자 추천곡 세팅 공간
+            // 추후 관리자 페이지에서 곡 ID를 받아올 자리입니다.
+            // (예: const adminPickId = "60d5ecb8b3...54";)
+            // 지금은 따옴표 안을 비워두었기 때문에 자동으로 '차트 1위 곡'이 재생됩니다.
+            const adminPickId = ""; 
+            
+            let targetIndex = 0; // 기본값: 1위 곡(0번 인덱스)
+            
+            // 만약 관리자가 지정한 곡 ID가 있다면, 리스트에서 그 곡을 찾아 번호를 바꿉니다.
+            if (adminPickId) {
+                const foundIndex = playlist.findIndex(t => t.id === adminPickId);
+                if (foundIndex !== -1) targetIndex = foundIndex;
             }
+            
+            // 3. 짠! 하단 플레이어에서 해당 곡 재생 시작
+            loadTrack(targetIndex);
         }
 
+        // 팝업창 띄우기 로직 (오늘 하루 안 보기 적용)
         document.addEventListener('DOMContentLoaded', function() {
             const overlay = document.getElementById('globalPopupOverlay');
             if (overlay) {
