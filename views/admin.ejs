@@ -308,6 +308,7 @@
                                                 <strong style="color:#fff;"><%= music.name %></strong> - <%= music.artist %> 
                                                 <span style="color:#ff5722; font-size:11px; margin-left:8px;">(조회수: <%= music.views || 0 %>)</span>
                                             </div>
+                                            <button type="button" onclick="navigator.clipboard.writeText('<%= music._id %>'); alert('곡 ID가 복사되었습니다! 아래 팝업 설정창에 붙여넣으세요.');" style="background:#4caf50; color:#fff; border:none; padding:4px 8px; font-size:11px; margin-left: 10px; border-radius:4px; cursor:pointer; font-weight:bold;">🆔 ID 복사</button>
                                             <form action="/admin/delete-music-only/<%= music._id %>" method="POST" style="margin:0;" onsubmit="return confirm('이 곡을 강제 삭제하시겠습니까?');">
                                                 <button type="submit" class="btn-delete" style="padding:4px 8px; font-size:11px; margin-left: 10px;">곡 삭제</button>
                                             </form>
