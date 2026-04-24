@@ -128,7 +128,7 @@ const popupSchema = new mongoose.Schema({
     title: String,
     content: String,
     isActive: { type: Boolean, default: false },
-    updatedAt: { type: Date, default: Date.now }
+    updatedAt: { type: Date, default: Date.now },
     recommendedTrackId: String
 });
 const Popup = mongoose.models.Popup || mongoose.model('Popup', popupSchema);
