@@ -494,10 +494,8 @@ document.addEventListener('click', async (e) => {
             if (playlist.length === 0) return;
 
             // 👑 관리자 추천곡 세팅 공간
-            // 추후 관리자 페이지에서 곡 ID를 받아올 자리입니다.
-            // (예: const adminPickId = "60d5ecb8b3...54";)
-            // 지금은 따옴표 안을 비워두었기 때문에 자동으로 '차트 1위 곡'이 재생됩니다.
-            const adminPickId = ""; 
+            // 관리자가 팝업에 입력한 추천곡 ID를 서버에서 가져옵니다!
+            const adminPickId = "<%= (typeof popup !== 'undefined' && popup && popup.recommendedTrackId) ? popup.recommendedTrackId : '' %>";
             
             let targetIndex = 0; // 기본값: 1위 곡(0번 인덱스)
             
