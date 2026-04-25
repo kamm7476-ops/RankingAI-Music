@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="<%= typeof getLocale !== 'undefined' ? getLocale() : 'ko' %>">
 <head>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5112383847606285"
      crossorigin="anonymous"></script>
@@ -209,9 +209,9 @@
             .music-item td { padding: 0; border: none; }
             .check-col { position: absolute; top: 15px; right: 15px; z-index: 10; width: auto !important; }
             /* 🚀 100번대 숫자 겹침 해결 버전 */
-.rank { position: absolute !important; top: 35px !important; left: 5px !important; background: transparent !important; color: #ff5722 !important; border-radius: 0 !important; padding: 0 !important; font-size: 18px !important; font-weight: 900 !important; width: 35px !important; text-align: center !important; z-index: 10 !important; box-shadow: none !important; }
-.music-item:nth-child(1) .rank, .music-item:nth-child(2) .rank, .music-item:nth-child(3) .rank { font-size: 22px !important; }
-.music-item td:nth-child(3) { float: left; width: 70px; margin-left: 42px !important; margin-right: 15px; margin-top: 0; }
+            .rank { position: absolute !important; top: 35px !important; left: 5px !important; background: transparent !important; color: #ff5722 !important; border-radius: 0 !important; padding: 0 !important; font-size: 18px !important; font-weight: 900 !important; width: 35px !important; text-align: center !important; z-index: 10 !important; box-shadow: none !important; }
+            .music-item:nth-child(1) .rank, .music-item:nth-child(2) .rank, .music-item:nth-child(3) .rank { font-size: 22px !important; }
+            .music-item td:nth-child(3) { float: left; width: 70px; margin-left: 42px !important; margin-right: 15px; margin-top: 0; }
             .song-info { margin-top: 0; overflow: hidden; min-height: 70px; } 
             .action-row { display: flex !important; flex-wrap: nowrap !important; gap: 5px !important; margin-top: 15px; clear: both; }
             .action-btn { flex: 1 !important; padding: 8px 2px !important; font-size: 11px !important; white-space: nowrap !important; display: flex !important; align-items: center !important; justify-content: center !important; letter-spacing: -0.5px !important; }
@@ -243,13 +243,12 @@
         }
 
         /* 🚀 [추가됨] 모바일 커뮤니티 게시판 텍스트 삐져나옴 방지 및 자동 정렬 */
-            .container table, .container td, .container th, .board-container, .post-content {
-                word-break: break-word !important; /* 긴 영어, 링크 강제 줄바꿈 */
-                overflow-wrap: break-word !important;
-                white-space: normal !important; /* 글씨가 가로로 뚫고 나가는 것 방지 */
-                line-height: 1.6 !important; /* 모바일에서 읽기 편한 줄간격 */
-                letter-spacing: -0.5px; /* 자간을 살짝 좁혀서 깔끔하게 정렬 */
-            }
+        .container table, .container td, .container th, .board-container, .post-content {
+            word-break: break-word !important; /* 긴 영어, 링크 강제 줄바꿈 */
+            overflow-wrap: break-word !important;
+            white-space: normal !important; /* 글씨가 가로로 뚫고 나가는 것 방지 */
+            line-height: 1.6 !important; /* 모바일에서 읽기 편한 줄간격 */
+            letter-spacing: -0.5px; /* 자간을 살짝 좁혀서 깔끔하게 정렬 */
         }
 
         /* 🌟 팝업창 전용 디자인 */
@@ -276,7 +275,6 @@
         /* ========================================= */
         /* 🌟 유튜브 전용 글로벌 디자인 🌟 */
         /* ========================================= */
-        /* 🚨 [핵심 수정] 관리자 방과 업로드 창의 레이아웃을 부수던 중복된 4줄 제거! */
 
         .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
         .video-card { background: #161718; border: 1px solid #222; border-radius: 12px; overflow: hidden; transition: 0.2s; }
@@ -321,100 +319,8 @@
         @media (max-width: 900px) {
             .floating-chat-btn { width: 38px; height: 38px; font-size: 18px; bottom: 150px; right: 15px; }
         }
-      // 1. 모든 메뉴 클릭 가로채기 (기록 연결 유지)
-document.addEventListener('click', async (e) => {
-    const link = e.target.closest('a'); 
-    if (!link) return;
-    
-    const href = link.getAttribute('href');
-    
-    // 시스템 링크는 제외
-    if (!href || !href.startsWith('/') || href.includes('logout') || href.includes('admin') || href.includes('delete') || href.includes('edit')) {
-        return; 
-    }
-
-    // 🚨 [수정] 쇼츠/유튜브도 일단 navigateTo로 보냅니다. (그래야 '앞으로 가기' 기록이 삽니다)
-    e.preventDefault();
-    navigateTo(href);
-});
-
-        // 🚀 화면 전환 마법 (일반 페이지 전용)
-        async function navigateTo(href) {
-            try {
-                const response = await fetch(href); 
-                const html = await response.text();
-                const newDoc = new DOMParser().parseFromString(html, 'text/html');
-                
-                // 1. 디자인(CSS) 복사
-                const newStyles = newDoc.querySelectorAll('style');
-                newStyles.forEach(newStyle => {
-                    let isExist = false;
-                    document.querySelectorAll('style').forEach(existingStyle => {
-                        if(existingStyle.innerHTML === newStyle.innerHTML) isExist = true;
-                    });
-                    if(!isExist) {
-                        const s = document.createElement('style');
-                        s.innerHTML = newStyle.innerHTML;
-                        document.head.appendChild(s);
-                    }
-                });
-
-                // 2. 본문 내용 교체
-                const currentContainer = document.querySelector('.container'); 
-                const newContainer = newDoc.querySelector('.container');
-                if (currentContainer && newContainer) {
-                    currentContainer.innerHTML = newContainer.innerHTML;
-                 // 👈 바로 여기에 아래 8줄을 넣으세요!
-                    if (href.includes('shorts') || href.includes('youtube')) {
-                        const iframes = currentContainer.querySelectorAll('iframe');
-                        iframes.forEach(iframe => {
-                            const src = iframe.src;
-                            iframe.src = ''; 
-                            iframe.src = src; 
-                        });
-                    }   
-                    // 스크립트 부활 주문
-                    const scripts = currentContainer.querySelectorAll('script');
-                    scripts.forEach(script => {
-                        const newScript = document.createElement('script');
-                        Array.from(script.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-                        newScript.innerHTML = script.innerHTML;
-                        document.body.appendChild(newScript);
-                        document.body.removeChild(newScript); 
-                    });
-                }
-
-                const currentNav = document.querySelector('.header-nav'); 
-                const newNav = newDoc.querySelector('.header-nav');
-                if (currentNav && newNav) currentNav.innerHTML = newNav.innerHTML;
-                
-                history.pushState(null, '', href); 
-                document.title = newDoc.title;
-                
-                const playerBar = document.getElementById('bottomPlayerBar');
-                if (playerBar) {
-                    if (href.includes('/board')) playerBar.style.display = 'none';
-                    else playerBar.style.display = 'flex'; 
-                }
-                
-                reattachEvents(); 
-                window.scrollTo(0, 0); 
-                
-            } catch (err) { 
-                location.href = href; 
-            }
-        }
-
-        // 🚨 [가장 중요] 뒤로가기/앞으로가기 시 음악 끊김 방어 (쇼츠 로직 제외)
-       window.addEventListener('popstate', async () => {
-    const targetUrl = location.pathname + location.search;
-    
-    // ✅ 쇼츠도 새로고침 없이 마법(navigateTo)을 써야 '앞으로 가기' 기록이 안 깨집니다!
-    console.log("뒤로/앞으로 가기 감지: 음악 유지하며 부드럽게 이동합니다.");
-    navigateTo(targetUrl, true); 
-});
-
-     /* 🚀 [새로운 아이디어] 모바일 쇼츠/영상 직접 터치 하이패스 */
+        
+        /* 🚀 [새로운 아이디어] 모바일 쇼츠/영상 직접 터치 하이패스 */
         .shorts-card-inner iframe, .video-iframe-wrap iframe {
             z-index: 10 !important; /* 영상 우선순위 올림 */
             pointer-events: auto !important; /* 영상이 직접 터치를 흡수함 */
@@ -424,7 +330,6 @@ document.addEventListener('click', async (e) => {
             z-index: 20 !important; /* 글자와 로고는 영상 위로 보이게 함 */
             pointer-events: none !important; /* 🚨 핵심: 글자에 닿은 터치는 통과시켜서 영상에 꽂히게 만듦 */
         }   
-        
 
     </style>
 </head>
@@ -435,30 +340,32 @@ document.addEventListener('click', async (e) => {
         <div id="globalPopupBox" style="background:#161718; border:2px solid #ff5722; border-radius:15px; width:100%; max-width:400px; box-shadow:0 15px 50px rgba(0,0,0,0.8); overflow:hidden; position:relative; display:flex; flex-direction:column;">
             
             <div style="background:#222; padding:12px 15px; border-bottom:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
-                <span style="color:#ffb300; font-weight:bold; font-size:14px;"><%= __('popup_welcome') %></span>
+                <span style="color:#ffb300; font-weight:bold; font-size:14px;"><%= __('popup_welcome') || '✨ Welcome to RAM' %></span>
             </div>
 
             <div style="padding: 30px 25px; text-align: center;">
                 <h2 style="color: #fff; margin-top: 0; font-size: 20px; font-weight: 800; line-height: 1.4; word-break: keep-all;">
-                    <%= __('popup_title') %>
+                    <%= __('popup_title') || 'Step into a Whole New World of AI Music 🚀' %>
                 </h2>
 
                 <div style="text-align: center; color: #bbb; font-size: 14px; line-height: 1.6; background: rgba(0,0,0,0.4); padding: 20px 15px; border-radius: 12px; border: 1px solid #282828; margin: 20px 0; word-break: keep-all;">
-                    <span style="color:#fff; font-weight:bold;"><%= __('popup_desc') %></span><br><br>
-                    <%= __('popup_sub_desc') %>
+                    <span style="color:#fff; font-weight:bold;"><%= __('popup_desc') || '회원가입하고 당신만의 AI 음원을 전 세계에 공유하고 판매해 보세요!' %></span><br><br>
+                    <%= __('popup_sub_desc') || '지금 RAM의 크리에이터가 되어 무한한 가능성을 언락(Unlock) 하세요.' %>
                 </div>
 
                 <button onclick="playTodaysPick()" style="background: linear-gradient(90deg, #ff5722, #ffb300); color: #000; border: none; padding: 15px; border-radius: 35px; cursor: pointer; width: 100%; transition: 0.2s; box-shadow: 0 4px 15px rgba(255, 87, 34, 0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;">
-                    <span style="font-size: 16px; font-weight: 900;">🎧 <%= __('btn_today_pick') %></span>
+                    <span style="font-size: 16px; font-weight: 900;">🎧 <%= __('btn_today_pick') || '오늘의 에디터 추천곡 듣기' %></span>
                 </button>
             </div>
 
             <div style="background:#222; padding:12px 15px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid #333;">
                 <label style="color:#888; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:5px;">
-                    <input type="checkbox" id="todayCheck" style="accent-color:#ff5722;"> <%= __('popup_hide_today') %>
+                    <input type="checkbox" id="todayCheck" style="accent-color:#ff5722;"> <%= __('popup_hide_today') || '오늘 하루 보지 않기' %>
                 </label>
-                <button onclick="closePopupWithCheck()" style="background:#444; color:#fff; border:none; padding:6px 16px; border-radius:4px; cursor:pointer; font-size:13px; font-weight:bold;"><%= __('btn_close') %></button>
+                <button onclick="closePopupWithCheck()" style="background:#444; color:#fff; border:none; padding:6px 16px; border-radius:4px; cursor:pointer; font-size:13px; font-weight:bold;"><%= __('btn_close') || '닫기' %></button>
             </div>
+        </div>
+    </div>
 <% } %>
 
     <% if (typeof unreadMessages !== 'undefined' && unreadMessages.length > 0) { %>
@@ -473,60 +380,6 @@ document.addEventListener('click', async (e) => {
     </div>
     <% } %>
 
-    <script>
-        function closePopupWithCheck() {
-            const chk = document.getElementById('todayCheck');
-            if (chk && chk.checked) {
-                // '오늘 하루 보지 않기' 체크 시 내일까지 숨김
-                localStorage.setItem('hideMainPopup_2026', new Date().toDateString());
-            }
-            const overlay = document.getElementById('globalPopupOverlay');
-            if (overlay) overlay.style.display = 'none';
-        }
-
-        // 🚀 2단계 핵심: 오늘의 추천곡 재생 마법 엔진
-        function playTodaysPick() {
-            closePopupWithCheck(); // 1. 일단 팝업을 스르륵 닫습니다.
-            
-            const rows = document.querySelectorAll('.music-item');
-            if (rows.length === 0) return alert("재생할 곡이 아직 없습니다.");
-            
-            // 2. 화면에 있는 모든 곡을 싹 쓸어서 플레이리스트 큐(Queue)에 담습니다.
-            playlist = Array.from(rows).map(row => ({ 
-                id: row.dataset.id, title: row.dataset.title, artist: row.dataset.artist, 
-                cover: row.dataset.cover, audio: row.dataset.audio, lyrics: row.dataset.lyrics 
-            })).filter(t => t.audio && t.audio.trim() !== "" && t.audio !== "undefined");
-            
-            if (playlist.length === 0) return;
-
-            // 👑 관리자 추천곡 세팅 공간
-            // 관리자가 팝업에 입력한 추천곡 ID를 서버에서 가져옵니다!
-            const adminPickId = "<%= (typeof popup !== 'undefined' && popup && popup.recommendedTrackId) ? popup.recommendedTrackId : '' %>";
-            
-            let targetIndex = 0; // 기본값: 1위 곡(0번 인덱스)
-            
-            // 만약 관리자가 지정한 곡 ID가 있다면, 리스트에서 그 곡을 찾아 번호를 바꿉니다.
-            if (adminPickId) {
-                const foundIndex = playlist.findIndex(t => t.id === adminPickId);
-                if (foundIndex !== -1) targetIndex = foundIndex;
-            }
-            
-            // 3. 짠! 하단 플레이어에서 해당 곡 재생 시작
-            loadTrack(targetIndex);
-        }
-
-        // 팝업창 띄우기 로직 (오늘 하루 안 보기 적용)
-        document.addEventListener('DOMContentLoaded', function() {
-            const overlay = document.getElementById('globalPopupOverlay');
-            if (overlay) {
-                const hideDate = localStorage.getItem('hideMainPopup_2026');
-                if (hideDate !== new Date().toDateString()) {
-                    overlay.style.display = 'flex'; 
-                }
-            }
-        });
-    </script>
-
     <header class="main-header">
        <div class="header-top">
             <img src="/logo.png" alt="RANKING AI 로고" class="logo-img" onclick="window.location.href='/?sort=views'">
@@ -537,48 +390,44 @@ document.addEventListener('click', async (e) => {
                      onclick="window.open('https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://rankingaimusic.com', '_blank')">
                     <img src="https://api.qrserver.com/v1/create-qr-code/?size=30x30&data=https://rankingaimusic.com" alt="QR Code" style="display: block; width: 24px; height: 24px;">
                 </div>
-                <input type="text" name="search" class="top-search-input" placeholder="<%= __('search_placeholder') %>" value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                <input type="text" name="search" class="top-search-input" placeholder="<%= __('search_placeholder') || '아티스트 검색...' %>" value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                 <button type="submit" class="top-search-btn">🔍</button>
             </form>
 
-            <select id="smartLangSelect" onchange="window.location.href='/change-lang/' + this.value" style="background: #222; color: #fff; border: 2px solid #ff5722; border-radius: 20px; padding: 6px 12px; font-weight: bold; font-size: 13px; cursor: pointer; outline: none; margin-right: 10px;">
+            <div class="auth-buttons">
+                <select id="smartLangSelect" onchange="window.location.href='/change-lang/' + this.value" class="lang-select">
                     <option value="ko">🇰🇷 한국어</option>
                     <option value="en">🇺🇸 English</option>
                     <option value="ja">🇯🇵 日本語</option>
                     <option value="zh">🇨🇳 中文</option>
                 </select>
-                <script>
-                    // 유저가 선택한 언어를 기억해서 스위치에 표시해두는 센스!
-                    const langMatch = document.cookie.match(new RegExp('(^| )lang=([^;]+)'));
-                    if (langMatch && langMatch[2]) document.getElementById('smartLangSelect').value = langMatch[2];
-                </script>
 
                 <% if (user && user.role === 'admin') { %>
                     <a href="/admin" class="btn-admin">👑 관리자</a>
                 <% } %>
                 
                 <% if (user) { %>
-                    <span style="color: #aaa; font-size: 14px;"><%= user.name || user.id %><%= __('welcome_user') %></span>
-                    <a href="/logout" class="btn-login" style="margin-left: 15px;"><%= __('btn_logout') %></a>
+                    <span style="color: #aaa; font-size: 14px;"><%= user.name || user.id %><%= __('welcome_user') || '님' %></span>
+                    <a href="/logout" class="btn-login" style="margin-left: 15px;"><%= __('btn_logout') || '로그아웃' %></a>
                 <% } else { %>
-                    <a href="/login" class="btn-login"><%= __('btn_login') %></a>
-                    <a href="/signup" class="btn-signup"><%= __('btn_signup') %></a>
+                    <a href="/login" class="btn-login"><%= __('btn_login') || '로그인' %></a>
+                    <a href="/signup" class="btn-signup"><%= __('btn_signup') || '회원가입' %></a>
                 <% } %>
             </div>
         </div>
         
        <div class="header-nav">
-            <a href="/?sort=views" class="nav-item <%= (typeof sortQuery !== 'undefined' && sortQuery === 'views' && !genreQuery) ? 'active' : '' %>"><%= __('menu_chart') %></a>
-            <a href="/?sort=latest" class="nav-item <%= (typeof sortQuery !== 'undefined' && sortQuery === 'latest') ? 'active' : '' %>"><%= __('menu_latest') %></a>
-            <a href="/?genre=발라드" class="nav-item <%= (typeof genreQuery !== 'undefined' && genreQuery) ? 'active' : '' %>"><%= __('menu_genre') %></a>
+            <a href="/?sort=views" class="nav-item <%= (typeof sortQuery !== 'undefined' && sortQuery === 'views' && !genreQuery) ? 'active' : '' %>"><%= __('menu_chart') || 'RANKING AI 차트' %></a>
+            <a href="/?sort=latest" class="nav-item <%= (typeof sortQuery !== 'undefined' && sortQuery === 'latest') ? 'active' : '' %>"><%= __('menu_latest') || '최신음악' %></a>
+            <a href="/?genre=발라드" class="nav-item <%= (typeof genreQuery !== 'undefined' && genreQuery) ? 'active' : '' %>"><%= __('menu_genre') || '장르별' %></a>
             
-            <a href="/radio" class="nav-item" style="color: #ffb300; font-weight: 900;"><%= __('menu_bgm') %></a>
+            <a href="/radio" class="nav-item" style="color: #ffb300; font-weight: 900;"><%= __('menu_bgm') || '🎧상황별BGM' %></a>
             
-            <a href="#" id="pwa-install-btn" class="nav-item" style="color: #00e5ff; font-weight: 900; display: none;"><%= __('menu_app_install') %></a>
+            <a href="#" id="pwa-install-btn" class="nav-item" style="color: #00e5ff; font-weight: 900; display: none;"><%= __('menu_app_install') || '📲앱 설치하기' %></a>
             
-           <a href="/youtube" class="nav-item"><%= __('menu_youtube') %></a>
-            <a href="/shorts" class="nav-item"><%= __('menu_shorts') %></a>
-            <a href="/board" class="nav-item"><%= __('menu_community') %></a>
+           <a href="/youtube" class="nav-item"><%= __('menu_youtube') || '유튜브' %></a>
+            <a href="/shorts" class="nav-item"><%= __('menu_shorts') || '쇼츠' %></a>
+            <a href="/board" class="nav-item"><%= __('menu_community') || '커뮤니티' %></a>
         </div>
     </header>
 
@@ -587,39 +436,39 @@ document.addEventListener('click', async (e) => {
             <div class="content-left">
               <% if (user) { %>
                 <div class="upload-section">
-                    <h3 style="margin-top:0; color:#ff5722;"><%= __('upload_title') %></h3>
+                    <h3 style="margin-top:0; color:#ff5722;"><%= __('upload_title') || '🎵 회원을 위한 음원 업로드' %></h3>
                     <form action="/add-music" method="POST" enctype="multipart/form-data" id="musicForm">
                         <div class="input-row">
-                            <input type="text" name="name" placeholder="<%= __('ph_title') %>" required>
-                            <input type="text" name="artist" placeholder="<%= __('ph_artist') %>" required>
+                            <input type="text" name="name" placeholder="<%= __('ph_title') || '곡 제목' %>" required>
+                            <input type="text" name="artist" placeholder="<%= __('ph_artist') || '아티스트' %>" required>
                         </div>
                         
                         <div class="genre-selector">                            
-                            <button type="button" class="genre-btn" data-genre="K-POP"><%= __('genre_kpop') %></button>
-                            <button type="button" class="genre-btn" data-genre="POP"><%= __('genre_pop') %></button>
-                            <button type="button" class="genre-btn" data-genre="발라드"><%= __('genre_ballad') %></button>
-                            <button type="button" class="genre-btn" data-genre="댄스"><%= __('genre_dance') %></button>
-                            <button type="button" class="genre-btn" data-genre="랩/힙합"><%= __('genre_rap') %></button>
-                            <button type="button" class="genre-btn" data-genre="R&B/Soul"><%= __('genre_rnb') %></button>
-                            <button type="button" class="genre-btn" data-genre="Lo-Fi / 칠아웃"><%= __('genre_lofi') %></button>
-                            <button type="button" class="genre-btn" data-genre="일렉트로니카"><%= __('genre_electronic') %></button>
-                            <button type="button" class="genre-btn" data-genre="록/메탈"><%= __('genre_rock') %></button>
-                            <button type="button" class="genre-btn" data-genre="애니 / OST"><%= __('genre_ani') %></button>
-                            <button type="button" class="genre-btn" data-genre="클래식 / 재즈"><%= __('genre_classic') %></button>
-                            <button type="button" class="genre-btn" data-genre="뉴에이지"><%= __('genre_newage') %></button>
-                            <button type="button" class="genre-btn" data-genre="트로트"><%= __('genre_trot') %></button>
-                            <button type="button" class="genre-btn" data-genre="인디음악"><%= __('genre_indie') %></button>
-                            <button type="button" class="genre-btn" data-genre="Beats"><%= __('genre_beats') %></button>
+                            <button type="button" class="genre-btn" data-genre="K-POP"><%= __('genre_kpop') || 'K-POP' %></button>
+                            <button type="button" class="genre-btn" data-genre="POP"><%= __('genre_pop') || 'POP' %></button>
+                            <button type="button" class="genre-btn" data-genre="발라드"><%= __('genre_ballad') || '발라드' %></button>
+                            <button type="button" class="genre-btn" data-genre="댄스"><%= __('genre_dance') || '댄스' %></button>
+                            <button type="button" class="genre-btn" data-genre="랩/힙합"><%= __('genre_rap') || '랩/힙합' %></button>
+                            <button type="button" class="genre-btn" data-genre="R&B/Soul"><%= __('genre_rnb') || 'R&B/Soul' %></button>
+                            <button type="button" class="genre-btn" data-genre="Lo-Fi / 칠아웃"><%= __('genre_lofi') || 'Lo-Fi / 칠아웃' %></button>
+                            <button type="button" class="genre-btn" data-genre="일렉트로니카"><%= __('genre_electronic') || '일렉트로니카' %></button>
+                            <button type="button" class="genre-btn" data-genre="록/메탈"><%= __('genre_rock') || '록/메탈' %></button>
+                            <button type="button" class="genre-btn" data-genre="애니 / OST"><%= __('genre_ani') || '애니 / OST' %></button>
+                            <button type="button" class="genre-btn" data-genre="클래식 / 재즈"><%= __('genre_classic') || '클래식 / 재즈' %></button>
+                            <button type="button" class="genre-btn" data-genre="뉴에이지"><%= __('genre_newage') || '뉴에이지' %></button>
+                            <button type="button" class="genre-btn" data-genre="트로트"><%= __('genre_trot') || '트로트' %></button>
+                            <button type="button" class="genre-btn" data-genre="인디음악"><%= __('genre_indie') || '인디음악' %></button>
+                            <button type="button" class="genre-btn" data-genre="Beats"><%= __('genre_beats') || 'Beats' %></button>
                         </div>
 
                         <div id="vibe-container" style="margin-top: 15px; padding: 12px; background: #1a1b1c; border-radius: 8px; border: 1px solid #333; display: none;">
-                            <span style="font-size: 12px; color: #ff5722; display: block; margin-bottom: 8px; font-weight: bold;"><%= __('vibe_title') %></span>
+                            <span style="font-size: 12px; color: #ff5722; display: block; margin-bottom: 8px; font-weight: bold;"><%= __('vibe_title') || '✨ 어떤 매장/상황에 어울리나요? (태그 선택)' %></span>
                             <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                                <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="cafe"> <%= __('vibe_cafe') %></label>
-                                <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="study"> <%= __('vibe_study') %></label>
-                                <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="healing"> <%= __('vibe_healing') %></label>
-                                <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="fitness"> <%= __('vibe_fitness') %></label>
-                                <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="hotel"> <%= __('vibe_hotel') %></label>
+                                <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="cafe"> <%= __('vibe_cafe') || '☕ 카페' %></label>
+                                <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="study"> <%= __('vibe_study') || '💻 집중/스터디' %></label>
+                                <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="healing"> <%= __('vibe_healing') || '🌿 힐링/명상' %></label>
+                                <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="fitness"> <%= __('vibe_fitness') || '🏋️ 헬스/운동' %></label>
+                                <label style="font-size:12px; cursor:pointer; color:#aaa;"><input type="checkbox" class="vibe-check" value="hotel"> <%= __('vibe_hotel') || '🏙️ 호텔/라운지' %></label>
                             </div>
                         </div>
 
@@ -627,56 +476,34 @@ document.addEventListener('click', async (e) => {
                         <input type="hidden" name="genre" id="hiddenGenreInput" required>
 
                         <div class="input-row" style="margin-top:15px;">
-                            <input type="text" name="aiTool" placeholder="<%= __('ph_tool') %>" required>
-                            <input type="text" name="realName" placeholder="<%= __('ph_uploader') %>" required>
+                            <input type="text" name="aiTool" placeholder="<%= __('ph_tool') || '사용 프로그램 (예: Suno)' %>" required>
+                            <input type="text" name="realName" placeholder="<%= __('ph_uploader') || '업로더 실명 (비공개)' %>" required>
                         </div>
 
-                        <textarea name="lyrics" placeholder="<%= __('ph_lyrics') %>"></textarea>
+                        <textarea name="lyrics" placeholder="<%= __('ph_lyrics') || '가사를 시간과 함께 입력하세요. (예: [00:15] 첫 번째 가사)' %>"></textarea>
 
                         <div class="input-row">
                             <div style="flex:1;">
-                                <span style="font-size: 12px; color: #ff5722; display: block; margin-bottom: 5px;"><%= __('upload_cover') %></span>
+                                <span style="font-size: 12px; color: #ff5722; display: block; margin-bottom: 5px;"><%= __('upload_cover') || '🖼️ 커버 이미지 (선택)' %></span>
                                 <input type="file" name="image" accept="image/*" class="file-upload">
                             </div>
                             <div style="flex:1;">
-                                <span style="font-size: 12px; color: #ff5722; display: block; margin-bottom: 5px;"><%= __('upload_mp3') %></span>
+                                <span style="font-size: 12px; color: #ff5722; display: block; margin-bottom: 5px;"><%= __('upload_mp3') || '🎵 MP3 음원 (필수)' %></span>
                                 <input type="file" name="audio" accept="audio/*" class="file-upload" required>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn-upload"><%= __('btn_submit_chart') %></button>
+                        <button type="submit" class="btn-upload"><%= __('btn_submit_chart') || '차트 등록하기' %></button>
                     </form>
                 </div>
                 <% } else { %>
-                <style>
-                    .guest-banner { 
-                        display: flex; align-items: center; justify-content: space-between; gap: 15px; 
-                        padding: 15px 20px; min-height: 60px; 
-                        background: linear-gradient(90deg, #161718 0%, #1a1b1c 100%); 
-                        border: 1px dashed #444; margin-bottom: 40px; border-radius: 12px;
-                    }
-                    .guest-lock { font-size: 24px; line-height: 1; flex-shrink: 0; }
-                    .guest-text-box { text-align: left; flex: 1; min-width: 0; }
-                    .guest-text-box h3 { margin: 0; color: #aaa; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-                    .guest-text-box p { color: #666; font-size: 13px; margin: 4px 0 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-                    .guest-btn { width: auto; margin: 0; padding: 8px 25px; font-size: 13px; border-radius: 20px; flex-shrink: 0; height: fit-content; }
-                    
-                    /* 📱 모바일(좁은 화면): 세로로 안 쌓이고 가로로 얇고 타이트하게 압축! */
-                    @media (max-width: 600px) {
-                        .guest-banner { gap: 8px; padding: 12px 10px; min-height: auto; margin-bottom: 25px; }
-                        .guest-lock { font-size: 18px; }
-                        .guest-text-box h3 { font-size: 13px; }
-                        .guest-text-box p { font-size: 11px; margin-top: 2px; }
-                        .guest-btn { padding: 6px 14px; font-size: 12px; }
-                    }
-                </style>
                 <div class="guest-banner">
                     <div class="guest-lock">🔒</div>
                     <div class="guest-text-box">
-                        <h3><%= __('guest_title') %></h3>
-                        <p><%= __('guest_desc') %></p>
+                        <h3><%= __('guest_title') || '음원 업로드는 회원 전용입니다' %></h3>
+                        <p><%= __('guest_desc') || '나만의 음악을 올리고 싶다면 로그인해주세요!' %></p>
                     </div>
-                    <button onclick="location.href='/login'" class="btn-upload guest-btn"><%= __('btn_login') %></button>
+                    <button onclick="location.href='/login'" class="btn-upload guest-btn"><%= __('btn_login') || '로그인' %></button>
                 </div>
                 <% } %>
 
@@ -701,35 +528,38 @@ document.addEventListener('click', async (e) => {
                         <% } %>
                     </div>
                     <div class="tabs">
-                        <a href="/?sort=views" class="tab <%= (typeof periodQuery === 'undefined' || !periodQuery) ? 'active' : '' %>"><%= __('tab_realtime') %></a>
-                        <a href="/?period=daily" class="tab <%= (typeof periodQuery !== 'undefined' && periodQuery === 'daily') ? 'active' : '' %>"><%= __('tab_daily') %></a>
-                        <a href="/?period=weekly" class="tab <%= (typeof periodQuery !== 'undefined' && periodQuery === 'weekly') ? 'active' : '' %>"><%= __('tab_weekly') %></a>
-                        <a href="/?period=monthly" class="tab <%= (typeof periodQuery !== 'undefined' && periodQuery === 'monthly') ? 'active' : '' %>"><%= __('tab_monthly') %></a>
+                        <a href="/?sort=views" class="tab <%= (typeof periodQuery === 'undefined' || !periodQuery) ? 'active' : '' %>"><%= __('tab_realtime') || '실시간(전체)' %></a>
+                        <a href="/?period=daily" class="tab <%= (typeof periodQuery !== 'undefined' && periodQuery === 'daily') ? 'active' : '' %>"><%= __('tab_daily') || '일간' %></a>
+                        <a href="/?period=weekly" class="tab <%= (typeof periodQuery !== 'undefined' && periodQuery === 'weekly') ? 'active' : '' %>"><%= __('tab_weekly') || '주간' %></a>
+                        <a href="/?period=monthly" class="tab <%= (typeof periodQuery !== 'undefined' && periodQuery === 'monthly') ? 'active' : '' %>"><%= __('tab_monthly') || '월간' %></a>
                     </div>
                 </div>
-<% if (typeof genreQuery !== 'undefined' && genreQuery) { %>
-    <div style="background: #161718; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; display: flex; gap: 8px; flex-wrap: wrap;">
-       <% 
-       const genreList = [
-           { val: 'K-POP', key: 'genre_kpop' }, { val: 'POP', key: 'genre_pop' }, { val: '발라드', key: 'genre_ballad' }, { val: '댄스', key: 'genre_dance' },
-           { val: '랩/힙합', key: 'genre_rap' }, { val: 'R&B/Soul', key: 'genre_rnb' }, { val: 'Lo-Fi / 칠아웃', key: 'genre_lofi' }, { val: '일렉트로니카', key: 'genre_electronic' },
-           { val: '록/메탈', key: 'genre_rock' }, { val: '애니 / OST', key: 'genre_ani' }, { val: '클래식 / 재즈', key: 'genre_classic' }, { val: '뉴에이지', key: 'genre_newage' },
-           { val: '트로트', key: 'genre_trot' }, { val: '인디음악', key: 'genre_indie' }, { val: 'Beats', key: 'genre_beats' }
-       ];
-       %>
-       
-       <% genreList.forEach(g => { %>
-            <a href="/?genre=<%= encodeURIComponent(g.val) %>" style="padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; border: 1px solid <%= genreQuery === g.val ? '#ff5722' : '#444' %>; background: <%= genreQuery === g.val ? '#ff5722' : '#222' %>; color: <%= genreQuery === g.val ? '#000' : '#aaa' %>; transition: 0.2s;"><%= __(g.key) %></a>
-       <% }) %>
-    </div>
-<% } %>
+
+                <% if (typeof genreQuery !== 'undefined' && genreQuery) { %>
+                    <div style="background: #161718; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; display: flex; gap: 8px; flex-wrap: wrap;">
+                       <% 
+                       const genreList = [
+                           { val: 'K-POP', key: 'genre_kpop' }, { val: 'POP', key: 'genre_pop' }, { val: '발라드', key: 'genre_ballad' }, { val: '댄스', key: 'genre_dance' },
+                           { val: '랩/힙합', key: 'genre_rap' }, { val: 'R&B/Soul', key: 'genre_rnb' }, { val: 'Lo-Fi / 칠아웃', key: 'genre_lofi' }, { val: '일렉트로니카', key: 'genre_electronic' },
+                           { val: '록/메탈', key: 'genre_rock' }, { val: '애니 / OST', key: 'genre_ani' }, { val: '클래식 / 재즈', key: 'genre_classic' }, { val: '뉴에이지', key: 'genre_newage' },
+                           { val: '트로트', key: 'genre_trot' }, { val: '인디음악', key: 'genre_indie' }, { val: 'Beats', key: 'genre_beats' }
+                       ];
+                       %>
+                       
+                       <% genreList.forEach(g => { %>
+                            <a href="/?genre=<%= encodeURIComponent(g.val) %>" style="padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; border: 1px solid <%= genreQuery === g.val ? '#ff5722' : '#444' %>; background: <%= genreQuery === g.val ? '#ff5722' : '#222' %>; color: <%= genreQuery === g.val ? '#000' : '#aaa' %>; transition: 0.2s;"><%= __(g.key) || g.val %></a>
+                       <% }) %>
+                    </div>
+                <% } %>
+
                 <div class="chart-controls">
                     <input type="checkbox" id="checkAll" class="custom-checkbox" onchange="toggleAll(this)">
-                    <button class="control-btn" onclick="playAll()"><%= __('btn_play_all') %></button>
-                    <button class="control-btn" onclick="playSelected()"><%= __('btn_play_selected') %></button>
-                    <button class="control-btn" onclick="addSelectedToMyMusic()"><%= __('btn_add_playlist') %></button>
-                    <a href="/mymusic" class="control-btn control-my-music"><%= __('btn_my_music') %></a>
+                    <button class="control-btn" onclick="playAll()"><%= __('btn_play_all') || '▶ 전체듣기' %></button>
+                    <button class="control-btn" onclick="playSelected()"><%= __('btn_play_selected') || '▶ 선택듣기' %></button>
+                    <button class="control-btn" onclick="addSelectedToMyMusic()"><%= __('btn_add_playlist') || '+ 담기' %></button>
+                    <a href="/mymusic" class="control-btn control-my-music"><%= __('btn_my_music') || '🎵 내 음악 보관함' %></a>
                 </div>
+
                 <table class="music-list">
                     <% if (typeof displaySongs !== 'undefined' && displaySongs.length > 0) { %>
                         <% displaySongs.forEach(function(music, index) { %>
@@ -770,8 +600,8 @@ document.addEventListener('click', async (e) => {
                                 <% } %>
 
                                 <div class="action-row">
-                                    <div class="action-btn" onclick="playSingleTrack(this)">▶ 듣기</div>
-                                    <div class="action-btn" onclick="parseAndShowLyrics('<%= music._id %>', `<%= music.lyrics %>`)">📝 가사</div>
+                                    <div class="action-btn" onclick="playSingleTrack(this)"><%= __('action_play') || '▶ 듣기' %></div>
+                                    <div class="action-btn" onclick="parseAndShowLyrics('<%= music._id %>', `<%= music.lyrics %>`)"><%= __('action_lyrics') || '📝 가사' %></div>
                                     <div class="action-btn" onclick="document.getElementById('comments-<%= music._id %>').style.display = (document.getElementById('comments-<%= music._id %>').style.display === 'block') ? 'none' : 'block';">💬 댓글 <%= music.comments ? music.comments.length : 0 %></div>
         
                                     <% 
@@ -834,17 +664,19 @@ document.addEventListener('click', async (e) => {
                     </div>
                 <% } %>
                 </div> <div class="sidebar-right">
-                <h3 class="sidebar-title"><%= __('sidebar_popular') %></h3>
+                <h3 class="sidebar-title"><%= __('sidebar_popular') || '🏆 인기 아티스트' %></h3>
                 <ul class="artist-list">
-                    <% popularArtists.forEach(function(artist, idx) { %>
-                        <li class="artist-item">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span class="artist-rank"><%= idx + 1 %></span>
-                                <a href="/?search=<%= encodeURIComponent(artist._id) %>" class="artist-name"><%= artist._id %></a>
-                            </div>
-                            <span class="artist-count"><%= artist.count %>곡</span>
-                        </li>
-                    <% }); %>
+                    <% if (typeof popularArtists !== 'undefined' && popularArtists) { %>
+                        <% popularArtists.forEach(function(artist, idx) { %>
+                            <li class="artist-item">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span class="artist-rank"><%= idx + 1 %></span>
+                                    <a href="/?search=<%= encodeURIComponent(artist._id) %>" class="artist-name"><%= artist._id %></a>
+                                </div>
+                                <span class="artist-count"><%= artist.count %>곡</span>
+                            </li>
+                        <% }); %>
+                    <% } %>
                 </ul>
             
 
@@ -858,8 +690,8 @@ document.addEventListener('click', async (e) => {
         <div class="player-info">
             <img src="/logo.png" id="main-player-cover" class="player-cover" style="object-fit: contain; background: #000;">
             <div class="player-text">
-                <span id="main-player-title" class="player-title"><%= __('player_empty_title') %></span>
-                <span id="main-player-artist" class="player-artist"><%= __('player_empty_desc') %></span>
+                <span id="main-player-title" class="player-title"><%= __('player_empty_title') || '선택된 곡이 없습니다' %></span>
+                <span id="main-player-artist" class="player-artist"><%= __('player_empty_desc') || '목록에서 음악을 선택해주세요' %></span>
             </div>
         </div>
         
@@ -878,8 +710,8 @@ document.addEventListener('click', async (e) => {
         </div>
 
       <div class="player-right-placeholder">
-            <button type="button" onclick="toggleSyncLyrics()" title="실시간 가사 보기"><%= __('player_btn_lyrics') %></button>
-            <button type="button" onclick="togglePlaylist()" title="재생목록 보기"><%= __('player_btn_list') %></button>
+            <button type="button" onclick="toggleSyncLyrics()" title="실시간 가사 보기"><%= __('player_btn_lyrics') || '가사' %></button>
+            <button type="button" onclick="togglePlaylist()" title="재생목록 보기"><%= __('player_btn_list') || '목록' %></button>
         </div>
         
         <audio id="main-audio" style="display:none;" preload="auto" playsinline webkit-playsinline></audio>
@@ -1810,13 +1642,13 @@ window.addEventListener('popstate', async () => {
     <div style="font-size: 14px;">
         <a href="/privacy" 
            onclick="window.open('/privacy?t=' + Date.now(), '_blank'); return false;" 
-           style="color: #888; text-decoration: none; cursor: pointer;"><%= __('footer_privacy') %></a> 
+           style="color: #888; text-decoration: none; cursor: pointer;"><%= __('footer_privacy') || '개인정보처리방침' %></a> 
         
         <span style="margin: 0 10px;">|</span>
         
         <a href="/terms" 
            onclick="window.open('/terms?t=' + Date.now(), '_blank'); return false;" 
-           style="color: #888; text-decoration: none; cursor: pointer;"><%= __('footer_terms') %></a>
+           style="color: #888; text-decoration: none; cursor: pointer;"><%= __('footer_terms') || '이용약관' %></a>
     </div>
 </footer>
 
