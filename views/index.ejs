@@ -396,11 +396,11 @@
 
             <div class="auth-buttons">
                 <select id="smartLangSelect" onchange="window.location.href='/change-lang/' + this.value" class="lang-select">
-                    <option value="ko">🇰🇷 한국어</option>
-                    <option value="en">🇺🇸 English</option>
-                    <option value="ja">🇯🇵 日本語</option>
-                    <option value="zh">🇨🇳 中文</option>
-                </select>
+    <option value="ko" <%= typeof getLocale !== 'undefined' && getLocale() === 'ko' ? 'selected' : '' %>>🇰🇷 한국어</option>
+    <option value="en" <%= typeof getLocale !== 'undefined' && getLocale() === 'en' ? 'selected' : '' %>>🇺🇸 English</option>
+    <option value="ja" <%= typeof getLocale !== 'undefined' && getLocale() === 'ja' ? 'selected' : '' %>>🇯🇵 日本語</option>
+    <option value="zh" <%= typeof getLocale !== 'undefined' && getLocale() === 'zh' ? 'selected' : '' %>>🇨🇳 中文</option>
+</select>
 
                 <% if (user && user.role === 'admin') { %>
                     <a href="/admin" class="btn-admin">👑 관리자</a>
