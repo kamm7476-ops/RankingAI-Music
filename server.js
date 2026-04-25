@@ -603,14 +603,24 @@ app.get('/logout', (req, res) => {
 });
 
 // =========================================
-// 🌟 유저 언어 변경 스위치 (한국어 ↔ 영어)
+// 🌟 유저 언어 변경 스위치 (무한루프 방지 & 다국어 완벽 적용)
 // =========================================
 app.get('/change-lang/:lang', (req, res) => {
     const lang = req.params.lang;
-    if (['ko', 'en'].includes(lang)) {
-        res.cookie('lang', lang, { maxAge: 900000, httpOnly: true }); // 쿠키에 언어 저장
+    
+    // 1. 지원하는 4개국어 확인 후 쿠키 발급
+    if (['ko', 'en', 'ja', 'zh'].includes(lang)) {
+        // 🚨 핵심 해결: path: '/' 를 넣어야 사이트의 '모든' 화면에서 언어가 바뀝니다!
+        res.cookie('lang', lang, { maxAge: 90000000, path: '/' }); 
     }
-    res.redirect('back'); // 언어를 바꾸고 원래 있던 페이지로 새로고침
+    
+    // 2. 무한 루프(ERR_TOO_MANY_REDIRECTS) 완벽 방어 마법
+    const referer = req.get('Referer');
+    if (referer && !referer.includes('/change-lang')) {
+        res.redirect(referer); // 정상적으로 원래 보던 페이지로 얌전히 돌아감
+    } else {
+        res.redirect('/'); // 만약 길이 꼬였으면 무조건 안전한 메인 홈('/')으로 보냄
+    }
 });
 
 // =========================================
