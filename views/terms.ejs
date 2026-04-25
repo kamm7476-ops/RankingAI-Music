@@ -1,22 +1,19 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="<%= getLocale() %>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>이용약관 - RANKING AI</title>
+    <title><%= __('footer_terms') %> - RANKING AI</title>
     <style>
         body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; padding-bottom: 50px; }
         .main-header { background: #121314; border-bottom: 1px solid #222; padding: 15px 20px; text-align: center; }
         .logo { font-size: 24px; font-weight: 900; color: #ff5722; text-decoration: none; cursor: pointer; }
-        
         .terms-container { max-width: 800px; margin: 40px auto; padding: 40px; background: #161718; border: 1px solid #333; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .terms-title { color: #ff5722; font-size: 28px; font-weight: bold; margin-top: 0; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 30px; text-align: center; }
-        
         .terms-article { margin-bottom: 30px; }
         .terms-article h3 { color: #fff; font-size: 18px; margin-bottom: 15px; background: #222; padding: 10px 15px; border-radius: 8px; border-left: 4px solid #ff5722; }
         .terms-article p { color: #ccc; font-size: 15px; line-height: 1.8; margin-bottom: 10px; padding-left: 10px; word-break: keep-all; }
         .highlight { color: #ffb300; font-weight: bold; }
-        
         .btn-back { display: block; width: 200px; margin: 40px auto 0; text-align: center; background: #222; color: #fff; padding: 12px 0; border-radius: 8px; text-decoration: none; font-weight: bold; border: 1px solid #444; transition: 0.2s; }
         .btn-back:hover { background: #ff5722; color: #000; border-color: #ff5722; }
     </style>
@@ -28,41 +25,132 @@
     </header>
 
     <div class="terms-container">
-        <h1 class="terms-title">📜 서비스 이용 및 음원 거래 약관</h1>
-        
-        <div class="terms-article">
-            <h3>제 1 조 (목적)</h3>
-            <p>본 약관은 RANKING AI(이하 '회사')가 제공하는 AI 음악 차트 및 커뮤니티 서비스의 이용 조건, 창작자(업로더)와 이용자(청취자 및 구매자) 간의 권리, 의무 및 책임 사항을 규정함을 목적으로 합니다. 우리의 목표는 훌륭한 AI 음악을 널리 알리고, 누구나 아티스트가 되어 수익을 창출할 수 있는 생태계를 만드는 것입니다.</p>
-        </div>
 
-        <div class="terms-article">
-            <h3>제 2 조 (100% 무료 스트리밍 및 매장 사용 - 프리 선언)</h3>
-            <p>① <strong>개인 감상:</strong> 사이트에 등록된 모든 음원은 누구나 회원가입 없이 무료로 감상할 수 있습니다.</p>
-            <p>② <strong>매장 배경음악(BGM) 사용:</strong> 카페, 식당, 헬스장 등 오프라인 매장에서 회사의 웹사이트를 통해 음악을 재생하는 행위는 <span class="highlight">100% 무료</span>이며, 회사는 이에 대해 어떠한 저작권료나 사용료도 청구하지 않습니다.</p>
-            <p>③ <strong>홍보 목적:</strong> 이는 창작자들의 훌륭한 AI 음악을 세상에 널리 알리기 위한 회사의 핵심 철학입니다.</p>
-        </div>
+        <% if (getLocale() === 'en') { %>
+            <h1 class="terms-title">📜 Terms of Use & Music Trading</h1>
+            <div class="terms-article">
+                <h3>Article 1 (Purpose)</h3>
+                <p>These terms define the conditions for using the AI music chart and community services provided by RANKING AI (the 'Company'), as well as the rights and responsibilities between creators (uploaders) and users (listeners/buyers). Our goal is to promote great AI music and create an ecosystem where anyone can become an artist and generate revenue.</p>
+            </div>
+            <div class="terms-article">
+                <h3>Article 2 (100% Free Streaming & Business Use)</h3>
+                <p>① <strong>Personal Listening:</strong> Anyone can enjoy all music registered on the site for free without signing up.</p>
+                <p>② <strong>BGM for Businesses:</strong> Playing music through the Company's website in offline locations like cafes, restaurants, and gyms is <span class="highlight">100% free</span>. The Company does not charge any copyright or usage fees.</p>
+                <p>③ <strong>Promotion:</strong> This is our core philosophy to introduce great AI music to the world.</p>
+            </div>
+            <div class="terms-article">
+                <h3>Article 3 (Copyright & Uploader Responsibility)</h3>
+                <p>① Creators (uploaders) hold ownership or usage rights for the music they upload.</p>
+                <p>② Uploaders must <span class="highlight">comply with the copyright and commercial use policies of the AI tools (Suno, Udio, etc.)</span> used. All legal liability for violations lies with the uploader.</p>
+                <p>③ By registering music, uploaders grant the Company a free license to stream it and use it for platform promotion.</p>
+            </div>
+            <div class="terms-article">
+                <h3>Article 4 (Music Sales & License Trading)</h3>
+                <p>① <strong>Monetization:</strong> Uploaders may receive 'usage and ownership purchase offers' from others for their music.</p>
+                <p>② <strong>Types of Trade:</strong> Transactions include personal file transfers, commercial BGM usage rights, or exclusive ownership transfers for official releases, based on mutual agreement.</p>
+                <p>③ <strong>Direct Trading Principle:</strong> The Company only provides the connection system and does not take transaction fees. All financial trades and rights transfers are handled directly between parties.</p>
+            </div>
+            <div class="terms-article">
+                <h3>Article 5 (Disclaimer)</h3>
+                <p>① The Company acts as a free streaming platform and does not guarantee the quality, legality, or non-infringement of copyrighted material uploaded by members.</p>
+                <p>② The Company is not liable for payment issues, breach of contract, or copyright disputes arising during 'Music Trading'. Users must verify identities and proceed with caution.</p>
+            </div>
+            <a href="/" class="btn-back">Back to Home</a>
 
-        <div class="terms-article">
-            <h3>제 3 조 (저작권 및 업로더의 책임)</h3>
-            <p>① 사이트에 음원을 업로드하는 창작자(업로더)는 해당 음원의 소유권 또는 사용 권한을 가집니다.</p>
-            <p>② 업로더는 곡 생성에 사용한 <span class="highlight">AI 프로그램(Suno, Udio 등)의 자체 저작권 및 상업적 이용 규정을 반드시 준수</span>해야 합니다. 이를 위반하여 발생하는 모든 법적 책임은 업로더 본인에게 있습니다.</p>
-            <p>③ 업로더는 사이트에 음원을 등록함과 동시에, 회사가 해당 음원을 사이트 내에서 스트리밍하고 플랫폼 홍보 목적으로 사용하는 것을 무상으로 허락한 것으로 간주합니다.</p>
-        </div>
+        <% } else if (getLocale() === 'ja') { %>
+            <h1 class="terms-title">📜 利用規約および音源取引規約</h1>
+            <div class="terms-article">
+                <h3>第1条（目的）</h3>
+                <p>本規約は、RANKING AI（以下「会社」）が提供するAI音楽チャートおよびコミュニティサービスの利用条件、クリエイター（アップローダー）と利用者（リスナーおよび購入者）間の権利、義務、責任事項を規定することを目的とします。私たちの目標は、優れたAI音楽を広め、誰もがアーティストになって収益を創出できるエコシステムを作ることです。</p>
+            </div>
+            <div class="terms-article">
+                <h3>第2条（100％無料ストリーミングおよび店舗使用 - フリー宣言）</h3>
+                <p>① <strong>個人鑑賞：</strong>サイトに登録されたすべての音源は、誰でも会員登録なしで無料で鑑賞できます。</p>
+                <p>② <strong>店舗用BGM使用：</strong>カフェ、レストラン、ジムなどのオフライン店舗で、当サイトを通じて音楽を再生する行為は<span class="highlight">100％無料</span>であり、会社はいかなる著作権料や使用料も請求しません。</p>
+                <p>③ <strong>広報目的：</strong>これはクリエイターの優れたAI音楽を世界に広めるための会社の核心的な哲学です。</p>
+            </div>
+            <div class="terms-article">
+                <h3>第3条（著作権およびアップローダーの責任）</h3>
+                <p>① 音源をアップロードするクリエイターは、該当音源の所有権または使用権限を持ちます。</p>
+                <p>② アップローダーは、曲の生成に使用した<span class="highlight">AIプログラム（Suno、Udioなど）の著作権および商業的利用規定を必ず遵守</span>しなければなりません。これに違反して発生するすべての法的責任はアップローダー本人にあります。</p>
+                <p>③ 音源を登録すると同時に、会社が該当音源をサイト内でストリーミングし、プラットフォームの広報目的で使用することを無償で許諾したものとみなします。</p>
+            </div>
+            <div class="terms-article">
+                <h3>第4条（音源販売および使用権取引）</h3>
+                <p>① <strong>収益創出：</strong>アップローダーは、登録した音源について、他者から「使用権および所有権の購入提案」を受けることができます。</p>
+                <p>② <strong>取引の種類：</strong>取引は個人用ファイル送信、商業映像のBGM使用権、正式な音源発売のための独占所有権譲渡など、当事者間の協議により自由に行われます。</p>
+                <p>③ <strong>直取引の原則：</strong>会社はクリエイターと購入者をつなぐシステムのみを提供し、取引手数料は受け取りません。すべての金銭的取引と権利譲渡は当事者間の合意によって行われます。</p>
+            </div>
+            <div class="terms-article">
+                <h3>第5条（免責条項）</h3>
+                <p>① 会社は無料ストリーミングプラットフォームとしての役割を果たし、会員がアップロードした音源の品質、合法性、著作権侵害の有無について保証しません。</p>
+                <p>② 「音源取引」の過程で発生する決済問題、契約不履行、著作権紛争などについて、会社は一切の法的責任を負いません。</p>
+            </div>
+            <a href="/" class="btn-back">ホームに戻る</a>
 
-        <div class="terms-article">
-            <h3>제 4 조 (음원 판매 및 사용권 거래)</h3>
-            <p>① <strong>수익 창출:</strong> 업로더는 자신이 등록한 음원에 대해 타인으로부터 '사용권 및 소유권 구매 제안'을 받을 수 있습니다.</p>
-            <p>② <strong>거래의 종류:</strong> 거래는 개인 소장용 파일 전송, 상업적 영상의 BGM 사용권 허락, 정식 음원 발매를 위한 독점 소유권 양도 등 당사자 간 협의에 따라 자유롭게 이루어집니다.</p>
-            <p>③ <strong>직거래 원칙:</strong> 회사는 창작자와 구매자를 연결해 주는 시스템만 제공하며 거래 수수료를 수취하지 않습니다. 모든 금전적 거래와 권리 양도는 당사자 간의 합의와 계약을 통해 이루어집니다.</p>
-        </div>
+        <% } else if (getLocale() === 'zh') { %>
+            <h1 class="terms-title">📜 服务利用及音源交易条款</h1>
+            <div class="terms-article">
+                <h3>第一条（目的）</h3>
+                <p>本条款旨在规定由 RANKING AI（以下简称“公司”）提供的 AI 音乐排行榜及社区服务的利用条件，以及创作者（上传者）与用户（听众及购买者）之间的权利、义务和责任事项。我们的目标是推广优秀的 AI 音乐，让每个人都能成为艺术家并创造收益。</p>
+            </div>
+            <div class="terms-article">
+                <h3>第二条（100% 免费串流及商家使用 - 免费宣言）</h3>
+                <p>① <strong>个人欣赏：</strong> 任何人均可免费欣赏网站上注册的所有音源，无需注册会员。</p>
+                <p>② <strong>商家背景音乐 (BGM) 使用：</strong> 在咖啡馆、餐厅、健身房等线下商家通过公司网站播放音乐的行为是 <span class="highlight">100% 免费</span> 的，公司不会为此收取任何版权费或使用费。</p>
+                <p>③ <strong>宣传目的：</strong> 这是公司为了向世界推广创作者优秀的 AI 音乐的核心理念。</p>
+            </div>
+            <div class="terms-article">
+                <h3>第三条（版权及上传者的责任）</h3>
+                <p>① 上传音源的创作者（上传者）拥有该音源的所有权或使用权限。</p>
+                <p>② 上传者必须 <span class="highlight">遵守所使用的 AI 程序（Suno, Udio 等）的版权及商业利用规定</span>。违反规定产生的所有法律责任由上传者本人承担。</p>
+                <p>③ 在注册音源的同时，视为上传者免费许可公司在网站内进行串流并出于平台宣传目的使用该音源。</p>
+            </div>
+            <div class="terms-article">
+                <h3>第四条（音源销售及使用权交易）</h3>
+                <p>① <strong>创造收益：</strong> 上传者可以就其注册的音源收到他人的“使用权及所有权购买建议”。</p>
+                <p>② <strong>交易种类：</strong> 交易根据当事人之间的协商自由进行，包括个人收藏用文件传输、商业视频的 BGM 使用权许可、为正式发布音源而进行的独占所有权转让等。</p>
+                <p>③ <strong>直销原则：</strong> 公司仅提供连接创作者和购买者的系统，不收取交易手续费。所有金钱交易和权利转让均通过当事人之间的合意和合同进行。</p>
+            </div>
+            <div class="terms-article">
+                <h3>第五条（免责条款）</h3>
+                <p>① 公司履行作为免费串流平台的作用，不对会员上传音源的质量、合法性、是否侵犯他人版权提供保证。</p>
+                <p>② 对于在“音源交易”过程中产生的支付问题、不履行合同、版权纠纷等，公司不承担任何法律责任。</p>
+            </div>
+            <a href="/" class="btn-back">返回首页</a>
 
-        <div class="terms-article">
-            <h3>제 5 조 (면책 조항)</h3>
-            <p>① 회사는 무료 스트리밍 플랫폼으로서의 역할을 다하며, 회원이 업로드한 음원의 품질, 합법성, 타인의 저작권 침해 여부에 대해 보증하지 않습니다.</p>
-            <p>② 창작자와 구매자 간의 '음원 거래' 과정에서 발생하는 결제 문제, 계약 불이행, 저작권 분쟁 등에 대해 회사는 어떠한 법적 책임도 지지 않습니다. 거래 시 양 당사자는 상호 신원을 명확히 확인하고 신중하게 진행해야 합니다.</p>
-        </div>
+        <% } else { %>
+            <h1 class="terms-title">📜 서비스 이용 및 음원 거래 약관</h1>
+            <div class="terms-article">
+                <h3>제 1 조 (목적)</h3>
+                <p>본 약관은 RANKING AI(이하 '회사')가 제공하는 AI 음악 차트 및 커뮤니티 서비스의 이용 조건, 창작자(업로더)와 이용자(청취자 및 구매자) 간의 권리, 의무 및 책임 사항을 규정함을 목적으로 합니다. 우리의 목표는 훌륭한 AI 음악을 널리 알리고, 누구나 아티스트가 되어 수익을 창출할 수 있는 생태계를 만드는 것입니다.</p>
+            </div>
+            <div class="terms-article">
+                <h3>제 2 조 (100% 무료 스트리밍 및 매장 사용 - 프리 선언)</h3>
+                <p>① <strong>개인 감상:</strong> 사이트에 등록된 모든 음원은 누구나 회원가입 없이 무료로 감상할 수 있습니다.</p>
+                <p>② <strong>매장 배경음악(BGM) 사용:</strong> 카페, 식당, 헬스장 등 오프라인 매장에서 회사의 웹사이트를 통해 음악을 재생하는 행위는 <span class="highlight">100% 무료</span>이며, 회사는 이에 대해 어떠한 저작권료나 사용료도 청구하지 않습니다.</p>
+                <p>③ <strong>홍보 목적:</strong> 이는 창작자들의 훌륭한 AI 음악을 세상에 널리 알리기 위한 회사의 핵심 철학입니다.</p>
+            </div>
+            <div class="terms-article">
+                <h3>제 3 조 (저작권 및 업로더의 책임)</h3>
+                <p>① 사이트에 음원을 업로드하는 창작자(업로더)는 해당 음원의 소유권 또는 사용 권한을 가집니다.</p>
+                <p>② 업로더는 곡 생성에 사용한 <span class="highlight">AI 프로그램(Suno, Udio 등)의 자체 저작권 및 상업적 이용 규정을 반드시 준수</span>해야 합니다. 이를 위반하여 발생하는 모든 법적 책임은 업로더 본인에게 있습니다.</p>
+                <p>③ 업로더는 사이트에 음원을 등록함과 동시에, 회사가 해당 음원을 사이트 내에서 스트리밍하고 플랫폼 홍보 목적으로 사용하는 것을 무상으로 허락한 것으로 간주합니다.</p>
+            </div>
+            <div class="terms-article">
+                <h3>제 4 조 (음원 판매 및 사용권 거래)</h3>
+                <p>① <strong>수익 창출:</strong> 업로더는 자신이 등록한 음원에 대해 타인으로부터 '사용권 및 소유권 구매 제안'을 받을 수 있습니다.</p>
+                <p>② <strong>거래의 종류:</strong> 거래는 개인 소장용 파일 전송, 상업적 영상의 BGM 사용권 허락, 정식 음원 발매를 위한 독점 소유권 양도 등 당사자 간 협의에 따라 자유롭게 이루어집니다.</p>
+                <p>③ <strong>직거래 원칙:</strong> 회사는 창작자와 구매자를 연결해 주는 시스템만 제공하며 거래 수수료를 수취하지 않습니다. 모든 금전적 거래와 권리 양도는 당사자 간의 합의와 계약을 통해 이루어집니다.</p>
+            </div>
+            <div class="terms-article">
+                <h3>제 5 조 (면책 조항)</h3>
+                <p>① 회사는 무료 스트리밍 플랫폼으로서의 역할을 다하며, 회원이 업로드한 음원의 품질, 합법성, 타인의 저작권 침해 여부에 대해 보증하지 않습니다.</p>
+                <p>② 창작자와 구매자 간의 '음원 거래' 과정에서 발생하는 결제 문제, 계약 불이행, 저작권 분쟁 등에 대해 회사는 어떠한 법적 책임도 지지 않습니다. 거래 시 양 당사자는 상호 신원을 명확히 확인하고 신중하게 진행해야 합니다.</p>
+            </div>
+            <a href="/" class="btn-back">메인으로 돌아가기</a>
+        <% } %>
 
-       <a href="/" class="btn-back">메인으로 돌아가기</a>
     </div>
 
 </body>

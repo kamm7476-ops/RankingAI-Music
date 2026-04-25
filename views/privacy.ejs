@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="<%= getLocale() %>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>개인정보처리방침 - RANKING AI</title>
+    <title><%= __('footer_privacy') %> - RANKING AI</title>
     <style>
         body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; padding-bottom: 50px; }
         .main-header { background: #121314; border-bottom: 1px solid #222; padding: 15px 20px; text-align: center; }
@@ -22,22 +22,77 @@
     <header class="main-header">
         <a href="/" class="logo">RANKING AI</a>
     </header>
+
     <div class="terms-container">
-        <h1 class="terms-title">🔒 개인정보처리방침</h1>
-        <div class="terms-article">
-            <h3>1. 개인정보 수집 항목</h3>
-            <p>RANKING AI는 서비스 제공을 위해 최소한의 개인정보(구글 닉네임, 프로필 사진 등)를 수집합니다.</p>
-        </div>
-        <div class="terms-article">
-            <h3>2. 쿠키 및 광고 안내 (구글 애드센스 관련)</h3>
-            <p>① 본 사이트는 사용자 경험 개선 및 광고 게재를 위해 <span class="highlight">쿠키(Cookie)</span>를 사용합니다.</p>
-            <p>② 구글(Google) 등 제3자 제공업체는 사용자의 이전 방문 기록을 바탕으로 <span class="highlight">맞춤형 광고</span>를 게재할 수 있습니다.</p>
-        </div>
-        <div class="terms-article">
-            <h3>3. 정보의 보유 및 파기</h3>
-            <p>이용자의 개인정보는 원칙적으로 목적이 달성되면 지체 없이 파기하며, 법령에서 정한 기간 동안만 보관합니다.</p>
-        </div>
-        <a href="/" class="btn-back">메인으로 돌아가기</a>
+        <% if (getLocale() === 'en') { %>
+            <h1 class="terms-title">🔒 Privacy Policy</h1>
+            <div class="terms-article">
+                <h3>1. Personal Information Collection</h3>
+                <p>RANKING AI collects minimum personal information (Google nickname, profile picture, etc.) to provide services.</p>
+            </div>
+            <div class="terms-article">
+                <h3>2. Cookies and Advertisements (Google AdSense)</h3>
+                <p>① This site uses <span class="highlight">Cookies</span> to improve user experience and display advertisements.</p>
+                <p>② Third-party vendors, including Google, use cookies to serve <span class="highlight">personalized ads</span> based on a user's prior visits.</p>
+            </div>
+            <div class="terms-article">
+                <h3>3. Retention and Destruction of Information</h3>
+                <p>In principle, personal information is destroyed without delay once the purpose is achieved, and is kept only for the period prescribed by law.</p>
+            </div>
+            <a href="/" class="btn-back">Back to Home</a>
+
+        <% } else if (getLocale() === 'ja') { %>
+            <h1 class="terms-title">🔒 プライバシーポリシー</h1>
+            <div class="terms-article">
+                <h3>1. 個人情報の収集項目</h3>
+                <p>RANKING AIは、サービス提供のために最小限の個人情報（Googleのニックネーム、プロフィール写真など）を収集します。</p>
+            </div>
+            <div class="terms-article">
+                <h3>2. クッキーおよび広告のご案内（Googleアドセンス関連）</h3>
+                <p>① 本サイトは、ユーザー体験の向上および広告掲載のために<span class="highlight">クッキー（Cookie）</span>を使用します。</p>
+                <p>② Googleなどの第三者配信事業者は、ユーザーの過去の訪問記録に基づいて<span class="highlight">パーソナライズ広告</span>を掲載することがあります。</p>
+            </div>
+            <div class="terms-article">
+                <h3>3. 情報の保有および破棄</h3>
+                <p>利用者の個人情報は、原則として目的が達成された後、遅滞なく破棄され、法令で定められた期間のみ保管されます。</p>
+            </div>
+            <a href="/" class="btn-back">ホームに戻る</a>
+
+        <% } else if (getLocale() === 'zh') { %>
+            <h1 class="terms-title">🔒 隐私政策</h1>
+            <div class="terms-article">
+                <h3>1. 个人信息收集项目</h3>
+                <p>RANKING AI 收集最少的个人信息（Google 昵称、个人资料图片等）以提供服务。</p>
+            </div>
+            <div class="terms-article">
+                <h3>2. Cookie 及广告说明 (Google AdSense 相关)</h3>
+                <p>① 本网站使用 <span class="highlight">Cookie</span> 来改善用户体验并投放广告。</p>
+                <p>② 包括 Google 在内的第三方供应商会根据用户之前的访问记录投放 <span class="highlight">个性化广告</span>。</p>
+            </div>
+            <div class="terms-article">
+                <h3>3. 信息的保留与销毁</h3>
+                <p>原则上，个人信息在达到目的后会立即销毁，且仅在法律规定的期限内保存。</p>
+            </div>
+            <a href="/" class="btn-back">返回首页</a>
+
+        <% } else { %>
+            <h1 class="terms-title">🔒 개인정보처리방침</h1>
+            <div class="terms-article">
+                <h3>1. 개인정보 수집 항목</h3>
+                <p>RANKING AI는 서비스 제공을 위해 최소한의 개인정보(구글 닉네임, 프로필 사진 등)를 수집합니다.</p>
+            </div>
+            <div class="terms-article">
+                <h3>2. 쿠키 및 광고 안내 (구글 애드센스 관련)</h3>
+                <p>① 본 사이트는 사용자 경험 개선 및 광고 게재를 위해 <span class="highlight">쿠키(Cookie)</span>를 사용합니다.</p>
+                <p>② 구글(Google) 등 제3자 제공업체는 사용자의 이전 방문 기록을 바탕으로 <span class="highlight">맞춤형 광고</span>를 게재할 수 있습니다.</p>
+            </div>
+            <div class="terms-article">
+                <h3>3. 정보의 보유 및 파기</h3>
+                <p>이용자의 개인정보는 원칙적으로 목적이 달성되면 지체 없이 파기하며, 법령에서 정한 기간 동안만 보관합니다.</p>
+            </div>
+            <a href="/" class="btn-back">메인으로 돌아가기</a>
+        <% } %>
+
     </div>
 </body>
 </html>
