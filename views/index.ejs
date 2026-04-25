@@ -581,20 +581,20 @@
                                     <% if (user && (user.role === 'admin' || user.id === music.uploader) && music._id !== "dummy") { %>
                                         <div style="margin-left: 10px; display: inline-flex; gap: 8px; align-items: center; background: rgba(0,0,0,0.5); padding: 3px 10px; border-radius: 6px; border: 1px solid #444;">
                                             <% if (user.role === 'admin') { %><span title="관리자 권한" style="font-size: 10px;">👑</span><% } %>
-                                            <a href="/edit/<%= music._id %>" style="color: #00e5ff; font-size: 11px; font-weight: bold; text-decoration: none; cursor: pointer;">수정</a>
+                                            <a href="/edit/<%= music._id %>" style="color: #00e5ff; font-size: 11px; font-weight: bold; text-decoration: none; cursor: pointer;"><%= __('action_edit') || '수정' %></a>
                                             <span style="color: #555; font-size: 10px;">|</span>
-                                            <form action="/delete-music/<%= music._id %>" method="POST" onsubmit="return confirm('이 음원을 차트에서 정말 삭제하시겠습니까?');" style="display: flex; align-items: center; margin: 0;">
-                                                <button type="submit" style="background: none; border: none; color: #ff4a4a; font-size: 11px; font-weight: bold; cursor: pointer; padding: 0; font-family: inherit;">삭제</button>
+                                            <form action="/delete-music/<%= music._id %>" method="POST" onsubmit="return confirm('<%= __('yt_confirm_delete') || '정말 삭제하시겠습니까?' %>');" style="display: flex; align-items: center; margin: 0;">
+                                                <button type="submit" style="background: none; border: none; color: #ff4a4a; font-size: 11px; font-weight: bold; cursor: pointer; padding: 0; font-family: inherit;"><%= __('action_delete') || '삭제' %></button>
                                             </form>
                                         </div>
                                     <% } %>
                                 </div>
-                                <div class="singer"><%= music.artist %> (<%= music.genre %>) <span class="ai-badge">🎵 <%= music.aiTool %></span> <span style="margin-left:10px; color:#ff5722; font-size:12px;">🎧 재생 <%= music.views || 0 %>회</span></div>
+                                <div class="singer"><%= music.artist %> (<%= music.genre %>) <span class="ai-badge">🎵 <%= music.aiTool %></span> <span style="margin-left:10px; color:#ff5722; font-size:12px;">🎧 <%= __('txt_play') || '재생' %> <%= music.views || 0 %></span></div>
                                 
                                 <% if (user && user.id !== music.uploader && music._id !== "dummy") { %>
                                     <div style="margin-top: 12px;">
                                         <button type="button" onclick="sendPurchaseMsg('<%= music.uploader %>', '<%= music.name %>')" style="width: 100%; background: rgba(255, 179, 0, 0.1); border: 1px solid #ffb300; color: #ffb300; padding: 8px 0; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; text-align: center;">
-                                            🤝 이 곡의 작곡가에게 구매/사용 제안하기
+                                            🤝 <%= __('btn_proposal') || '이 곡의 작곡가에게 구매/사용 제안하기' %>
                                         </button>
                                     </div>
                                 <% } %>
@@ -602,7 +602,7 @@
                                 <div class="action-row">
                                     <div class="action-btn" onclick="playSingleTrack(this)"><%= __('action_play') || '▶ 듣기' %></div>
                                     <div class="action-btn" onclick="parseAndShowLyrics('<%= music._id %>', `<%= music.lyrics %>`)"><%= __('action_lyrics') || '📝 가사' %></div>
-                                    <div class="action-btn" onclick="document.getElementById('comments-<%= music._id %>').style.display = (document.getElementById('comments-<%= music._id %>').style.display === 'block') ? 'none' : 'block';">💬 댓글 <%= music.comments ? music.comments.length : 0 %></div>
+                                    <div class="action-btn" onclick="document.getElementById('comments-<%= music._id %>').style.display = (document.getElementById('comments-<%= music._id %>').style.display === 'block') ? 'none' : 'block';">💬 <%= __('action_comments') || '댓글' %> <%= music.comments ? music.comments.length : 0 %></div>
         
                                     <% 
                                         let isLiked = false;
@@ -611,7 +611,7 @@
                                         }
                                     %>
                                     <div class="action-btn" id="like-btn-<%= music._id %>" onclick="likeMusic('<%= music._id %>')" style="<%= isLiked ? 'color:#ff4a4a; border-color:#ff4a4a;' : '' %>">
-                                        <%= isLiked ? '❤️' : '🤍' %> 좋아요 <span id="like-count-<%= music._id %>"><%= music.likes || 0 %></span>
+                                        <%= isLiked ? '❤️' : '🤍' %> <%= __('action_likes') || '좋아요' %> <span id="like-count-<%= music._id %>"><%= music.likes || 0 %></span>
                                     </div>
                                 </div>
 
@@ -627,21 +627,21 @@
                                                         <span style="font-size:14px; margin-left:8px; color:#ddd;"><%= c.text %></span>
                                                     </div>
                                                     <% if (user && (user.role === 'admin' || user.id === c.author)) { %>
-                                                        <form action="/delete-music-comment/<%= music._id %>/<%= c._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('이 댓글을 삭제할까요?');">
-                                                            <button type="submit" style="background: none; border: none; color: #ff4a4a; font-size: 11px; cursor: pointer;">❌삭제</button>
+                                                        <form action="/delete-music-comment/<%= music._id %>/<%= c._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('<%= __('yt_confirm_delete') || '삭제할까요?' %>');">
+                                                            <button type="submit" style="background: none; border: none; color: #ff4a4a; font-size: 11px; cursor: pointer;">❌ <%= __('action_delete') || '삭제' %></button>
                                                         </form>
                                                     <% } %>
                                                 </div>
                                             <% }); %>
                                         <% } else { %>
-                                            <p style="font-size:13px; color:#777;">아직 댓글이 없습니다.</p>
+                                            <p style="font-size:13px; color:#777;"><%= __('board_no_comment') || '아직 댓글이 없습니다.' %></p>
                                         <% } %>
                                     </div>
                                     
                                     <% if (music._id !== "dummy") { %>
                                         <form action="/add-comment/<%= music._id %>" method="POST" style="display:flex; gap:10px;">
-                                            <input type="text" name="commentText" placeholder="댓글..." style="flex:1; padding:10px; border-radius:6px; border:1px solid #444; background:#222; color:white;" required>
-                                            <button type="submit" style="background:#ff5722; color:black; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer;">등록</button>
+                                            <input type="text" name="commentText" placeholder="<%= __('ph_comment') || '댓글...' %>" style="flex:1; padding:10px; border-radius:6px; border:1px solid #444; background:#222; color:white;" required>
+                                            <button type="submit" style="background:#ff5722; color:black; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer;"><%= __('btn_submit') || '등록' %></button>
                                         </form>
                                     <% } %>
                                 </div>
@@ -649,7 +649,7 @@
                         </tr>
                         <% }); %>
                     <% } else { %>
-                        <tr><td colspan="4" style="text-align:center; padding:100px; color:#555;">검색된 곡이 없습니다.</td></tr>
+                        <tr><td colspan="4" style="text-align:center; padding:100px; color:#555;"><%= __('no_search_result') || '검색된 곡이 없습니다.' %></td></tr>
                     <% } %>
                 </table>
 
@@ -663,7 +663,9 @@
                         <% } %>
                     </div>
                 <% } %>
-                </div> <div class="sidebar-right">
+            </div> 
+            
+            <div class="sidebar-right">
                 <h3 class="sidebar-title"><%= __('sidebar_popular') || '🏆 인기 아티스트' %></h3>
                 <ul class="artist-list">
                     <% if (typeof popularArtists !== 'undefined' && popularArtists) { %>
@@ -673,13 +675,11 @@
                                     <span class="artist-rank"><%= idx + 1 %></span>
                                     <a href="/?search=<%= encodeURIComponent(artist._id) %>" class="artist-name"><%= artist._id %></a>
                                 </div>
-                                <span class="artist-count"><%= artist.count %>곡</span>
+                                <span class="artist-count"><%= artist.count %><%= __('txt_songs') || '곡' %></span>
                             </li>
                         <% }); %>
                     <% } %>
                 </ul>
-            
-
             </div>
         </div>
     </div>
