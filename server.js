@@ -6,6 +6,7 @@ const path = require('path');
 const multer = require('multer');
 const session = require('express-session');
 const cookieParser = require('cookie-parser'); // 🌟 1. 이거 한 줄 추가!
+const i18n = require('i18n');
 const nodemailer = require('nodemailer'); // 🌟 이메일 우체부 소환!
 
 const passport = require('passport');
@@ -229,6 +230,21 @@ app.use(async (req, res, next) => {
     }
     next();
 });
+
+// =========================================
+// 🌟 다국어(i18n) 번역 엔진 셋팅
+// =========================================
+i18n.configure({
+    locales: ['ko', 'en', 'ja', 'zh'], // 지원할 언어 목록
+    directory: path.join(__dirname, 'locales'), // 사전 파일이 있는 폴더 경로
+    defaultLocale: 'ko', // 기본 언어는 한국어
+    cookie: 'lang', // 'lang'이라는 이름의 쿠키로 유저의 언어를 기억
+    objectNotation: true
+});
+
+// 익스프레스(앱)에 번역 엔진 최종 장착!
+app.use(i18n.init);
+
 
 // =========================================
 // 📈 방문자 수 카운터 마법 (무조건 라우터들보다 위에 있어야 함!)
@@ -584,6 +600,17 @@ app.post('/login', async (req, res) => {
 
 app.get('/logout', (req, res) => {
   req.session.destroy(() => { res.redirect('/'); });
+});
+
+// =========================================
+// 🌟 유저 언어 변경 스위치 (한국어 ↔ 영어)
+// =========================================
+app.get('/change-lang/:lang', (req, res) => {
+    const lang = req.params.lang;
+    if (['ko', 'en'].includes(lang)) {
+        res.cookie('lang', lang, { maxAge: 900000, httpOnly: true }); // 쿠키에 언어 저장
+    }
+    res.redirect('back'); // 언어를 바꾸고 원래 있던 페이지로 새로고침
 });
 
 // =========================================
