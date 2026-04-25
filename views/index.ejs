@@ -335,6 +335,36 @@
 </head>
 <body>
 
+<%
+  // 🎵 DB에 저장된 한글 장르를 다국어 키값으로 변환해주는 마법의 번역기
+  function getGenreKey(dbGenre) {
+      const genreMap = {
+          "K-POP": "genre_kpop",
+          "POP": "genre_pop",
+          "발라드": "genre_ballad",
+          "댄스": "genre_dance",
+          "랩/힙합": "genre_rap",
+          "R&B/Soul": "genre_rnb",
+          "Lo-Fi / 칠아웃": "genre_lofi",
+          "Lo-Fi / Chillout": "genre_lofi",
+          "일렉트로니카": "genre_electronic",
+          "일렉트로닉": "genre_electronic",
+          "록/메탈": "genre_rock",
+          "락/메탈": "genre_rock",
+          "애니 / OST": "genre_ani",
+          "클래식 / 재즈": "genre_classic",
+          "뉴에이지": "genre_newage",
+          "트로트": "genre_trot",
+          "인디음악": "genre_indie",
+          "인디": "genre_indie",
+          "Beats": "genre_beats",
+          "비트": "genre_beats"
+      };
+      // 매칭되는 게 있으면 키값을 반환, 없으면 원래 한글 그대로 출력
+      return genreMap[dbGenre] || dbGenre;
+  }
+%>
+
    <% if (typeof popup !== 'undefined' && popup && popup.isActive) { %>
     <div id="globalPopupOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:none; justify-content:center; align-items:center; z-index:1000000; backdrop-filter:blur(5px); padding:20px; box-sizing:border-box;">
         <div id="globalPopupBox" style="background:#161718; border:2px solid #ff5722; border-radius:15px; width:100%; max-width:400px; box-shadow:0 15px 50px rgba(0,0,0,0.8); overflow:hidden; position:relative; display:flex; flex-direction:column;">
@@ -590,7 +620,7 @@
                                         </div>
                                     <% } %>
                                 </div>
-                                <div class="singer"><%= music.artist %> (<%= music.genre %>) <span class="ai-badge">🎵 <%= music.aiTool %></span> <span style="margin-left:10px; color:#ff5722; font-size:12px;">🎧 <%= __('txt_play') || '재생' %> <%= music.views || 0 %></span></div>
+                                <div class="singer"><%= music.artist %> (<%= __(getGenreKey(music.genre)) || music.genre %>) <span class="ai-badge">🎵 <%= music.aiTool %></span> <span style="margin-left:10px; color:#ff5722; font-size:12px;">🎧 <%= __('txt_play') || '재생' %> <%= music.views || 0 %></span></div>
                                 
                                 <% if (user && user.id !== music.uploader && music._id !== "dummy") { %>
                                     <div style="margin-top: 12px;">
