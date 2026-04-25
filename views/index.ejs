@@ -541,7 +541,9 @@
         box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         gap: 15px;
     ">
-        <div style="background: rgba(255, 87, 34, 0.08); border: 1px solid rgba(255, 87, 34, 0.2); border-radius: 16px; padding: 12px 20px; margin: 20px 0 30px 0; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); gap: 15px;">
+        <% if (user) { %>
+    <% } else { %>
+    <div style="background: rgba(255, 87, 34, 0.08); border: 1px solid rgba(255, 87, 34, 0.2); border-radius: 16px; padding: 12px 20px; margin: 20px 0 30px 0; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); gap: 15px;">
         <div style="display: flex; align-items: center; gap: 15px;">
             <div style="font-size: 22px; background: rgba(255,255,255,0.05); width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">🔒</div>
             <div>
@@ -553,22 +555,21 @@
                 </p>
             </div>
         </div>
-        
-        <button onclick="location.href='/login'" style="
-            background: #ff5722; 
-            color: #000; 
-            padding: 10px 24px; 
-            border: none;
-            border-radius: 30px; 
-            font-weight: 800; 
-            font-size: 14px; 
-            cursor: pointer;
-            white-space: nowrap;
-            transition: 0.2s;
-            box-shadow: 0 4px 12px rgba(255, 87, 34, 0.3);
-        " onmouseover="this.style.background='#ff7043'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#ff5722'; this.style.transform='translateY(0)'">
+        <button onclick="location.href='/login'" style="background: #ff5722; color: #000; padding: 10px 24px; border: none; border-radius: 30px; font-weight: 800; font-size: 14px; cursor: pointer; white-space: nowrap; transition: 0.2s; box-shadow: 0 4px 12px rgba(255, 87, 34, 0.3);" onmouseover="this.style.background='#ff7043'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#ff5722'; this.style.transform='translateY(0)'">
             <%= __('btn_login') || '로그인' %>
         </button>
+    </div>
+<% } %>
+
+<% /* 🚨 아래 페이지네이션 에러 방지 코드까지 포함했습니다 */ %>
+<% if (typeof isMainChart !== 'undefined' && !isMainChart && typeof displaySongs !== 'undefined' && displaySongs.length > 100) { %>
+    <div class="pagination-container" style="text-align:center; margin-top:40px; margin-bottom:40px;">
+        <% const totalPages = Math.ceil(displaySongs.length / 100); %>
+        <% for(let i=1; i<=totalPages; i++) { %>
+            <button class="page-btn <%= i === 1 ? 'active' : '' %>" 
+                    style="background:<%= i === 1 ? '#ff5722' : '#222' %>; color:<%= i === 1 ? '#000' : '#aaa' %>; font-weight:<%= i === 1 ? 'bold' : 'normal' %>; border:1px solid <%= i === 1 ? '#ff5722' : '#333' %>; padding:8px 14px; margin:0 4px; border-radius:6px; cursor:pointer; transition:0.2s;"
+                    onclick="changeSongPage(<%= i %>)"><%= i %></button>
+        <% } %>
     </div>
 <% } %>
             let currentTitle = "🏆 RANKING AI 챠트 TOP 100";
