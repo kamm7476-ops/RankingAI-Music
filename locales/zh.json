@@ -1,11 +1,17 @@
 {
-  "site_title": "RANKING AI 综合控制室",
-  "menu_home": "首页",
-  "menu_chart": "排行榜",
+  "menu_chart": "RANKING AI 排行榜",
+  "menu_latest": "最新音乐",
+  "menu_genre": "风格分类",
+  "menu_bgm": "🎧场景BGM",
+  "menu_app_install": "📲安装应用",
+  "menu_youtube": "YouTube",
+  "menu_shorts": "Shorts",
   "menu_community": "社区",
   "btn_login": "登录",
   "btn_signup": "注册",
+  "btn_logout": "登出",
+  "welcome_user": "您好",
   "popup_title": "Step into a Whole New World of AI Music 🚀",
   "popup_desc": "立即注册，向全世界分享并销售您的专属AI音乐！",
-  "btn_today_pick": "收听今日编辑推荐歌曲"
+  "btn_today_pick": "收听今日编辑推荐"
 }
