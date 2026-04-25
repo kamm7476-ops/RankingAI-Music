@@ -1,22 +1,32 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="<%= typeof getLocale !== 'undefined' ? getLocale() : 'ko' %>">
 <head>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5112383847606285"
      crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>유튜브 모아보기 - RANKING AI</title>
+    <title><%= __('menu_youtube') || '유튜브 모아보기' %> - RANKING AI</title>
     <style>
         body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; padding-bottom: 100px; }
         a { text-decoration: none; color: inherit; }
 
-        /* 네비게이션 & 헤더 (메인과 동일) */
+        /* 🌟 네비게이션 & 헤더 (메인과 완벽히 동일하게 CSS 복사) */
         .main-header { background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
-        .header-top { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; border-bottom: 1px solid #1a1b1c; }
-        .logo { font-size: 28px; font-weight: 900; color: #ff5722; letter-spacing: -1px; } 
-        .auth-buttons { display: flex; gap: 20px; align-items: center; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #1a1b1c; gap: 10px; flex-wrap: nowrap; }
+        .logo-img { height: 50px; max-width: 100%; cursor: pointer; object-fit: contain; flex-shrink: 0; }
+        
+        .top-search-form { display: flex; align-items: center; background: #222 !important; border: 2px solid #ff5722; border-radius: 25px; padding: 5px 12px; flex: 1; max-width: 400px; margin: 0; min-width: 0; }
+        .top-search-input { background: transparent !important; border: none !important; color: white !important; outline: none; flex: 1; font-size: 14px; padding: 5px; min-width: 0; }
+        .top-search-input::placeholder { color: #aaa; }
+        .top-search-btn { background: none; border: none; color: #ff5722; font-weight: bold; cursor: pointer; font-size: 16px; padding: 0 10px; }
+
+        .auth-buttons { display: flex; gap: 15px; align-items: center; flex-shrink: 0; }
+        .lang-select { padding: 7px 14px; background: #222; color: #fff; border: 2px solid #ff5722; border-radius: 20px; font-weight: bold; font-size: 13px; outline: none; cursor: pointer; transition: 0.2s; }
+        .lang-select:hover { background: #ff5722; color: #000; }
+        .btn-admin { color: #ff4a4a; font-weight: bold; font-size: 14px; border: 1px solid #ff4a4a; padding: 5px 12px; border-radius: 15px; }
         .btn-login { color: #bbb; font-size: 14px; }
         .btn-signup { background: #ff5722; color: #000; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+
         .header-nav { display: flex; justify-content: center; gap: 40px; padding: 12px 0; background: #0b0c0d; }
         .nav-item { color: #aaa; font-weight: 600; font-size: 16px; transition: 0.2s; position: relative; }
         .nav-item:hover, .nav-item.active { color: #ff5722; }
@@ -31,7 +41,7 @@
         /* 🌟 반응형 유튜브 비디오 그리드 🌟 */
         .video-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* PC에선 여러 줄, 모바일에선 1줄 */
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 25px;
         }
         .video-card {
@@ -39,11 +49,10 @@
         }
         .video-card:hover { border-color: #ff5722; transform: translateY(-5px); }
         
-        /* 🌟 이 부분이 핵심! 비율 고정 마법 🌟 */
         .video-iframe-wrap {
             position: relative;
             width: 100%;
-            aspect-ratio: 16 / 9; /* 가로 16 : 세로 9 꽉 차게! */
+            aspect-ratio: 16 / 9;
             background: #000;
         }
         .video-iframe-wrap iframe {
@@ -54,52 +63,85 @@
         .video-title { font-size: 16px; font-weight: bold; margin: 0 0 10px 0; color: #fff; line-height: 1.4; }
         .btn-delete { background: none; border: none; color: #ff4a4a; cursor: pointer; font-size: 13px; font-weight: bold; padding: 0; }
 
-        @media (max-width: 768px) {
-            .header-top { flex-direction: column; gap: 15px; }
-            .header-nav { justify-content: flex-start; overflow-x: auto; white-space: nowrap; padding: 12px 15px; gap: 20px; }
+        @media (max-width: 900px) {
+            .header-top { flex-wrap: wrap !important; padding: 15px 15px !important; gap: 15px !important; }
+            .logo-img { height: 60px !important; max-width: 350px !important; flex-shrink: 0 !important; }
+            .auth-buttons { flex: 1; justify-content: flex-end; width: auto !important; flex-wrap: nowrap; gap: 10px !important; }
+            .lang-select { font-size: 11px !important; padding: 5px 8px !important; margin-bottom: 0 !important; margin-right: auto !important; } 
+            .btn-signup, .btn-login { font-size: 12px !important; padding: 6px 10px !important; }
+            .top-search-form { width: 100% !important; flex: 1 1 100% !important; margin: 0 !important; padding: 5px 15px !important; order: 3; }
+            .top-search-input { font-size: 14px !important; padding: 5px !important; }
+            
+            .header-nav { justify-content: flex-start; overflow-x: auto; white-space: nowrap; padding: 12px 15px; gap: 20px; border-bottom: 1px solid #222; }
             .header-nav::-webkit-scrollbar { display: none; }
             .input-row { flex-direction: column; }
-            .video-grid { grid-template-columns: 1fr; } /* 모바일에서는 무조건 꽉 찬 1줄로! */
+            .video-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
     <header class="main-header">
         <div class="header-top">
-            <img src="/logo.png" alt="RANKING AI 로고" style="height: 45px; cursor: pointer; object-fit: contain;" onclick="window.location.href='/?sort=views'">
+            <img src="/logo.png" alt="RANKING AI 로고" class="logo-img" onclick="window.location.href='/?sort=views'">
+            
+            <form action="/" method="GET" class="top-search-form">
+                <div style="display: flex; align-items: center; justify-content: center; cursor: pointer; background: #fff; padding: 2px; border-radius: 4px; margin-right: 10px; box-shadow: 0 0 5px rgba(255,87,34,0.5); flex-shrink: 0;" 
+                     title="클릭하면 크게 확대됩니다! 친구들에게 공유해보세요 🚀" 
+                     onclick="window.open('https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://rankingaimusic.com', '_blank')">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=30x30&data=https://rankingaimusic.com" alt="QR Code" style="display: block; width: 24px; height: 24px;">
+                </div>
+                <input type="text" name="search" class="top-search-input" placeholder="<%= __('search_placeholder') || '아티스트 검색...' %>" value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                <button type="submit" class="top-search-btn">🔍</button>
+            </form>
+
             <div class="auth-buttons">
+                <select id="smartLangSelect" onchange="window.location.href='/change-lang/' + this.value" class="lang-select">
+                    <option value="ko" <%= typeof getLocale !== 'undefined' && getLocale() === 'ko' ? 'selected' : '' %>>🇰🇷 한국어</option>
+                    <option value="en" <%= typeof getLocale !== 'undefined' && getLocale() === 'en' ? 'selected' : '' %>>🇺🇸 English</option>
+                    <option value="ja" <%= typeof getLocale !== 'undefined' && getLocale() === 'ja' ? 'selected' : '' %>>🇯🇵 日本語</option>
+                    <option value="zh" <%= typeof getLocale !== 'undefined' && getLocale() === 'zh' ? 'selected' : '' %>>🇨🇳 中文</option>
+                </select>
+
+                <% if (user && user.role === 'admin') { %>
+                    <a href="/admin" class="btn-admin">👑 관리자</a>
+                <% } %>
+                
                 <% if (user) { %>
-                    <span style="color: #aaa; font-size: 14px;"><%= user.id %>님</span>
-                    <a href="/logout" class="btn-login">로그아웃</a>
+                    <span style="color: #aaa; font-size: 14px;"><%= user.name || user.id %><%= __('welcome_user') || '님' %></span>
+                    <a href="/logout" class="btn-login" style="margin-left: 15px;"><%= __('btn_logout') || '로그아웃' %></a>
                 <% } else { %>
-                    <a href="/login" class="btn-login">로그인</a>
-                    <a href="/signup" class="btn-signup">회원가입</a>
+                    <a href="/login" class="btn-login"><%= __('btn_login') || '로그인' %></a>
+                    <a href="/signup" class="btn-signup"><%= __('btn_signup') || '회원가입' %></a>
                 <% } %>
             </div>
         </div>
-        <div class="header-nav">
-            <a href="/?sort=views" class="nav-item">RANKING AI 챠트</a>
-            <a href="/youtube" class="nav-item active">유튜브</a>
-            <a href="/shorts" class="nav-item">쇼츠</a>
-            <a href="/board" class="nav-item">커뮤니티</a>
+        
+       <div class="header-nav">
+            <a href="/?sort=views" class="nav-item"><%= __('menu_chart') || 'RANKING AI 차트' %></a>
+            <a href="/?sort=latest" class="nav-item"><%= __('menu_latest') || '최신음악' %></a>
+            <a href="/?genre=발라드" class="nav-item"><%= __('menu_genre') || '장르별' %></a>
+            <a href="/radio" class="nav-item" style="color: #ffb300; font-weight: 900;"><%= __('menu_bgm') || '🎧상황별BGM' %></a>
+            <a href="/youtube" class="nav-item active"><%= __('menu_youtube') || '유튜브' %></a>
+            <a href="/shorts" class="nav-item"><%= __('menu_shorts') || '쇼츠' %></a>
+            <a href="/board" class="nav-item"><%= __('menu_community') || '커뮤니티' %></a>
         </div>
     </header>
 
     <div class="container">
         <% if (user) { %>
         <div class="upload-section">
-            <h3 style="margin-top:0; color:#ff5722;">📺 유튜브 영상 등록</h3>
+            <h3 style="margin-top:0; color:#ff5722;"><%= __('yt_upload_title') || '📺 유튜브 영상 등록' %></h3>
             <form action="/add-youtube" method="POST">
                 <div class="input-row">
-                    <input type="text" name="title" placeholder="영상 제목을 입력하세요" required>
-                    <input type="text" name="youtubeLink" placeholder="유튜브 링크 (https://youtube.com/...)" required>
+                    <input type="text" name="title" placeholder="<%= __('yt_ph_title') || '영상 제목을 입력하세요' %>" required>
+                    <input type="text" name="youtubeLink" placeholder="<%= __('yt_ph_link') || '유튜브 링크 (https://youtube.com/...)' %>" required>
                 </div>
-                <button type="submit" class="btn-upload">등록하기</button>
+                <button type="submit" class="btn-upload"><%= __('btn_submit_chart') || '등록하기' %></button>
             </form>
         </div>
         <% } %>
 
-        <h2 style="border-bottom: 2px solid #333; padding-bottom: 10px;">🔥 최신 유튜브 영상</h2>
+        <h2 style="border-bottom: 2px solid #333; padding-bottom: 10px;"><%= __('yt_title') || '🔥 최신 유튜브 영상' %></h2>
         
         <div class="video-grid">
             <% 
@@ -116,16 +158,16 @@
                     <% if (videoId) { %>
                         <iframe src="https://www.youtube.com/embed/<%= videoId %>" allowfullscreen></iframe>
                     <% } else { %>
-                        <div style="padding: 20px; text-align: center; color: #ff4a4a;">잘못된 링크입니다.</div>
+                        <div style="padding: 20px; text-align: center; color: #ff4a4a;"><%= __('yt_invalid_link') || '잘못된 링크입니다.' %></div>
                     <% } %>
                 </div>
                 <div class="video-info">
                     <h4 class="video-title"><%= video.title %></h4>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="color: #888; font-size: 13px;">올린이: <%= video.uploader %></span>
+                        <span style="color: #888; font-size: 13px;"><%= __('txt_uploader') || '올린이:' %> <%= video.uploader %></span>
                         <% if (user && (user.role === 'admin' || user.id === video.uploader)) { %>
-                            <form action="/delete-video/<%= video._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('삭제할까요?');">
-                                <button type="submit" class="btn-delete">❌ 삭제</button>
+                            <form action="/delete-video/<%= video._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('<%= __('yt_confirm_delete') || '삭제할까요?' %>');">
+                                <button type="submit" class="btn-delete">❌ <%= __('action_delete') || '삭제' %></button>
                             </form>
                         <% } %>
                     </div>
@@ -133,7 +175,7 @@
             </div>
             <% }); %>
             <% if (videos.length === 0) { %>
-                <p style="color: #777;">등록된 유튜브 영상이 없습니다.</p>
+                <p style="color: #777;"><%= __('yt_no_video') || '등록된 유튜브 영상이 없습니다.' %></p>
             <% } %>
         </div>
     </div>
