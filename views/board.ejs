@@ -97,32 +97,78 @@
             .board-header { flex-direction: column; align-items: flex-start; gap: 15px; }
             .btn-write-toggle { width: 100%; }
 
-           /* 🚨 여기서부터 게시판 카드형 변환 핵심 🚨 */
+          /* 🚨 [프리미엄 앱 디자인] 모바일 게시판 카드형 변환 🚨 */
             .board-table thead { display: none; }
             .board-table, .board-table tbody, .board-row, .board-row td { display: block; width: 100%; box-sizing: border-box; }
-            .board-row { background: #1c1d1e; margin-bottom: 12px; padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: left; }
             
-            /* 제목 크기 및 줄바꿈 최적화 */
-            .td-title { padding: 0 !important; margin-bottom: 12px; font-size: 16px !important; font-weight: bold; color: #fff !important; border: none !important; line-height: 1.4; word-break: break-word; }
+            /* 1. 카드 본체 디자인 (더 부드럽고 입체적으로) */
+            .board-row { 
+                background: #1a1b1c; 
+                margin-bottom: 16px; 
+                padding: 20px; 
+                border-radius: 16px; /* 요즘 앱처럼 둥글게 */
+                border: 1px solid #2a2b2c; 
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3); /* 은은한 입체감 */
+                text-align: left;
+                position: relative;
+                z-index: 2;
+            }
             
-            /* 모바일에서 덜 중요한 '번호'는 숨기기 (더 깔끔함) */
+            /* 2. 제목 텍스트 (시원하고 눈에 띄게) */
+            .td-title { 
+                padding: 0 !important; 
+                margin-bottom: 14px; 
+                font-size: 17px !important; 
+                font-weight: 700; 
+                color: #ffffff !important; 
+                border: none !important; 
+                line-height: 1.4; 
+                word-break: break-word; 
+            }
+            
+            /* 3. 모바일에서 덜 중요한 '번호' 숨기기 */
             .board-row td:first-child { display: none; }
             
-            /* 작성자, 날짜, 댓글, 좋아요 가로 정렬 */
-            .board-row td:not(.td-title) { display: inline-block; width: auto; padding: 0; margin-right: 12px; font-size: 12px; color: #888; border: none !important; }
+            /* 4. 글쓴이, 날짜, 댓글, 좋아요 하단에 깔끔하게 배치 */
+            .board-row td:not(.td-title) { 
+                display: inline-block; 
+                width: auto; 
+                padding: 0; 
+                margin-right: 14px; 
+                font-size: 13px; 
+                color: #888; 
+                border: none !important; 
+            }
             
-            /* 그냥 숫자만 뜨면 헷갈리니 아이콘 부착 */
-            .board-row td:nth-child(5)::before { content: "💬 "; }
-            .board-row td:nth-child(6)::before { content: "❤️ "; }
+            /* 5. 아이콘 간격 및 정렬 */
+            .board-row td:nth-child(5)::before { content: "💬 "; font-size: 11px; margin-right: 3px; }
+            .board-row td:nth-child(6)::before { content: "❤️ "; font-size: 11px; margin-right: 3px; }
             
-            /* 🔥 핵심: 글 열렸을 때 레이아웃 찢어짐 완벽 방어 */
+            /* 6. 🔥 본문 열렸을 때 애니메이션처럼 자연스러운 연결 */
             .post-detail[style*="table-row"], .post-detail[style*="table-row"] td { display: block !important; width: 100%; box-sizing: border-box; }
-            .post-detail { background: #111 !important; margin-top: -12px; margin-bottom: 15px; border-radius: 0 0 12px 12px; border: 1px solid #ff5722; border-top: none; }
-            .post-detail td { padding: 15px !important; }
+            .post-detail { 
+                background: #111 !important; 
+                margin-top: -24px; /* 위 카드 밑으로 쏙 들어가게 디자인 */
+                margin-bottom: 20px; 
+                padding-top: 10px; /* 여백 조정 */
+                border-radius: 0 0 16px 16px; 
+                border: 1px solid #ff5722; 
+                border-top: none;
+                z-index: 1;
+                position: relative;
+            }
+            .post-detail td { padding: 20px !important; }
             
-            /* 🔥 핵심: 모바일 화면 밖으로 글씨 삐져나가는 현상 원천 차단 */
-            .post-content { word-break: break-word !important; overflow-wrap: break-word !important; white-space: pre-wrap !important; }
-            .post-content img { max-width: 100% !important; height: auto !important; }
+            /* 7. 본문 텍스트 여백 및 가독성 극대화 */
+            .post-content { 
+                word-break: break-word !important; 
+                overflow-wrap: break-word !important; 
+                white-space: pre-wrap !important; 
+                font-size: 15px !important;
+                line-height: 1.7 !important;
+                color: #ddd !important;
+            }
+            .post-content img { max-width: 100% !important; height: auto !important; border-radius: 12px; margin: 15px 0; }
             .ql-container { height: 350px !important; }
     </style>
 </head>
