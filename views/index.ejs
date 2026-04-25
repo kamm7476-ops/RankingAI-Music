@@ -541,7 +541,7 @@ document.addEventListener('click', async (e) => {
                      onclick="window.open('https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://rankingaimusic.com', '_blank')">
                     <img src="https://api.qrserver.com/v1/create-qr-code/?size=30x30&data=https://rankingaimusic.com" alt="QR Code" style="display: block; width: 24px; height: 24px;">
                 </div>
-                <input type="text" name="search" class="top-search-input" placeholder="아티스트 검색..." value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                <input type="text" name="search" class="top-search-input" placeholder="<%= __('search_placeholder') %>" value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                 <button type="submit" class="top-search-btn">🔍</button>
             </form>
 
@@ -677,10 +677,10 @@ document.addEventListener('click', async (e) => {
                 <div class="guest-banner">
                     <div class="guest-lock">🔒</div>
                     <div class="guest-text-box">
-                        <h3>음원 업로드는 회원 전용입니다</h3>
-                        <p>나만의 음악을 올리고 싶다면 로그인해주세요!</p>
+                        <h3><%= __('guest_title') %></h3>
+                        <p><%= __('guest_desc') %></p>
                     </div>
-                    <button onclick="location.href='/login'" class="btn-upload guest-btn">로그인</button>
+                    <button onclick="location.href='/login'" class="btn-upload guest-btn"><%= __('btn_login') %></button>
                 </div>
                 <% } %>
 
@@ -705,10 +705,10 @@ document.addEventListener('click', async (e) => {
                         <% } %>
                     </div>
                     <div class="tabs">
-                        <a href="/?sort=views" class="tab <%= (typeof periodQuery === 'undefined' || !periodQuery) ? 'active' : '' %>">실시간(전체)</a>
-                        <a href="/?period=daily" class="tab <%= (typeof periodQuery !== 'undefined' && periodQuery === 'daily') ? 'active' : '' %>">일간</a>
-                        <a href="/?period=weekly" class="tab <%= (typeof periodQuery !== 'undefined' && periodQuery === 'weekly') ? 'active' : '' %>">주간</a>
-                        <a href="/?period=monthly" class="tab <%= (typeof periodQuery !== 'undefined' && periodQuery === 'monthly') ? 'active' : '' %>">월간</a>
+                        <a href="/?sort=views" class="tab <%= (typeof periodQuery === 'undefined' || !periodQuery) ? 'active' : '' %>"><%= __('tab_realtime') %></a>
+                        <a href="/?period=daily" class="tab <%= (typeof periodQuery !== 'undefined' && periodQuery === 'daily') ? 'active' : '' %>"><%= __('tab_daily') %></a>
+                        <a href="/?period=weekly" class="tab <%= (typeof periodQuery !== 'undefined' && periodQuery === 'weekly') ? 'active' : '' %>"><%= __('tab_weekly') %></a>
+                        <a href="/?period=monthly" class="tab <%= (typeof periodQuery !== 'undefined' && periodQuery === 'monthly') ? 'active' : '' %>"><%= __('tab_monthly') %></a>
                     </div>
                 </div>
 <% if (typeof genreQuery !== 'undefined' && genreQuery) { %>
@@ -721,12 +721,11 @@ document.addEventListener('click', async (e) => {
 <% } %>
                 <div class="chart-controls">
                     <input type="checkbox" id="checkAll" class="custom-checkbox" onchange="toggleAll(this)">
-                    <button class="control-btn" onclick="playAll()">▶ 전체듣기</button>
-                    <button class="control-btn" onclick="playSelected()">▶ 선택듣기</button>
-                    <button class="control-btn" onclick="addSelectedToMyMusic()">+ 담기</button>
-                    <a href="/mymusic" class="control-btn control-my-music">🎵 내 음악 보관함</a>
+                    <button class="control-btn" onclick="playAll()"><%= __('btn_play_all') %></button>
+                    <button class="control-btn" onclick="playSelected()"><%= __('btn_play_selected') %></button>
+                    <button class="control-btn" onclick="addSelectedToMyMusic()"><%= __('btn_add_playlist') %></button>
+                    <a href="/mymusic" class="control-btn control-my-music"><%= __('btn_my_music') %></a>
                 </div>
-
                 <table class="music-list">
                     <% if (typeof displaySongs !== 'undefined' && displaySongs.length > 0) { %>
                         <% displaySongs.forEach(function(music, index) { %>
@@ -831,7 +830,7 @@ document.addEventListener('click', async (e) => {
                     </div>
                 <% } %>
                 </div> <div class="sidebar-right">
-                <h3 class="sidebar-title">🏆 인기 아티스트</h3>
+                <h3 class="sidebar-title"><%= __('sidebar_popular') %></h3>
                 <ul class="artist-list">
                     <% popularArtists.forEach(function(artist, idx) { %>
                         <li class="artist-item">
@@ -855,8 +854,8 @@ document.addEventListener('click', async (e) => {
         <div class="player-info">
             <img src="/logo.png" id="main-player-cover" class="player-cover" style="object-fit: contain; background: #000;">
             <div class="player-text">
-                <span id="main-player-title" class="player-title">선택된 곡이 없습니다</span>
-                <span id="main-player-artist" class="player-artist">목록에서 음악을 선택해주세요</span>
+                <span id="main-player-title" class="player-title"><%= __('player_empty_title') %></span>
+                <span id="main-player-artist" class="player-artist"><%= __('player_empty_desc') %></span>
             </div>
         </div>
         
@@ -875,9 +874,9 @@ document.addEventListener('click', async (e) => {
         </div>
 
       <div class="player-right-placeholder">
-            <button type="button" onclick="toggleSyncLyrics()" title="실시간 가사 보기">가사</button>
-            <button type="button" onclick="togglePlaylist()" title="재생목록 보기">목록</button>
-      </div>
+            <button type="button" onclick="toggleSyncLyrics()" title="실시간 가사 보기"><%= __('player_btn_lyrics') %></button>
+            <button type="button" onclick="togglePlaylist()" title="재생목록 보기"><%= __('player_btn_list') %></button>
+        </div>
         
         <audio id="main-audio" style="display:none;" preload="auto" playsinline webkit-playsinline></audio>
         <audio id="heartbeat-audio" loop playsinline webkit-playsinline style="display:none;" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
