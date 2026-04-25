@@ -716,7 +716,7 @@
                     <% } %>
                 </table>
 
-                <% if (!isMainChart && displaySongs.length > 100) { %>
+                <% if (typeof isMainChart !== 'undefined' && !isMainChart && typeof displaySongs !== 'undefined' && displaySongs.length > 100) { %>
                     <div class="pagination-container" style="text-align:center; margin-top:40px; margin-bottom:40px;">
                         <% const totalPages = Math.ceil(displaySongs.length / 100); %>
                         <% for(let i=1; i<=totalPages; i++) { %>
