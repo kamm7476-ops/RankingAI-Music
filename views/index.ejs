@@ -527,23 +527,8 @@
                         <button type="submit" class="btn-upload"><%= __('btn_submit_chart') || '차트 등록하기' %></button>
                     </form>
                 </div>
-                <% } else { %>
-    <div style="
-        background: rgba(255, 87, 34, 0.08); 
-        border: 1px solid rgba(255, 87, 34, 0.2); 
-        border-radius: 16px; 
-        padding: 12px 20px; 
-        margin: 20px 0 30px 0; 
-        display: flex; 
-        align-items: center; 
-        justify-content: space-between; 
-        backdrop-filter: blur(10px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        gap: 15px;
-    ">
-        <% if (user) { %>
-    <% } else { %>
-    <div style="background: rgba(255, 87, 34, 0.08); border: 1px solid rgba(255, 87, 34, 0.2); border-radius: 16px; padding: 12px 20px; margin: 20px 0 30px 0; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); gap: 15px;">
+               <% } else { %>
+    <div style="background: rgba(255, 87, 34, 0.08); border: 1px solid rgba(255, 87, 34, 0.2); border-radius: 16px; padding: 12px 20px; margin: 20px 0 30px 0; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); gap: 15px;"> border: 1px solid rgba(255, 87, 34, 0.2); border-radius: 16px; padding: 12px 20px; margin: 20px 0 30px 0; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); gap: 15px;">
         <div style="display: flex; align-items: center; gap: 15px;">
             <div style="font-size: 22px; background: rgba(255,255,255,0.05); width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">🔒</div>
             <div>
@@ -572,6 +557,7 @@
         <% } %>
     </div>
 <% } %>
+        <%
             let currentTitle = "🏆 RANKING AI 챠트 TOP 100";
             let isMainChart = true;
                     // 🚨 sort를 sortQuery로 4글자 추가했습니다! 🚨
