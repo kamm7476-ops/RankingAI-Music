@@ -709,8 +709,6 @@ document.addEventListener('click', async (e) => {
                 </div>
 <% if (typeof genreQuery !== 'undefined' && genreQuery) { %>
     <div style="background: #161718; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; display: flex; gap: 8px; flex-wrap: wrap;">
-       <% if (typeof genreQuery !== 'undefined' && genreQuery) { %>
-    <div style="background: #161718; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; display: flex; gap: 8px; flex-wrap: wrap;">
        <% 
        const genreList = [
            { val: 'K-POP', key: 'genre_kpop' }, { val: 'POP', key: 'genre_pop' }, { val: '발라드', key: 'genre_ballad' }, { val: '댄스', key: 'genre_dance' },
@@ -719,9 +717,10 @@ document.addEventListener('click', async (e) => {
            { val: '트로트', key: 'genre_trot' }, { val: '인디음악', key: 'genre_indie' }, { val: 'Beats', key: 'genre_beats' }
        ];
        %>
-        <% genreList.forEach(g => { %>
+       
+       <% genreList.forEach(g => { %>
             <a href="/?genre=<%= encodeURIComponent(g.val) %>" style="padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; border: 1px solid <%= genreQuery === g.val ? '#ff5722' : '#444' %>; background: <%= genreQuery === g.val ? '#ff5722' : '#222' %>; color: <%= genreQuery === g.val ? '#000' : '#aaa' %>; transition: 0.2s;"><%= __(g.key) %></a>
-        <% }) %>
+       <% }) %>
     </div>
 <% } %>
                 <div class="chart-controls">
