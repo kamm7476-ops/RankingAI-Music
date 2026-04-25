@@ -108,5 +108,11 @@
   "board_comment_info": "댓글과 양식은 기존과 동일하게 작동합니다.",
   "board_no_post": "등록된 게시글이 없습니다.",
   "action_edit_post": "수정",
-  "action_delete_post": "삭제"
+  "action_delete_post": "삭제",
+  "proposal_guide_1": "1. 개인 소장 및 단순 감상용: 5,000원 이상",
+  "proposal_guide_2": "2. 유튜브/SNS 배경음악 (비상업): 2~4만원",
+  "proposal_guide_3": "3. 상업적 광고/영상 및 독점 소유권: 10만원 이상 (협의)",
+  "proposal_guide_4": "※ 매장 배경음악 재생은 100% 무료입니다!",
+  "proposal_ph": "예) 유튜브 브금으로 사용하고 싶습니다. 3만원 제안합니다.",
+  "btn_send_proposal": "제안 보내기"
 }

@@ -79,5 +79,11 @@
   "vibe_study": "💻 集中/スタディ",
   "vibe_healing": "🌿 癒し/瞑想",
   "vibe_fitness": "🏋️ フィットネス",
-  "vibe_hotel": "🏙️ ホテル/ラウンジ"
+  "vibe_hotel": "🏙️ ホテル/ラウンジ",
+  "proposal_guide_1": "1. 個人保存および鑑賞用: 500円以上",
+  "proposal_guide_2": "2. YouTube/SNS BGM (非営利): 2,000〜4,000円",
+  "proposal_guide_3": "3. 商業広告/映像および独占所有権: 10,000円以上 (要相談)",
+  "proposal_guide_4": "※ 店舗のBGM再生は100%無料です！",
+  "proposal_ph": "例) YouTubeのBGMとして使用したいです。3,000円を提案します。",
+  "btn_send_proposal": "提案を送信する"
 }

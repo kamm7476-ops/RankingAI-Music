@@ -108,5 +108,11 @@
   "board_comment_info": "Comments and forms work the same as before.",
   "board_no_post": "No posts found.",
   "action_edit_post": "Edit",
-  "action_delete_post": "Delete"
+  "action_delete_post": "Delete",
+ "proposal_guide_1": "1. Personal Use & Listening: $5 or more",
+  "proposal_guide_2": "2. YouTube/SNS BGM (Non-commercial): $20 - $40",
+  "proposal_guide_3": "3. Commercial/Exclusive Ownership: $100+ (Negotiable)",
+  "proposal_guide_4": "※ Store/Business BGM is 100% FREE!",
+  "proposal_ph": "e.g., I want to use it for a YouTube BGM. I propose $30.",
+  "btn_send_proposal": "Send Proposal"
 }
