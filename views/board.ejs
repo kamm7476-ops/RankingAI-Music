@@ -81,62 +81,49 @@
         .page-btn:hover { background: #333; color: #fff; }
         .page-btn.active { background: #ff5722; color: #000; font-weight: bold; border-color: #ff5722; pointer-events: none; }
 
-        /* 📱 모바일 최적화 */
-        @media (max-width: 900px) {
-            .header-top { flex-wrap: wrap !important; padding: 15px 15px !important; gap: 15px !important; }
-            .logo-img { height: 60px !important; max-width: 350px !important; flex-shrink: 0 !important; }
-            .auth-buttons { flex: 1; justify-content: flex-end; width: auto !important; flex-wrap: nowrap; gap: 10px !important; }
-            .lang-select { font-size: 11px !important; padding: 5px 8px !important; margin-bottom: 0 !important; margin-right: auto !important; } 
-            .btn-signup, .btn-login { font-size: 12px !important; padding: 6px 10px !important; }
-            .top-search-form { width: 100% !important; flex: 1 1 100% !important; margin: 0 !important; padding: 5px 15px !important; order: 3; }
-            .top-search-input { font-size: 14px !important; padding: 5px !important; }
-            
-            .header-nav { justify-content: flex-start; overflow-x: auto; white-space: nowrap; padding: 12px 15px; gap: 20px; border-bottom: 1px solid #222; }
-            .header-nav::-webkit-scrollbar { display: none; }
-            
-            .board-header { flex-direction: column; align-items: flex-start; gap: 15px; }
-            .btn-write-toggle { width: 100%; }
-
-          /* 🚨 [프리미엄 앱 디자인] 모바일 게시판 카드형 변환 🚨 */
+       /* 🚨 [프리미엄 디자인 + 제목 100% 확보] 모바일 게시판 카드형 변환 🚨 */
             .board-table thead { display: none; }
-            .board-table, .board-table tbody, .board-row, .board-row td { display: block; width: 100%; box-sizing: border-box; }
+            .board-table, .board-table tbody, .board-row { display: block; width: 100%; box-sizing: border-box; }
             
-            /* 1. 카드 본체 디자인 (더 부드럽고 입체적으로) */
+            /* 1. 카드 본체 디자인 */
             .board-row { 
                 background: #1a1b1c; 
                 margin-bottom: 16px; 
-                padding: 20px; 
-                border-radius: 16px; /* 요즘 앱처럼 둥글게 */
+                padding: 20px !important; 
+                border-radius: 16px; 
                 border: 1px solid #2a2b2c; 
-                box-shadow: 0 4px 12px rgba(0,0,0,0.3); /* 은은한 입체감 */
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3); 
                 text-align: left;
                 position: relative;
                 z-index: 2;
             }
             
-            /* 2. 제목 텍스트 (시원하고 눈에 띄게) */
+            /* 2. 🔥 제목 텍스트 (가로 100% 혼자 다 쓰기 강제 적용) */
             .td-title { 
-                padding: 0 !important; 
-                margin-bottom: 14px; 
+                display: block !important; /* 표 셀(td) 성질을 버리고 한 줄 전체 차지 */
+                width: 100% !important; 
+                padding: 0 0 12px 0 !important; /* 아래쪽 여백만 주기 */
+                margin-bottom: 0 !important; 
                 font-size: 17px !important; 
                 font-weight: 700; 
                 color: #ffffff !important; 
                 border: none !important; 
                 line-height: 1.4; 
-                word-break: break-word; 
+                word-break: break-all; /* 긴 단어도 무조건 줄바꿈 */
+                white-space: normal !important;
             }
             
             /* 3. 모바일에서 덜 중요한 '번호' 숨기기 */
-            .board-row td:first-child { display: none; }
+            .board-row td:first-child { display: none !important; }
             
-            /* 4. 글쓴이, 날짜, 댓글, 좋아요 하단에 깔끔하게 배치 */
+            /* 4. 글쓴이, 날짜, 댓글, 좋아요 하단에 나란히 배치 */
             .board-row td:not(.td-title) { 
-                display: inline-block; 
-                width: auto; 
-                padding: 0; 
-                margin-right: 14px; 
-                font-size: 13px; 
-                color: #888; 
+                display: inline-block !important; /* 제목 아래에서 가로로 나열 */
+                width: auto !important; 
+                padding: 0 !important; 
+                margin-right: 14px !important; 
+                font-size: 13px !important; 
+                color: #888 !important; 
                 border: none !important; 
             }
             
@@ -144,13 +131,13 @@
             .board-row td:nth-child(5)::before { content: "💬 "; font-size: 11px; margin-right: 3px; }
             .board-row td:nth-child(6)::before { content: "❤️ "; font-size: 11px; margin-right: 3px; }
             
-            /* 6. 🔥 본문 열렸을 때 애니메이션처럼 자연스러운 연결 */
+            /* 6. 본문 열렸을 때 애니메이션처럼 자연스러운 연결 */
             .post-detail[style*="table-row"], .post-detail[style*="table-row"] td { display: block !important; width: 100%; box-sizing: border-box; }
             .post-detail { 
                 background: #111 !important; 
-                margin-top: -24px; /* 위 카드 밑으로 쏙 들어가게 디자인 */
+                margin-top: -24px; 
                 margin-bottom: 20px; 
-                padding-top: 10px; /* 여백 조정 */
+                padding-top: 10px; 
                 border-radius: 0 0 16px 16px; 
                 border: 1px solid #ff5722; 
                 border-top: none;
