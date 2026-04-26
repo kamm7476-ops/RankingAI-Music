@@ -62,13 +62,62 @@
         .action-btn { background: none; border: none; color: #aaa; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; padding: 0; }
         .action-btn:hover { color: #ff5722; }
 
-       /* 🌟 커뮤니티 리스트 테이블 (PC/모바일 통합 깔끔 버전) */
-        .board-table { width: 100%; border-collapse: collapse; background: #161718; border-radius: 8px; overflow: hidden; margin-top: 15px; }
-        .board-table thead { background: #222; color: #888; font-size: 14px; }
-        .board-table th { padding: 12px; border-bottom: 2px solid #222; font-weight: 500; }
-        .board-table td { padding: 15px 10px; border-bottom: 1px solid #222; color: #ccc; }
-        .board-row:hover { background: rgba(255, 87, 34, 0.05); cursor: pointer; }
-        .td-title { text-align: left !important; padding-left: 20px !important; font-size: 16px !important; color: #fff !important; line-height: 1.5; }
+       /* 🌟 프리미엄 커뮤니티 리스트 (독립된 카드 스타일) */
+        .board-table { 
+            width: 100%; 
+            border-collapse: separate; /* 줄 간격을 벌리는 마법의 속성 */
+            border-spacing: 0 12px; /* 위아래로 12px씩 시원하게 간격 띄우기 */
+            background: transparent; 
+        }
+        .board-table thead th { 
+            padding: 10px 15px; 
+            color: #888; 
+            font-size: 14px; 
+            border-bottom: 2px solid #333; 
+        }
+        
+        /* 💡 각 게시글 줄을 멋진 '독립된 박스'처럼 만듭니다 */
+        .board-row { 
+            background: #161718; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); /* 은은한 기본 그림자 */
+            transition: all 0.2s ease; 
+        }
+        
+        /* 카드의 양끝 모서리를 둥글게 깎아줍니다 */
+        .board-row td:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; border-left: 1px solid #252628; }
+        .board-row td:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; border-right: 1px solid #252628; }
+        
+        /* 여백을 대폭 늘려서 답답함 해소 */
+        .board-table td { 
+            padding: 22px 15px; /* 위아래 여백을 22px로 팍 늘렸습니다! */
+            border-top: 1px solid #252628;
+            border-bottom: 1px solid #252628;
+            color: #ccc; 
+        }
+
+        /* 🖱️ 마우스 올렸을 때의 럭셔리한 애니메이션 */
+        .board-row:hover { 
+            background: #1c1d20; 
+            transform: translateY(-3px); /* 위로 살짝 떠오르는 효과 */
+            box-shadow: 0 8px 20px rgba(255, 87, 34, 0.15); /* 주황색 네온 빛 그림자 */
+            cursor: pointer; 
+        }
+
+        .td-title { 
+            text-align: left !important; 
+            padding-left: 20px !important; 
+            font-size: 17px !important; 
+            color: #fff !important; 
+            font-weight: 500;
+        }
+
+        /* 📖 상세 본문이 열렸을 때의 스타일 */
+        .post-detail td {
+            background: #111214 !important;
+            border: 1px solid #ff5722 !important; /* 본문은 주황색 테두리로 강조 */
+            border-radius: 12px !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+        }
 
         /* 🚀 모바일 최적화: 제목 절대 안 찌그러짐 (세로 기차 영원히 안녕) */
         @media screen and (max-width: 768px) {
