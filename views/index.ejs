@@ -242,15 +242,29 @@
             #playlist-modal { bottom: 140px !important; right: 10px !important; width: calc(100% - 20px) !important; max-height: 50vh !important; }
         }
 
-        /* 🚀 [추가됨] 모바일 커뮤니티 게시판 텍스트 삐져나옴 방지 및 자동 정렬 */
+       /* 🚀 [최종 보강] 모바일 커뮤니티 세로 기차 현상 물리적 차단 */
         .container table, .container td, .container th, .board-container, .post-content {
-            word-break: break-word !important; /* 긴 영어, 링크 강제 줄바꿈 */
+            word-break: keep-all !important; /* 한국어 단어 단위 줄바꿈 (세로 기차 방지 핵심) */
             overflow-wrap: break-word !important;
-            white-space: normal !important; /* 글씨가 가로로 뚫고 나가는 것 방지 */
-            line-height: 1.6 !important; /* 모바일에서 읽기 편한 줄간격 */
-            letter-spacing: -0.5px; /* 자간을 살짝 좁혀서 깔끔하게 정렬 */
+            white-space: normal !important;
+            line-height: 1.6 !important;
+            letter-spacing: -0.5px;
         }
 
+        @media screen and (max-width: 768px) {
+            /* 폰에서 표가 찌그러지지 않게 강제로 너비를 확보합니다 */
+            .container table {
+                display: block !important;
+                width: 100% !important;
+                min-width: 100% !important;
+            }
+            /* 제목 칸(.td-title)이 죽어도 세로로 안 나오게 너비 고정 */
+            .td-title {
+                display: block !important;
+                width: 100% !important;
+                min-width: 280px !important; /* 이 수치가 있으면 절대 세로 일자가 안 됩니다 */
+            }
+        }
         /* 🌟 팝업창 전용 디자인 */
         .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .popup-box { background: #161718; border: 2px solid #ff5722; border-radius: 15px; padding: 30px; width: 400px; max-width: 90%; box-shadow: 0 10px 30px rgba(255,87,34,0.3); text-align: center; position: relative; }
