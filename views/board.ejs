@@ -180,21 +180,21 @@
         <% posts.forEach((post, index) => { %>
             <% const pageNum = Math.floor(index / 100) + 1; %>
 
-            <tr class="board-row page-<%= pageNum %>" 
-                style="<%= pageNum > 1 ? 'display: none;' : '' %>"
+           <tr class="board-row page-<%= pageNum %>" 
+                style="<%= pageNum > 1 ? 'display: none;' : '' %>; cursor: pointer;"
                 onclick="const detail = document.getElementById('post-detail-<%= post._id %>'); detail.style.display = (detail.style.display === 'none' || detail.style.display === '') ? 'table-row' : 'none';">
                 
-                <td><%= posts.length - index %></td>
-                <td class="td-title">
+                <td class="mobile-hide" style="width: 60px; text-align: center;"><%= posts.length - index %></td>
+                
+                <td class="td-title" style="text-align: left !important; color: #fff !important;">
                     <%= post.title %>
                     <% if (post.imageUrl) { %> <span style="font-size: 12px; margin-left: 5px;">📷</span> <% } %>
                 </td>
-                <td style="color: #aaa;">@<%= post.author %></td>
-                <td style="font-size: 13px;"><%= new Date(post.createdAt).toLocaleDateString() %></td>
                 
-                <td style="color: #00e5ff; font-weight: bold;"><%= post.comments ? post.comments.length : 0 %></td>
-                
-                <td style="color: #ff5722;"><%= post.likes || 0 %></td>
+                <td class="mobile-hide" style="width: 100px; color: #aaa;">@<%= post.author %></td>
+                <td class="mobile-hide" style="width: 100px; font-size: 13px;"><%= new Date(post.createdAt).toLocaleDateString() %></td>
+                <td class="mobile-hide" style="width: 60px; color: #00e5ff; font-weight: bold;"><%= post.comments ? post.comments.length : 0 %></td>
+                <td class="mobile-hide" style="color: #ff5722; width: 60px;"><%= post.likes || 0 %></td>
             </tr>
 
            <tr id="post-detail-<%= post._id %>" class="post-detail page-<%= pageNum %>" style="display: none; background: #0e0e0f;">
@@ -321,49 +321,22 @@
 
     <style>
     @media screen and (max-width: 768px) {
-        /* 1. 표의 모든 칸들을 강제로 수직으로 쌓습니다. */
-        .board-table, .board-table tbody, .board-table tr {
-            display: block !important;
-            width: 100% !important;
-        }
-
-        /* 2. 번호, 글쓴이, 날짜, 댓글, 좋아요 칸을 '물리적'으로 지웁니다. */
-        /* 제목(.td-title)이 아닌 모든 td를 투명인간 취급합니다. */
-        .board-row td:not(.td-title) {
+        .mobile-hide {
             display: none !important;
             width: 0 !important;
-            height: 0 !important;
             padding: 0 !important;
-            margin: 0 !important;
-            border: none !important;
-            visibility: hidden !important;
         }
-
-        /* 3. 제목 칸을 화면 전체 100%로 강제 확장합니다. */
-        .board-row td.td-title {
+        .td-title {
             display: block !important;
             width: 100% !important;
-            min-width: 100% !important;
-            max-width: 100% !important;
             padding: 15px 10px !important;
-            font-size: 16px !important;
-            font-weight: bold !important;
-            line-height: 1.5 !important;
             white-space: normal !important;
-            word-break: keep-all !important; /* 한글 단어 보존 */
-            overflow-wrap: break-word !important;
-            border-bottom: 1px solid #333 !important;
-            box-sizing: border-box !important;
+            word-break: keep-all !important;
         }
-
-        /* 상단 헤더 숨김 */
-        .board-table thead { display: none !important; }
-
-        /* 본문 안쪽 디자인 최적화 */
-        .post-detail { display: none; width: 100% !important; }
-        .post-detail[style*="table-row"], .post-detail[style*="block"] { display: block !important; }
-        .post-detail td { display: block !important; padding: 20px 15px !important; width: 100% !important; visibility: visible !important; height: auto !important; }
-        .mobile-author-info { display: block !important; }
+        .board-table, .board-table tbody, .board-row {
+            display: block !important;
+            width: 100% !important;
+        }
     }
 </style>
 </body>
