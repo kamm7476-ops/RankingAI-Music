@@ -527,23 +527,40 @@
                         <button type="submit" class="btn-upload"><%= __('btn_submit_chart') || '차트 등록하기' %></button>
                     </form>
                 </div>
-              <% } else { %>
-    <div style="background: rgba(255, 87, 34, 0.08); border: 1px solid rgba(255, 87, 34, 0.2); border-radius: 16px; padding: 12px 20px; margin: 20px 0 30px 0; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); gap: 15px;">
+             <% } else { %>
+    <div class="guest-banner-responsive" style="background: rgba(255, 87, 34, 0.08); border: 1px solid rgba(255, 87, 34, 0.2); border-radius: 16px; padding: 15px 20px; margin: 20px 0 30px 0; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); gap: 15px;">
         <div style="display: flex; align-items: center; gap: 15px;">
-            <div style="font-size: 22px; background: rgba(255,255,255,0.05); width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">🔒</div>
+            <div style="font-size: 20px; background: rgba(255,255,255,0.05); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0;">🔒</div>
             <div>
-                <h4 style="margin: 0; color: #fff; font-size: 15px; font-weight: 700; letter-spacing: -0.5px;">
+                <h4 style="margin: 0; color: #fff; font-size: 15px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.3;">
                     <%= __('guest_title') || '음원 업로드는 회원 전용입니다' %>
                 </h4>
-                <p style="margin: 3px 0 0 0; color: #aaa; font-size: 13px; letter-spacing: -0.3px;">
-                    <%= __('guest_desc') || '나만의 음악을 올리고 싶다면 로그인해주세요!' %>
+                <p style="margin: 3px 0 0 0; color: #aaa; font-size: 12px; letter-spacing: -0.3px;">
+                    <%= __('guest_desc') || '로그인 후 나만의 음악을 올려보세요!' %>
                 </p>
             </div>
         </div>
-        <button onclick="location.href='/login'" style="background: #ff5722; color: #000; padding: 10px 24px; border: none; border-radius: 30px; font-weight: 800; font-size: 14px; cursor: pointer; white-space: nowrap; transition: 0.2s; box-shadow: 0 4px 12px rgba(255, 87, 34, 0.3);" onmouseover="this.style.background='#ff7043'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#ff5722'; this.style.transform='translateY(0)'">
+        <button onclick="location.href='/login'" style="background: #ff5722; color: #000; padding: 8px 18px; border: none; border-radius: 30px; font-weight: 800; font-size: 13px; cursor: pointer; white-space: nowrap; transition: 0.2s; flex-shrink: 0;">
             <%= __('btn_login') || '로그인' %>
         </button>
     </div>
+
+    <style>
+        @media (max-width: 600px) {
+            .guest-banner-responsive {
+                flex-direction: column !important; /* 모바일에선 위아래로 */
+                text-align: center !important;
+                gap: 10px !important;
+            }
+            .guest-banner-responsive div {
+                flex-direction: column !important;
+                gap: 8px !important;
+            }
+            .guest-banner-responsive button {
+                width: 100% !important; /* 버튼이 가로로 꽉 차게 */
+            }
+        }
+    </style>
 <% } %>
 
 <% 
