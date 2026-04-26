@@ -354,5 +354,46 @@
             }
         }
     </script>
+
+    <style>
+    @media screen and (max-width: 768px) {
+        /* 1. 표 성질을 강제로, 절대적으로 파괴합니다. */
+        table.board-table, 
+        table.board-table tbody, 
+        table.board-table tr, 
+        table.board-table td, 
+        table.board-table th {
+            display: block !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
+            clear: both !important;
+            float: none !important;
+        }
+        
+        /* 2. 상단 제목줄 무조건 숨김 */
+        table.board-table thead {
+            display: none !important;
+        }
+        
+        /* 3. 대표님 아이디어: 제목(.td-title) 빼고 싹 다 강제 숨김! */
+        table.board-table tr.board-row td:not(.td-title) {
+            display: none !important;
+        }
+        
+        /* 4. 대망의 제목: 세로로 절대 못 깨지게 100% 가로 확장 방어막 */
+        table.board-table tr.board-row td.td-title {
+            display: block !important;
+            white-space: normal !important;
+            word-break: break-all !important;
+            overflow-wrap: break-word !important;
+            padding: 15px 10px !important;
+            font-size: 16px !important;
+            line-height: 1.5 !important;
+            border-bottom: 1px solid #333 !important;
+        }
+    }
+</style>
 </body>
 </html>
