@@ -81,82 +81,36 @@
         .page-btn:hover { background: #333; color: #fff; }
         .page-btn.active { background: #ff5722; color: #000; font-weight: bold; border-color: #ff5722; pointer-events: none; }
 
-       /* 🚨 [프리미엄 디자인 + 제목 100% 확보] 모바일 게시판 카드형 변환 🚨 */
-            .board-table thead { display: none; }
-            .board-table, .board-table tbody, .board-row { display: block; width: 100%; box-sizing: border-box; }
-            
-            /* 1. 카드 본체 디자인 */
-            .board-row { 
-                background: #1a1b1c; 
-                margin-bottom: 16px; 
-                padding: 20px !important; 
-                border-radius: 16px; 
-                border: 1px solid #2a2b2c; 
-                box-shadow: 0 4px 12px rgba(0,0,0,0.3); 
-                text-align: left;
-                position: relative;
-                z-index: 2;
+       /* 📱 모바일 커뮤니티 최적화 (불필요한 칸 숨기기 & 제목 100% 확장) */
+        @media (max-width: 768px) {
+            /* 1. 모바일에서는 번호(1), 날짜(4), 좋아요(6) 칼같이 숨기기 */
+            .board-table th:nth-child(1), .board-table td:nth-child(1),
+            .board-table th:nth-child(4), .board-table td:nth-child(4),
+            .board-table th:nth-child(6), .board-table td:nth-child(6) {
+                display: none !important;
             }
             
-            /* 2. 🔥 제목 텍스트 (가로 100% 혼자 다 쓰기 강제 적용) */
-            .td-title { 
-                display: block !important; /* 표 셀(td) 성질을 버리고 한 줄 전체 차지 */
-                width: 100% !important; 
-                padding: 0 0 12px 0 !important; /* 아래쪽 여백만 주기 */
-                margin-bottom: 0 !important; 
-                font-size: 17px !important; 
-                font-weight: 700; 
-                color: #ffffff !important; 
-                border: none !important; 
-                line-height: 1.4; 
-                word-break: break-all; /* 긴 단어도 무조건 줄바꿈 */
+            /* 2. 글쓴이(3), 댓글(5) 크기 최소화로 압축 */
+            .board-table th:nth-child(3), .board-table td:nth-child(3),
+            .board-table th:nth-child(5), .board-table td:nth-child(5) {
+                width: 50px !important;
+                font-size: 12px !important;
+                padding: 10px 2px !important;
+            }
+
+            /* 3. 🚀 제목칸 해방! 남은 공간 100% 다 쓰게 만들기 */
+            .board-table th:nth-child(2), .board-table td:nth-child(2) {
+                width: auto !important;
                 white-space: normal !important;
+                word-break: break-all !important;
+                padding-left: 5px !important;
             }
             
-            /* 3. 모바일에서 덜 중요한 '번호' 숨기기 */
-            .board-row td:first-child { display: none !important; }
+            .td-title { font-size: 14px !important; line-height: 1.4 !important; padding-left: 5px !important; }
             
-            /* 4. 글쓴이, 날짜, 댓글, 좋아요 하단에 나란히 배치 */
-            .board-row td:not(.td-title) { 
-                display: inline-block !important; /* 제목 아래에서 가로로 나열 */
-                width: auto !important; 
-                padding: 0 !important; 
-                margin-right: 14px !important; 
-                font-size: 13px !important; 
-                color: #888 !important; 
-                border: none !important; 
-            }
-            
-            /* 5. 아이콘 간격 및 정렬 */
-            .board-row td:nth-child(5)::before { content: "💬 "; font-size: 11px; margin-right: 3px; }
-            .board-row td:nth-child(6)::before { content: "❤️ "; font-size: 11px; margin-right: 3px; }
-            
-            /* 6. 본문 열렸을 때 애니메이션처럼 자연스러운 연결 */
-            .post-detail[style*="table-row"], .post-detail[style*="table-row"] td { display: block !important; width: 100%; box-sizing: border-box; }
-            .post-detail { 
-                background: #111 !important; 
-                margin-top: -24px; 
-                margin-bottom: 20px; 
-                padding-top: 10px; 
-                border-radius: 0 0 16px 16px; 
-                border: 1px solid #ff5722; 
-                border-top: none;
-                z-index: 1;
-                position: relative;
-            }
-            .post-detail td { padding: 20px !important; }
-            
-            /* 7. 본문 텍스트 여백 및 가독성 극대화 */
-            .post-content { 
-                word-break: break-word !important; 
-                overflow-wrap: break-word !important; 
-                white-space: pre-wrap !important; 
-                font-size: 15px !important;
-                line-height: 1.7 !important;
-                color: #ddd !important;
-            }
-            .post-content img { max-width: 100% !important; height: auto !important; border-radius: 12px; margin: 15px 0; }
-            .ql-container { height: 350px !important; }
+            /* 모바일 글쓰기 에디터 높이 조절 */
+            .ql-container { height: 250px !important; }
+        }
     </style>
 </head>
 <body>
