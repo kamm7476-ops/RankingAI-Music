@@ -312,13 +312,20 @@
                         </div>
                     <% } %>
 
-                    <div class="post-actions" style="display: flex; gap: 15px; margin-top: 20px; margin-bottom: 20px;">
+                    <div class="post-actions" style="display: flex; gap: 15px; align-items: center; margin-top: 20px; margin-bottom: 20px;">
                         <button class="action-btn" onclick="event.stopPropagation(); likePost('<%= post._id %>')" style="background:none; border:1px solid #444; color:#ccc; padding: 5px 12px; border-radius: 5px; cursor:pointer;">
-                            ❤️ 좋아요
+                            ❤️ <%= __('th_likes') || '좋아요' %> <span id="like-post-count-<%= post._id %>"><%= post.likes || 0 %></span>
                         </button>
-                    </div>
 
-                    <div id="board-comments-<%= post._id %>" style="background: #111; padding: 20px; border-radius: 8px; border: 1px solid #222;">
+                        <% if (user && (user.id === post.author || user.role === 'admin')) { %>
+                            <div style="display: flex; gap: 10px; margin-left: auto;">
+                                <button onclick="event.stopPropagation(); location.href='/edit-post/<%= post._id %>'" style="color: #00e5ff; background: none; border: none; cursor: pointer;">✏️ <%= __('action_edit') || '수정' %></button>
+                                <form action="/delete-post/<%= post._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('<%= __('yt_confirm_delete') || '정말 삭제할까요?' %>');">
+                                    <button type="submit" style="color: #ff4a4a; background: none; border: none; cursor: pointer;">🗑 <%= __('action_delete') || '삭제' %></button>
+                                </form>
+                            </div>
+                        <% } %>
+                    </div> <div id="board-comments-<%= post._id %>" style="background: #111; padding: 20px; border-radius: 8px; border: 1px solid #222;">
                         <h4 style="margin-top: 0; color: #fff; font-size: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">💬 댓글 (<%= post.comments ? post.comments.length : 0 %>)</h4>
                         
                         <% if (post.comments && post.comments.length > 0) { %>
