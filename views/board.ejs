@@ -400,64 +400,89 @@
     </script>
 
     <style>
-    @media screen and (max-width: 768px) {
-        /* 1. 표의 성질을 완전히 제거하고 수직 박스로 바꿉니다. */
-        table.board-table, 
-        table.board-table tbody, 
-        table.board-table tr, 
-        table.board-table td {
-            display: block !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-        }
+    /* 🚨 모바일 세로 기차 완전 박멸 & 모바일용 프리미엄 카드 디자인 🚨 */
+        @media screen and (max-width: 768px) {
+            /* 1. 표(Table) 시스템 완전 폐기 */
+            table.board-table, 
+            table.board-table tbody {
+                display: block !important;
+                width: 100% !important;
+                background: transparent !important; /* 뒷배경 투명하게 */
+            }
+            table.board-table thead { display: none !important; }
 
-        /* 2. 상단 헤더 숨김 */
-        table.board-table thead { display: none !important; }
+            /* 2. 📱 모바일 전용 프리미엄 카드 스타일 (🔥여기가 핵심입니다!) */
+            tr.board-row {
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+                padding: 18px 15px !important;
+                margin-bottom: 12px !important; /* ✅ 위아래 카드를 12px씩 시원하게 띄웁니다! */
+                background: #161718 !important; /* 카드 배경색 */
+                border-radius: 12px !important; /* ✅ 예쁜 둥근 모서리 */
+                border: 1px solid #252628 !important; /* 은은한 테두리 */
+                box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+            }
 
-        /* 3. 모바일에서 숨겨야 할 칸들(번호, 글쓴이, 날짜 등)을 완전히 제거 */
-        .mobile-hide {
-            display: none !important;
-            width: 0 !important;
-            height: 0 !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            visibility: hidden !important;
-        }
+            /* 3. 칸(td)들의 기존 속성 찌꺼기 완벽 리셋 */
+            table.board-table td {
+                display: block !important;
+                border: none !important;
+                padding: 0 !important;
+                box-sizing: border-box !important;
+            }
 
-        /* 4. 제목 칸: 세로 기차 절대 방어 🔥 */
-        .td-title {
-            display: block !important;
-            width: 100% !important;
-            padding: 18px 12px !important; /* 클릭하기 편하게 패딩 확대 */
-            font-size: 16px !important;
-            font-weight: 700 !important;
-            line-height: 1.4 !important;
-            color: #ffffff !important;
-            
-            /* 핵심 옵션: 한글이 세로로 쪼개지는 현상 방지 */
-            white-space: normal !important;
-            word-break: keep-all !important; /* 단어 단위로 줄바꿈 (세로 방지 핵심) */
-            overflow-wrap: break-word !important; 
-            
-            border-bottom: 1px solid #222 !important;
-        }
+            /* 모바일에서 숨겨야 할 칸들 완전히 제거 */
+            .mobile-hide {
+                display: none !important;
+                width: 0 !important;
+                height: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                visibility: hidden !important;
+            }
 
-        /* 5. 본문 열렸을 때 화면 최적화 */
-        .post-detail { display: none; width: 100% !important; }
-        .post-detail[style*="table-row"], .post-detail[style*="block"] {
-            display: block !important;
+            /* 4. 번호 칸: 왼쪽에 작게 딱 고정시켜 버림 */
+            tr.board-row td:first-child {
+                width: 35px !important;
+                min-width: 35px !important;
+                flex-shrink: 0 !important;
+                text-align: center !important;
+            }
+
+            /* 5. 대망의 제목 칸: 남은 공간 독식 */
+            tr.board-row td.td-title {
+                flex-grow: 1 !important;
+                width: calc(100% - 35px) !important;
+                padding-left: 12px !important;
+                white-space: normal !important;
+                word-break: break-word !important; 
+                line-height: 1.5 !important;
+                border-bottom: none !important; /* ✅ 촌스러운 밑줄 제거 */
+            }
+
+            /* 6. 본문 열렸을 때 화면 최적화 */
+            tr.post-detail { 
+                display: none; 
+                width: 100% !important; 
+                flex-direction: column !important; 
+                margin-bottom: 12px !important; /* 본문 아래도 여백 */
+            }
+            tr.post-detail[style*="table-row"], tr.post-detail[style*="block"] {
+                display: flex !important;
+            }
+            tr.post-detail td {
+                width: 100% !important;
+                padding: 20px 15px !important;
+                border-radius: 12px !important;
+            }
+            .mobile-author-info { 
+                display: flex !important; 
+                margin-bottom: 10px;
+            }
         }
-        .post-detail td {
-            display: block !important;
-            padding: 20px 15px !important;
-            width: 100% !important;
-            background: #0e0e0f !important;
-        }
-        .mobile-author-info { 
-            display: flex !important; /* 글 상세에서 글쓴이 보이기 */
-            margin-bottom: 10px;
-        }
-    }
 </style>
 </body>
 </html>
