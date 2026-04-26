@@ -285,7 +285,7 @@
                 style="<%= pageNum > 1 ? 'display: none;' : '' %>; cursor: pointer;"
                 onclick="const detail = document.getElementById('post-detail-<%= post._id %>'); detail.style.display = (detail.style.display === 'none' || detail.style.display === '') ? 'table-row' : 'none';">
                 
-                <td style="text-align: center; color: #666;"><%= posts.length - index %></td>
+                <td class="td-num" style="text-align: center; color: #666;"><%= posts.length - index %></td>
                 <td class="td-title" style="font-weight: 500;">
                     <%= post.title %>
                     <% if (post.imageUrl) { %> <span style="font-size: 12px; margin-left: 5px;">📷</span> <% } %>
@@ -299,7 +299,7 @@
                     <div class="post-info-bar" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #222; font-size: 14px; color: #aaa; display: flex; gap: 15px; flex-wrap: wrap;">
                         <span style="color: #ff5722; font-weight: bold;">@<%= post.author %></span>
                         <span>📅 <%= new Date(post.createdAt).toLocaleDateString() %></span>
-                        <span>❤️ <%= __('th_likes') || '좋아요' %> <%= post.likes || 0 %></span>
+                        <span>❤️ 좋아요 <span id="like-post-count-<%= post._id %>"><%= post.likes || 0 %></span></span>
                     </div>
                     
                     <div class="post-content" style="white-space: pre-wrap; line-height: 1.9; color: #e5e5e5; font-size: 16px;">
@@ -312,12 +312,43 @@
                         </div>
                     <% } %>
 
-                    <div class="post-actions" style="display: flex; gap: 15px; margin-top: 20px;">
+                    <div class="post-actions" style="display: flex; gap: 15px; margin-top: 20px; margin-bottom: 20px;">
                         <button class="action-btn" onclick="event.stopPropagation(); likePost('<%= post._id %>')" style="background:none; border:1px solid #444; color:#ccc; padding: 5px 12px; border-radius: 5px; cursor:pointer;">
-                            ❤️ <%= __('th_likes') || '좋아요' %> <span id="like-post-count-<%= post._id %>"><%= post.likes || 0 %></span>
+                            ❤️ 좋아요
                         </button>
                     </div>
-                </td>
+
+                    <div id="board-comments-<%= post._id %>" style="background: #111; padding: 20px; border-radius: 8px; border: 1px solid #222;">
+                        <h4 style="margin-top: 0; color: #fff; font-size: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">💬 댓글 (<%= post.comments ? post.comments.length : 0 %>)</h4>
+                        
+                        <% if (post.comments && post.comments.length > 0) { %>
+                            <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
+                                <% post.comments.forEach(comment => { %>
+                                    <div style="border-bottom: 1px dashed #333; padding-bottom: 10px;">
+                                        <div style="font-size: 13px; margin-bottom: 5px;">
+                                            <span style="color: #ff5722; font-weight: bold;">@<%= comment.author %></span>
+                                            <span style="color: #666; margin-left: 10px;"><%= new Date(comment.createdAt).toLocaleDateString() %></span>
+                                        </div>
+                                        <div style="color: #ccc; font-size: 14px; line-height: 1.5;"><%= comment.content %></div>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        <% } else { %>
+                            <p style="color: #555; font-size: 13px;">등록된 댓글이 없습니다. 첫 댓글을 남겨보세요!</p>
+                        <% } %>
+
+                        <% if (user) { %>
+                            <form action="/add-comment/<%= post._id %>" method="POST" style="display: flex; gap: 10px; margin-top: 15px;">
+                                <input type="text" name="content" placeholder="댓글을 입력하세요..." required style="flex: 1; padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff; font-family: inherit;">
+                                <button type="submit" style="background: #ff5722; color: #000; border: none; padding: 0 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">등록</button>
+                            </form>
+                        <% } else { %>
+                            <div style="padding: 12px; background: #222; text-align: center; border-radius: 6px; font-size: 13px; color: #aaa; border: 1px solid #333;">
+                                댓글을 작성하려면 <a href="/login" style="color: #ff5722; text-decoration: underline;">로그인</a>이 필요합니다.
+                            </div>
+                        <% } %>
+                    </div>
+                    </td>
             </tr>
         <% }) %>
     <% } else { %>
@@ -400,89 +431,53 @@
     </script>
 
     <style>
-    /* 🚨 모바일 세로 기차 완전 박멸 & 모바일용 프리미엄 카드 디자인 🚨 */
-        @media screen and (max-width: 768px) {
-            /* 1. 표(Table) 시스템 완전 폐기 */
-            table.board-table, 
-            table.board-table tbody {
-                display: block !important;
-                width: 100% !important;
-                background: transparent !important; /* 뒷배경 투명하게 */
-            }
-            table.board-table thead { display: none !important; }
-
-            /* 2. 📱 모바일 전용 프리미엄 카드 스타일 (🔥여기가 핵심입니다!) */
-            tr.board-row {
-                display: flex !important;
-                flex-direction: row !important;
-                align-items: center !important;
-                width: 100% !important;
-                box-sizing: border-box !important;
-                padding: 18px 15px !important;
-                margin-bottom: 12px !important; /* ✅ 위아래 카드를 12px씩 시원하게 띄웁니다! */
-                background: #161718 !important; /* 카드 배경색 */
-                border-radius: 12px !important; /* ✅ 예쁜 둥근 모서리 */
-                border: 1px solid #252628 !important; /* 은은한 테두리 */
-                box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
-            }
-
-            /* 3. 칸(td)들의 기존 속성 찌꺼기 완벽 리셋 */
-            table.board-table td {
-                display: block !important;
-                border: none !important;
-                padding: 0 !important;
-                box-sizing: border-box !important;
-            }
-
-            /* 모바일에서 숨겨야 할 칸들 완전히 제거 */
-            .mobile-hide {
-                display: none !important;
-                width: 0 !important;
-                height: 0 !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                visibility: hidden !important;
-            }
-
-            /* 4. 번호 칸: 왼쪽에 작게 딱 고정시켜 버림 */
-            tr.board-row td:first-child {
-                width: 35px !important;
-                min-width: 35px !important;
-                flex-shrink: 0 !important;
-                text-align: center !important;
-            }
-
-            /* 5. 대망의 제목 칸: 남은 공간 독식 */
-            tr.board-row td.td-title {
-                flex-grow: 1 !important;
-                width: calc(100% - 35px) !important;
-                padding-left: 12px !important;
-                white-space: normal !important;
-                word-break: break-word !important; 
-                line-height: 1.5 !important;
-                border-bottom: none !important; /* ✅ 촌스러운 밑줄 제거 */
-            }
-
-            /* 6. 본문 열렸을 때 화면 최적화 */
-            tr.post-detail { 
-                display: none; 
-                width: 100% !important; 
-                flex-direction: column !important; 
-                margin-bottom: 12px !important; /* 본문 아래도 여백 */
-            }
-            tr.post-detail[style*="table-row"], tr.post-detail[style*="block"] {
-                display: flex !important;
-            }
-            tr.post-detail td {
-                width: 100% !important;
-                padding: 20px 15px !important;
-                border-radius: 12px !important;
-            }
-            .mobile-author-info { 
-                display: flex !important; 
-                margin-bottom: 10px;
-            }
+    @media screen and (max-width: 768px) {
+        /* 모바일에서는 Table 속성을 완전히 죽여서 margin이 먹히게 만듭니다 */
+        table.board-table, 
+        table.board-table tbody, 
+        table.board-table tr, 
+        table.board-table td {
+            display: block !important; 
+            width: 100% !important;
+            box-sizing: border-box !important;
         }
+        
+        table.board-table thead { display: none !important; }
+
+        /* 📱 모바일 카드 디자인 (여백 확보 핵심!) */
+        tr.board-row {
+            margin-bottom: 15px !important; /* 🔥 카드가 다닥다닥 붙지 않게 15px 띄움! */
+            background: #161718 !important;
+            border-radius: 12px !important;
+            border: 1px solid #252628 !important;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+            padding: 10px !important;
+        }
+
+        /* 번호 숨김 처리 (모바일에선 제목만 집중) */
+        tr.board-row td.td-num { display: none !important; }
+
+        /* 제목 가로폭 100% 보장 (세로 기차 박멸) */
+        tr.board-row td.td-title {
+            padding: 10px 5px !important;
+            border: none !important;
+            white-space: normal !important;
+            word-break: break-word !important;
+            line-height: 1.5 !important;
+            font-size: 16px !important;
+        }
+
+        /* 본문 구역 모바일 최적화 */
+        tr.post-detail { margin-bottom: 15px !important; }
+        tr.post-detail[style*="table-row"], tr.post-detail[style*="block"] {
+            display: block !important;
+        }
+        tr.post-detail td {
+            padding: 20px 15px !important;
+            border: 1px solid #ff5722 !important;
+            border-radius: 12px !important;
+        }
+    }
 </style>
 </body>
 </html>
