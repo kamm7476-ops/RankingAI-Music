@@ -62,13 +62,22 @@
         .action-btn { background: none; border: none; color: #aaa; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; padding: 0; }
         .action-btn:hover { color: #ff5722; }
 
-        /* 🌟 PC 보배드림 스타일 테이블 (table-layout: fixed 추가!) */
-        .board-table { width: 100%; table-layout: fixed; border-collapse: collapse; background: #161718; border-radius: 8px; overflow: hidden; margin-top: 15px; }
+       /* 🌟 커뮤니티 리스트 테이블 (PC/모바일 통합 깔끔 버전) */
+        .board-table { width: 100%; border-collapse: collapse; background: #161718; border-radius: 8px; overflow: hidden; margin-top: 15px; }
         .board-table thead { background: #222; color: #888; font-size: 14px; }
-        .board-table th { padding: 15px 10px; border-bottom: 1px solid #333; font-weight: 500; }
-        .board-table td { padding: 12px 10px; border-bottom: 1px solid #222; text-align: center; font-size: 14px; color: #ccc; }
+        .board-table th { padding: 12px; border-bottom: 2px solid #222; font-weight: 500; }
+        .board-table td { padding: 15px 10px; border-bottom: 1px solid #222; color: #ccc; }
         .board-row:hover { background: rgba(255, 87, 34, 0.05); cursor: pointer; }
-        .td-title { text-align: left !important; padding-left: 20px !important; color: #fff; font-size: 15px; word-break: break-word; white-space: normal; line-height: 1.4; }
+        .td-title { text-align: left !important; padding-left: 20px !important; font-size: 16px !important; color: #fff !important; line-height: 1.5; }
+
+        /* 🚀 모바일 최적화: 제목 절대 안 찌그러짐 (세로 기차 영원히 안녕) */
+        @media screen and (max-width: 768px) {
+            .td-title {
+                word-break: keep-all !important;
+                overflow-wrap: break-word !important;
+                padding: 15px 10px !important;
+            }
+        }
 
         /* 🌟 커뮤니티 본문 가독성 최적화 */
         .post-content { white-space: pre-wrap !important; }
@@ -169,10 +178,6 @@
         <tr>
             <th style="width: 60px; text-align: center;"><%= __('th_num') || '번호' %></th>
             <th style="width: auto; text-align: left;"><%= __('th_title') || '제목' %></th>
-            <th style="width: 100px; text-align: center;"><%= __('th_author') || '글쓴이' %></th>
-            <th style="width: 100px; text-align: center;"><%= __('th_date') || '날짜' %></th>
-            <th style="width: 60px; text-align: center;"><%= __('th_comments') || '댓글' %></th>
-            <th style="width: 60px; text-align: center;"><%= __('th_likes') || '좋아요' %></th>
         </tr>
     </thead>
     <tbody>
@@ -180,68 +185,47 @@
         <% posts.forEach((post, index) => { %>
             <% const pageNum = Math.floor(index / 100) + 1; %>
 
-           <tr class="board-row page-<%= pageNum %>" 
+            <tr class="board-row page-<%= pageNum %>" 
                 style="<%= pageNum > 1 ? 'display: none;' : '' %>; cursor: pointer;"
                 onclick="const detail = document.getElementById('post-detail-<%= post._id %>'); detail.style.display = (detail.style.display === 'none' || detail.style.display === '') ? 'table-row' : 'none';">
                 
-                <td class="mobile-hide" style="width: 60px; text-align: center;"><%= posts.length - index %></td>
-                
-                <td class="td-title" style="text-align: left !important; color: #fff !important;">
+                <td style="text-align: center; color: #666;"><%= posts.length - index %></td>
+                <td class="td-title" style="font-weight: 500;">
                     <%= post.title %>
                     <% if (post.imageUrl) { %> <span style="font-size: 12px; margin-left: 5px;">📷</span> <% } %>
+                    <span style="color: #ff5722; font-size: 12px; margin-left: 5px;">[<%= post.comments ? post.comments.length : 0 %>]</span>
                 </td>
-                
-                <td class="mobile-hide" style="width: 100px; color: #aaa;">@<%= post.author %></td>
-                <td class="mobile-hide" style="width: 100px; font-size: 13px;"><%= new Date(post.createdAt).toLocaleDateString() %></td>
-                <td class="mobile-hide" style="width: 60px; color: #00e5ff; font-weight: bold;"><%= post.comments ? post.comments.length : 0 %></td>
-                <td class="mobile-hide" style="color: #ff5722; width: 60px;"><%= post.likes || 0 %></td>
             </tr>
 
-           <tr id="post-detail-<%= post._id %>" class="post-detail page-<%= pageNum %>" style="display: none; background: #0e0e0f;">
-    <td colspan="6" style="padding: 35px; text-align: left; border-bottom: 2px solid #ff5722;"> 
-        
-        <div class="mobile-author-info" style="display: none; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #333; font-size: 13px; color: #aaa;">
-            <span style="color: #ff5722; font-weight: bold; margin-right: 10px;">@<%= post.author %></span>
-            <span><%= new Date(post.createdAt).toLocaleDateString() %></span>
-        </div>
-        
-        <div class="post-content" style="white-space: pre-wrap; line-height: 1.9; word-break: keep-all; color: #e5e5e5; margin-top: 0; font-size: 15px; letter-spacing: -0.4px;">
-            <%- post.content %>
-        </div>
-        
-        <% if (post.imageUrl) { %>
-            <div style="margin-bottom: 20px; text-align: center; margin-top: 20px;">
-                <img src="<%= post.imageUrl %>" alt="게시글 이미지" style="max-width: 100%; max-height: 500px; border-radius: 12px; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
-            </div>
-        <% } %>
-                    <div class="post-actions" style="display: flex; gap: 15px; align-items: center; border-top: 1px solid #222; padding-top: 15px; margin-top: 15px;">
-                        <% let isPostLiked = (user && post.likedBy && post.likedBy.includes(user.id)); %>
-                        <button class="action-btn" id="like-post-btn-<%= post._id %>" onclick="event.stopPropagation(); likePost('<%= post._id %>')" style="<%= isPostLiked ? 'color:#ff4a4a;' : '' %> background:none; border:none; cursor:pointer;">
-                            <%= isPostLiked ? '❤️' : '🤍' %> <%= __('th_likes') || '좋아요' %> <span id="like-post-count-<%= post._id %>"><%= post.likes || 0 %></span>
-                        </button>
-                        
-                        <button class="action-btn" onclick="event.stopPropagation(); const box = document.getElementById('board-comments-<%= post._id %>'); box.style.display = (box.style.display === 'block') ? 'none' : 'block';" style="background:none; border:none; color:#aaa; cursor:pointer;">
-                            💬 <%= __('th_comments') || '댓글' %> <%= post.comments ? post.comments.length : 0 %>
-                        </button>
-                        
-                        <% if (user && (user.id === post.author || user.role === 'admin')) { %>
-                            <div style="display: flex; gap: 10px; margin-left: auto;">
-                                <button onclick="event.stopPropagation(); location.href='/edit-post/<%= post._id %>'" style="color: #00e5ff; background: none; border: none; cursor: pointer;">✏️ <%= __('action_edit') || '수정' %></button>
-                                <form action="/delete-post/<%= post._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('<%= __('yt_confirm_delete') || '정말 삭제할까요?' %>');">
-                                    <button type="submit" style="color: #ff4a4a; background: none; border: none; cursor: pointer;">🗑 <%= __('action_delete') || '삭제' %></button>
-                                </form>
-                            </div>
-                        <% } %>
+            <tr id="post-detail-<%= post._id %>" class="post-detail page-<%= pageNum %>" style="display: none; background: #0e0e0f;">
+                <td colspan="2" style="padding: 30px 20px; text-align: left; border-bottom: 2px solid #ff5722;"> 
+                    
+                    <div class="post-info-bar" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #222; font-size: 14px; color: #aaa; display: flex; gap: 15px; flex-wrap: wrap;">
+                        <span style="color: #ff5722; font-weight: bold;">@<%= post.author %></span>
+                        <span>📅 <%= new Date(post.createdAt).toLocaleDateString() %></span>
+                        <span>❤️ <%= __('th_likes') || '좋아요' %> <%= post.likes || 0 %></span>
                     </div>
+                    
+                    <div class="post-content" style="white-space: pre-wrap; line-height: 1.9; color: #e5e5e5; font-size: 16px;">
+                        <%- post.content %>
+                    </div>
+                    
+                    <% if (post.imageUrl) { %>
+                        <div style="margin: 20px 0; text-align: center;">
+                            <img src="<%= post.imageUrl %>" alt="게시글 이미지" style="max-width: 100%; border-radius: 12px; border: 1px solid #333;">
+                        </div>
+                    <% } %>
 
-                    <div id="board-comments-<%= post._id %>" style="display: none; background: #111; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #222;">
-                        <p style="font-size:12px; color:#555;"><%= __('board_comment_info') || '댓글 목록 및 작성창은 기존과 동일하게 작동합니다.' %></p>
+                    <div class="post-actions" style="display: flex; gap: 15px; margin-top: 20px;">
+                        <button class="action-btn" onclick="event.stopPropagation(); likePost('<%= post._id %>')" style="background:none; border:1px solid #444; color:#ccc; padding: 5px 12px; border-radius: 5px; cursor:pointer;">
+                            ❤️ <%= __('th_likes') || '좋아요' %> <span id="like-post-count-<%= post._id %>"><%= post.likes || 0 %></span>
+                        </button>
                     </div>
                 </td>
             </tr>
         <% }) %>
     <% } else { %>
-        <tr><td colspan="6" style="padding: 80px 0; color:#555; text-align:center;"><%= __('board_no_post') || '등록된 게시글이 없습니다.' %></td></tr>
+        <tr><td colspan="2" style="padding: 80px 0; color:#555; text-align:center;"><%= __('board_no_post') || '등록된 게시글이 없습니다.' %></td></tr>
     <% } %>
     </tbody>
 </table>
