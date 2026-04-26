@@ -81,7 +81,7 @@
         .page-btn:hover { background: #333; color: #fff; }
         .page-btn.active { background: #ff5722; color: #000; font-weight: bold; border-color: #ff5722; pointer-events: none; }
 
-       /* 📱 모바일 커뮤니티 최적화 (표 성질 완전 해제!) */
+      /* 📱 모바일 커뮤니티 최적화 (표 성질 완전 해제!) */
         @media (max-width: 768px) {
             .board-table, .board-table tbody, .board-row, .board-table td {
                 display: block !important;
@@ -102,14 +102,15 @@
                 display: none !important; 
             }
             
-            /* 제목: 가로 100% 차지 */
+            /* 제목: 가로 100% 차지 (세로 기차 완벽 차단!) */
             .board-row .td-title {
                 display: block !important;
                 padding: 0 0 10px 0 !important;
                 font-size: 16px !important;
                 font-weight: bold !important;
                 color: #fff !important;
-                word-break: break-word !important;
+                white-space: normal !important;
+                word-break: break-all !important;
                 border: none !important;
             }
             
@@ -122,6 +123,11 @@
                 font-size: 13px !important;
                 color: #888 !important;
             }
+
+            /* 🚀 본문 열렸을 때 찢어짐 방어 (이게 추가된 핵심입니다!) */
+            .post-detail { display: none; width: 100%; box-sizing: border-box; }
+            .post-detail[style*="table-row"] { display: block !important; }
+            .post-detail td { display: block !important; padding: 20px 10px !important; width: 100%; box-sizing: border-box; }
 
             /* 모바일 글쓰기 에디터 높이 조절 */
             .ql-container { height: 250px !important; }
