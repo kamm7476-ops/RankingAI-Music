@@ -62,66 +62,55 @@
         .action-btn { background: none; border: none; color: #aaa; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; padding: 0; }
         .action-btn:hover { color: #ff5722; }
 
-        /* 🌟 보배드림 스타일 테이블 */
-        .board-table { width: 100%; border-collapse: collapse; background: #161718; border-radius: 8px; overflow: hidden; margin-top: 15px; }
+        /* 🌟 PC 보배드림 스타일 테이블 (table-layout: fixed 추가!) */
+        .board-table { width: 100%; table-layout: fixed; border-collapse: collapse; background: #161718; border-radius: 8px; overflow: hidden; margin-top: 15px; }
         .board-table thead { background: #222; color: #888; font-size: 14px; }
         .board-table th { padding: 15px 10px; border-bottom: 1px solid #333; font-weight: 500; }
         .board-table td { padding: 12px 10px; border-bottom: 1px solid #222; text-align: center; font-size: 14px; color: #ccc; }
         .board-row:hover { background: rgba(255, 87, 34, 0.05); cursor: pointer; }
-        .td-title { text-align: left !important; padding-left: 20px !important; color: #fff; font-size: 15px; }
+        .td-title { text-align: left !important; padding-left: 20px !important; color: #fff; font-size: 15px; word-break: break-word; white-space: normal; line-height: 1.4; }
 
-        /* 🌟 [NEW] 커뮤니티 본문 가독성 최적화 */
+        /* 🌟 커뮤니티 본문 가독성 최적화 */
         .post-content { white-space: pre-wrap !important; }
         .post-content p { margin-bottom: 20px !important; margin-top: 0; }
         .post-content img { max-width: 100%; border-radius: 8px; margin: 15px 0; }
 
-        /* 🌟 [NEW] 하단 페이지 번호 (페이징) 디자인 */
+        /* 🌟 하단 페이지 번호 (페이징) 디자인 */
         .pagination-container { text-align: center; margin-top: 40px; padding-bottom: 20px; }
         .page-btn { background: #222; color: #aaa; border: 1px solid #333; padding: 8px 14px; margin: 0 4px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s; }
         .page-btn:hover { background: #333; color: #fff; }
         .page-btn.active { background: #ff5722; color: #000; font-weight: bold; border-color: #ff5722; pointer-events: none; }
 
-       /* 📱 진짜 최종 모바일 완벽 방어 코드 (테이블 붕괴 해결) */
+        /* 📱 모바일 커뮤니티 최적화 (표 성질 완전 해제!) */
         @media (max-width: 768px) {
-            /* 1. 억지로 칸을 나누는 '표(Table)' 성질을 완전히 부숴버립니다! */
-            .board-table, .board-table tbody, .board-row { display: block; width: 100%; box-sizing: border-box; }
-            .board-table thead { display: none; } /* 맨 위 제목줄(번호,제목...) 숨김 */
-
-            /* 2. 각 게시글을 하나의 '카드 박스'처럼 만듭니다 */
-            .board-row { padding: 15px 10px !important; border-bottom: 1px solid #222 !important; position: relative; text-align: left; }
-
-            /* 3. 모바일에서 안 봐도 되는 [번호, 날짜] 숨기기 */
-            .board-row td:nth-child(1), .board-row td:nth-child(4) { display: none !important; }
-
-            /* 4. 대망의 제목! 가로 100% 혼자 다 쓰고 예쁘게 줄바꿈 (1글자씩 떨어지는 현상 절대 불가) */
-            .board-row .td-title {
+            .board-table, .board-table tbody, .board-row, .board-table td {
                 display: block !important;
                 width: 100% !important;
-                padding: 0 0 8px 0 !important;
-                font-size: 15px !important;
-                white-space: normal !important;
-                word-break: break-word !important; 
-                border: none !important;
+                box-sizing: border-box !important;
             }
-
-            /* 5. 글쓴이, 댓글, 좋아요는 제목 밑에 가로로 예쁘게 나란히! */
+            .board-table thead { display: none !important; } /* 제목줄 숨김 */
+            
+            .board-row { padding: 15px !important; position: relative; text-align: left; }
+            
+            /* 번호, 날짜 숨기기 */
+            .board-row td:nth-child(1), .board-row td:nth-child(4) { display: none !important; }
+            
+            /* 제목: 가로 100% 차지 */
+            .board-row .td-title {
+                padding: 0 0 10px 0 !important;
+                font-size: 16px !important;
+                word-break: break-word !important;
+            }
+            
+            /* 글쓴이, 댓글, 좋아요: 한 줄로 나란히 */
             .board-row td:nth-child(3), .board-row td:nth-child(5), .board-row td:nth-child(6) {
                 display: inline-block !important;
                 width: auto !important;
                 padding: 0 15px 0 0 !important;
                 border: none !important;
-                font-size: 12px !important;
-                color: #888 !important;
+                font-size: 13px !important;
             }
-
-            /* 6. 게시글 본문 열렸을 때 화면 밖으로 찢어지는 현상 방어 */
-            .post-detail { display: none; width: 100%; box-sizing: border-box; }
-            .post-detail[style*="table-row"] { display: block !important; } /* JS 충돌 완벽 방어 */
-            .post-detail td { display: block !important; padding: 20px 10px !important; width: 100%; box-sizing: border-box; }
-
             .ql-container { height: 250px !important; }
-            .header-nav { justify-content: flex-start; overflow-x: auto; white-space: nowrap; padding: 12px 15px; gap: 20px; border-bottom: 1px solid #222; }
-            .header-nav::-webkit-scrollbar { display: none; }
         }
     </style>
 </head>
@@ -210,12 +199,12 @@
             <table class="board-table">
     <thead>
         <tr>
-           <th style="width: 60px; text-align: center; white-space: nowrap;"><%= __('th_num') || '번호' %></th>
-<th style="text-align: left;"><%= __('th_title') || '제목' %></th>
-<th style="width: 80px; text-align: center; white-space: nowrap;"><%= __('th_author') || '글쓴이' %></th>
-<th style="width: 90px; text-align: center; white-space: nowrap;"><%= __('th_date') || '날짜' %></th>
-<th style="width: 60px; text-align: center; white-space: nowrap;"><%= __('th_comments') || '댓글' %></th>
-<th style="width: 60px; text-align: center; white-space: nowrap;"><%= __('th_likes') || '좋아요' %></th>
+            <th style="width: 60px; text-align: center;"><%= __('th_num') || '번호' %></th>
+            <th style="width: auto; text-align: left;"><%= __('th_title') || '제목' %></th>
+            <th style="width: 100px; text-align: center;"><%= __('th_author') || '글쓴이' %></th>
+            <th style="width: 100px; text-align: center;"><%= __('th_date') || '날짜' %></th>
+            <th style="width: 60px; text-align: center;"><%= __('th_comments') || '댓글' %></th>
+            <th style="width: 60px; text-align: center;"><%= __('th_likes') || '좋아요' %></th>
         </tr>
     </thead>
     <tbody>
