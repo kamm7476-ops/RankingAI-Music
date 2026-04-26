@@ -66,11 +66,11 @@
         .action-btn { background: none; border: none; color: #aaa; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; padding: 0; }
         .action-btn:hover { color: #ff5722; }
 
-       /* 🌟 프리미엄 커뮤니티 리스트 (독립된 카드 스타일) */
+        /* 🌟 프리미엄 커뮤니티 리스트 (독립된 카드 스타일) */
         .board-table { 
             width: 100%; 
-            border-collapse: separate; /* 줄 간격을 벌리는 마법의 속성 */
-            border-spacing: 0 12px; /* 위아래로 12px씩 시원하게 간격 띄우기 */
+            border-collapse: separate; 
+            border-spacing: 0 12px; 
             background: transparent; 
         }
         .board-table thead th { 
@@ -80,30 +80,26 @@
             border-bottom: 2px solid #333; 
         }
         
-        /* 💡 각 게시글 줄을 멋진 '독립된 박스'처럼 만듭니다 */
         .board-row { 
             background: #161718; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2); /* 은은한 기본 그림자 */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
             transition: all 0.2s ease; 
         }
         
-        /* 카드의 양끝 모서리를 둥글게 깎아줍니다 */
         .board-row td:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; border-left: 1px solid #252628; }
         .board-row td:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; border-right: 1px solid #252628; }
         
-        /* 여백을 대폭 늘려서 답답함 해소 */
         .board-table td { 
-            padding: 22px 15px; /* 위아래 여백을 22px로 팍 늘렸습니다! */
+            padding: 22px 15px; 
             border-top: 1px solid #252628;
             border-bottom: 1px solid #252628;
             color: #ccc; 
         }
 
-        /* 🖱️ 마우스 올렸을 때의 럭셔리한 애니메이션 */
         .board-row:hover { 
             background: #1c1d20; 
-            transform: translateY(-3px); /* 위로 살짝 떠오르는 효과 */
-            box-shadow: 0 8px 20px rgba(255, 87, 34, 0.15); /* 주황색 네온 빛 그림자 */
+            transform: translateY(-3px); 
+            box-shadow: 0 8px 20px rgba(255, 87, 34, 0.15); 
             cursor: pointer; 
         }
 
@@ -115,21 +111,11 @@
             font-weight: 500;
         }
 
-        /* 📖 상세 본문이 열렸을 때의 스타일 */
         .post-detail td {
             background: #111214 !important;
-            border: 1px solid #ff5722 !important; /* 본문은 주황색 테두리로 강조 */
+            border: 1px solid #ff5722 !important; 
             border-radius: 12px !important;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
-        }
-
-        /* 🚀 모바일 최적화: 제목 절대 안 찌그러짐 (세로 기차 영원히 안녕) */
-        @media screen and (max-width: 768px) {
-            .td-title {
-                word-break: keep-all !important;
-                overflow-wrap: break-word !important;
-                padding: 15px 10px !important;
-            }
         }
 
         /* 🌟 커뮤니티 본문 가독성 최적화 */
@@ -142,6 +128,63 @@
         .page-btn { background: #222; color: #aaa; border: 1px solid #333; padding: 8px 14px; margin: 0 4px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s; }
         .page-btn:hover { background: #333; color: #fff; }
         .page-btn.active { background: #ff5722; color: #000; font-weight: bold; border-color: #ff5722; pointer-events: none; }
+
+        /* 🚨 모바일 세로 기차 물리적 완전 박멸 (Flexbox 카드 변환) 🚨 */
+        @media screen and (max-width: 768px) {
+            /* 1. 표(Table) 시스템 완전 폐기 */
+            table.board-table, 
+            table.board-table tbody {
+                display: block !important;
+                width: 100% !important;
+            }
+            table.board-table thead { display: none !important; }
+
+            /* 2. 각 게시글 줄을 '가로 정렬 박스(Flex)'로 강제 변환 */
+            tr.board-row {
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+                padding: 15px 10px !important;
+            }
+
+            /* 3. 칸(td)들의 기존 속성 찌꺼기 완벽 리셋 */
+            table.board-table td {
+                display: block !important;
+                border: none !important;
+                padding: 0 !important;
+                box-sizing: border-box !important;
+            }
+
+            /* 4. 번호 칸: 왼쪽에 작게(35px) 딱 고정시켜 버림 */
+            tr.board-row td:first-child {
+                width: 35px !important;
+                min-width: 35px !important;
+                flex-shrink: 0 !important; /* 절대 안 찌그러지게 고정 */
+                text-align: center !important;
+            }
+
+            /* 5. 대망의 제목 칸: 남은 공간을 독식 (세로 기차 절대 불가) */
+            tr.board-row td.td-title {
+                flex-grow: 1 !important; /* 남은 공간 100% 차지 */
+                width: calc(100% - 35px) !important;
+                padding-left: 10px !important;
+                white-space: normal !important;
+                word-break: break-word !important; /* 세로 기차 원천 차단 */
+                line-height: 1.5 !important;
+            }
+
+            /* 6. 본문 열렸을 때 화면 찢어짐 방어 */
+            tr.post-detail { display: none; width: 100% !important; flex-direction: column !important; }
+            tr.post-detail[style*="table-row"], tr.post-detail[style*="block"] {
+                display: flex !important;
+            }
+            tr.post-detail td {
+                width: 100% !important;
+                padding: 20px 15px !important;
+            }
+        }
     </style>
 </head>
 <body>
