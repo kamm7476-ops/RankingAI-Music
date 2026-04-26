@@ -321,55 +321,50 @@
 
     <style>
     @media screen and (max-width: 768px) {
-        /* 1. 표 성질을 강제로, 절대적으로 파괴합니다. */
-        table.board-table, 
-        table.board-table tbody, 
-        table.board-table tr, 
-        table.board-table td, 
-        table.board-table th {
+        /* 1. 표의 모든 칸들을 강제로 수직으로 쌓습니다. */
+        .board-table, .board-table tbody, .board-table tr {
             display: block !important;
             width: 100% !important;
-            max-width: 100% !important;
-            min-width: 0 !important;
-            box-sizing: border-box !important;
-            clear: both !important;
-            float: none !important;
         }
-        
-        /* 2. 상단 제목줄 무조건 숨김 */
-        table.board-table thead {
+
+        /* 2. 번호, 글쓴이, 날짜, 댓글, 좋아요 칸을 '물리적'으로 지웁니다. */
+        /* 제목(.td-title)이 아닌 모든 td를 투명인간 취급합니다. */
+        .board-row td:not(.td-title) {
             display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+            visibility: hidden !important;
         }
-        
-        /* 3. 대표님 아이디어: 제목(.td-title) 빼고 싹 다 강제 숨김! */
-        table.board-table tr.board-row td:not(.td-title) {
-            display: none !important;
-        }
-        
-        /* 4. 대망의 제목: 한국어가 1글자씩 깨지는 원인 완벽 제거 (keep-all) */
-        table.board-table tr.board-row td.td-title {
+
+        /* 3. 제목 칸을 화면 전체 100%로 강제 확장합니다. */
+        .board-row td.td-title {
             display: block !important;
-            white-space: normal !important;
-            word-break: keep-all !important; /* <--- 🔥 여기가 세로기차 해결 핵심입니다! */
-            overflow-wrap: break-word !important;
+            width: 100% !important;
+            min-width: 100% !important;
+            max-width: 100% !important;
             padding: 15px 10px !important;
             font-size: 16px !important;
             font-weight: bold !important;
             line-height: 1.5 !important;
+            white-space: normal !important;
+            word-break: keep-all !important; /* 한글 단어 보존 */
+            overflow-wrap: break-word !important;
             border-bottom: 1px solid #333 !important;
+            box-sizing: border-box !important;
         }
 
-        /* 5. 본문 열렸을 때 화면 찢어짐 방어 & 글쓴이 표시 */
-        table.board-table tr.post-detail[style*="table-row"], table.board-table tr.post-detail[style*="block"] {
-            display: block !important;
-        }
-        table.board-table tr.post-detail td {
-            display: block !important;
-            padding: 20px 15px !important;
-            border: none !important;
-        }
+        /* 상단 헤더 숨김 */
+        .board-table thead { display: none !important; }
+
+        /* 본문 안쪽 디자인 최적화 */
+        .post-detail { display: none; width: 100% !important; }
+        .post-detail[style*="table-row"], .post-detail[style*="block"] { display: block !important; }
+        .post-detail td { display: block !important; padding: 20px 15px !important; width: 100% !important; visibility: visible !important; height: auto !important; }
         .mobile-author-info { display: block !important; }
     }
-    </style>
+</style>
 </body>
 </html>
