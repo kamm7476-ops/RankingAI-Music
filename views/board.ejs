@@ -81,7 +81,7 @@
         .page-btn:hover { background: #333; color: #fff; }
         .page-btn.active { background: #ff5722; color: #000; font-weight: bold; border-color: #ff5722; pointer-events: none; }
 
-        /* 📱 모바일 커뮤니티 최적화 (표 성질 완전 해제!) */
+       /* 📱 모바일 커뮤니티 최적화 (표 성질 완전 해제!) */
         @media (max-width: 768px) {
             .board-table, .board-table tbody, .board-row, .board-table td {
                 display: block !important;
@@ -90,16 +90,27 @@
             }
             .board-table thead { display: none !important; } /* 제목줄 숨김 */
             
-            .board-row { padding: 15px !important; position: relative; text-align: left; }
+            .board-row { 
+                padding: 15px !important; 
+                border-bottom: 1px solid #222 !important;
+                position: relative; 
+                text-align: left; 
+            }
             
             /* 번호, 날짜 숨기기 */
-            .board-row td:nth-child(1), .board-row td:nth-child(4) { display: none !important; }
+            .board-row td:nth-child(1), .board-row td:nth-child(4) { 
+                display: none !important; 
+            }
             
             /* 제목: 가로 100% 차지 */
             .board-row .td-title {
+                display: block !important;
                 padding: 0 0 10px 0 !important;
                 font-size: 16px !important;
+                font-weight: bold !important;
+                color: #fff !important;
                 word-break: break-word !important;
+                border: none !important;
             }
             
             /* 글쓴이, 댓글, 좋아요: 한 줄로 나란히 */
@@ -109,7 +120,10 @@
                 padding: 0 15px 0 0 !important;
                 border: none !important;
                 font-size: 13px !important;
+                color: #888 !important;
             }
+
+            /* 모바일 글쓰기 에디터 높이 조절 */
             .ql-container { height: 250px !important; }
         }
     </style>
@@ -165,12 +179,12 @@
     <div class="container">
         
         <div class="board-header">
-            <h2 class="board-title">💬 <%= __('board_title') || '커뮤니티' %> <span style="font-size: 14px; font-weight: normal; color: #777;"><%= __('board_desc') || '자유롭게 이야기를 나눠보세요!' %></span></h2>
+            <h2 class="board-title"><%= __('board_title') || '커뮤니티' %> <span style="font-size: 14px; font-weight: normal; color: #777;"><%= __('board_desc') || '자유롭게 이야기를 나눠보세요!' %></span></h2>
             
             <% if (user) { %>
                 <button class="btn-write-toggle" onclick="const box = document.getElementById('writeBox'); box.style.display = (box.style.display === 'block') ? 'none' : 'block'; window.scrollBy({ top: 100, behavior: 'smooth' });">✍️ <%= __('btn_write') || '글쓰기' %></button>
             <% } else { %>
-                <button class="btn-write-toggle" onclick="location.href='/login'" style="background:#444; color:#fff;">🔒 <%= __('btn_write_login') || '로그인 후 글쓰기' %></button>
+                <button class="btn-write-toggle" onclick="location.href='/login'" style="background:#444; color:#fff;"><%= __('btn_write_login') || '로그인 후 글쓰기' %></button>
             <% } %>
         </div>
 
