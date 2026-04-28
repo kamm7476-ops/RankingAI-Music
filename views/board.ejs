@@ -241,7 +241,7 @@
             <h2 class="board-title"><%= __('board_title') || '커뮤니티' %> <span style="font-size: 14px; font-weight: normal; color: #777;"><%= __('board_desc') || '자유롭게 이야기를 나눠보세요!' %></span></h2>
             
             <% if (user) { %>
-                <button class="btn-write-toggle" onclick="const box = document.getElementById('writeBox'); box.style.display = (box.style.display === 'block') ? 'none' : 'block'; window.scrollBy({ top: 100, behavior: 'smooth' });">✍️ <%= __('btn_write') || '글쓰기' %></button>
+                <button class="btn-write-toggle" onclick="toggleWriteBox()">✍️ <%= __('btn_write') || '글쓰기' %></button>
             <% } else { %>
                 <button class="btn-write-toggle" onclick="location.href='/login'" style="background:#444; color:#fff;"><%= __('btn_write_login') || '로그인 후 글쓰기' %></button>
             <% } %>
@@ -395,113 +395,122 @@
 <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     
     <script>
-        // 🚨 방어막 가동: 페이지의 모든 HTML이 로드된 후 실행
-        document.addEventListener("DOMContentLoaded", function() {
+        let quill = null; // 에디터를 담을 빈 바구니 준비
+
+        // 🚨 글쓰기 버튼을 누를 때 실행되는 마법의 함수!
+        function toggleWriteBox() {
+            const box = document.getElementById('writeBox');
             
-            // 🚨 방어막 가동: 화면에 'editor-container'가 존재할 때만 실행 (에러 완벽 차단)
-            if (document.getElementById('editor-container')) {
+            if (box.style.display === 'none' || box.style.display === '') {
+                // 1. 숨겨진 창을 화면에 먼저 딱 보여줍니다!
+                box.style.display = 'block'; 
                 
-                // 1. 에디터 셋업 (테마 적용 및 툴바 설정)
-                var quill = new Quill('#editor-container', {
-                    theme: 'snow',
-                    placeholder: '<%= __('ph_editor_content') || "여기를 클릭해서 내용을 입력하세요. (사진도 드래그해서 넣을 수 있습니다!)" %>',
-                    modules: {
-                        toolbar: {
-                            container: [
-                                [{ 'size': ['small', false, 'large', 'huge'] }],
-                                ['bold', 'italic', 'underline', 'strike'],
-                                [{ 'color': [] }, { 'background': [] }],
-                                ['image', 'video', 'link'],
-                                [{ 'list': 'ordered'}, { 'list': 'bullet' }]
-                            ],
-                            handlers: {
-                                image: imageHandler // 이미지 버튼 누를 때 압축 함수 실행
+                // 2. 창이 열렸으니 이제 안전하게 에디터를 켭니다! (좀비 버그 원천 차단)
+                if (!quill && document.getElementById('editor-container')) {
+                    quill = new Quill('#editor-container', {
+                        theme: 'snow',
+                        placeholder: '<%= __('ph_editor_content') || "여기를 클릭해서 내용을 입력하세요. (사진도 드래그해서 넣을 수 있습니다!)" %>',
+                        modules: {
+                            toolbar: {
+                                container: [
+                                    [{ 'size': ['small', false, 'large', 'huge'] }],
+                                    ['bold', 'italic', 'underline', 'strike'],
+                                    [{ 'color': [] }, { 'background': [] }],
+                                    ['image', 'video', 'link'],
+                                    [{ 'list': 'ordered'}, { 'list': 'bullet' }]
+                                ],
+                                handlers: { image: imageHandler }
                             }
                         }
-                    }
-                });
+                    });
 
-                // 2. 폼 제출 시 에디터 내용 HTML로 넘기기
-                const writeForm = document.querySelector('form[action="/add-post"]');
-                if(writeForm) {
-                    writeForm.addEventListener('submit', function(e) {
-                        document.getElementById('hidden-content').value = quill.root.innerHTML;
+                    // 폼 제출 시 데이터 묶어주기
+                    const writeForm = document.querySelector('form[action="/add-post"]');
+                    if(writeForm) {
+                        writeForm.addEventListener('submit', function(e) {
+                            document.getElementById('hidden-content').value = quill.root.innerHTML;
+                        });
+                    }
+
+                    // 드래그 앤 드롭 및 붙여넣기 연결
+                    quill.root.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+                            compressAndInsertImage(e.dataTransfer.files[0]);
+                        }
+                    });
+                    quill.root.addEventListener('paste', (e) => {
+                        if (e.clipboardData && e.clipboardData.files && e.clipboardData.files.length) {
+                            e.preventDefault();
+                            compressAndInsertImage(e.clipboardData.files[0]);
+                        }
                     });
                 }
-
-                // 🚀 3. 강력한 이미지 압축 엔진 (Canvas 기반, 용량 90% 다이어트!)
-                function compressAndInsertImage(file) {
-                    if (!file.type.match(/^image\/(jpeg|png|gif|webp)$/)) {
-                        alert('이미지 파일만 업로드 가능합니다.');
-                        return;
-                    }
-
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const img = new Image();
-                        img.onload = function() {
-                            const canvas = document.createElement('canvas');
-                            let width = img.width;
-                            let height = img.height;
-                            const max_size = 1200; // 가로/세로 최대 1200px로 제한
-
-                            if (width > height) {
-                                if (width > max_size) {
-                                    height *= max_size / width;
-                                    width = max_size;
-                                }
-                            } else {
-                                if (height > max_size) {
-                                    width *= max_size / height;
-                                    height = max_size;
-                                }
-                            }
-
-                            canvas.width = width;
-                            canvas.height = height;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0, width, height);
-
-                            // 품질 70%의 JPEG로 강제 압축
-                            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-
-                            // 현재 커서 위치에 압축된 이미지 꽂아넣기
-                            const range = quill.getSelection(true);
-                            quill.insertEmbed(range.index, 'image', compressedDataUrl);
-                            quill.setSelection(range.index + 1);
-                        };
-                        img.src = e.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                }
-
-                // 툴바 이미지 버튼 클릭 시 작동
-                function imageHandler() {
-                    const input = document.createElement('input');
-                    input.setAttribute('type', 'file');
-                    input.setAttribute('accept', 'image/*');
-                    input.click();
-                    input.onchange = async () => {
-                        const file = input.files[0];
-                        if (file) compressAndInsertImage(file);
-                    };
-                }
-
-                // 드래그 앤 드롭 & 붙여넣기 시 작동
-                quill.root.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
-                        compressAndInsertImage(e.dataTransfer.files[0]);
-                    }
-                });
-                quill.root.addEventListener('paste', (e) => {
-                    if (e.clipboardData && e.clipboardData.files && e.clipboardData.files.length) {
-                        e.preventDefault();
-                        compressAndInsertImage(e.clipboardData.files[0]);
-                    }
-                });
+                
+                // 창이 열리면 부드럽게 아래로 내려가고, 커서가 자동으로 콕 찍힙니다!
+                window.scrollBy({ top: 100, behavior: 'smooth' });
+                if (quill) quill.focus();
+                
+            } else {
+                // 열려있을 때 한 번 더 누르면 닫기
+                box.style.display = 'none';
             }
-        });
+        }
+
+        // 🚀 이미지 자동 압축 엔진
+        function compressAndInsertImage(file) {
+            if (!file.type.match(/^image\/(jpeg|png|gif|webp)$/)) {
+                alert('이미지 파일만 업로드 가능합니다.');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const max_size = 1200;
+
+                    if (width > height) {
+                        if (width > max_size) {
+                            height *= max_size / width;
+                            width = max_size;
+                        }
+                    } else {
+                        if (height > max_size) {
+                            width *= max_size / height;
+                            height = max_size;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    
+                    // 에러 방지: 커서 위치를 정확히 잡아서 넣기
+                    const range = quill.getSelection(true) || { index: quill.getLength() };
+                    quill.insertEmbed(range.index, 'image', compressedDataUrl);
+                    quill.setSelection(range.index + 1);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function imageHandler() {
+            const input = document.createElement('input');
+            input.setAttribute('type', 'file');
+            input.setAttribute('accept', 'image/*');
+            input.click();
+            input.onchange = async () => {
+                const file = input.files[0];
+                if (file) compressAndInsertImage(file);
+            };
+        }
     </script>
 
     <script>
