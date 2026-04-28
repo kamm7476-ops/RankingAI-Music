@@ -249,21 +249,32 @@
 
         <% if (user) { %>
         <div class="write-box" id="writeBox">
-            <h3><%= __('board_write_new') || '새로운 글 작성하기' %></h3>
+            <h3 style="color: #ff5722; font-size: 20px; font-weight: bold; border-bottom: 2px solid #ff5722; padding-bottom: 10px; margin-bottom: 25px;"><%= __('board_write_new') || '✨ 새로운 글 작성하기' %></h3>
             <form action="/add-post" method="POST" enctype="multipart/form-data">
-                <input type="text" name="title" class="write-input" placeholder="<%= __('ph_post_title') || '제목을 입력하세요.' %>" required>
+                
+                <input type="text" name="title" class="write-input" placeholder="<%= __('ph_post_title') || '제목을 시원하게 입력하세요!' %>" required
+                       style="width: 100%; background: #1c1d20; border: 1px solid #444; color: #fff; padding: 18px 20px; border-radius: 10px; font-size: 18px; font-weight: bold; margin-bottom: 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); outline: none; transition: border 0.3s;">
                 <input type="hidden" name="content" id="hidden-content">
 
-                <div style="background: white; border-radius: 8px; margin-bottom: 15px;">
-                    <div id="editor-container" style="height: 600px; color: black; font-family: 'Pretendard', sans-serif; font-size: 15px;"></div>
+                <div style="background-color: #FFF5EC; border-radius: 10px; border: 1px solid #ffccb3; overflow: hidden; margin-bottom: 25px; box-shadow: 0 5px 15px rgba(255, 87, 34, 0.1);">
+                    <style>
+                        /* 에디터 내부 강제 스타일링 (클릭 안되는 문제 완벽 해결) */
+                        .ql-toolbar.ql-snow { border: none !important; border-bottom: 1px solid #ffccb3 !important; background: #fffaf6; padding: 12px; }
+                        .ql-container.ql-snow { border: none !important; min-height: 400px; font-size: 16px; color: #333; font-family: 'Pretendard', sans-serif; }
+                        .ql-editor { min-height: 400px; padding: 25px; line-height: 1.8; }
+                        .ql-editor.ql-blank::before { color: #b38b75; font-style: normal; } /* 안내 문구 색상도 고급스럽게 */
+                    </style>
+                    <div id="editor-container"></div>
                 </div>
                 
-                <div style="margin-bottom: 20px; background: #222; padding: 12px; border-radius: 8px; border: 1px dashed #555;">
-                    <label style="color: #ff5722; font-size: 13px; font-weight: bold; margin-bottom: 8px; display: block;">📷 <%= __('upload_cover') || '이미지 첨부 (선택사항)' %></label>
+                <div style="margin-bottom: 25px; background: #222; padding: 15px; border-radius: 8px; border: 1px dashed #ff5722;">
+                    <label style="color: #ff5722; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: block;">📷 <%= __('upload_cover') || '대표 커버 이미지 첨부 (선택사항)' %></label>
                     <input type="file" name="image" accept="image/*" style="color: #aaa; font-size: 14px; width: 100%; cursor: pointer;">
                 </div>
 
-                <button type="submit" class="btn-submit"><%= __('btn_submit_chart') || '게시글 등록하기' %></button>
+                <button type="submit" class="btn-submit" style="width: 100%; background: #ff5722; color: #000; border: none; padding: 16px; border-radius: 10px; font-weight: bold; font-size: 18px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(255, 87, 34, 0.3);">
+                    <%= __('btn_submit_chart') || '게시글 멋지게 등록하기' %>
+                </button>
             </form>
         </div>
         <% } %>
@@ -378,26 +389,105 @@
 
 <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <script>
+        // 1. 에디터 셋업 (테마 적용 및 툴바 설정)
         var quill = new Quill('#editor-container', {
             theme: 'snow',
-            placeholder: '<%= __('ph_editor_content') || "여기에 내용을 입력하세요. (사진도 드래그해서 넣을 수 있습니다!)" %>',
+            placeholder: '<%= __('ph_editor_content') || "여기를 클릭해서 내용을 입력하세요. (사진도 드래그해서 넣을 수 있습니다!)" %>',
             modules: {
-                toolbar: [
-                    [{ 'size': ['small', false, 'large', 'huge'] }],
-                    ['bold', 'italic', 'underline', 'strike'],
-                    [{ 'color': [] }, { 'background': [] }],
-                    ['image', 'video', 'link'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }]
-                ]
+                toolbar: {
+                    container: [
+                        [{ 'size': ['small', false, 'large', 'huge'] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        ['image', 'video', 'link'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }]
+                    ],
+                    handlers: {
+                        image: imageHandler // 이미지 버튼 누를 때 압축 함수 실행
+                    }
+                }
             }
         });
 
+        // 2. 폼 제출 시 에디터 내용 HTML로 넘기기
         const writeForm = document.querySelector('form[action="/add-post"]');
         if(writeForm) {
             writeForm.addEventListener('submit', function(e) {
                 document.getElementById('hidden-content').value = quill.root.innerHTML;
             });
         }
+
+        // 🚀 3. 강력한 이미지 압축 엔진 (Canvas 기반, 용량 90% 다이어트!)
+        function compressAndInsertImage(file) {
+            if (!file.type.match(/^image\/(jpeg|png|gif|webp)$/)) {
+                alert('이미지 파일만 업로드 가능합니다.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const max_size = 1200; // 가로/세로 최대 1200px로 제한
+
+                    if (width > height) {
+                        if (width > max_size) {
+                            height *= max_size / width;
+                            width = max_size;
+                        }
+                    } else {
+                        if (height > max_size) {
+                            width *= max_size / height;
+                            height = max_size;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // 품질 70%의 JPEG로 강제 압축 (서버 용량 대폭 절약!)
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+                    // 현재 커서 위치에 압축된 이미지 꽂아넣기
+                    const range = quill.getSelection(true);
+                    quill.insertEmbed(range.index, 'image', compressedDataUrl);
+                    quill.setSelection(range.index + 1);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 툴바 이미지 버튼 클릭 시 작동
+        function imageHandler() {
+            const input = document.createElement('input');
+            input.setAttribute('type', 'file');
+            input.setAttribute('accept', 'image/*');
+            input.click();
+            input.onchange = async () => {
+                const file = input.files[0];
+                if (file) compressAndInsertImage(file);
+            };
+        }
+
+        // 드래그 앤 드롭 & 붙여넣기 시 작동 (가장 편리한 기능!)
+        quill.root.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+                compressAndInsertImage(e.dataTransfer.files[0]);
+            }
+        });
+        quill.root.addEventListener('paste', (e) => {
+            if (e.clipboardData && e.clipboardData.files && e.clipboardData.files.length) {
+                e.preventDefault();
+                compressAndInsertImage(e.clipboardData.files[0]);
+            }
+        });
     </script>
 
     <script>
