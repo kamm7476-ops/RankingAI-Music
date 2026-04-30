@@ -208,10 +208,14 @@
             .music-item { position: relative; background: #161718; border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px solid #222; box-shadow: 0 4px 6px rgba(0,0,0,0.3); overflow: hidden; }
             .music-item td { padding: 0; border: none; }
             .check-col { position: absolute; top: 15px; right: 15px; z-index: 10; width: auto !important; }
-            /* 🚀 100번대 숫자 겹침 해결 버전 */
-            .rank { position: absolute !important; top: 35px !important; left: 5px !important; background: transparent !important; color: #ff5722 !important; border-radius: 0 !important; padding: 0 !important; font-size: 18px !important; font-weight: 900 !important; width: 35px !important; text-align: center !important; z-index: 10 !important; box-shadow: none !important; }
+           /* 🚀 100번대 이상(세 자리) 숫자 겹침 완벽 해결 버전 */
+            /* 1. 숫자가 들어가는 방(width)을 35px -> 50px로 넓혀서 1000등까지 방어합니다! */
+            .rank { position: absolute !important; top: 35px !important; left: 5px !important; background: transparent !important; color: #ff5722 !important; border-radius: 0 !important; padding: 0 !important; font-size: 18px !important; font-weight: 900 !important; width: 50px !important; text-align: center !important; z-index: 10 !important; box-shadow: none !important; }
+            
             .music-item:nth-child(1) .rank, .music-item:nth-child(2) .rank, .music-item:nth-child(3) .rank { font-size: 22px !important; }
-            .music-item td:nth-child(3) { float: left; width: 70px; margin-left: 42px !important; margin-right: 15px; margin-top: 0; }
+            
+            /* 2. 숫자 방이 커졌으니, 앨범 커버 위치(margin-left)도 42px -> 55px로 뒤로 밀어서 안전거리를 확보합니다! */
+            .music-item td:nth-child(3) { float: left; width: 70px; margin-left: 55px !important; margin-right: 15px; margin-top: 0; }
             .song-info { margin-top: 0; overflow: hidden; min-height: 70px; } 
             .action-row { display: flex !important; flex-wrap: nowrap !important; gap: 5px !important; margin-top: 15px; clear: both; }
             .action-btn { flex: 1 !important; padding: 8px 2px !important; font-size: 11px !important; white-space: nowrap !important; display: flex !important; align-items: center !important; justify-content: center !important; letter-spacing: -0.5px !important; }
