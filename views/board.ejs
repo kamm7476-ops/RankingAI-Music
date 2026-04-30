@@ -295,7 +295,7 @@
     <tbody>
     <% if (typeof posts !== 'undefined' && posts.length > 0) { %>
         <% posts.forEach((post, index) => { %>
-            <% const pageNum = Math.floor(index / 100) + 1; %>
+            <% const pageNum = Math.floor(index / 20) + 1; %>
 
             <tr class="board-row page-<%= pageNum %>" 
                 style="<%= pageNum > 1 ? 'display: none;' : '' %>; cursor: pointer;"
@@ -381,9 +381,9 @@
 </table>
         </div>
 
-        <% if (typeof posts !== 'undefined' && posts.length > 100) { %>
+        <% if (typeof posts !== 'undefined' && posts.length > 10) { %>
             <div class="pagination-container">
-                <% const totalPages = Math.ceil(posts.length / 100); %>
+                <% const totalPages = Math.ceil(posts.length / 20); %>
                 <% for(let i=1; i<=totalPages; i++) { %>
                     <button class="page-btn <%= i === 1 ? 'active' : '' %>" onclick="changePage(<%= i %>)"><%= i %></button>
                 <% } %>
