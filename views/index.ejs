@@ -106,6 +106,20 @@
         
         .song-title { font-size: 16px; font-weight: 600; display: block; margin-bottom: 4px; word-break: break-all; overflow: hidden; }
         .singer { font-size: 13px; color: #aaa; word-break: break-all; }
+
+        /* 🌟 클릭 가능한 아티스트 이름 마우스 오버 효과 */
+.clickable-artist {
+    color: inherit; /* 원래 텍스트 색상 유지 */
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.clickable-artist:hover {
+    color: #ff5722 !important; /* 마우스를 올리면 포인트 컬러(오렌지)로 변경 */
+    text-decoration: underline; /* 밑줄 쫙! */
+}
+
         .ai-badge { background: rgba(255, 87, 34, 0.1); border: 1px solid #ff5722; color: #ff5722; font-size: 10px; padding: 2px 6px; border-radius: 12px; margin-left: 5px; }
         
         .action-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
@@ -671,8 +685,7 @@
                                         </div>
                                     <% } %>
                                 </div>
-                                <div class="singer"><%= music.artist %> (<%= __(getGenreKey(music.genre)) || music.genre %>) <span class="ai-badge">🎵 <%= music.aiTool %></span> <span style="margin-left:10px; color:#ff5722; font-size:12px;">🎧 <%= __('txt_play') || '재생' %> <%= music.views || 0 %></span></div>
-                                
+                                <div class="singer"><a href="/?search=<%= music.artist %>" class="clickable-artist"><%= music.artist %></a> (<%= __(getGenreKey(music.genre)) || music.genre %>) <span class="ai-badge">🎵 <%= music.aiTool %></span> <span style="margin-left:10px; color:#ff5722; font-size:12px;">🎧 <%= __('txt_play') || '재생' %> <%= music.views || 0 %></span></div>
                                 <% if (user && user.id !== music.uploader && music._id !== "dummy") { %>
                                     <div style="margin-top: 12px;">
                                         <button type="button" onclick="sendPurchaseMsg('<%= music.uploader %>', '<%= music.name %>')" style="width: 100%; background: rgba(255, 179, 0, 0.1); border: 1px solid #ffb300; color: #ffb300; padding: 8px 0; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; text-align: center;">
