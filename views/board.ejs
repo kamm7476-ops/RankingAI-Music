@@ -185,6 +185,29 @@
                 padding: 20px 15px !important;
             }
         }
+
+        /* ... (대표님의 기존 모바일 세로 기차 박멸 코드 등) ... */
+        
+            tr.post-detail td {
+                width: 100% !important;
+                padding: 20px 15px !important;
+            }
+        }
+
+        /* 🚨 [여기에 추가!] 모바일 에디터 터치 먹통 및 키보드 미출력 해결 패치 🚨 */
+        .ql-editor {
+            -webkit-user-select: text !important; /* 아이폰 등에서 글씨 입력 강제 허용 */
+            user-select: text !important;
+            -webkit-touch-callout: default !important;
+            cursor: text !important;
+            min-height: 250px !important; /* 터치할 수 있는 빈 공간 넉넉하게 확보 */
+            padding-bottom: 50px !important; /* 화면 맨 밑에서 터치 씹히는 현상 방지 */
+        }
+        
+        .write-box {
+            position: relative;
+            z-index: 90; /* 다른 투명 요소가 글쓰기 창을 덮어서 터치를 방해하지 못하게 방어 (상단바 100보다는 낮게) */
+        }
     </style>
 </head>
 <body>
