@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="<%= typeof getLocale !== 'undefined' ? getLocale() : 'ko' %>">
 <head>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5112383847606285" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title><%= __('menu_community') || '커뮤니티' %> - RANKING AI</title>
     
+    <!-- 🚀 강력 캐시 방어 (PC/모바일 새로고침 문제 해결) -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    
 
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5112383847606285" crossorigin="anonymous"></script>
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <link rel="icon" href="/favicon.png" type="image/png">
+    
     <style>
         /* 🌟 글로벌 기본 설정 */
         body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; padding-bottom: 100px; }
@@ -22,7 +23,7 @@
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #ff5722; }
 
-        /* 🌟 상단바 디자인 (메인과 완벽히 동일) */
+        /* 🌟 상단바 디자인 */
         .main-header { background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
         .header-top { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #1a1b1c; gap: 10px; flex-wrap: nowrap; }
         .logo-img { height: 50px; max-width: 100%; cursor: pointer; object-fit: contain; flex-shrink: 0; }
@@ -53,154 +54,69 @@
         .btn-write-toggle:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(255, 87, 34, 0.3); }
 
         /* 🌟 글쓰기 상자 */
-        .write-box { background: #161718; padding: 25px; border-radius: 12px; border: 1px solid #333; margin-bottom: 40px; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .write-box { background: #161718; padding: 25px; border-radius: 12px; border: 1px solid #333; margin-bottom: 40px; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; z-index: 90; }
         .write-box h3 { margin-top: 0; color: #ff5722; font-size: 18px; margin-bottom: 20px; }
         .write-input { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; margin-bottom: 15px; font-family: inherit; font-size: 15px; transition: 0.2s; }
         .write-input:focus { outline: none; border-color: #ff5722; background: #1a1a1a; }
-        .write-textarea { height: 150px; resize: vertical; }
         .btn-submit { width: 100%; background: #ff5722; color: #000; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
         .btn-submit:hover { background: #ffb300; }
 
-        /* 🌟 버튼 및 기능 요소 */
+        /* 🚨 모바일 에디터 완벽 최적화 CSS 🚨 */
+        .ql-toolbar.ql-snow { border: none !important; border-bottom: 1px solid #444 !important; background: #222; padding: 12px; }
+        .ql-snow .ql-stroke { stroke: #ccc !important; }
+        .ql-snow .ql-fill, .ql-snow .ql-stroke.ql-fill { fill: #ccc !important; }
+        .ql-snow .ql-picker { color: #ccc !important; }
+        .ql-container.ql-snow { border: none !important; min-height: 250px; font-size: 16px; color: #fff; font-family: 'Pretendard', sans-serif; }
+        
+        .ql-editor {
+            -webkit-user-select: auto !important;
+            user-select: auto !important;
+            -webkit-touch-callout: default !important;
+            touch-action: manipulation !important;
+            cursor: text !important;
+            min-height: 250px !important; 
+            padding: 25px !important; 
+            line-height: 1.8;
+        }
+        .ql-editor.ql-blank::before { color: #888; font-style: normal; }
+
+        /* 🌟 게시글 리스트 및 버튼 */
         .post-list { display: flex; flex-direction: column; gap: 20px; }
         .post-actions { display: flex; gap: 15px; align-items: center; border-top: 1px solid #222; padding-top: 15px; }
         .action-btn { background: none; border: none; color: #aaa; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; padding: 0; }
         .action-btn:hover { color: #ff5722; }
 
-        /* 🌟 프리미엄 커뮤니티 리스트 (독립된 카드 스타일) */
-        .board-table { 
-            width: 100%; 
-            border-collapse: separate; 
-            border-spacing: 0 12px; 
-            background: transparent; 
-        }
-        .board-table thead th { 
-            padding: 10px 15px; 
-            color: #888; 
-            font-size: 14px; 
-            border-bottom: 2px solid #333; 
-        }
-        
-        .board-row { 
-            background: #161718; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
-            transition: all 0.2s ease; 
-        }
-        
+        .board-table { width: 100%; border-collapse: separate; border-spacing: 0 12px; background: transparent; }
+        .board-table thead th { padding: 10px 15px; color: #888; font-size: 14px; border-bottom: 2px solid #333; }
+        .board-row { background: #161718; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: all 0.2s ease; }
         .board-row td:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; border-left: 1px solid #252628; }
         .board-row td:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; border-right: 1px solid #252628; }
-        
-        .board-table td { 
-            padding: 22px 15px; 
-            border-top: 1px solid #252628;
-            border-bottom: 1px solid #252628;
-            color: #ccc; 
-        }
+        .board-table td { padding: 22px 15px; border-top: 1px solid #252628; border-bottom: 1px solid #252628; color: #ccc; }
+        .board-row:hover { background: #1c1d20; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(255, 87, 34, 0.15); cursor: pointer; }
 
-        .board-row:hover { 
-            background: #1c1d20; 
-            transform: translateY(-3px); 
-            box-shadow: 0 8px 20px rgba(255, 87, 34, 0.15); 
-            cursor: pointer; 
-        }
-
-        .td-title { 
-            text-align: left !important; 
-            padding-left: 20px !important; 
-            font-size: 17px !important; 
-            color: #fff !important; 
-            font-weight: 500;
-        }
-
-        .post-detail td {
-            background: #111214 !important;
-            border: 1px solid #ff5722 !important; 
-            border-radius: 12px !important;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
-        }
-
-        /* 🌟 커뮤니티 본문 가독성 최적화 */
-        .post-content { white-space: pre-wrap !important; }
+        .td-title { text-align: left !important; padding-left: 20px !important; font-size: 17px !important; color: #fff !important; font-weight: 500; }
+        .post-detail td { background: #111214 !important; border: 1px solid #ff5722 !important; border-radius: 12px !important; box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important; }
+        .post-content { white-space: pre-wrap !important; line-height: 1.9; color: #e5e5e5; font-size: 16px; }
         .post-content p { margin-bottom: 20px !important; margin-top: 0; }
         .post-content img { max-width: 100%; border-radius: 8px; margin: 15px 0; }
 
-        /* 🌟 하단 페이지 번호 (페이징) 디자인 */
+        /* 🌟 페이징 디자인 */
         .pagination-container { text-align: center; margin-top: 40px; padding-bottom: 20px; }
         .page-btn { background: #222; color: #aaa; border: 1px solid #333; padding: 8px 14px; margin: 0 4px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s; }
         .page-btn:hover { background: #333; color: #fff; }
         .page-btn.active { background: #ff5722; color: #000; font-weight: bold; border-color: #ff5722; pointer-events: none; }
 
-        /* 🚨 모바일 세로 기차 물리적 완전 박멸 (Flexbox 카드 변환) 🚨 */
+        /* 🚨 모바일 세로 기차 완전 박멸 (Flexbox) 🚨 */
         @media screen and (max-width: 768px) {
-            /* 1. 표(Table) 시스템 완전 폐기 */
-            table.board-table, 
-            table.board-table tbody {
-                display: block !important;
-                width: 100% !important;
-            }
+            table.board-table, table.board-table tbody { display: block !important; width: 100% !important; }
             table.board-table thead { display: none !important; }
-
-            /* 2. 각 게시글 줄을 '가로 정렬 박스(Flex)'로 강제 변환 */
-            tr.board-row {
-                display: flex !important;
-                flex-direction: row !important;
-                align-items: center !important;
-                width: 100% !important;
-                box-sizing: border-box !important;
-                padding: 15px 10px !important;
-            }
-
-            /* 3. 칸(td)들의 기존 속성 찌꺼기 완벽 리셋 */
-            table.board-table td {
-                display: block !important;
-                border: none !important;
-                padding: 0 !important;
-                box-sizing: border-box !important;
-            }
-
-            /* 4. 번호 칸: 왼쪽에 작게(35px) 딱 고정시켜 버림 */
-            tr.board-row td:first-child {
-                width: 35px !important;
-                min-width: 35px !important;
-                flex-shrink: 0 !important; /* 절대 안 찌그러지게 고정 */
-                text-align: center !important;
-            }
-
-            /* 5. 대망의 제목 칸: 남은 공간을 독식 (세로 기차 절대 불가) */
-            tr.board-row td.td-title {
-                flex-grow: 1 !important; /* 남은 공간 100% 차지 */
-                width: calc(100% - 35px) !important;
-                padding-left: 10px !important;
-                white-space: normal !important;
-                word-break: break-word !important; /* 세로 기차 원천 차단 */
-                line-height: 1.5 !important;
-            }
-
-            /* 6. 본문 열렸을 때 화면 찢어짐 방어 */
-            tr.post-detail { display: none; width: 100% !important; flex-direction: column !important; }
-            tr.post-detail[style*="table-row"], tr.post-detail[style*="block"] {
-                display: flex !important;
-            }
-            tr.post-detail td {
-                width: 100% !important;
-                padding: 20px 15px !important;
-            }
-        }
-       
-        /* 🚨 모바일 에디터 터치 및 키보드 미출력 해결 패치 🚨 */
-        .ql-editor {
-            -webkit-user-select: auto !important; /* text 대신 auto로 변경하여 호환성 극대화 */
-            user-select: auto !important;
-            -webkit-touch-callout: default !important;
-            touch-action: manipulation !important; /* 🚀 브라우저의 터치 간섭을 차단하고 클릭만 허용 */
-            cursor: text !important;
-            min-height: 250px !important; 
-            padding-bottom: 50px !important; 
-        }
-        
-        .write-box {
-            position: relative;
-            z-index: 90; /* 다른 투명 요소가 글쓰기 창을 덮어서 터치를 방해하지 못하게 방어 (상단바 100보다는 낮게) */
+            tr.board-row { display: flex !important; flex-direction: row !important; align-items: center !important; width: 100% !important; box-sizing: border-box !important; padding: 15px 10px !important; margin-bottom: 15px !important; background: #161718 !important; border-radius: 12px !important; border: 1px solid #252628 !important; box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important; }
+            table.board-table td { display: block !important; border: none !important; padding: 0 !important; box-sizing: border-box !important; }
+            tr.board-row td.td-num { display: none !important; }
+            tr.board-row td.td-title { flex-grow: 1 !important; padding-left: 10px !important; white-space: normal !important; word-break: break-word !important; line-height: 1.5 !important; font-size: 16px !important; }
+            tr.post-detail { display: none; width: 100% !important; flex-direction: column !important; margin-bottom: 15px !important; }
+            tr.post-detail[style*="table-row"], tr.post-detail[style*="block"] { display: flex !important; }
+            tr.post-detail td { width: 100% !important; padding: 20px 15px !important; border: 1px solid #ff5722 !important; border-radius: 12px !important; }
         }
     </style>
 </head>
@@ -210,6 +126,7 @@
             <img src="/logo.png" alt="RANKING AI 로고" class="logo-img" onclick="window.location.href='/?sort=views'">
             
             <form action="/" method="GET" class="top-search-form">
+                <!-- 🚀 대표님의 오리지널 QR 코드 완벽 복구 -->
                 <div style="display: flex; align-items: center; justify-content: center; cursor: pointer; background: #fff; padding: 2px; border-radius: 4px; margin-right: 10px; box-shadow: 0 0 5px rgba(255,87,34,0.5); flex-shrink: 0;" 
                      title="클릭하면 크게 확대됩니다! 친구들에게 공유해보세요 🚀" 
                      onclick="window.open('https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://rankingaimusic.com', '_blank')">
@@ -253,7 +170,6 @@
     </header>
 
     <div class="container">
-        
         <div class="board-header">
             <h2 class="board-title"><%= __('board_title') || '커뮤니티' %> <span style="font-size: 14px; font-weight: normal; color: #777;"><%= __('board_desc') || '자유롭게 이야기를 나눠보세요!' %></span></h2>
             
@@ -266,27 +182,13 @@
 
         <% if (user) { %>
         <div class="write-box" id="writeBox">
-            <form action="/add-post" method="POST" enctype="multipart/form-data">
-                
+            <form action="/add-post" method="POST" enctype="multipart/form-data" id="postForm">
                 <input type="text" name="title" class="write-input" placeholder="<%= __('ph_post_title') || '제목을 시원하게 입력하세요!' %>" required
                        style="width: 100%; background: #1c1d20; border: 1px solid #444; color: #fff; padding: 18px 20px; border-radius: 10px; font-size: 18px; font-weight: bold; margin-bottom: 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); outline: none; transition: border 0.3s;">
                 <input type="hidden" name="content" id="hidden-content">
 
                 <div style="background-color: #1c1d20; border-radius: 10px; border: 1px solid #444; overflow: hidden; margin-bottom: 25px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
-                    <style>
-                        /* 다크 테마 에디터 맞춤 CSS */
-                        .ql-toolbar.ql-snow { border: none !important; border-bottom: 1px solid #444 !important; background: #222; padding: 12px; }
-                        /* 툴바 아이콘들을 하얀색(회색)으로 변경 */
-                        .ql-snow .ql-stroke { stroke: #ccc !important; }
-                        .ql-snow .ql-fill, .ql-snow .ql-stroke.ql-fill { fill: #ccc !important; }
-                        .ql-snow .ql-picker { color: #ccc !important; }
-                        
-                        /* 에디터 본문 글씨 설정 */
-                        .ql-container.ql-snow { border: none !important; min-height: 400px; font-size: 16px; color: #fff; font-family: 'Pretendard', sans-serif; }
-                        .ql-editor { min-height: 400px; padding: 25px; line-height: 1.8; }
-                        .ql-editor.ql-blank::before { color: #888; font-style: normal; } /* 안내 문구 색상 */
-                    </style>
-                    <div id="editor-container" style="min-height: 400px; background-color: transparent;"></div>
+                    <div id="editor-container" style="min-height: 300px; background-color: transparent;"></div>
                 </div>
                 
                 <div style="margin-bottom: 25px; background: #222; padding: 15px; border-radius: 8px; border: 1px dashed #ff5722;">
@@ -294,119 +196,115 @@
                     <input type="file" name="image" accept="image/*" style="color: #aaa; font-size: 14px; width: 100%; cursor: pointer;">
                 </div>
 
-                <button type="submit" class="btn-submit" style="width: 100%; background: #ff5722; color: #000; border: none; padding: 16px; border-radius: 10px; font-weight: bold; font-size: 18px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(255, 87, 34, 0.3);">
-                    ✏️ 커뮤니티에 글 등록하기
-                </button>
+                <button type="submit" class="btn-submit">✏️ 커뮤니티에 글 등록하기</button>
             </form>
         </div>
         <% } %>
 
         <div class="post-list">
             <table class="board-table">
-    <thead>
-        <tr>
-            <th style="width: 60px; text-align: center;"><%= __('th_num') || '번호' %></th>
-            <th style="width: auto; text-align: left;"><%= __('th_title') || '제목' %></th>
-        </tr>
-    </thead>
-    <tbody>
-    <% if (typeof posts !== 'undefined' && posts.length > 0) { %>
-        <% posts.forEach((post, index) => { %>
-            <% const pageNum = Math.floor(index / 20) + 1; %>
+                <thead>
+                    <tr>
+                        <th style="width: 60px; text-align: center;"><%= __('th_num') || '번호' %></th>
+                        <th style="width: auto; text-align: left;"><%= __('th_title') || '제목' %></th>
+                    </tr>
+                </thead>
+                <tbody>
+                <% if (typeof posts !== 'undefined' && posts.length > 0) { %>
+                    <% posts.forEach((post, index) => { %>
+                        <% const pageNum = Math.floor(index / 20) + 1; %>
 
-            <tr class="board-row page-<%= pageNum %>" 
-                style="<%= pageNum > 1 ? 'display: none;' : '' %>; cursor: pointer;"
-                onclick="const detail = document.getElementById('post-detail-<%= post._id %>'); detail.style.display = (detail.style.display === 'none' || detail.style.display === '') ? 'table-row' : 'none';">
-                
-                <td class="td-num" style="text-align: center; color: #666;"><%= posts.length - index %></td>
-                <td class="td-title" style="font-weight: 500;">
-                    <%= post.title %>
-                    <% if (post.imageUrl) { %> <span style="font-size: 12px; margin-left: 5px;">📷</span> <% } %>
-                    <span style="color: #ff5722; font-size: 12px; margin-left: 5px;">[<%= post.comments ? post.comments.length : 0 %>]</span>
-                </td>
-            </tr>
+                        <tr class="board-row page-<%= pageNum %>" 
+                            style="<%= pageNum > 1 ? 'display: none;' : '' %>; cursor: pointer;"
+                            onclick="const detail = document.getElementById('post-detail-<%= post._id %>'); detail.style.display = (detail.style.display === 'none' || detail.style.display === '') ? 'table-row' : 'none';">
+                            
+                            <td class="td-num" style="text-align: center; color: #666;"><%= posts.length - index %></td>
+                            <td class="td-title" style="font-weight: 500;">
+                                <%= post.title %>
+                                <% if (post.imageUrl) { %> <span style="font-size: 12px; margin-left: 5px;">📷</span> <% } %>
+                                <span style="color: #ff5722; font-size: 12px; margin-left: 5px;">[<%= post.comments ? post.comments.length : 0 %>]</span>
+                            </td>
+                        </tr>
 
-            <tr id="post-detail-<%= post._id %>" class="post-detail page-<%= pageNum %>" style="display: none; background: #0e0e0f;">
-                <td colspan="2" style="padding: 30px 20px; text-align: left; border-bottom: 2px solid #ff5722;"> 
-                    
-                    <div class="post-info-bar" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #222; font-size: 14px; color: #aaa; display: flex; gap: 15px; flex-wrap: wrap;">
-                        <span style="color: #ff5722; font-weight: bold;">@<%= post.author %></span>
-                        <span>📅 <%= new Date(post.createdAt).toLocaleDateString() %></span>
-                        <span>❤️ 좋아요 <span id="like-post-count-<%= post._id %>"><%= post.likes || 0 %></span></span>
-                    </div>
-                    
-                    <div class="post-content" style="white-space: pre-wrap; line-height: 1.9; color: #e5e5e5; font-size: 16px;">
-                        <%- post.content %>
-                    </div>
-                    
-                    <% if (post.imageUrl) { %>
-                        <div style="margin: 20px 0; text-align: center;">
-                            <img src="<%= post.imageUrl %>" alt="게시글 이미지" style="max-width: 100%; border-radius: 12px; border: 1px solid #333;">
-                        </div>
-                    <% } %>
-
-                    <div class="post-actions" style="display: flex; gap: 15px; align-items: center; margin-top: 20px; margin-bottom: 20px;">
-                        <button class="action-btn" onclick="event.stopPropagation(); likePost('<%= post._id %>')" style="background:none; border:1px solid #444; color:#ccc; padding: 5px 12px; border-radius: 5px; cursor:pointer;">
-                            ❤️ <%= __('th_likes') || '좋아요' %> <span id="like-post-count-<%= post._id %>"><%= post.likes || 0 %></span>
-                        </button>
-
-                        <% if (user && (user.id === post.author || user.role === 'admin')) { %>
-                            <div style="display: flex; gap: 10px; margin-left: auto;">
-                                <button onclick="event.stopPropagation(); location.href='/edit-post/<%= post._id %>'" style="color: #00e5ff; background: none; border: none; cursor: pointer;">✏️ <%= __('action_edit') || '수정' %></button>
-                                <form action="/delete-post/<%= post._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('<%= __('yt_confirm_delete') || '정말 삭제할까요?' %>');">
-                                    <button type="submit" style="color: #ff4a4a; background: none; border: none; cursor: pointer;">🗑 <%= __('action_delete') || '삭제' %></button>
-                                </form>
-                            </div>
-                        <% } %>
-                    </div> <div id="board-comments-<%= post._id %>" style="background: #111; padding: 20px; border-radius: 8px; border: 1px solid #222;">
-                        <h4 style="margin-top: 0; color: #fff; font-size: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">💬 댓글 (<%= post.comments ? post.comments.length : 0 %>)</h4>
-                        
-                        <% if (post.comments && post.comments.length > 0) { %>
-                            <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
-                                <% post.comments.forEach(comment => { %>
-                                    <div style="border-bottom: 1px dashed #333; padding-bottom: 10px;">
-                                        <div style="font-size: 13px; margin-bottom: 5px;">
-                                            <span style="color: #ff5722; font-weight: bold;">@<%= comment.author %></span>
-                                            <span style="color: #666; margin-left: 10px;"><%= new Date(comment.createdAt).toLocaleDateString() %></span>
-                                        </div>
-                                        <div style="color: #ccc; font-size: 14px; line-height: 1.5;"><%= comment.content %></div>
+                        <tr id="post-detail-<%= post._id %>" class="post-detail page-<%= pageNum %>" style="display: none; background: #0e0e0f;">
+                            <td colspan="2" style="padding: 30px 20px; text-align: left; border-bottom: 2px solid #ff5722;"> 
+                                
+                                <div class="post-info-bar" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #222; font-size: 14px; color: #aaa; display: flex; gap: 15px; flex-wrap: wrap;">
+                                    <span style="color: #ff5722; font-weight: bold;">@<%= post.author %></span>
+                                    <span>📅 <%= new Date(post.createdAt).toLocaleDateString() %></span>
+                                    <span>❤️ 좋아요 <span id="like-post-count-<%= post._id %>"><%= post.likes || 0 %></span></span>
+                                </div>
+                                
+                                <div class="post-content">
+                                    <%- post.content %>
+                                </div>
+                                
+                                <% if (post.imageUrl) { %>
+                                    <div style="margin: 20px 0; text-align: center;">
+                                        <img src="<%= post.imageUrl %>" alt="게시글 이미지" style="max-width: 100%; border-radius: 12px; border: 1px solid #333;">
                                     </div>
-                                <% }) %>
-                            </div>
-                        <% } else { %>
-                            <p style="color: #555; font-size: 13px;">등록된 댓글이 없습니다. 첫 댓글을 남겨보세요!</p>
-                        <% } %>
+                                <% } %>
 
-                        <% if (user) { %>
-                            <form action="/add-comment/<%= post._id %>" method="POST" style="display: flex; gap: 10px; margin-top: 15px;">
-                                <input type="text" name="content" placeholder="댓글을 입력하세요..." required style="flex: 1; padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff; font-family: inherit;">
-                                <button type="submit" style="background: #ff5722; color: #000; border: none; padding: 0 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">등록</button>
-                            </form>
-                        <% } else { %>
-                            <div style="padding: 12px; background: #222; text-align: center; border-radius: 6px; font-size: 13px; color: #aaa; border: 1px solid #333;">
-                                댓글을 작성하려면 <a href="/login" style="color: #ff5722; text-decoration: underline;">로그인</a>이 필요합니다.
-                            </div>
-                        <% } %>
-                    </div>
-                    </td>
-            </tr>
-        <% }) %>
-    <% } else { %>
-        <tr><td colspan="2" style="padding: 80px 0; color:#555; text-align:center;"><%= __('board_no_post') || '등록된 게시글이 없습니다.' %></td></tr>
-    <% } %>
-    </tbody>
-</table>
+                                <div class="post-actions">
+                                    <button class="action-btn" onclick="event.stopPropagation(); likePost('<%= post._id %>')" style="background:none; border:1px solid #444; color:#ccc; padding: 5px 12px; border-radius: 5px; cursor:pointer;">
+                                        ❤️ <%= __('th_likes') || '좋아요' %> <span id="like-post-count-<%= post._id %>"><%= post.likes || 0 %></span>
+                                    </button>
+
+                                    <% if (user && (user.id === post.author || user.role === 'admin')) { %>
+                                        <div style="display: flex; gap: 10px; margin-left: auto;">
+                                            <button onclick="event.stopPropagation(); location.href='/edit-post/<%= post._id %>'" style="color: #00e5ff; background: none; border: none; cursor: pointer;">✏️ <%= __('action_edit') || '수정' %></button>
+                                            <form action="/delete-post/<%= post._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('<%= __('yt_confirm_delete') || '정말 삭제할까요?' %>');">
+                                                <button type="submit" style="color: #ff4a4a; background: none; border: none; cursor: pointer;">🗑 <%= __('action_delete') || '삭제' %></button>
+                                            </form>
+                                        </div>
+                                    <% } %>
+                                </div> 
+                                
+                                <!-- 🚀 대표님의 오리지널 댓글 기능 100% 복구 완료! -->
+                                <div id="board-comments-<%= post._id %>" style="background: #111; padding: 20px; border-radius: 8px; border: 1px solid #222; margin-top: 25px;">
+                                    <h4 style="margin-top: 0; color: #fff; font-size: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">💬 댓글 (<%= post.comments ? post.comments.length : 0 %>)</h4>
+                                    
+                                    <% if (post.comments && post.comments.length > 0) { %>
+                                        <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
+                                            <% post.comments.forEach(comment => { %>
+                                                <div style="border-bottom: 1px dashed #333; padding-bottom: 10px;">
+                                                    <div style="font-size: 13px; margin-bottom: 5px;">
+                                                        <span style="color: #ff5722; font-weight: bold;">@<%= comment.author %></span>
+                                                        <span style="color: #666; margin-left: 10px;"><%= new Date(comment.createdAt).toLocaleDateString() %></span>
+                                                    </div>
+                                                    <div style="color: #ccc; font-size: 14px; line-height: 1.5;"><%= comment.content %></div>
+                                                </div>
+                                            <% }) %>
+                                        </div>
+                                    <% } else { %>
+                                        <p style="color: #555; font-size: 13px;">등록된 댓글이 없습니다. 첫 댓글을 남겨보세요!</p>
+                                    <% } %>
+
+                                    <% if (user) { %>
+                                        <form action="/add-comment/<%= post._id %>" method="POST" style="display: flex; gap: 10px; margin-top: 15px;">
+                                            <input type="text" name="content" placeholder="댓글을 입력하세요..." required style="flex: 1; padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff; font-family: inherit;">
+                                            <button type="submit" style="background: #ff5722; color: #000; border: none; padding: 0 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">등록</button>
+                                        </form>
+                                    <% } else { %>
+                                        <div style="padding: 12px; background: #222; text-align: center; border-radius: 6px; font-size: 13px; color: #aaa; border: 1px solid #333;">
+                                            댓글을 작성하려면 <a href="/login" style="color: #ff5722; text-decoration: underline;">로그인</a>이 필요합니다.
+                                        </div>
+                                    <% } %>
+                                </div>
+                                <!-- 댓글 영역 끝 -->
+
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr><td colspan="2" style="padding: 80px 0; color:#555; text-align:center;"><%= __('board_no_post') || '등록된 게시글이 없습니다.' %></td></tr>
+                <% } %>
+                </tbody>
+            </table>
         </div>
 
-        <% if (typeof posts !== 'undefined' && posts.length > 10) { %>
-            <div class="pagination-container">
-                <% const totalPages = Math.ceil(posts.length / 20); %>
-                <% for(let i=1; i<=totalPages; i++) { %>
-                    <button class="page-btn <%= i === 1 ? 'active' : '' %>" onclick="changePage(<%= i %>)"><%= i %></button>
-                <% } %>
-            </div>
-        <% } %>
-
+        <!-- 🌟 20개/10블록 스마트 페이징 컨테이너 -->
+        <div class="pagination-container" id="pagination-container"></div>
     </div>
 
 <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
@@ -414,17 +312,21 @@
 <script>
     let quill = null;
 
-    // 🚨 투명 망토 마법 가동: 페이지에 들어오자마자 몰래 에디터를 세팅합니다!
+    // 🚀 스마트 페이징 설정
+    const totalPosts = <%= typeof posts !== 'undefined' ? posts.length : 0 %>;
+    const postsPerPage = 20;
+    const totalPages = Math.ceil(totalPosts / postsPerPage) || 1;
+    let currentPage = 1;
+    const pagesPerBlock = 10;
+
     document.addEventListener("DOMContentLoaded", function() {
         const box = document.getElementById('writeBox');
         const editorDiv = document.getElementById('editor-container');
 
         if (box && editorDiv) {
-            // 1. 유저 눈에 안 보이게 투명하게 만든 뒤, 강제로 창을 엽니다.
             box.style.visibility = 'hidden';
             box.style.display = 'block';
 
-            // 2. 창이 열렸으니 에디터가 정상적인 크기(400px)로 완벽하게 켜집니다!
             quill = new Quill('#editor-container', {
                 theme: 'snow',
                 placeholder: '<%= __('ph_editor_content') || "여기를 클릭해서 내용을 입력하세요. (사진도 드래그해서 넣을 수 있습니다!)" %>',
@@ -442,20 +344,16 @@
                 }
             });
 
-            // 3. 에디터 세팅이 끝났으니, 다시 몰래 창을 닫고 투명도를 원래대로 돌려놓습니다.
-            // (이 모든 게 0.001초 만에 일어나서 유저 눈에는 아무 변화도 안 보입니다!)
             box.style.display = 'none';
             box.style.visibility = 'visible';
 
-            // 폼 제출 이벤트 연결
-            const writeForm = document.querySelector('form[action="/add-post"]');
+            const writeForm = document.getElementById('postForm') || document.querySelector('form[action="/add-post"]');
             if(writeForm) {
                 writeForm.addEventListener('submit', function(e) {
                     document.getElementById('hidden-content').value = quill.root.innerHTML;
                 });
             }
 
-            // 드래그 앤 드롭 이벤트 연결
             quill.root.addEventListener('drop', (e) => {
                 e.preventDefault();
                 if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
@@ -469,25 +367,25 @@
                 }
             });
         }
+        
+        // 페이지 로드 시 페이징 버튼 렌더링
+        renderPagination();
     });
 
-    /// 🚨 글쓰기 버튼을 누를 때 작동하는 함수
+    // 🚨 글쓰기 버튼 - 모바일 에디터 완벽 소환
     function toggleWriteBox() {
         const box = document.getElementById('writeBox');
+        if (!box) return;
+        
         if (box.style.display === 'none' || box.style.display === '') {
             box.style.display = 'block';
             window.scrollBy({ top: 100, behavior: 'smooth' });
             
-            // 🚀 모바일 키보드 강제 소환 마법 🚀
-            // 창이 열리고 0.1초(100ms) 뒤에 자바스크립트가 강제로 커서를 찍어줍니다!
-            setTimeout(function() {
-                if (quill) {
-                    quill.focus(); // 에디터 내부 클릭!
-                }
-                // 숨겨진 모바일 방어막을 뚫기 위해 텍스트 입력창처럼 강제 인식시킴
-                document.querySelector('.ql-editor').setAttribute('tabindex', '0');
-            }, 100);
-
+            if (quill) {
+                quill.focus(); 
+            }
+            const qlEditor = document.querySelector('.ql-editor');
+            if(qlEditor) qlEditor.setAttribute('tabindex', '0');
         } else {
             box.style.display = 'none';
         }
@@ -509,15 +407,9 @@
                 const max_size = 1200;
 
                 if (width > height) {
-                    if (width > max_size) {
-                        height *= max_size / width;
-                        width = max_size;
-                    }
+                    if (width > max_size) { height *= max_size / width; width = max_size; }
                 } else {
-                    if (height > max_size) {
-                        width *= max_size / height;
-                        height = max_size;
-                    }
+                    if (height > max_size) { width *= max_size / height; height = max_size; }
                 }
 
                 canvas.width = width;
@@ -526,7 +418,6 @@
                 ctx.drawImage(img, 0, 0, width, height);
 
                 const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                
                 const range = quill.getSelection(true) || { index: quill.getLength() };
                 quill.insertEmbed(range.index, 'image', compressedDataUrl);
                 quill.setSelection(range.index + 1);
@@ -546,105 +437,73 @@
             if (file) compressAndInsertImage(file);
         };
     }
-</script>
 
-    <script>
-        function changePage(targetPage) {
-            document.querySelectorAll('.board-row').forEach(row => row.style.display = 'none');
-            document.querySelectorAll('.post-detail').forEach(row => row.style.display = 'none');
-
-            document.querySelectorAll('.board-row.page-' + targetPage).forEach(row => row.style.display = '');
-
-            document.querySelectorAll('.page-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-
-            const boardTop = document.querySelector('.board-header').offsetTop;
-            window.scrollTo({ top: boardTop - 80, behavior: 'smooth' });
-        }
-
-        async function likePost(postId) {
-            try {
-                const response = await fetch('/like-post/' + postId, { method: 'POST' });
-                const data = await response.json();
-
-                if (data.success) {
-                    const countSpan = document.getElementById('like-post-count-' + postId);
-                    const currentCount = parseInt(countSpan ? countSpan.innerText : '0');
-                    const newCount = currentCount + 1;
-                    
-                    const btn = document.getElementById('like-post-btn-' + postId);
-                    btn.innerHTML = '❤️ <%= __('th_likes') || "좋아요" %> <span id="like-post-count-' + postId + '">' + newCount + '</span>';
-                    btn.style.color = '#ff4a4a';
-                } else {
-                    alert(data.message);
+    async function likePost(postId) {
+        try {
+            const response = await fetch('/like-post/' + postId, { method: 'POST' });
+            const data = await response.json();
+            if (data.success) {
+                const countSpan = document.getElementById('like-post-count-' + postId);
+                if (countSpan) {
+                    const currentCount = parseInt(countSpan.innerText || '0');
+                    countSpan.innerText = currentCount + 1;
                 }
-            } catch (err) {
-                console.error("좋아요 에러:", err);
-                alert("통신 중 에러가 발생했습니다.");
+            } else {
+                alert(data.message || '좋아요 처리에 실패했습니다.');
             }
-        }
-    </script>
-
-    <style>
-    @media screen and (max-width: 768px) {
-        /* 모바일에서는 Table 속성을 완전히 죽여서 margin이 먹히게 만듭니다 */
-        table.board-table, 
-        table.board-table tbody, 
-        table.board-table tr, 
-        table.board-table td {
-            display: block !important; 
-            width: 100% !important;
-            box-sizing: border-box !important;
-        }
-        
-        table.board-table thead { display: none !important; }
-
-        /* 📱 모바일 카드 디자인 (여백 확보 핵심!) */
-        tr.board-row {
-            margin-bottom: 15px !important; /* 🔥 카드가 다닥다닥 붙지 않게 15px 띄움! */
-            background: #161718 !important;
-            border-radius: 12px !important;
-            border: 1px solid #252628 !important;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
-            padding: 10px !important;
-        }
-
-        /* 번호 숨김 처리 (모바일에선 제목만 집중) */
-        tr.board-row td.td-num { display: none !important; }
-
-        /* 제목 가로폭 100% 보장 (세로 기차 박멸) */
-        tr.board-row td.td-title {
-            padding: 10px 5px !important;
-            border: none !important;
-            white-space: normal !important;
-            word-break: break-word !important;
-            line-height: 1.5 !important;
-            font-size: 16px !important;
-        }
-
-        /* 본문 구역 모바일 최적화 */
-        tr.post-detail { margin-bottom: 15px !important; }
-        tr.post-detail[style*="table-row"], tr.post-detail[style*="block"] {
-            display: block !important;
-        }
-        tr.post-detail td {
-            padding: 20px 15px !important;
-            border: 1px solid #ff5722 !important;
-            border-radius: 12px !important;
+        } catch (err) {
+            console.error("좋아요 에러:", err);
+            alert("통신 중 에러가 발생했습니다.");
         }
     }
-</style>
 
-<script>
-        window.addEventListener('pageshow', function(event) {
-            // event.persisted가 true이거나, performance.navigation.type === 2 이면
-            // 브라우저가 서버를 무시하고 폰에 저장된 '옛날 화면(캐시)'을 꺼내왔다는 뜻입니다.
-            if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
-                console.log("캐시된 옛날 화면 감지! 서버에서 최신 화면을 강제로 다시 받아옵니다.");
-                window.location.reload(true); // true 옵션을 주어 무조건 서버에서 100% 새로 다운로드합니다.
-            }
+    // 🚀 스마트 페이징 시스템 (10개 단위 블록 렌더링)
+    function renderPagination() {
+        if (totalPosts <= postsPerPage) {
+            document.getElementById('pagination-container').innerHTML = '';
+            return;
+        }
+
+        const blockStart = Math.floor((currentPage - 1) / pagesPerBlock) * pagesPerBlock + 1;
+        const blockEnd = Math.min(blockStart + pagesPerBlock - 1, totalPages);
+        let html = '';
+        
+        if (blockStart > 1) {
+            html += `<button class="page-btn" onclick="changePage(${blockStart - 1})">◀ 이전</button>`;
+        }
+        for (let i = blockStart; i <= blockEnd; i++) {
+            html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+        }
+        if (blockEnd < totalPages) {
+            html += `<button class="page-btn" onclick="changePage(${blockEnd + 1})">다음 ▶</button>`;
+        }
+        document.getElementById('pagination-container').innerHTML = html;
+    }
+
+    function changePage(page) {
+        currentPage = page;
+        
+        // 모든 로우 닫기
+        document.querySelectorAll('.board-row').forEach(row => row.style.display = 'none');
+        document.querySelectorAll('.post-detail').forEach(row => row.style.display = 'none');
+        
+        // 선택한 페이지만 보여주기
+        document.querySelectorAll('.page-' + page).forEach(row => {
+            if (row.classList.contains('board-row')) row.style.display = '';
         });
-    </script>
+        
+        renderPagination();
+        
+        const boardTop = document.querySelector('.board-header').offsetTop;
+        window.scrollTo({ top: boardTop - 80, behavior: 'smooth' });
+    }
 
+    // 🚨 강력 캐시 방어막 (PC & 모바일 새로고침 문제 원천 차단)
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+            window.location.reload(true);
+        }
+    });
+</script>
 </body>
 </html>
