@@ -284,7 +284,7 @@
                                             <span style="color: #ff5722; font-weight: bold;">@<%= comment.author %></span>
                                             <span style="color: #666; margin-left: 10px;"><%= new Date(comment.createdAt).toLocaleDateString() %></span>
                                         </div>
-                                        <div style="color: #ccc; font-size: 14px; line-height: 1.5;"><%= comment.content %></div>
+                                        <div style="color: #ccc; font-size: 14px; line-height: 1.5;"><%= comment.text %></div>
                                     </div>
                                 <% }) %>
                             </div>
@@ -293,8 +293,8 @@
                         <% } %>
 
                         <% if (user) { %>
-                            <form action="/add-comment/<%= post._id %>" method="POST" style="display: flex; gap: 10px; margin-top: 15px;">
-                                <input type="text" name="content" placeholder="댓글을 입력하세요..." required style="flex: 1; padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff; font-family: inherit;">
+                            <form action="/add-board-comment/<%= post._id %>" method="POST" style="display: flex; gap: 10px; margin-top: 15px;">
+                                <input type="text" name="commentText" placeholder="댓글을 입력하세요..." required style="flex: 1; padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff; font-family: inherit;">
                                 <button type="submit" style="background: #ff5722; color: #000; border: none; padding: 0 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">등록</button>
                             </form>
                         <% } else { %>

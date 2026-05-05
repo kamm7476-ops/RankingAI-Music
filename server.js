@@ -918,6 +918,36 @@ app.post('/like-board-comment/:postId/:commentId', async (req, res) => {
 });
 
 // =========================================
+// 🌟 커뮤니티 게시글 좋아요 처리 라우터 (신규 추가!)
+// =========================================
+app.post('/like-post/:id', async (req, res) => {
+    if (!req.session.user) return res.json({ success: false, message: "로그인이 필요합니다." });
+    try {
+        const post = await Post.findById(req.params.id);
+        if (!post) return res.json({ success: false, message: "게시글을 찾을 수 없습니다." });
+
+        const username = req.session.user.id;
+        const isAdmin = req.session.user.role === 'admin';
+
+        if (isAdmin) {
+            post.likes = (post.likes || 0) + 1; 
+            await post.save();
+            return res.json({ success: true, message: "👑 관리자 권한!" });
+        } else {
+            if (!post.likedBy) post.likedBy = [];
+            if (post.likedBy.includes(username)) {
+                return res.json({ success: false, message: "이미 좋아요를 누르셨습니다!" });
+            } else {
+                post.likes = (post.likes || 0) + 1;
+                post.likedBy.push(username);
+                await post.save();
+                return res.json({ success: true });
+            }
+        }
+    } catch (err) { res.status(500).json({ success: false }); }
+});
+
+// =========================================
 // 🌟 음악 추가, 수정, 삭제, 좋아요, 재생수 (Music CRUD)
 // =========================================
 app.post('/add-music', (req, res, next) => {
