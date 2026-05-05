@@ -634,5 +634,17 @@
         }
     }
 </style>
+
+<script>
+        window.addEventListener('pageshow', function(event) {
+            // event.persisted가 true이거나, performance.navigation.type === 2 이면
+            // 브라우저가 서버를 무시하고 폰에 저장된 '옛날 화면(캐시)'을 꺼내왔다는 뜻입니다.
+            if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+                console.log("캐시된 옛날 화면 감지! 서버에서 최신 화면을 강제로 다시 받아옵니다.");
+                window.location.reload(true); // true 옵션을 주어 무조건 서버에서 100% 새로 다운로드합니다.
+            }
+        });
+    </script>
+
 </body>
 </html>
