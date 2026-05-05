@@ -1579,7 +1579,50 @@ io.on('connection', (socket) => {
         }
     });
 });
+// =========================================
+// 🌟 8. 실시간 웹소켓(Socket.io) 우체국 로직 (수정됨!)
+// =========================================
+io.on('connection', (socket) => {
+    socket.on('joinRoom', ({ roomId, userId }) => {
+        socket.join(roomId); 
+    });
 
+    socket.on('chatMessage', async (data) => {
+        try {
+            // 1. 메시지 DB 저장
+            const newMsg = await new ChatMessage({
+                roomId: data.roomId,
+                senderId: data.senderId,
+                senderName: data.senderName,
+                text: data.text
+            }).save();
+
+            // 2. 채팅방 안에 있는 사람들에게 메시지 쏘기
+            io.to(data.roomId).emit('message', newMsg);
+            
+            // 3. 방 정보 업데이트 (가장 최근 메시지 저장)
+            const room = await ChatRoom.findByIdAndUpdate(data.roomId, { 
+                lastMessage: data.text, 
+                updatedAt: Date.now() 
+            });
+
+            // 🌟 4. [핵심 추가] 밖에서 놀고 있는 상대방에게 알림 쏘기!
+            if (room) {
+                // 방 참여자 중 '나(보낸사람)'를 제외한 상대방의 ID를 찾습니다.
+                const receiverId = room.participants.find(id => id !== data.senderId);
+                
+                // 전 우주(서버 전체)에 방송합니다: "이 사람(receiverId)에게 메시지 왔어요!"
+                io.emit('globalChatAlert', { 
+                    receiverId: receiverId, 
+                    senderName: data.senderName, 
+                    text: data.text 
+                });
+            }
+        } catch(err) { 
+            console.log("웹소켓 메시지 에러:", err); 
+        }
+    });
+});
 // =========================================
 // 🌟 9. 서버 실행
 // =========================================

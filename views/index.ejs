@@ -1765,10 +1765,80 @@ window.addEventListener('popstate', async () => {
     </div>
 </footer>
 
+<!-- 🌟 터치 무조건 먹히는 버튼 디자인 및 알림창 디자인 -->
+<style>
+    .floating-chat-btn {
+        position: fixed; bottom: 110px; right: 20px; background: #ffb300; color: #000;
+        width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-size: 28px; box-shadow: 0 4px 15px rgba(255, 179, 0, 0.4); 
+        z-index: 99999 !important; /* 🚨 무조건 화면 최상단으로 올림 */
+        cursor: pointer !important; pointer-events: auto !important; /* 🚨 터치 무조건 흡수 */
+        text-decoration: none; transition: transform 0.2s;
+    }
+    .floating-chat-btn:hover { transform: scale(1.1); }
+    
+    /* 🔴 안 읽은 메시지 빨간 동그라미 뱃지 */
+    .chat-badge {
+        position: absolute; top: -5px; right: -5px; background: #ff4a4a; color: #fff;
+        font-size: 12px; font-weight: bold; width: 22px; height: 22px;
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.5); display: none; /* 평소엔 숨김 */
+    }
+
+    /* 💌 새 메시지 팝업창 */
+    .chat-alert-popup {
+        position: fixed; bottom: 180px; right: 20px; background: #1c1d20; border: 2px solid #ffb300;
+        color: #fff; padding: 15px 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        z-index: 99999; display: none; cursor: pointer; transform: translateY(20px); opacity: 0;
+        transition: all 0.3s ease;
+    }
+    .chat-alert-popup.show { transform: translateY(0); opacity: 1; }
+</style>
+
 <% if (user) { %>
+    <!-- 알림 팝업창 -->
+    <div id="chatAlertPopup" class="chat-alert-popup" onclick="location.href='/chatlist'">
+        <div style="font-size: 12px; color: #ffb300; font-weight: bold; margin-bottom: 5px;">🔔 새 메시지 도착!</div>
+        <div id="chatAlertSender" style="font-weight: bold; font-size: 15px;"></div>
+        <div id="chatAlertText" style="color: #aaa; font-size: 13px; margin-top: 3px; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
+    </div>
+
+    <!-- 노란색 버튼 -->
     <a href="/chatlist" class="floating-chat-btn">
         💬
+        <span id="chatBadge" class="chat-badge">N</span>
     </a>
+
+    <!-- 📡 실시간 안테나 (Socket.io) 장착! -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const myId = "<%= user.id %>"; // 현재 접속한 내 아이디
+
+        // 서버가 "누구 메시지 왔어!" 하고 방송하면 듣는 곳
+        socket.on('globalChatAlert', function(data) {
+            // 그 메시지가 '나'한테 온 게 맞다면?!
+            if (data.receiverId === myId) {
+                // 1. 버튼에 빨간 뱃지 띄우기
+                document.getElementById('chatBadge').style.display = 'flex';
+                
+                // 2. 팝업창에 보낸 사람과 내용 적기
+                document.getElementById('chatAlertSender').innerText = data.senderName + " 님의 메시지";
+                document.getElementById('chatAlertText').innerText = data.text;
+                
+                // 3. 팝업창 스윽~ 나타나게 하기
+                const popup = document.getElementById('chatAlertPopup');
+                popup.style.display = 'block';
+                setTimeout(() => popup.classList.add('show'), 10);
+
+                // 4. 4초 뒤에 팝업창 알아서 스윽~ 사라지게 하기
+                setTimeout(() => {
+                    popup.classList.remove('show');
+                    setTimeout(() => popup.style.display = 'none', 300);
+                }, 4000);
+            }
+        });
+    </script>
 <% } %>
 
 <script>
