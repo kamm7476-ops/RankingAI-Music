@@ -9,6 +9,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    
 
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <link rel="icon" href="/favicon.png" type="image/png">
@@ -194,14 +195,15 @@
             }
         }
 
-        /* 🚨 [여기에 추가!] 모바일 에디터 터치 먹통 및 키보드 미출력 해결 패치 🚨 */
+        /* 🚨 모바일 에디터 터치 및 키보드 미출력 해결 패치 🚨 */
         .ql-editor {
-            -webkit-user-select: text !important; /* 아이폰 등에서 글씨 입력 강제 허용 */
-            user-select: text !important;
+            -webkit-user-select: auto !important; /* text 대신 auto로 변경하여 호환성 극대화 */
+            user-select: auto !important;
             -webkit-touch-callout: default !important;
+            touch-action: manipulation !important; /* 🚀 브라우저의 터치 간섭을 차단하고 클릭만 허용 */
             cursor: text !important;
-            min-height: 250px !important; /* 터치할 수 있는 빈 공간 넉넉하게 확보 */
-            padding-bottom: 50px !important; /* 화면 맨 밑에서 터치 씹히는 현상 방지 */
+            min-height: 250px !important; 
+            padding-bottom: 50px !important; 
         }
         
         .write-box {
@@ -477,14 +479,23 @@
         }
     });
 
-    // 🚨 글쓰기 버튼을 누를 때는? 
-    // 이미 에디터가 완벽하게 세팅되어 대기 중이므로, 그냥 창만 보여주면 끝납니다!
+    /// 🚨 글쓰기 버튼을 누를 때 작동하는 함수
     function toggleWriteBox() {
         const box = document.getElementById('writeBox');
         if (box.style.display === 'none' || box.style.display === '') {
             box.style.display = 'block';
             window.scrollBy({ top: 100, behavior: 'smooth' });
-            if (quill) quill.focus(); // 커서 콕 찍어주기
+            
+            // 🚀 모바일 키보드 강제 소환 마법 🚀
+            // 창이 열리고 0.1초(100ms) 뒤에 자바스크립트가 강제로 커서를 찍어줍니다!
+            setTimeout(function() {
+                if (quill) {
+                    quill.focus(); // 에디터 내부 클릭!
+                }
+                // 숨겨진 모바일 방어막을 뚫기 위해 텍스트 입력창처럼 강제 인식시킴
+                document.querySelector('.ql-editor').setAttribute('tabindex', '0');
+            }, 100);
+
         } else {
             box.style.display = 'none';
         }
