@@ -1851,5 +1851,38 @@ window.addEventListener('popstate', async () => {
         });
     </script>
 
+<script>
+    // 🌟 음원 좋아요 실시간 통신 엔진 (서버 주소 완벽 동기화 완료!)
+    async function likeMusic(musicId) {
+        try {
+            // 🚨 핵심 수정: 서버 주소에 맞춰 '/like-music/'을 '/like/'로 변경했습니다!
+            const response = await fetch('/like/' + musicId, { method: 'POST' });
+            const data = await response.json();
+
+            if (data.success) {
+                // 1. 숫자 1 올리기
+                const countSpan = document.getElementById('like-count-' + musicId);
+                if (countSpan) {
+                    countSpan.innerText = parseInt(countSpan.innerText) + 1;
+                }
+                
+                // 2. 하트를 빨간색으로 바꾸기
+                const btn = document.getElementById('like-btn-' + musicId);
+                if (btn) {
+                    btn.style.color = '#ff4a4a';
+                    btn.style.borderColor = '#ff4a4a';
+                    btn.innerHTML = '❤️ 좋아요 <span id="like-count-' + musicId + '">' + countSpan.innerText + '</span>';
+                }
+            } else {
+                // 서버에서 실패(이미 누름 등)했다고 하면 알림 띄우기
+                alert(data.message); 
+            }
+        } catch (err) {
+            console.error("음원 좋아요 에러:", err);
+            alert("서버와 통신 중 에러가 발생했습니다.");
+        }
+    }
+</script>
+
 </body>
 </html>
