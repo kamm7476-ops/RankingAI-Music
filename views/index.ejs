@@ -364,6 +364,21 @@
         }   
 
     </style>
+
+<style>
+/* 🚨 AI 뉴스 섹션 디자인 시작 🚨 */
+.side-news-container { background: #111827; border-radius: 15px; padding: 20px; margin-top: 30px; border: 1px solid #1f2937; }
+.news-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #374151; padding-bottom: 10px; }
+.news-header h3 { font-size: 0.9rem; color: #f97316; letter-spacing: 1px; font-weight: bold; }
+.pulse-icon { width: 8px; height: 8px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 10px #ef4444; animation: pulse 2s infinite; }
+@keyframes pulse { 0% { transform: scale(0.95); opacity: 0.7; } 70% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(0.95); opacity: 0.7; } }
+.news-item-link { display: block; text-decoration: none; margin-bottom: 15px; transition: 0.3s; }
+.news-item-link:hover { transform: translateX(5px); }
+.news-item-title { font-size: 0.85rem; color: #e5e7eb; line-height: 1.4; font-weight: 500; word-break: keep-all; }
+.news-meta { font-size: 0.75rem; color: #6b7280; margin-top: 5px; }
+/* 🚨 AI 뉴스 섹션 디자인 끝 🚨 */
+</style>
+
 </head>
 <body>
 
@@ -775,6 +790,47 @@
                         <% }); %>
                     <% } %>
                 </ul>
+                
+                <section class="side-news-container">
+    <div class="news-header">
+        <span class="pulse-icon"></span>
+        <h3 style="margin:0;">AI CREATIVE TRENDS</h3>
+    </div>
+    <div id="news-api-list">
+        <div style="color:#aaa; font-size:13px; padding: 10px;">Scanning Global Trends...</div>
+    </div>
+</section>
+
+<script>
+async function fetchGlobalAINews() {
+    const query = encodeURIComponent('AI Music OR Generative AI Music OR Suno AI OR Udio');
+    const rssUrl = `https://news.google.com/rss/search?q=${query}&hl=ko&gl=KR&ceid=KR:ko`;
+    const apiProxy = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+
+    try {
+        const response = await fetch(apiProxy);
+        const data = await response.json();
+        
+        const container = document.getElementById('news-api-list');
+        container.innerHTML = ''; 
+
+        data.items.slice(0, 5).forEach(item => { 
+            const newsHtml = `
+                <a href="${item.link}" target="_blank" class="news-item-link">
+                    <div class="news-item-title">${item.title}</div>
+                    <div class="news-meta">${item.pubDate.split(' ')[0]}</div>
+                </a>
+            `;
+            container.innerHTML += newsHtml;
+        });
+    } catch (error) {
+        console.error("News Fetch Error:", error);
+    }
+}
+document.addEventListener('DOMContentLoaded', fetchGlobalAINews);
+</script>
+
+                
             </div>
         </div>
     </div>
