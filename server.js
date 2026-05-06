@@ -1552,7 +1552,7 @@ app.get('/terms', (req, res) => {
 });
 
 // =========================================
-// 🌟 8. 실시간 웹소켓(Socket.io) 우체국 로직
+// 🌟 8. 실시간 웹소켓(Socket.io) 우체국 로직 (최종 통합본)
 // =========================================
 io.on('connection', (socket) => {
     socket.on('joinRoom', ({ roomId, userId }) => {
@@ -1561,35 +1561,7 @@ io.on('connection', (socket) => {
 
     socket.on('chatMessage', async (data) => {
         try {
-            const newMsg = await new ChatMessage({
-                roomId: data.roomId,
-                senderId: data.senderId,
-                senderName: data.senderName,
-                text: data.text
-            }).save();
-
-            io.to(data.roomId).emit('message', newMsg);
-            
-            await ChatRoom.findByIdAndUpdate(data.roomId, { 
-                lastMessage: data.text, 
-                updatedAt: Date.now() 
-            });
-        } catch(err) { 
-            console.log("웹소켓 메시지 에러:", err); 
-        }
-    });
-});
-// =========================================
-// 🌟 8. 실시간 웹소켓(Socket.io) 우체국 로직 (수정됨!)
-// =========================================
-io.on('connection', (socket) => {
-    socket.on('joinRoom', ({ roomId, userId }) => {
-        socket.join(roomId); 
-    });
-
-    socket.on('chatMessage', async (data) => {
-        try {
-            // 1. 메시지 DB 저장
+            // 1. 메시지 DB 저장 (이제 딱 한 번만 저장됩니다!)
             const newMsg = await new ChatMessage({
                 roomId: data.roomId,
                 senderId: data.senderId,
@@ -1606,12 +1578,10 @@ io.on('connection', (socket) => {
                 updatedAt: Date.now() 
             });
 
-            // 🌟 4. [핵심 추가] 밖에서 놀고 있는 상대방에게 알림 쏘기!
+            // 🌟 4. [핵심] 밖에서 놀고 있는 상대방에게 알림 팝업 쏘기!
             if (room) {
-                // 방 참여자 중 '나(보낸사람)'를 제외한 상대방의 ID를 찾습니다.
                 const receiverId = room.participants.find(id => id !== data.senderId);
                 
-                // 전 우주(서버 전체)에 방송합니다: "이 사람(receiverId)에게 메시지 왔어요!"
                 io.emit('globalChatAlert', { 
                     receiverId: receiverId, 
                     senderName: data.senderName, 
