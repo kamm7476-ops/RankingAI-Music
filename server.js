@@ -1592,8 +1592,27 @@ io.on('connection', (socket) => {
         } catch(err) { 
             console.log("웹소켓 메시지 에러:", err); 
         }
+    }); // ⬅️ 여기가 기존 'chatMessage' 수신기가 끝나는 곳입니다!
+
+    // 🌟🌟🌟 [여기에 새로운 수신기 추가!] 상대방이 방에 들어와서 메시지를 읽었을 때 🌟🌟🌟
+    socket.on('markAsRead', async ({ roomId, userId }) => {
+        try {
+            // 내가 보낸 게 아닌(상대방이 보낸) 메시지 중 아직 안 읽은 것(false)을 전부 '읽음(true)'으로 바꿉니다.
+            await ChatMessage.updateMany(
+                { roomId: roomId, senderId: { $ne: userId }, isRead: false },
+                { $set: { isRead: true } }
+            );
+
+            // 방 안에 있는 사람들에게 "상대방이 다 읽었으니 1 지워라!" 라고 방송을 쏩니다.
+            io.to(roomId).emit('messagesRead');
+        } catch (err) {
+            console.log("읽음 처리 에러:", err);
+        }
     });
-});
+    // 🌟🌟🌟 [추가된 코드 끝] 🌟🌟🌟
+
+}); // ⬅️ 여기가 전체 웹소켓(io.on('connection'))이 끝나는 곳입니다!
+
 // =========================================
 // 🌟 9. 서버 실행
 // =========================================

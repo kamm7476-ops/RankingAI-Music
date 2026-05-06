@@ -136,7 +136,29 @@
         // 들어오자마자 스크롤 맨 밑으로!
         chatBox.scrollTop = chatBox.scrollHeight;
 
+        // 1. 방에 접속하기 (기존 코드)
         socket.emit('joinRoom', { roomId: roomId, userId: myId });
+
+        // ==============================================================
+        // 🌟 [추가된 핵심 기능] 카카오톡 숫자 1 지우기 로직 시작! 🌟
+        // ==============================================================
+        
+        // [추가 1] 방에 들어왔으니 "나 다 읽었어!" 라고 서버에 신호 보내기
+        socket.emit('markAsRead', { roomId: roomId, userId: myId });
+
+        // [추가 2] 서버에서 "누군가 읽었대!" 라는 신호가 오면 화면의 '1' 지우기
+        socket.on('messagesRead', () => {
+            // 화면에 켜져 있는 숫자 1(.unread-mark.show)을 모두 찾습니다.
+            const unreadMarks = document.querySelectorAll('.unread-mark.show');
+            unreadMarks.forEach(mark => {
+                // show 클래스를 빼버려서 화면에서 싹 숨깁니다.
+                mark.classList.remove('show');
+            });
+        });
+
+        // ==============================================================
+        // 🌟 [추가된 핵심 기능] 끝! 아래는 대표님의 기존 코드 그대로입니다. 🌟
+        // ==============================================================
 
         chatForm.addEventListener('submit', (e) => {
             e.preventDefault();
