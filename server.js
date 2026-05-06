@@ -1616,6 +1616,7 @@ io.on('connection', (socket) => {
                     receiverId: receiverId, 
                     senderName: data.senderName, 
                     text: data.text 
+                    roomId: data.roomId
                 });
             }
         } catch(err) { 
