@@ -181,6 +181,16 @@
             const isMyMsg = (msg.senderId === myId);
             const currentTime = formatTime(new Date()); // 현재 시간 구하기
             
+            // ==========================================================
+            // 🌟 [여기에 추가되었습니다!] 두 사람이 방에 같이 있을 때 실시간 1 지우기 🌟
+            // ==========================================================
+            if (!isMyMsg) {
+                // 내가 쓴 글이 아니라 상대방 글이 내 화면에 도착했다면, 
+                // "나 지금 방에 있으니 방금 온 거 즉시 읽었음!" 이라고 서버에 보고합니다.
+                socket.emit('markAsRead', { roomId: roomId, userId: myId });
+            }
+            // ==========================================================
+
             // 1. 전체 묶음 상자
             const wrapper = document.createElement('div');
             wrapper.classList.add('msg-wrapper');
