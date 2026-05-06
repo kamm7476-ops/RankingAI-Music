@@ -1565,7 +1565,7 @@ io.on('connection', (socket) => {
                 roomId: data.roomId,
                 senderId: data.senderId,
                 senderName: data.senderName,
-                text: data.text,
+                text: data.text
             }).save();
 
             io.to(data.roomId).emit('message', newMsg);
@@ -1615,7 +1615,7 @@ io.on('connection', (socket) => {
                 io.emit('globalChatAlert', { 
                     receiverId: receiverId, 
                     senderName: data.senderName, 
-                    text: data.text 
+                    text: data.text, 
                     roomId: data.roomId
                 });
             }
