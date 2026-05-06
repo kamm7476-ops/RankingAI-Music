@@ -499,7 +499,7 @@
             <a href="/?sort=latest" class="nav-item <%= (typeof sortQuery !== 'undefined' && sortQuery === 'latest') ? 'active' : '' %>"><%= __('menu_latest') || '최신음악' %></a>
             <a href="/?genre=발라드" class="nav-item <%= (typeof genreQuery !== 'undefined' && genreQuery) ? 'active' : '' %>"><%= __('menu_genre') || '장르별' %></a>
             
-            <a href="#news-api-list" class="nav-item" style="color: #f97316; font-weight: bold;">📰 AI TRENDS</a>
+            <a href="/#news-api-list" class="nav-item" style="color: #f97316; font-weight: bold;">📰 AI TRENDS</a>
             
             <a href="#" id="pwa-install-btn" class="nav-item" style="color: #00e5ff; font-weight: 900; display: none;"><%= __('menu_app_install') || '📲앱 설치하기' %></a>
             
@@ -827,7 +827,7 @@ async function fetchGlobalAINews() {
         console.error("News Fetch Error:", error);
     }
 }
-document.addEventListener('DOMContentLoaded', fetchGlobalAINews);
+fetchGlobalAINews();
 </script>
 
                 
