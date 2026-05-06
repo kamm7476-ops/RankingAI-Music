@@ -1960,6 +1960,86 @@ window.addEventListener('popstate', async () => {
         }
     }
 </script>
+<!-- 🌟 터치 무조건 먹히는 버튼 디자인 및 알림창 디자인 -->
+<style>
+    .floating-chat-btn {
+        position: fixed; bottom: 110px; right: 20px; background: #ffb300; color: #000;
+        width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-size: 28px; box-shadow: 0 4px 15px rgba(255, 179, 0, 0.4); 
+        z-index: 9999999 !important; /* 🚨 무한대 파워 부여 */
+        cursor: pointer !important; pointer-events: auto !important; 
+        transition: transform 0.2s;
+    }
+    .floating-chat-btn:hover { transform: scale(1.1); }
+    
+    .chat-badge {
+        position: absolute; top: -5px; right: -5px; background: #ff4a4a; color: #fff;
+        font-size: 12px; font-weight: bold; width: 22px; height: 22px;
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.5); display: none; 
+    }
 
+    .chat-alert-popup {
+        position: fixed; bottom: 180px; right: 20px; background: #1c1d20; border: 2px solid #ffb300;
+        color: #fff; padding: 15px 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        z-index: 9999999 !important; display: none; cursor: pointer !important; pointer-events: auto !important;
+        transform: translateY(20px); opacity: 0; transition: all 0.3s ease;
+    }
+    .chat-alert-popup.show { transform: translateY(0); opacity: 1; }
+</style>
+
+<% if (user) { %>
+    <!-- 💌 1. 새 메시지 팝업창 -->
+    <div id="chatAlertPopup" class="chat-alert-popup">
+        <div style="font-size: 12px; color: #ffb300; font-weight: bold; margin-bottom: 5px; pointer-events: none;">🔔 새 메시지 도착!</div>
+        <div id="chatAlertSender" style="font-weight: bold; font-size: 15px; pointer-events: none;"></div>
+        <div id="chatAlertText" style="color: #aaa; font-size: 13px; margin-top: 3px; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none;"></div>
+    </div>
+
+    <!-- 💬 2. 노란색 채팅 버튼 (div 태그로 교체하여 클릭 100% 보장!) -->
+    <div onclick="window.location.href='/chatlist';" class="floating-chat-btn">
+        💬
+        <span id="chatBadge" class="chat-badge" style="display: none;">N</span>
+    </div>
+
+    <!-- 📡 3. 실시간 안테나 (Socket.io) -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const myId = "<%= user.id %>"; 
+
+        socket.on('globalChatAlert', function(data) {
+            if (data.receiverId === myId) {
+                // 뱃지 켜기
+                document.getElementById('chatBadge').style.display = 'flex';
+                
+                // 정보 채우기
+                document.getElementById('chatAlertSender').innerText = data.senderName + " 님의 메시지";
+                document.getElementById('chatAlertText').innerText = data.text;
+                
+                const popup = document.getElementById('chatAlertPopup');
+                
+                // 🚨 팝업 클릭 시 해당 채팅방으로 강제 이동!
+                popup.onclick = function() {
+                    if(data.roomId) {
+                        window.location.href = '/chat/' + data.roomId;
+                    } else {
+                        window.location.href = '/chatlist';
+                    }
+                };
+
+                // 팝업 애니메이션
+                popup.style.display = 'block';
+                setTimeout(() => popup.classList.add('show'), 10);
+
+                // 4초 후 퇴장
+                setTimeout(() => {
+                    popup.classList.remove('show');
+                    setTimeout(() => popup.style.display = 'none', 300);
+                }, 4000);
+            }
+        });
+    </script>
+<% } %>
 </body>
 </html>
