@@ -89,13 +89,26 @@
         .input-area input { flex: 1; height: 45px; box-sizing: border-box; background: #0b0c0d; border: 1px solid #333; color: #fff; padding: 0 20px; border-radius: 25px; outline: none; font-size: 15px; margin: 0; }
         .input-area button { height: 45px; background: #ffb300; color: #000; font-weight: 900; border: none; padding: 0 24px; border-radius: 25px; cursor: pointer; transition: 0.2s; margin: 0; }
         .input-area button:hover { filter: brightness(1.1); transform: scale(1.05); }
+        /* 나가기 버튼 스타일 */
+.leave-btn { 
+    background: #ff4d4d; 
+    color: white; 
+    border: none; 
+    padding: 5px 12px; 
+    border-radius: 5px; 
+    font-size: 12px; 
+    cursor: pointer; 
+    font-weight: bold;
+}
+.leave-btn:hover { background: #ff3333; }
     </style>
 </head>
 <body>
     <div class="header">
         <a href="/chatlist" class="back-btn">⬅ 목록으로</a>
         <strong style="font-size: 16px;">💬 1:1 채팅방</strong>
-        <div style="width: 60px;"></div>
+        
+        <button class="leave-btn" onclick="leaveRoom()">나가기</button>
     </div>
 
     <div class="chat-box" id="chatBox">
@@ -182,6 +195,20 @@
             const currentTime = formatTime(new Date()); // 현재 시간 구하기
             
             // ==========================================================
+            // 🌟 [여기에 진동/소리 추가되었습니다!] 🌟
+            // ==========================================================
+            if (!isMyMsg) {
+                // 1. "나 즉시 읽었음!" 보고 (대표님이 완벽히 넣으신 부분)
+                socket.emit('markAsRead', { roomId: roomId, userId: myId });
+
+                // 2. 📳 진동 알림 (모바일 기기에서만 0.2초 징~ 울립니다)
+                if (navigator.vibrate) navigator.vibrate(200); 
+
+                // 3. 🔊 소리 알림 (파일이 없으면 조용히 대기만 합니다)
+                alertSound.play().catch(e => console.log("소리 대기중"));
+            }
+
+            // ==========================================================
             // 🌟 [여기에 추가되었습니다!] 두 사람이 방에 같이 있을 때 실시간 1 지우기 🌟
             // ==========================================================
             if (!isMyMsg) {
@@ -245,6 +272,21 @@
             chatBox.appendChild(wrapper);
             chatBox.scrollTop = chatBox.scrollHeight;
         });
+
+       // ==============================================================
+        // 🚪 방 나가기 함수
+        // ==============================================================
+        function leaveRoom() {
+            if (confirm('정말 이 채팅방을 나가시겠습니까?\n내 목록에서만 삭제되며 상대방은 대화가 유지됩니다.')) {
+                fetch(`/chat/leave/${roomId}`, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        location.href = '/chatlist'; // 나가기 성공 시 목록으로 튕겨냄
+                    }
+                });
+            }
+        } 
     </script>
 </body>
 </html>

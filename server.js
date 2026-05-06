@@ -1552,6 +1552,36 @@ app.get('/terms', (req, res) => {
 });
 
 // =========================================
+// 🌟 [여기에 추가!] 🚪 채팅방 나가기 (내 목록에서만 제거)
+// =========================================
+app.post('/chat/leave/:roomId', async (req, res) => {
+    // 로그인 안 한 사람이 지우려고 하면 막아냅니다.
+    if (!req.session.user) return res.status(401).json({ success: false });
+
+    try {
+        const { roomId } = req.params;
+        const userId = req.session.user.id; // 대표님 방식에 맞게 세션에서 내 ID 가져오기!
+
+        // 1. 방 참여자 명단(participants)에서 내 ID를 쏙 빼버립니다. ($pull 사용)
+        const room = await ChatRoom.findByIdAndUpdate(roomId, {
+            $pull: { participants: userId }
+        }, { new: true });
+
+        // 2. 만약 둘 다 나가서 방에 아무도 안 남았다면? 쓰레기통 비우듯 방과 메시지를 완전히 삭제!
+        if (room && room.participants.length === 0) {
+            await ChatRoom.findByIdAndDelete(roomId);
+            await ChatMessage.deleteMany({ roomId: roomId });
+        }
+
+        // 3. 화면(chat.ejs) 쪽에 "성공적으로 나갔어!" 라고 답변을 줍니다.
+        res.json({ success: true });
+    } catch (err) {
+        console.log("방 나가기 에러:", err);
+        res.status(500).json({ success: false });
+    }
+});
+
+// =========================================
 // 🌟 8. 실시간 웹소켓(Socket.io) 우체국 로직 (최종 통합본)
 // =========================================
 io.on('connection', (socket) => {
