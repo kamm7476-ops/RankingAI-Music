@@ -47,7 +47,34 @@
         .msg.my { background: #ffb300; color: #000; font-weight: 500; align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 4px 10px rgba(255,179,0,0.3); }
         .msg.other { background: #222; color: #ddd; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #333; }
         .sender-name { font-size: 11px; color: #777; margin-bottom: 4px; margin-left: 5px; }
+
+        /* 🌟 [여기 추가됨!] 카카오톡 스타일 시간 및 읽음 표시 CSS 🌟 */
+        .msg-wrapper { 
+            display: flex; 
+            align-items: flex-end; 
+            gap: 5px; 
+            margin-bottom: 12px; 
+        }
+        .msg-wrapper.my { flex-direction: row-reverse; }
         
+        .msg-info { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: flex-end; 
+            font-size: 11px; 
+            color: #888; 
+            min-width: 45px;
+        }
+        .msg-wrapper.other .msg-info { align-items: flex-start; }
+        
+        .unread-mark { 
+            color: #ffb300; 
+            font-weight: bold; 
+            margin-bottom: 2px; 
+            display: none; 
+        }
+        .unread-mark.show { display: block; }
+
         /* 🚨 4. 입력창 (바닥에 절대 고정) */
         .input-area { 
             position: absolute; 
@@ -121,28 +148,69 @@
             msgInput.focus();
         });
 
+        // 🌟 [여기서부터 화면에 그리는 새 코드가 시작됩니다!] 🌟
+        
+        // 현재 시간을 '오후 2:30' 형태로 바꿔주는 마법의 함수
+        function formatTime(dateObj) {
+            return new Intl.DateTimeFormat('ko-KR', { hour: 'numeric', minute: 'numeric', hour12: true }).format(dateObj);
+        }
+
         socket.on('message', (msg) => {
             const isMyMsg = (msg.senderId === myId);
+            const currentTime = formatTime(new Date()); // 현재 시간 구하기
             
+            // 1. 전체 묶음 상자
             const wrapper = document.createElement('div');
-            wrapper.style.display = 'flex';
-            wrapper.style.flexDirection = 'column';
+            wrapper.classList.add('msg-wrapper');
+            if (isMyMsg) wrapper.classList.add('my');
+            else wrapper.classList.add('other');
             
+            // 상대방 메시지일 경우 이름표 붙이기
             if (!isMyMsg) {
                 const nameDiv = document.createElement('div');
                 nameDiv.classList.add('sender-name');
                 nameDiv.innerText = msg.senderName;
-                wrapper.appendChild(nameDiv);
+                
+                // 이름표와 말풍선을 묶기 위해 세로 정렬(column) div를 하나 만듭니다
+                const nameAndMsg = document.createElement('div');
+                nameAndMsg.style.display = 'flex';
+                nameAndMsg.style.flexDirection = 'column';
+                nameAndMsg.appendChild(nameDiv);
+                wrapper.appendChild(nameAndMsg); 
             }
 
+            // 2. 말풍선 생성
             const bubble = document.createElement('div');
             bubble.classList.add('msg');
             bubble.classList.add(isMyMsg ? 'my' : 'other');
             bubble.innerText = msg.text;
+
+            // 3. 시간 및 읽음표시(1) 생성
+            const infoDiv = document.createElement('div');
+            infoDiv.classList.add('msg-info');
             
-            wrapper.appendChild(bubble);
+            const unreadSpan = document.createElement('span');
+            unreadSpan.classList.add('unread-mark');
+            unreadSpan.classList.add('show'); // 방금 보낸 건 당연히 안 읽었으므로 '1' 표시
+            unreadSpan.innerText = '1';
+            
+            const timeSpan = document.createElement('span');
+            timeSpan.innerText = currentTime;
+
+            // 조립하기
+            infoDiv.appendChild(unreadSpan);
+            infoDiv.appendChild(timeSpan);
+            
+            // 내 메시지면 [말풍선] - [정보], 상대방이면 [이름/말풍선] - [정보] 순서로 배치
+            if(isMyMsg) {
+                wrapper.appendChild(bubble);
+                wrapper.appendChild(infoDiv);
+            } else {
+                wrapper.firstChild.appendChild(bubble); // 아까 만든 nameAndMsg 아래에 말풍선 넣기
+                wrapper.appendChild(infoDiv);
+            }
+            
             chatBox.appendChild(wrapper);
-            
             chatBox.scrollTop = chatBox.scrollHeight;
         });
     </script>
