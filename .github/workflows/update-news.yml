@@ -2,8 +2,12 @@ name: Global News Auto Update
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # 6시간마다 자동으로 실행 (하루 4번)
-  workflow_dispatch: # 대표님이 원할 때 수동으로도 실행 가능
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+# 👇 로봇에게 파일 쓰기 절대 권한을 부여하는 강력한 명찰입니다!
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -15,7 +19,7 @@ jobs:
         with:
           node-version: '18'
       - name: Update News Data
-        run: node update_news.js # 아래 2단계에서 만들 스크립트를 실행합니다.
+        run: node update_news.js
       - name: Commit and Push
         run: |
           git config --global user.name "NewsBot"
