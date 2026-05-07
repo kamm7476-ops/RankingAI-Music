@@ -931,13 +931,14 @@ function closeNewsPage() {
 
 async function fetchBigNews() {
     const container = document.getElementById('big-news-list');
-    container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:50px; color:#fff;">전 세계 AI 트렌드를 수집 중입니다... 🚀</div>';
+    container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:50px; color:#fff;">전 세계 AI 작곡 및 음악 프로그램 소식을 수집 중입니다... 🚀</div>';
 
-    const query = encodeURIComponent('AI Music OR Generative AI OR Suno AI OR Udio');
+    // 🚨 검색어를 'AI 작곡', 'Suno AI', 'Udio' 등 음악 프로그램에 완전히 집중시켰습니다!
+    const query = encodeURIComponent('"Suno AI" OR "Udio" OR "AI 작곡" OR "AI 음악 프로그램" OR "Vocaloid"');
     const rssUrl = `https://news.google.com/rss/search?q=${query}&hl=ko&gl=KR&ceid=KR:ko`;
 
     try {
-        // 🛡️ 1차 시도: 30개 가져오기 (가장 강력한 최신 프록시)
+        // 🛡️ 1차 시도 (30개 목표)
         const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(rssUrl)}`;
         const response = await fetch(proxyUrl);
         
@@ -965,7 +966,7 @@ async function fetchBigNews() {
             const html = `
                 <a href="${link}" target="_blank" class="bento-news-card">
                     <div class="bento-header">
-                        <span class="bento-tag">🔥 HOT TREND</span>
+                        <span class="bento-tag">🎵 AI MUSIC TOOL</span>
                         <span class="bento-date">${formattedDate}</span>
                     </div>
                     <h3 class="bento-title">${title}</h3>
@@ -980,9 +981,9 @@ async function fetchBigNews() {
         }
 
     } catch (error) {
-        console.log("1차 시도 실패. 절대 안 막히는 2차 안전망으로 10개를 가져옵니다.");
+        console.log("1차 시도 실패. 2차 안전망(10개) 발동.");
         
-        // 🛡️ 2차 시도: 1차 실패 시, 무조건 10개라도 가져오는 안전망 발동
+        // 🛡️ 2차 시도 (안전망 10개)
         try {
             const backupUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
             const backupRes = await fetch(backupUrl);
@@ -995,7 +996,7 @@ async function fetchBigNews() {
                 const html = `
                     <a href="${item.link}" target="_blank" class="bento-news-card">
                         <div class="bento-header">
-                            <span class="bento-tag">🔥 HOT TREND</span>
+                            <span class="bento-tag">🎵 AI MUSIC TOOL</span>
                             <span class="bento-date">${item.pubDate.split(' ')[0]}</span>
                         </div>
                         <h3 class="bento-title">${item.title}</h3>
