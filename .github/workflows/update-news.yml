@@ -1,0 +1,25 @@
+name: Global News Auto Update
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # 6시간마다 자동으로 실행 (하루 4번)
+  workflow_dispatch: # 대표님이 원할 때 수동으로도 실행 가능
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Update News Data
+        run: node update_news.js # 아래 2단계에서 만들 스크립트를 실행합니다.
+      - name: Commit and Push
+        run: |
+          git config --global user.name "NewsBot"
+          git config --global user.email "bot@rankingaimusic.com"
+          git add news-data.json
+          git commit -m "Automated News Update" || exit 0
+          git push
