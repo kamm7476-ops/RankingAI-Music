@@ -499,7 +499,7 @@
             <a href="/?sort=latest" class="nav-item <%= (typeof sortQuery !== 'undefined' && sortQuery === 'latest') ? 'active' : '' %>"><%= __('menu_latest') || '최신음악' %></a>
             <a href="/?genre=발라드" class="nav-item <%= (typeof genreQuery !== 'undefined' && genreQuery) ? 'active' : '' %>"><%= __('menu_genre') || '장르별' %></a>
             
-            <a href="/#news-api-list" class="nav-item" style="color: #f97316; font-weight: bold;">📰 AI TRENDS</a>
+            <a href="javascript:void(0);" onclick="openNewsPage()" class="nav-item" style="color: #f97316; font-weight: bold;">📰 AI TRENDS</a>
             
             <a href="#" id="pwa-install-btn" class="nav-item" style="color: #00e5ff; font-weight: 900; display: none;"><%= __('menu_app_install') || '📲앱 설치하기' %></a>
             
@@ -800,9 +800,40 @@
         <div style="color:#aaa; font-size:13px; padding: 10px;">Scanning Global Trends...</div>
     </div>
 </section>
+                
+            </div>
+        </div>
+    </div>
+
+<div id="full-news-page" style="display: none; padding: 40px 20px; min-height: 80vh; max-width: 1200px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #f97316; padding-bottom: 10px; margin-bottom: 20px;">
+        <h2 style="color: #f97316; font-size: 36px; margin: 0; font-weight: 900;">GLOBAL AI TRENDS</h2>
+        <button onclick="closeNewsPage()" style="background: #222; color: #fff; border: 1px solid #444; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold;">🔙 차트로 돌아가기</button>
+    </div>
+    <p style="color: #aaa; font-size: 16px; margin-bottom: 40px;">매일 업데이트되는 전 세계 AI 음악 및 창작 트렌드입니다.</p>
+
+    <div id="big-news-list" style="display: grid; grid-template-columns: 1fr; gap: 20px;">
+        </div>
+</div>
 
 <script>
-async function fetchGlobalAINews() {
+// 뉴스 페이지 열기
+function openNewsPage() {
+    document.querySelector('.main-layout').style.display = 'none'; 
+    document.getElementById('full-news-page').style.display = 'block'; 
+    fetchBigNews(); 
+}
+
+// 뉴스 페이지 닫고 차트로 돌아가기
+function closeNewsPage() {
+    document.getElementById('full-news-page').style.display = 'none'; 
+    document.querySelector('.main-layout').style.display = 'flex'; 
+}
+
+async function fetchBigNews() {
+    const container = document.getElementById('big-news-list');
+    container.innerHTML = '<h3 style="color:#fff; text-align:center; margin-top:50px;">뉴스를 실시간으로 불러오는 중입니다... 잠시만 기다려주세요! 🚀</h3>';
+
     const query = encodeURIComponent('AI Music OR Generative AI Music OR Suno AI OR Udio');
     const rssUrl = `https://news.google.com/rss/search?q=${query}&hl=ko&gl=KR&ceid=KR:ko`;
     const apiProxy = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
@@ -810,30 +841,22 @@ async function fetchGlobalAINews() {
     try {
         const response = await fetch(apiProxy);
         const data = await response.json();
-        
-        const container = document.getElementById('news-api-list');
-        container.innerHTML = ''; 
+        container.innerHTML = '';
 
-        data.items.slice(0, 5).forEach(item => { 
-            const newsHtml = `
-                <a href="${item.link}" target="_blank" class="news-item-link">
-                    <div class="news-item-title">${item.title}</div>
-                    <div class="news-meta">${item.pubDate.split(' ')[0]}</div>
+        data.items.slice(0, 10).forEach(item => { 
+            const html = `
+                <a href="${item.link}" target="_blank" style="background: #161718; border: 1px solid #333; padding: 25px; border-radius: 12px; display: block; text-decoration: none; border-left: 5px solid #f97316; transition: 0.2s;" onmouseover="this.style.borderColor='#f97316'; this.style.transform='translateX(5px)';" onmouseout="this.style.borderColor='#333'; this.style.borderLeftColor='#f97316'; this.style.transform='translateX(0)';">
+                    <h3 style="color: #fff; font-size: 20px; margin: 0 0 10px 0; line-height: 1.4;">${item.title}</h3>
+                    <div style="color: #888; font-size: 14px;">${item.pubDate.split(' ')[0]} | Google News Curation</div>
                 </a>
             `;
-            container.innerHTML += newsHtml;
+            container.innerHTML += html;
         });
     } catch (error) {
-        console.error("News Fetch Error:", error);
+        container.innerHTML = '<div style="color:red; text-align:center;">뉴스를 불러오는데 실패했습니다. 새로고침 후 다시 시도해주세요.</div>';
     }
 }
-fetchGlobalAINews();
 </script>
-
-                
-            </div>
-        </div>
-    </div>
 
     <div class="bottom-player-bar" id="bottomPlayerBar">
         <div class="player-toggle-tab" onclick="togglePlayerVisibility()">▼ 숨기기</div>
