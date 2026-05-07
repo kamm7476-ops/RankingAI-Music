@@ -942,7 +942,7 @@ async function fetchBigNews() {
         const data = await response.json();
         container.innerHTML = '';
 
-        data.items.slice(0, 12).forEach(item => { 
+        data.items.slice(0, 100).forEach(item => { 
             // 태그 싹 지우고 순수 텍스트 요약본만 90자 추출
             const description = item.content.replace(/<[^>]*>?/gm, '').substring(0, 90);
 
