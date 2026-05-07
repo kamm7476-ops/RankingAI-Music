@@ -931,13 +931,13 @@ function closeNewsPage() {
 
 async function fetchBigNews() {
     const container = document.getElementById('big-news-list');
-    container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:50px; color:#fff;">전 세계 AI 트렌드 빅데이터를 수집 중입니다... 🚀</div>';
+    container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:50px; color:#fff;">전 세계 AI 트렌드 빅데이터 100개를 수집 중입니다... 🚀</div>';
 
     const query = encodeURIComponent('AI Music OR Generative AI OR Suno AI OR Udio');
     const rssUrl = `https://news.google.com/rss/search?q=${query}&hl=ko&gl=KR&ceid=KR:ko`;
     
-    // 🚨 뻗어버린 서버 대신, 가장 안정적인 프록시(우회) 고속도로 2번 라인 사용!
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`;
+    // 🚨 완전히 새롭고 더 강력한 우회 서버(CodeTabs) 도입!
+    const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rssUrl)}`;
 
     try {
         const response = await fetch(proxyUrl);
@@ -945,7 +945,6 @@ async function fetchBigNews() {
         
         const xmlText = await response.text();
         
-        // 원본 데이터를 텍스트로 바로 읽어옵니다.
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xmlText, "text/xml");
         const items = xmlDoc.querySelectorAll("item");
@@ -954,8 +953,8 @@ async function fetchBigNews() {
 
         container.innerHTML = '';
 
-        // 🚨 30개 시원하게 가져오기!
-        const maxItems = Math.min(items.length, 30); 
+        // 🚨 대표님 요청대로 시원하게 100개 세팅 완료! (데이터가 100개 이하면 있는 만큼만 가져옴)
+        const maxItems = Math.min(items.length, 100); 
 
         for (let i = 0; i < maxItems; i++) {
             const item = items[i];
@@ -986,7 +985,7 @@ async function fetchBigNews() {
             container.innerHTML += html;
         }
     } catch (error) {
-        container.innerHTML = '<div style="color:red; text-align:center; grid-column:1/-1;">뉴스를 불러오는 데 실패했습니다. 새로고침 후 다시 시도해 주세요.</div>';
+        container.innerHTML = '<div style="color:red; text-align:center; grid-column:1/-1;">뉴스를 불러오는 데 실패했습니다. 잠시 후 새로고침 해주세요.</div>';
         console.error("뉴스 로드 에러:", error);
     }
 }
