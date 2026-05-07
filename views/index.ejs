@@ -931,28 +931,49 @@ function closeNewsPage() {
 
 async function fetchBigNews() {
     const container = document.getElementById('big-news-list');
-    container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:50px; color:#fff;">전 세계 AI 트렌드를 분석 중입니다... 🚀</div>';
+    container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:50px; color:#fff;">전 세계 AI 트렌드 빅데이터를 수집 중입니다... 🚀</div>';
 
     const query = encodeURIComponent('AI Music OR Generative AI OR Suno AI OR Udio');
     const rssUrl = `https://news.google.com/rss/search?q=${query}&hl=ko&gl=KR&ceid=KR:ko`;
-    const apiProxy = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+    
+    // 🚨 10개 제한 걸린 rss2json 대신, 무제한 우회 프록시 사용!
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
 
     try {
-        const response = await fetch(apiProxy);
+        const response = await fetch(proxyUrl);
         const data = await response.json();
+        
+        // 구글이 준 원본 데이터(XML)를 직접 해독합니다.
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+        const items = xmlDoc.querySelectorAll("item");
+
         container.innerHTML = '';
 
-        data.items.slice(0, 100).forEach(item => { 
-            // 태그 싹 지우고 순수 텍스트 요약본만 90자 추출
-            const description = item.content.replace(/<[^>]*>?/gm, '').substring(0, 90);
+        // 🚨 여기서 30개를 가져옵니다!
+        const maxItems = Math.min(items.length, 30); 
+
+        for (let i = 0; i < maxItems; i++) {
+            const item = items[i];
+            const title = item.querySelector("title")?.textContent || "제목 없음";
+            const link = item.querySelector("link")?.textContent || "#";
+            const pubDate = item.querySelector("pubDate")?.textContent || "";
+            
+            // 날짜 깔끔하게 정리 (예: 2023. 10. 25.)
+            const dateObj = new Date(pubDate);
+            const formattedDate = dateObj.toLocaleDateString('ko-KR');
+
+            // 내용 요약 (HTML 태그 제거 후 90자)
+            const descriptionHtml = item.querySelector("description")?.textContent || "";
+            const description = descriptionHtml.replace(/<[^>]*>?/gm, '').substring(0, 90);
 
             const html = `
-                <a href="${item.link}" target="_blank" class="bento-news-card">
+                <a href="${link}" target="_blank" class="bento-news-card">
                     <div class="bento-header">
                         <span class="bento-tag">🔥 HOT TREND</span>
-                        <span class="bento-date">${item.pubDate.split(' ')[0]}</span>
+                        <span class="bento-date">${formattedDate}</span>
                     </div>
-                    <h3 class="bento-title">${item.title}</h3>
+                    <h3 class="bento-title">${title}</h3>
                     <p class="bento-desc">${description}...</p>
                     <div class="bento-footer">
                         <span>Google News Curation</span>
@@ -961,9 +982,10 @@ async function fetchBigNews() {
                 </a>
             `;
             container.innerHTML += html;
-        });
+        }
     } catch (error) {
         container.innerHTML = '<div style="color:red; text-align:center; grid-column:1/-1;">뉴스를 불러오지 못했습니다.</div>';
+        console.error(error);
     }
 }
 </script>
