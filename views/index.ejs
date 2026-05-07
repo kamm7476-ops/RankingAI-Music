@@ -393,6 +393,19 @@
     /* 날짜 글자 크기 축소 */
     #big-news-list a > div { font-size: 11px !important; }
 }
+
+/* 🌟 네이버형 프리미엄 뉴스 그리드 디자인 🌟 */
+#big-news-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important; gap: 25px !important; padding: 20px 0 !important; }
+.news-card-premium { background: #1a1b1e !important; border: 1px solid #2d2e32 !important; border-radius: 16px !important; overflow: hidden !important; text-decoration: none !important; transition: all 0.3s ease !important; display: flex !important; flex-direction: column !important; }
+.news-card-premium:hover { transform: translateY(-8px) !important; border-color: #f97316 !important; box-shadow: 0 10px 30px rgba(249, 115, 22, 0.2) !important; }
+.news-thumb-wrap { width: 100%; height: 180px; background: #000; }
+.news-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.news-content-wrap { padding: 20px !important; display: flex; flex-direction: column; flex-grow: 1; }
+.news-category { color: #f97316; font-size: 11px; font-weight: 800; margin-bottom: 8px; }
+.news-card-title { color: #fff !important; font-size: 17px !important; font-weight: bold !important; margin-bottom: 12px !important; line-height: 1.4 !important; height: 48px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.news-card-desc { color: #9ca3af !important; font-size: 14px !important; line-height: 1.6 !important; height: 66px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; margin-bottom: 15px !important; }
+.news-card-footer { margin-top: auto; display: flex; justify-content: space-between; font-size: 12px; color: #6b7280; border-top: 1px solid #2d2e32; padding-top: 15px; }
+@media (max-width: 600px) { #big-news-list { grid-template-columns: 1fr !important; } }
 </style>
 
 </head>
@@ -848,9 +861,9 @@ function closeNewsPage() {
 
 async function fetchBigNews() {
     const container = document.getElementById('big-news-list');
-    container.innerHTML = '<h3 style="color:#fff; text-align:center; margin-top:50px;">뉴스를 실시간으로 불러오는 중입니다... 잠시만 기다려주세요! 🚀</h3>';
+    container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:50px; color:#fff;">전 세계 AI 트렌드를 분석 중입니다... 🚀</div>';
 
-    const query = encodeURIComponent('AI Music OR Generative AI Music OR Suno AI OR Udio');
+    const query = encodeURIComponent('AI Music OR Generative AI OR Suno AI OR Udio');
     const rssUrl = `https://news.google.com/rss/search?q=${query}&hl=ko&gl=KR&ceid=KR:ko`;
     const apiProxy = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
 
@@ -859,17 +872,38 @@ async function fetchBigNews() {
         const data = await response.json();
         container.innerHTML = '';
 
-        data.items.slice(0, 10).forEach(item => { 
+        data.items.slice(0, 12).forEach(item => { 
+            // 1. 이미지 찾기 (없으면 예쁜 기본 AI 이미지 사용)
+            let thumb = item.thumbnail || "";
+            if (!thumb && item.description) {
+                const imgMatch = item.description.match(/<img[^>]+src="([^">]+)"/);
+                thumb = imgMatch ? imgMatch[1] : "";
+            }
+            const finalThumb = thumb || 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=400';
+
+            // 2. 요약문 만들기 (태그 제거 후 80자까지)
+            const description = item.content.replace(/<[^>]*>?/gm, '').substring(0, 80);
+
             const html = `
-                <a href="${item.link}" target="_blank" style="background: #161718; border: 1px solid #333; padding: 25px; border-radius: 12px; display: block; text-decoration: none; border-left: 5px solid #f97316; transition: 0.2s;" onmouseover="this.style.borderColor='#f97316'; this.style.transform='translateX(5px)';" onmouseout="this.style.borderColor='#333'; this.style.borderLeftColor='#f97316'; this.style.transform='translateX(0)';">
-                    <h3 style="color: #fff; font-size: 20px; margin: 0 0 10px 0; line-height: 1.4;">${item.title}</h3>
-                    <div style="color: #888; font-size: 14px;">${item.pubDate.split(' ')[0]} | Google News Curation</div>
+                <a href="${item.link}" target="_blank" class="news-card-premium">
+                    <div class="news-thumb-wrap">
+                        <img src="${finalThumb}" alt="thumbnail">
+                    </div>
+                    <div class="news-content-wrap">
+                        <span class="news-category">LATEST TREND</span>
+                        <h3 class="news-card-title">${item.title}</h3>
+                        <p class="news-card-desc">${description}...</p>
+                        <div class="news-card-footer">
+                            <span>${item.pubDate.split(' ')[0]}</span>
+                            <span style="color:#f97316;">Read More →</span>
+                        </div>
+                    </div>
                 </a>
             `;
             container.innerHTML += html;
         });
     } catch (error) {
-        container.innerHTML = '<div style="color:red; text-align:center;">뉴스를 불러오는데 실패했습니다. 새로고침 후 다시 시도해주세요.</div>';
+        container.innerHTML = '<div style="color:red; text-align:center; grid-column:1/-1;">뉴스를 불러오지 못했습니다.</div>';
     }
 }
 </script>
