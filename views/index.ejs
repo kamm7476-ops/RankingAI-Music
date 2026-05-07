@@ -916,12 +916,21 @@
 </div>
 
 <script>
+// 🚨 뉴스를 이미 불러왔는지 기억하는 스위치 (이게 핵심입니다!)
+let isNewsLoaded = false;
+
+// 뉴스 페이지 열기
 function openNewsPage() {
     document.querySelector('.main-layout').style.display = 'none'; 
     document.getElementById('full-news-page').style.display = 'block'; 
-    fetchBigNews(); 
+    
+    // 스위치가 꺼져있을 때(처음 들어올 때)만 뉴스를 가져옵니다!
+    if (!isNewsLoaded) {
+        fetchBigNews(); 
+    }
 }
 
+// 뉴스 페이지 닫고 차트로 돌아가기
 function closeNewsPage() {
     document.getElementById('full-news-page').style.display = 'none'; 
     document.querySelector('.main-layout').style.display = 'flex'; 
@@ -936,7 +945,7 @@ async function translateText(text, targetLang) {
         const data = await res.json();
         return data[0].map(x => x[0]).join('');
     } catch (e) {
-        return text; // 번역기 과부하 시 에러 없이 영어 원문으로 출력
+        return text;
     }
 }
 
@@ -981,11 +990,10 @@ async function fetchBigNews() {
         <small style="color:#f97316;">(번역에 2~3초 정도 소요될 수 있습니다 🚀)</small>
     </div>`;
 
-    const query = encodeURIComponent('"AI Music" OR "Generative Audio" OR "Suno AI" OR "Udio" OR "Music Industry AI"');
+    const query = encodeURIComponent('"AI Music" OR "Generative Audio" OR "Suno AI" OR "Udio"');
     const rssUrl = `https://news.google.com/rss/search?q=${query}&hl=en&gl=US&ceid=US:en`;
 
     try {
-        // 🛡️ 1차 시도: 30개 (가장 안정적인 allorigins 고속도로)
         const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`;
         const response = await fetch(proxyUrl);
         if (!response.ok) throw new Error("1차 차단");
@@ -1007,9 +1015,10 @@ async function fetchBigNews() {
             renderCard(container, link, pubDate, originTitle, originDesc, userLang);
         });
 
+        // 🚨 뉴스를 성공적으로 다 그렸으면 스위치를 켭니다! (다음부턴 로딩 안 함)
+        isNewsLoaded = true; 
+
     } catch (error) {
-        console.log("1차 실패. 2차 안전망(10개) 발동!");
-        // 🛡️ 2차 시도: 10개 (rss2json 안전망)
         try {
             const backupUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
             const backupRes = await fetch(backupUrl);
@@ -1021,8 +1030,12 @@ async function fetchBigNews() {
                 const originDesc = item.content.replace(/<[^>]*>?/gm, '').substring(0, 100);
                 renderCard(container, item.link, item.pubDate.split(' ')[0], item.title, originDesc, userLang);
             });
+
+            // 🚨 안전망으로 가져왔을 때도 스위치를 켭니다!
+            isNewsLoaded = true; 
+
         } catch (backupError) {
-            container.innerHTML = '<div style="color:red; text-align:center; grid-column:1/-1;">잠시 서버 접속자가 많습니다. 1분 뒤에 새로고침 해주세요! 🙏</div>';
+            container.innerHTML = '<div style="color:red; text-align:center; grid-column:1/-1;">잠시 서버 접속자가 많습니다. 나중에 다시 시도해 주세요! 🙏</div>';
         }
     }
 }
