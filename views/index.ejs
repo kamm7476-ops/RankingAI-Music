@@ -936,21 +936,25 @@ async function fetchBigNews() {
     const query = encodeURIComponent('AI Music OR Generative AI OR Suno AI OR Udio');
     const rssUrl = `https://news.google.com/rss/search?q=${query}&hl=ko&gl=KR&ceid=KR:ko`;
     
-    // 🚨 10개 제한 걸린 rss2json 대신, 무제한 우회 프록시 사용!
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
+    // 🚨 뻗어버린 서버 대신, 가장 안정적인 프록시(우회) 고속도로 2번 라인 사용!
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`;
 
     try {
         const response = await fetch(proxyUrl);
-        const data = await response.json();
+        if (!response.ok) throw new Error("서버 응답 에러");
         
-        // 구글이 준 원본 데이터(XML)를 직접 해독합니다.
+        const xmlText = await response.text();
+        
+        // 원본 데이터를 텍스트로 바로 읽어옵니다.
         const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+        const xmlDoc = parser.parseFromString(xmlText, "text/xml");
         const items = xmlDoc.querySelectorAll("item");
+
+        if (items.length === 0) throw new Error("뉴스가 없습니다");
 
         container.innerHTML = '';
 
-        // 🚨 여기서 30개를 가져옵니다!
+        // 🚨 30개 시원하게 가져오기!
         const maxItems = Math.min(items.length, 30); 
 
         for (let i = 0; i < maxItems; i++) {
@@ -959,11 +963,9 @@ async function fetchBigNews() {
             const link = item.querySelector("link")?.textContent || "#";
             const pubDate = item.querySelector("pubDate")?.textContent || "";
             
-            // 날짜 깔끔하게 정리 (예: 2023. 10. 25.)
             const dateObj = new Date(pubDate);
             const formattedDate = dateObj.toLocaleDateString('ko-KR');
 
-            // 내용 요약 (HTML 태그 제거 후 90자)
             const descriptionHtml = item.querySelector("description")?.textContent || "";
             const description = descriptionHtml.replace(/<[^>]*>?/gm, '').substring(0, 90);
 
@@ -984,8 +986,8 @@ async function fetchBigNews() {
             container.innerHTML += html;
         }
     } catch (error) {
-        container.innerHTML = '<div style="color:red; text-align:center; grid-column:1/-1;">뉴스를 불러오지 못했습니다.</div>';
-        console.error(error);
+        container.innerHTML = '<div style="color:red; text-align:center; grid-column:1/-1;">뉴스를 불러오는 데 실패했습니다. 새로고침 후 다시 시도해 주세요.</div>';
+        console.error("뉴스 로드 에러:", error);
     }
 }
 </script>
