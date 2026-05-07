@@ -377,6 +377,22 @@
 .news-item-title { font-size: 0.85rem; color: #e5e7eb; line-height: 1.4; font-weight: 500; word-break: keep-all; }
 .news-meta { font-size: 0.75rem; color: #6b7280; margin-top: 5px; }
 /* 🚨 AI 뉴스 섹션 디자인 끝 🚨 */
+
+/* 🚨 모바일 전용: 전용 뉴스 페이지 예쁘게 다듬기 🚨 */
+@media (max-width: 768px) {
+    /* 상단 타이틀과 버튼 정렬 */
+    #full-news-page > div:first-child { flex-direction: column !important; align-items: flex-start !important; gap: 15px; }
+    /* 제목 축소 */
+    #full-news-page h2 { font-size: 24px !important; }
+    /* 설명글 축소 및 한국어 줄바꿈 방어 */
+    #full-news-page > p { font-size: 13px !important; margin-bottom: 25px !important; word-break: keep-all !important; }
+    /* 카드 안쪽 여백 줄이기 */
+    #big-news-list a { padding: 15px !important; }
+    /* 뉴스 제목 글자 크기 축소 */
+    #big-news-list h3 { font-size: 15px !important; line-height: 1.5 !important; word-break: keep-all !important; }
+    /* 날짜 글자 크기 축소 */
+    #big-news-list a > div { font-size: 11px !important; }
+}
 </style>
 
 </head>
