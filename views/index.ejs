@@ -950,6 +950,7 @@ async function fetchBigNews() {
         container.innerHTML = '';
 
         data.forEach(item => {
+            if (!item.title || item.title.trim() === '') return;
             const html = `
                 <a href="${item.link}" target="_blank" class="bento-news-card">
                     <div class="bento-header">
