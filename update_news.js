@@ -40,8 +40,9 @@ async function fetchAndSave() {
             });
         }
 
-        fs.writeFileSync('news-data.json', JSON.stringify(newsData, null, 2));
-        console.log("✅ news-data.json 저장 완료!");
+        // 👇 여기가 핵심입니다! public 폴더 안으로 저장 위치를 바꿨습니다!
+        fs.writeFileSync('public/news-data.json', JSON.stringify(newsData, null, 2));
+        console.log("✅ public/news-data.json 저장 완료!");
     } catch (error) {
         console.error("❌ 에러 발생:", error);
     }

@@ -941,7 +941,7 @@ async function fetchBigNews() {
 
     try {
         // 로봇이 저장해둔 완성본(news-data.json)을 그냥 읽기만 합니다.
-        const response = await fetch('news-data.json');
+        const response = await fetch('/news-data.json');
         
         // 만약 로봇이 아직 파일을 못 만들었다면 에러로 넘김
         if (!response.ok) throw new Error("파일 아직 없음"); 
