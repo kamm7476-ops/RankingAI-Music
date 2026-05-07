@@ -916,111 +916,114 @@
 </div>
 
 <script>
-// 뉴스 페이지 열기
 function openNewsPage() {
     document.querySelector('.main-layout').style.display = 'none'; 
     document.getElementById('full-news-page').style.display = 'block'; 
     fetchBigNews(); 
 }
 
-// 뉴스 페이지 닫고 차트로 돌아가기
 function closeNewsPage() {
     document.getElementById('full-news-page').style.display = 'none'; 
     document.querySelector('.main-layout').style.display = 'flex'; 
 }
 
-// 🌐 실시간 AI 자동 번역기 (구글 무료 API)
+// 🌐 실시간 AI 자동 번역기
 async function translateText(text, targetLang) {
-    if (targetLang === 'en') return text; // 영어권 유저는 원문 그대로
+    if (targetLang === 'en') return text;
     try {
         const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
         const res = await fetch(url);
         const data = await res.json();
         return data[0].map(x => x[0]).join('');
     } catch (e) {
-        return text; // 너무 많은 요청 시 에러 방지용 (영어 원문 표시)
+        return text; // 번역기 과부하 시 에러 없이 영어 원문으로 출력
+    }
+}
+
+// ⚡ 카드 그리고 번역하는 공통 함수
+async function renderCard(container, link, pubDate, originTitle, originDesc, userLang) {
+    const cardId = 'news-' + Math.random().toString(36).substr(2, 9);
+    const html = `
+        <a href="${link}" target="_blank" class="bento-news-card" id="${cardId}">
+            <div class="bento-header">
+                <span class="bento-tag">🌐 GLOBAL NEWS</span>
+                <span class="bento-date">${pubDate}</span>
+            </div>
+            <h3 class="bento-title" style="color:#666;">AI 번역 중... ⏳</h3>
+            <p class="bento-desc" style="color:#444;">Translating text...</p>
+            <div class="bento-footer">
+                <span>Silicon Valley Curation</span>
+                <span class="bento-read">원문 읽기 ↗</span>
+            </div>
+        </a>
+    `;
+    container.insertAdjacentHTML('beforeend', html);
+
+    const combinedText = originTitle + " ▩ " + originDesc;
+    const tranCombined = await translateText(combinedText, userLang);
+    const parts = tranCombined.split(" ▩ ");
+    
+    const card = document.getElementById(cardId);
+    if(card) {
+        card.querySelector('.bento-title').innerText = parts[0] || originTitle;
+        card.querySelector('.bento-title').style.color = '#fff';
+        card.querySelector('.bento-desc').innerText = (parts[1] || originDesc) + '...';
+        card.querySelector('.bento-desc').style.color = '#aaa';
     }
 }
 
 async function fetchBigNews() {
     const container = document.getElementById('big-news-list');
-    
-    // 🕵️‍♂️ 접속자의 브라우저 언어 자동 감지 (한국어=ko, 일본어=ja 등)
     const userLang = (navigator.language || navigator.userLanguage).substring(0, 2);
     
     container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:50px; color:#fff;">
-        🌍 미국 실리콘밸리 발 최신 AI 음악 뉴스를 수집 중입니다...<br>
-        <small style="color:#f97316;">(접속자 언어[${userLang.toUpperCase()}]로 실시간 AI 번역 중이라 2~3초 정도 소요됩니다 🚀)</small>
+        🌍 실리콘밸리 발 최신 AI 음악 뉴스를 수집 중입니다...<br>
+        <small style="color:#f97316;">(번역에 2~3초 정도 소요될 수 있습니다 🚀)</small>
     </div>`;
 
-    // 🚨 타겟을 한국(KR)에서 전 세계의 중심인 미국(US)으로 완전 변경! (데이터 무제한)
     const query = encodeURIComponent('"AI Music" OR "Generative Audio" OR "Suno AI" OR "Udio" OR "Music Industry AI"');
     const rssUrl = `https://news.google.com/rss/search?q=${query}&hl=en&gl=US&ceid=US:en`;
 
     try {
-        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(rssUrl)}`;
+        // 🛡️ 1차 시도: 30개 (가장 안정적인 allorigins 고속도로)
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`;
         const response = await fetch(proxyUrl);
-        
-        if (!response.ok) throw new Error("서버 차단");
+        if (!response.ok) throw new Error("1차 차단");
         
         const xmlText = await response.text();
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-        const items = Array.from(xmlDoc.querySelectorAll("item")).slice(0, 30); // 30개 꽉꽉 채움
+        const items = Array.from(xmlDoc.querySelectorAll("item")).slice(0, 30);
 
         if (items.length === 0) throw new Error("데이터 없음");
-
         container.innerHTML = '';
 
-        // ⚡ 비동기 번역 로직 (카드를 먼저 그리고 번역이 완료되면 글자를 채워 넣음)
-        items.forEach(async (item) => {
+        items.forEach(item => {
             const link = item.querySelector("link")?.textContent || "#";
-            const pubDate = item.querySelector("pubDate")?.textContent || "";
-            const formattedDate = new Date(pubDate).toLocaleDateString(userLang === 'ko' ? 'ko-KR' : 'en-US');
-            
-            // 영어 원문 추출
+            const pubDate = new Date(item.querySelector("pubDate")?.textContent || "").toLocaleDateString(userLang === 'ko' ? 'ko-KR' : 'en-US');
             const originTitle = item.querySelector("title")?.textContent || "No Title";
-            const descHtml = item.querySelector("description")?.textContent || "";
-            const originDesc = descHtml.replace(/<[^>]*>?/gm, '').substring(0, 100);
-
-            // 1. 빈 카드(스켈레톤) 먼저 그리기
-            const cardId = 'news-' + Math.random().toString(36).substr(2, 9);
-            const html = `
-                <a href="${link}" target="_blank" class="bento-news-card" id="${cardId}">
-                    <div class="bento-header">
-                        <span class="bento-tag">🌐 GLOBAL NEWS</span>
-                        <span class="bento-date">${formattedDate}</span>
-                    </div>
-                    <h3 class="bento-title" style="color:#666;">AI 번역 중... ⏳</h3>
-                    <p class="bento-desc" style="color:#444;">Translating text...</p>
-                    <div class="bento-footer">
-                        <span>Silicon Valley Curation</span>
-                        <span class="bento-read">원문 읽기 ↗</span>
-                    </div>
-                </a>
-            `;
-            container.insertAdjacentHTML('beforeend', html);
-
-            // 2. 백그라운드 번역 실행 (제목과 요약을 한 번에 묶어서 번역해 속도 2배 향상)
-            const combinedText = originTitle + " ▩ " + originDesc;
-            const tranCombined = await translateText(combinedText, userLang);
-            const parts = tranCombined.split(" ▩ ");
+            const originDesc = (item.querySelector("description")?.textContent || "").replace(/<[^>]*>?/gm, '').substring(0, 100);
             
-            const tranTitle = parts[0] || originTitle;
-            const tranDesc = parts[1] || originDesc;
-
-            // 3. 번역 완료되면 화면 업데이트!
-            const card = document.getElementById(cardId);
-            if(card) {
-                card.querySelector('.bento-title').innerText = tranTitle;
-                card.querySelector('.bento-title').style.color = '#fff'; // 글자색 밝게
-                card.querySelector('.bento-desc').innerText = tranDesc + '...';
-                card.querySelector('.bento-desc').style.color = '#aaa';
-            }
+            renderCard(container, link, pubDate, originTitle, originDesc, userLang);
         });
 
     } catch (error) {
-        container.innerHTML = '<div style="color:red; text-align:center; grid-column:1/-1;">글로벌 뉴스를 불러오는 데 실패했습니다. 잠시 후 다시 시도해 주세요.</div>';
+        console.log("1차 실패. 2차 안전망(10개) 발동!");
+        // 🛡️ 2차 시도: 10개 (rss2json 안전망)
+        try {
+            const backupUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+            const backupRes = await fetch(backupUrl);
+            const backupData = await backupRes.json();
+            
+            container.innerHTML = '';
+            
+            backupData.items.forEach(item => {
+                const originDesc = item.content.replace(/<[^>]*>?/gm, '').substring(0, 100);
+                renderCard(container, item.link, item.pubDate.split(' ')[0], item.title, originDesc, userLang);
+            });
+        } catch (backupError) {
+            container.innerHTML = '<div style="color:red; text-align:center; grid-column:1/-1;">잠시 서버 접속자가 많습니다. 1분 뒤에 새로고침 해주세요! 🙏</div>';
+        }
     }
 }
 </script>
