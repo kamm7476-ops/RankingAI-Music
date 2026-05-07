@@ -394,18 +394,88 @@
     #big-news-list a > div { font-size: 11px !important; }
 }
 
-/* 🌟 네이버형 프리미엄 뉴스 그리드 디자인 🌟 */
-#big-news-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important; gap: 25px !important; padding: 20px 0 !important; }
-.news-card-premium { background: #1a1b1e !important; border: 1px solid #2d2e32 !important; border-radius: 16px !important; overflow: hidden !important; text-decoration: none !important; transition: all 0.3s ease !important; display: flex !important; flex-direction: column !important; }
-.news-card-premium:hover { transform: translateY(-8px) !important; border-color: #f97316 !important; box-shadow: 0 10px 30px rgba(249, 115, 22, 0.2) !important; }
-.news-thumb-wrap { width: 100%; height: 180px; background: #000; }
-.news-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; }
-.news-content-wrap { padding: 20px !important; display: flex; flex-direction: column; flex-grow: 1; }
-.news-category { color: #f97316; font-size: 11px; font-weight: 800; margin-bottom: 8px; }
-.news-card-title { color: #fff !important; font-size: 17px !important; font-weight: bold !important; margin-bottom: 12px !important; line-height: 1.4 !important; height: 48px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.news-card-desc { color: #9ca3af !important; font-size: 14px !important; line-height: 1.6 !important; height: 66px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; margin-bottom: 15px !important; }
-.news-card-footer { margin-top: auto; display: flex; justify-content: space-between; font-size: 12px; color: #6b7280; border-top: 1px solid #2d2e32; padding-top: 15px; }
-@media (max-width: 600px) { #big-news-list { grid-template-columns: 1fr !important; } }
+/* 🌟 실리콘밸리형 벤토 UI (Bento Box) 디자인 🌟 */
+#big-news-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important; 
+    gap: 20px !important;
+    padding: 20px 0 !important;
+}
+
+.bento-news-card {
+    background: #121314 !important; /* 배경색을 더 깊은 블랙으로 */
+    border: 1px solid #222 !important;
+    border-radius: 16px !important;
+    padding: 25px !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+}
+
+.bento-news-card:hover {
+    background: #1a1b1c !important;
+    border-color: #f97316 !important;
+    transform: translateY(-5px) !important;
+    box-shadow: 0 10px 20px rgba(249, 115, 22, 0.1) !important;
+}
+
+.bento-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.bento-tag {
+    background: rgba(249, 115, 22, 0.15);
+    color: #f97316;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.bento-date {
+    color: #666;
+    font-size: 12px;
+}
+
+.bento-title {
+    color: #fff !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    margin: 0 0 15px 0 !important;
+    line-height: 1.4 !important;
+}
+
+.bento-desc {
+    color: #aaa !important;
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+    margin: 0 0 20px 0 !important;
+}
+
+.bento-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px dashed #333;
+    padding-top: 15px;
+    font-size: 12px;
+    color: #555;
+}
+
+.bento-read {
+    color: #f97316;
+    font-weight: bold;
+}
+
+/* 모바일 1열 대응 */
+@media (max-width: 600px) {
+    #big-news-list { grid-template-columns: 1fr !important; }
+}
 </style>
 
 </head>
@@ -873,30 +943,20 @@ async function fetchBigNews() {
         container.innerHTML = '';
 
         data.items.slice(0, 12).forEach(item => { 
-            // 1. 이미지 찾기 (없으면 예쁜 기본 AI 이미지 사용)
-            let thumb = item.thumbnail || "";
-            if (!thumb && item.description) {
-                const imgMatch = item.description.match(/<img[^>]+src="([^">]+)"/);
-                thumb = imgMatch ? imgMatch[1] : "";
-            }
-            const finalThumb = thumb || 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=400';
-
-            // 2. 요약문 만들기 (태그 제거 후 80자까지)
-            const description = item.content.replace(/<[^>]*>?/gm, '').substring(0, 80);
+            // 태그 싹 지우고 순수 텍스트 요약본만 90자 추출
+            const description = item.content.replace(/<[^>]*>?/gm, '').substring(0, 90);
 
             const html = `
-                <a href="${item.link}" target="_blank" class="news-card-premium">
-                    <div class="news-thumb-wrap">
-                        <img src="${finalThumb}" alt="thumbnail">
+                <a href="${item.link}" target="_blank" class="bento-news-card">
+                    <div class="bento-header">
+                        <span class="bento-tag">🔥 HOT TREND</span>
+                        <span class="bento-date">${item.pubDate.split(' ')[0]}</span>
                     </div>
-                    <div class="news-content-wrap">
-                        <span class="news-category">LATEST TREND</span>
-                        <h3 class="news-card-title">${item.title}</h3>
-                        <p class="news-card-desc">${description}...</p>
-                        <div class="news-card-footer">
-                            <span>${item.pubDate.split(' ')[0]}</span>
-                            <span style="color:#f97316;">Read More →</span>
-                        </div>
+                    <h3 class="bento-title">${item.title}</h3>
+                    <p class="bento-desc">${description}...</p>
+                    <div class="bento-footer">
+                        <span>Google News Curation</span>
+                        <span class="bento-read">원문 읽기 ↗</span>
                     </div>
                 </a>
             `;
