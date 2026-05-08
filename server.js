@@ -794,6 +794,9 @@ app.get('/api/radio-tracks', async (req, res) => {
 // =========================================
 app.get('/board', async (req, res) => {
     try {
+    // 🚨 [여기 추가!] 브라우저에게 "이 페이지는 절대 기억(캐시)하지 말고 무조건 최신 DB 다시 읽어와!" 라고 명령
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+
         const posts = await Post.find().sort({ createdAt: -1 });
         const currentUser = req.session ? req.session.user : null;
         res.render('board', { user: currentUser, posts: posts });
