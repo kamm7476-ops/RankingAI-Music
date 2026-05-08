@@ -821,7 +821,7 @@ const uploadedImageUrl = req.file ? `${process.env.R2_PUBLIC_URL}/${req.file.key
             imageUrl: uploadedImageUrl // 👈 DB에 사진 주소 저장!
         }).save();
         
-        res.redirect('/board');
+        res.redirect('/board?t=' + Date.now());  // 👈 현재 시간을 몰래 붙여서 브라우저를 속입니다!
     } catch (err) { 
         console.log("게시글 작성 에러:", err); 
         res.status(500).send("<script>alert('글쓰기 중 에러가 발생했습니다. 첨부파일 크기를 확인해주세요.'); history.back();</script>");
@@ -887,7 +887,7 @@ app.post('/add-board-comment/:id', async (req, res) => {
             post.comments.push({ author: req.session.user.name, text: req.body.commentText });
             await post.save();
         }
-        res.redirect('/board'); 
+        res.redirect('/board?t=' + Date.now()); // 👈 똑같이 바꿔줍니다!
     } catch (err) {
         console.log("댓글 등록 에러:", err);
         res.redirect('/board'); 
