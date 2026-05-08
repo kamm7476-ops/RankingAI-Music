@@ -329,14 +329,12 @@
 <script>
     let quill = null;
 
-    document.addEventListener("DOMContentLoaded", function() {
-        const box = document.getElementById('writeBox');
+    // 🚀 1. 에디터를 준비시키는 마법의 함수 (원할 때만 부를 수 있게 바꿈!)
+    function initQuill() {
+        if (quill) return; // 이미 에디터가 켜져있으면 두 번 안 켭니다.
+        
         const editorDiv = document.getElementById('editor-container');
-
-        if (box && editorDiv) {
-            box.style.visibility = 'hidden';
-            box.style.display = 'block';
-
+        if (editorDiv && typeof Quill !== 'undefined') {
             quill = new Quill('#editor-container', {
                 theme: 'snow',
                 placeholder: '<%= __('ph_editor_content') || "여기를 클릭해서 내용을 입력하세요. (사진도 드래그해서 넣을 수 있습니다!)" %>',
@@ -354,9 +352,7 @@
                 }
             });
 
-            box.style.display = 'none';
-            box.style.visibility = 'visible';
-
+            // 글 전송 시 에디터 내용을 숨겨진 상자에 담기
             const writeForm = document.querySelector('form[action="/add-post"]');
             if(writeForm) {
                 writeForm.addEventListener('submit', function(e) {
@@ -364,6 +360,7 @@
                 });
             }
 
+            // 사진 드래그 앤 드롭 기능
             quill.root.addEventListener('drop', (e) => {
                 e.preventDefault();
                 if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
@@ -377,13 +374,17 @@
                 }
             });
         }
-    });
+    }
 
     /// 🚨 글쓰기 버튼을 누를 때 작동하는 함수
     function toggleWriteBox() {
         const box = document.getElementById('writeBox');
         if (box.style.display === 'none' || box.style.display === '') {
-            box.style.display = 'block';
+            
+            box.style.display = 'block'; // 💡 1단계: 하얀 박스를 화면에 먼저 짠! 띄웁니다.
+            
+            initQuill(); // 💡 2단계: 박스가 눈에 보이자마자 에디터를 확실하게 그립니다!
+
             window.scrollBy({ top: 100, behavior: 'smooth' });
             
             // 🚀 모바일 키보드 강제 소환 마법 🚀
@@ -391,7 +392,8 @@
                 if (quill) {
                     quill.focus(); // 에디터 내부 클릭!
                 }
-                document.querySelector('.ql-editor').setAttribute('tabindex', '0');
+                const qlEditor = document.querySelector('.ql-editor');
+                if (qlEditor) qlEditor.setAttribute('tabindex', '0');
             }, 100);
 
         } else {
