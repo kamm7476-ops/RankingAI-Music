@@ -383,18 +383,18 @@
             
             box.style.display = 'block'; // 💡 1단계: 하얀 박스를 화면에 먼저 짠! 띄웁니다.
             
-            initQuill(); // 💡 2단계: 박스가 눈에 보이자마자 에디터를 확실하게 그립니다!
-
-            window.scrollBy({ top: 100, behavior: 'smooth' });
-            
-            // 🚀 모바일 키보드 강제 소환 마법 🚀
+            // 🚨 핵심 처방전: 박스가 화면에 완전히 나타나도록 딱 0.1초(100ms)만 숨을 고르고 에디터를 깨웁니다!
             setTimeout(function() {
+                initQuill(); // 💡 2단계: 0.1초 뒤에 에디터를 확실하게 그립니다!
+                window.scrollBy({ top: 100, behavior: 'smooth' });
+                
+                // 모바일 키보드 소환
                 if (quill) {
-                    quill.focus(); // 에디터 내부 클릭!
+                    quill.focus();
                 }
                 const qlEditor = document.querySelector('.ql-editor');
                 if (qlEditor) qlEditor.setAttribute('tabindex', '0');
-            }, 100);
+            }, 100); // 👈 0.1초 기다림
 
         } else {
             box.style.display = 'none';
