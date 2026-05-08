@@ -2009,7 +2009,7 @@ window.addEventListener('popstate', async () => {
     <!-- 📡 실시간 안테나 (Socket.io) 장착! -->
     <script src="/socket.io/socket.io.js"></script>
     <script>
-    const socket = io();
+    var socket = io();
     const myId = "<%= user.id %>"; // 현재 접속한 내 아이디
 
     // 서버가 "누구 메시지 왔어!" 하고 방송하면 듣는 곳
@@ -2202,7 +2202,7 @@ window.addEventListener('popstate', async () => {
     <!-- 📡 3. 실시간 안테나 (Socket.io) -->
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io();
+        var socket = io();
         const myId = "<%= user.id %>"; 
 
         socket.on('globalChatAlert', function(data) {

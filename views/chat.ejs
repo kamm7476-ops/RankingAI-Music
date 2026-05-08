@@ -137,7 +137,7 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io(); 
+        var socket = io(); 
         const roomId = '<%= room._id %>';
         const myId = '<%= user.id %>';
         const myName = '<%= user.name %>';
