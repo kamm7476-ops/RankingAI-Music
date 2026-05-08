@@ -329,12 +329,16 @@
 <script>
     let quill = null;
 
-    // 🚀 1. 에디터를 준비시키는 마법의 함수 (원할 때만 부를 수 있게 바꿈!)
-    function initQuill() {
-        if (quill) return; // 이미 에디터가 켜져있으면 두 번 안 켭니다.
-        
+    document.addEventListener("DOMContentLoaded", function() {
+        const box = document.getElementById('writeBox');
         const editorDiv = document.getElementById('editor-container');
-        if (editorDiv && typeof Quill !== 'undefined') {
+
+        if (box && editorDiv && typeof Quill !== 'undefined') {
+            // 👻 1. 투명 망토 작전: 박스를 찰나의 순간 열어두되, 투명하게 숨깁니다.
+            box.style.visibility = 'hidden';
+            box.style.display = 'block';
+
+            // 🎨 2. 박스가 열려있으니 에디터가 안심하고 예쁜 툴바를 그립니다!
             quill = new Quill('#editor-container', {
                 theme: 'snow',
                 placeholder: '<%= __('ph_editor_content') || "여기를 클릭해서 내용을 입력하세요. (사진도 드래그해서 넣을 수 있습니다!)" %>',
@@ -352,15 +356,13 @@
                 }
             });
 
-            // 글 전송 시 에디터 내용을 숨겨진 상자에 담기
+            // 3. 에디터 내용 저장 및 드래그 앤 드롭 기능 세팅
             const writeForm = document.querySelector('form[action="/add-post"]');
             if(writeForm) {
                 writeForm.addEventListener('submit', function(e) {
                     document.getElementById('hidden-content').value = quill.root.innerHTML;
                 });
             }
-
-            // 사진 드래그 앤 드롭 기능
             quill.root.addEventListener('drop', (e) => {
                 e.preventDefault();
                 if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
@@ -373,29 +375,26 @@
                     compressAndInsertImage(e.clipboardData.files[0]);
                 }
             });
+
+            // 🚪 4. 에디터를 다 그렸으니 다시 박스를 닫고 투명 망토를 벗습니다.
+            box.style.display = 'none';
+            box.style.visibility = 'visible';
         }
-    }
+    });
 
     /// 🚨 글쓰기 버튼을 누를 때 작동하는 함수
     function toggleWriteBox() {
         const box = document.getElementById('writeBox');
         if (box.style.display === 'none' || box.style.display === '') {
+            box.style.display = 'block'; // 버튼 누르면 짠! 하고 나타남
+            window.scrollBy({ top: 100, behavior: 'smooth' });
             
-            box.style.display = 'block'; // 💡 1단계: 하얀 박스를 화면에 먼저 짠! 띄웁니다.
-            
-            // 🚨 핵심 처방전: 박스가 화면에 완전히 나타나도록 딱 0.1초(100ms)만 숨을 고르고 에디터를 깨웁니다!
+            // 모바일 키보드 소환
             setTimeout(function() {
-                initQuill(); // 💡 2단계: 0.1초 뒤에 에디터를 확실하게 그립니다!
-                window.scrollBy({ top: 100, behavior: 'smooth' });
-                
-                // 모바일 키보드 소환
-                if (quill) {
-                    quill.focus();
-                }
+                if (quill) quill.focus();
                 const qlEditor = document.querySelector('.ql-editor');
                 if (qlEditor) qlEditor.setAttribute('tabindex', '0');
-            }, 100); // 👈 0.1초 기다림
-
+            }, 100);
         } else {
             box.style.display = 'none';
         }
