@@ -328,74 +328,72 @@
     
 <script>
     let quill = null;
+    let isQuillInitialized = false; // 🔒 에디터를 두 번 그리지 않게 막아주는 자물쇠
 
-    document.addEventListener("DOMContentLoaded", function() {
-        const box = document.getElementById('writeBox');
-        const editorDiv = document.getElementById('editor-container');
-
-        if (box && editorDiv && typeof Quill !== 'undefined') {
-            // 👻 1. 투명 망토 작전: 박스를 찰나의 순간 열어두되, 투명하게 숨깁니다.
-            box.style.visibility = 'hidden';
-            box.style.display = 'block';
-
-            // 🎨 2. 박스가 열려있으니 에디터가 안심하고 예쁜 툴바를 그립니다!
-            quill = new Quill('#editor-container', {
-                theme: 'snow',
-                placeholder: '<%= __('ph_editor_content') || "여기를 클릭해서 내용을 입력하세요. (사진도 드래그해서 넣을 수 있습니다!)" %>',
-                modules: {
-                    toolbar: {
-                        container: [
-                            [{ 'size': ['small', false, 'large', 'huge'] }],
-                            ['bold', 'italic', 'underline', 'strike'],
-                            [{ 'color': [] }, { 'background': [] }],
-                            ['image', 'video', 'link'],
-                            [{ 'list': 'ordered'}, { 'list': 'bullet' }]
-                        ],
-                        handlers: { image: imageHandler }
-                    }
-                }
-            });
-
-            // 3. 에디터 내용 저장 및 드래그 앤 드롭 기능 세팅
-            const writeForm = document.querySelector('form[action="/add-post"]');
-            if(writeForm) {
-                writeForm.addEventListener('submit', function(e) {
-                    document.getElementById('hidden-content').value = quill.root.innerHTML;
-                });
-            }
-            quill.root.addEventListener('drop', (e) => {
-                e.preventDefault();
-                if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
-                    compressAndInsertImage(e.dataTransfer.files[0]);
-                }
-            });
-            quill.root.addEventListener('paste', (e) => {
-                if (e.clipboardData && e.clipboardData.files && e.clipboardData.files.length) {
-                    e.preventDefault();
-                    compressAndInsertImage(e.clipboardData.files[0]);
-                }
-            });
-
-            // 🚪 4. 에디터를 다 그렸으니 다시 박스를 닫고 투명 망토를 벗습니다.
-            box.style.display = 'none';
-            box.style.visibility = 'visible';
-        }
-    });
-
-    /// 🚨 글쓰기 버튼을 누를 때 작동하는 함수
+    /// 🚨 글쓰기 버튼을 누를 때 작동하는 함수 (여기에 모든 걸 걸었습니다!)
     function toggleWriteBox() {
         const box = document.getElementById('writeBox');
+        
         if (box.style.display === 'none' || box.style.display === '') {
-            box.style.display = 'block'; // 버튼 누르면 짠! 하고 나타남
-            window.scrollBy({ top: 100, behavior: 'smooth' });
             
-            // 모바일 키보드 소환
+            // 💡 1단계: 숨기거나 꼼수 쓰지 않고, 일단 무조건 하얀 박스부터 화면에 100% 엽니다.
+            box.style.display = 'block'; 
+            
+            // 💡 2단계: 박스가 완전히 열린 상태에서 에디터를 그립니다! (최초 1회만)
+            if (!isQuillInitialized && typeof Quill !== 'undefined') {
+                
+                quill = new Quill('#editor-container', {
+                    theme: 'snow',
+                    placeholder: '<%= __('ph_editor_content') || "여기를 클릭해서 내용을 입력하세요. (사진도 드래그해서 넣을 수 있습니다!)" %>',
+                    modules: {
+                        toolbar: {
+                            container: [
+                                [{ 'size': ['small', false, 'large', 'huge'] }],
+                                ['bold', 'italic', 'underline', 'strike'],
+                                [{ 'color': [] }, { 'background': [] }],
+                                ['image', 'video', 'link'],
+                                [{ 'list': 'ordered'}, { 'list': 'bullet' }]
+                            ],
+                            handlers: { image: imageHandler }
+                        }
+                    }
+                });
+
+                // 글 전송 시 에디터 내용을 숨겨진 상자에 담기
+                const writeForm = document.querySelector('form[action="/add-post"]');
+                if(writeForm) {
+                    writeForm.addEventListener('submit', function(e) {
+                        document.getElementById('hidden-content').value = quill.root.innerHTML;
+                    });
+                }
+
+                // 사진 드래그 앤 드롭 기능
+                quill.root.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+                        compressAndInsertImage(e.dataTransfer.files[0]);
+                    }
+                });
+                quill.root.addEventListener('paste', (e) => {
+                    if (e.clipboardData && e.clipboardData.files && e.clipboardData.files.length) {
+                        e.preventDefault();
+                        compressAndInsertImage(e.clipboardData.files[0]);
+                    }
+                });
+
+                isQuillInitialized = true; // 🔒 자물쇠 찰칵! (다음부턴 다시 안 그립니다)
+            }
+
+            // 💡 3단계: 화면 살짝 내리고 키보드 소환
+            window.scrollBy({ top: 100, behavior: 'smooth' });
             setTimeout(function() {
                 if (quill) quill.focus();
                 const qlEditor = document.querySelector('.ql-editor');
                 if (qlEditor) qlEditor.setAttribute('tabindex', '0');
             }, 100);
+
         } else {
+            // 닫을 때는 그냥 박스만 숨깁니다.
             box.style.display = 'none';
         }
     }
