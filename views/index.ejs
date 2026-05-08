@@ -2010,7 +2010,7 @@ window.addEventListener('popstate', async () => {
     <script src="/socket.io/socket.io.js"></script>
     <script>
     var socket = io();
-    const myId = "<%= user.id %>"; // 현재 접속한 내 아이디
+    var myId = "<%= user.id %>"; // 현재 접속한 내 아이디
 
     // 서버가 "누구 메시지 왔어!" 하고 방송하면 듣는 곳
     socket.on('globalChatAlert', function(data) {
@@ -2203,7 +2203,7 @@ window.addEventListener('popstate', async () => {
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var socket = io();
-        const myId = "<%= user.id %>"; 
+        var myId = "<%= user.id %>"; 
 
         socket.on('globalChatAlert', function(data) {
             if (data.receiverId === myId) {
