@@ -179,41 +179,32 @@
             <% } %>
         </div>
 
-        <% if (user) { %>
-        <div class="write-box" id="writeBox">
-            <form action="/add-post" method="POST" enctype="multipart/form-data">
-                
-                <input type="text" name="title" class="write-input" placeholder="<%= __('ph_post_title') || '제목을 시원하게 입력하세요!' %>" required
-                       style="width: 100%; background: #1c1d20; border: 1px solid #444; color: #fff; padding: 18px 20px; border-radius: 10px; font-size: 18px; font-weight: bold; margin-bottom: 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); outline: none; transition: border 0.3s;">
-                <input type="hidden" name="content" id="hidden-content">
+       <% if (user) { %>
+<div class="write-box" id="writeBox" style="display:none;">
+    <form action="/add-post" method="POST" enctype="multipart/form-data">
+        <input type="text" name="title" class="write-input" placeholder="<%= __('ph_post_title') || '제목을 입력하세요' %>" required
+               style="width: 100%; background: #1c1d20; border: 1px solid #444; color: #fff; padding: 18px 20px; border-radius: 10px; font-size: 18px; margin-bottom: 20px; outline: none;">
+        
+        <input type="hidden" name="content" id="hidden-content">
 
-                <div style="background-color: #1c1d20; border-radius: 10px; border: 1px solid #444; overflow: hidden; margin-bottom: 25px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
-                    <style>
-                        /* 다크 테마 에디터 맞춤 CSS */
-                        .ql-toolbar.ql-snow { border: none !important; border-bottom: 1px solid #444 !important; background: #222; padding: 12px; }
-                        .ql-snow .ql-stroke { stroke: #ccc !important; }
-                        .ql-snow .ql-fill, .ql-snow .ql-stroke.ql-fill { fill: #ccc !important; }
-                        .ql-snow .ql-picker { color: #ccc !important; }
-                        
-                        /* 에디터 본문 글씨 설정 */
-                        .ql-container.ql-snow { border: none !important; min-height: 400px; font-size: 16px; color: #fff; font-family: 'Pretendard', sans-serif; }
-                        .ql-editor { min-height: 400px; padding: 25px; line-height: 1.8; }
-                        .ql-editor.ql-blank::before { color: #888; font-style: normal; }
-                    </style>
-                    <div id="editor-container" style="min-height: 400px; background-color: transparent;"></div>
-                </div>
-                
-                <div style="margin-bottom: 25px; background: #222; padding: 15px; border-radius: 8px; border: 1px dashed #ff5722;">
-                    <label style="color: #ff5722; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: block;">📷 <%= __('upload_cover') || '대표 커버 이미지 첨부 (선택사항)' %></label>
-                    <input type="file" name="image" accept="image/*" style="color: #aaa; font-size: 14px; width: 100%; cursor: pointer;">
-                </div>
-
-                <button type="submit" class="btn-submit" style="width: 100%; background: #ff5722; color: #000; border: none; padding: 16px; border-radius: 10px; font-weight: bold; font-size: 18px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(255, 87, 34, 0.3);">
-                    ✏️ 커뮤니티에 글 등록하기
-                </button>
-            </form>
+        <div id="editor-wrapper" style="background-color: #1c1d20; border-radius: 10px; border: 1px solid #444; overflow: hidden; margin-bottom: 25px;">
+            <style>
+                .ql-toolbar.ql-snow { border: none !important; border-bottom: 1px solid #444 !important; background: #222; padding: 12px; }
+                .ql-snow .ql-stroke { stroke: #ccc !important; }
+                .ql-snow .ql-fill { fill: #ccc !important; }
+                .ql-snow .ql-picker { color: #ccc !important; }
+                .ql-container.ql-snow { border: none !important; min-height: 400px; font-size: 16px; color: #fff; }
+                .ql-editor { min-height: 400px; padding: 25px; line-height: 1.8; }
+            </style>
+            <div id="editor-container" style="min-height: 400px;"></div>
         </div>
-        <% } %>
+        
+        <button type="submit" class="btn-submit" style="width: 100%; background: #ff5722; color: #000; border: none; padding: 16px; border-radius: 10px; font-weight: bold; font-size: 18px; cursor: pointer;">
+            ✏️ 커뮤니티에 글 등록하기
+        </button>
+    </form>
+</div>
+<% } %>
 
         <div class="post-list">
             <table class="board-table">
@@ -331,29 +322,30 @@
 
 function toggleWriteBox() {
     const box = document.getElementById('writeBox');
-    const wrapper = document.getElementById('editor-wrapper'); // 상자를 감싸는 부모 태그
+    const wrapper = document.getElementById('editor-wrapper');
     
+    // 열려있으면 닫기
     if (box.style.display === 'block') {
         box.style.display = 'none';
         return;
     }
     
+    // 1. 박스 먼저 노출
     box.style.display = 'block'; 
 
-    // 1. 🧨 기존 에디터 싹 다 날리고 새로 만들기
-    // (기존 찌꺼기가 남아서 안 뜨는 문제를 물리적으로 해결합니다)
-    wrapper.innerHTML = '<div id="editor-container" style="height: 300px;"></div>';
-
+    // 2. 0.2초 뒤에 에디터 강제 재건축
     setTimeout(function() {
         if (typeof Quill === 'undefined') {
-            alert("라이브러리 로딩 중... 잠시 후 다시 눌러주세요!");
+            alert("라이브러리 로딩 중입니다. 잠시 후 다시 눌러주세요!");
             return;
         }
 
-        // 2. 🏗️ 새 상자에 에디터 입히기
+        // 기존 찌꺼기 싹 비우고 도화지 새로 깔기
+        wrapper.innerHTML = '<div id="editor-container" style="min-height: 400px;"></div>';
+
         quill = new Quill('#editor-container', {
             theme: 'snow',
-            placeholder: '여기에 내용을 입력하세요...',
+            placeholder: '내용을 입력하세요...',
             modules: {
                 toolbar: [
                     [{ 'size': ['small', false, 'large', 'huge'] }],
@@ -365,7 +357,6 @@ function toggleWriteBox() {
             }
         });
 
-        // 3. 폼 전송 설정
         const writeForm = document.querySelector('form[action="/add-post"]');
         if (writeForm) {
             writeForm.onsubmit = function() {
@@ -376,26 +367,6 @@ function toggleWriteBox() {
         quill.focus();
         window.scrollBy({ top: 150, behavior: 'smooth' });
     }, 200); 
-}
-
-        // 이미지 드래그/붙여넣기 연결
-        quill.root.addEventListener('drop', (e) => {
-            e.preventDefault();
-            if (e.dataTransfer?.files?.length) compressAndInsertImage(e.dataTransfer.files[0]);
-        });
-        quill.root.addEventListener('paste', (e) => {
-            if (e.clipboardData?.files?.length) {
-                e.preventDefault();
-                compressAndInsertImage(e.clipboardData.files[0]);
-            }
-        });
-
-        // 5. ✨ 강제 포커스 (키보드 올리기)
-        quill.focus();
-        console.log("LOG: 모든 작업 완료! 툴바가 보여야 합니다.");
-        
-        window.scrollBy({ top: 150, behavior: 'smooth' });
-    }, 300); // 0.3초 여유있게 기다림
 }
 
     // 🚀 이미지 자동 압축 엔진
