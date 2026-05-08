@@ -182,7 +182,8 @@
        <% if (user) { %>
 <div class="write-box" id="writeBox" style="display:none;">
     <form action="/add-post" method="POST" enctype="multipart/form-data">
-        <input type="text" name="title" class="write-input" placeholder="<%= __('ph_post_title') || '제목을 입력하세요' %>" required
+        
+        <input type="text" name="title" class="write-input" placeholder="제목을 입력하세요" required
                style="width: 100%; background: #1c1d20; border: 1px solid #444; color: #fff; padding: 18px 20px; border-radius: 10px; font-size: 18px; margin-bottom: 20px; outline: none;">
         
         <input type="hidden" name="content" id="hidden-content">
@@ -199,6 +200,11 @@
             <div id="editor-container" style="min-height: 400px;"></div>
         </div>
         
+        <div style="margin-bottom: 25px; background: #222; padding: 15px; border-radius: 8px; border: 1px dashed #ff5722;">
+            <label style="color: #ff5722; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: block;">📷 커버 이미지 첨부</label>
+            <input type="file" name="image" accept="image/*" style="color: #aaa; font-size: 14px; width: 100%;">
+        </div>
+
         <button type="submit" class="btn-submit" style="width: 100%; background: #ff5722; color: #000; border: none; padding: 16px; border-radius: 10px; font-weight: bold; font-size: 18px; cursor: pointer;">
             ✏️ 커뮤니티에 글 등록하기
         </button>
@@ -322,26 +328,27 @@
 
 function toggleWriteBox() {
     const box = document.getElementById('writeBox');
-    const wrapper = document.getElementById('editor-wrapper');
+    const wrapper = document.getElementById('editor-wrapper'); // 👈 아까 위에서 만든 상자를 찾습니다.
     
-    // 열려있으면 닫기
     if (box.style.display === 'block') {
         box.style.display = 'none';
         return;
     }
     
-    // 1. 박스 먼저 노출
+    // 1. 일단 박스를 눈에 보이게 엽니다.
     box.style.display = 'block'; 
 
-    // 2. 0.2초 뒤에 에디터 강제 재건축
+    // 2. 0.2초만 기다렸다가 상자를 새로 짓고 에디터를 넣습니다.
     setTimeout(function() {
         if (typeof Quill === 'undefined') {
             alert("라이브러리 로딩 중입니다. 잠시 후 다시 눌러주세요!");
             return;
         }
 
-        // 기존 찌꺼기 싹 비우고 도화지 새로 깔기
-        wrapper.innerHTML = '<div id="editor-container" style="min-height: 400px;"></div>';
+        // 🧨 기존 찌꺼기 싹 비우고 도화지 새로 깔기
+        if (wrapper) {
+            wrapper.innerHTML = '<div id="editor-container" style="min-height: 400px;"></div>';
+        }
 
         quill = new Quill('#editor-container', {
             theme: 'snow',
