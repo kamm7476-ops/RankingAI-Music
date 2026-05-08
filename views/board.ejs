@@ -329,47 +329,31 @@
 <script>
   let quill = null;
 
-/// 🚨 [최후의 수단] 에디터 강제 재건축 함수
 function toggleWriteBox() {
     const box = document.getElementById('writeBox');
-    const containerName = '#editor-container';
+    const wrapper = document.getElementById('editor-wrapper'); // 상자를 감싸는 부모 태그
     
-    // 1. 박스 열기 (이미 열려있으면 닫기)
     if (box.style.display === 'block') {
         box.style.display = 'none';
         return;
     }
     
     box.style.display = 'block'; 
-    console.log("LOG: 박스 열림");
 
-    // 2. 🧨 [지옥에서 온 청소부] 기존 에디터 흔적을 완전히 파괴합니다.
-    const oldToolbar = box.querySelector('.ql-toolbar');
-    if (oldToolbar) oldToolbar.remove();
-    
-    const editorWrapper = document.getElementById('editor-wrapper'); // 만약 감싸는 태그가 있다면
-    const editorDiv = document.querySelector(containerName);
-    
-    // 에디터 박스 자체를 새로 만들어버립니다 (찌꺼기 방지)
-    editorDiv.innerHTML = "";
-    editorDiv.className = ""; 
-    console.log("LOG: 에디터 박스 초기화 완료");
+    // 1. 🧨 기존 에디터 싹 다 날리고 새로 만들기
+    // (기존 찌꺼기가 남아서 안 뜨는 문제를 물리적으로 해결합니다)
+    wrapper.innerHTML = '<div id="editor-container" style="height: 300px;"></div>';
 
-    // 3. ⏳ [강제 대기] 브라우저가 숨을 고를 시간 0.3초를 강제로 줍니다.
     setTimeout(function() {
-        console.log("LOG: 에디터 생성 시작");
-        
-        // Quill 라이브러리가 로드되었는지 확인
         if (typeof Quill === 'undefined') {
-            console.error("ERROR: Quill 라이브러리를 찾을 수 없습니다!");
-            alert("에디터 로딩 중입니다. 잠시 후 다시 눌러주세요.");
+            alert("라이브러리 로딩 중... 잠시 후 다시 눌러주세요!");
             return;
         }
 
-        // 🏗️ 4. [완전 새 건물 건설] 툴바를 강제로 다시 그립니다.
-        quill = new Quill(containerName, {
+        // 2. 🏗️ 새 상자에 에디터 입히기
+        quill = new Quill('#editor-container', {
             theme: 'snow',
-            placeholder: '내용을 입력하세요...',
+            placeholder: '여기에 내용을 입력하세요...',
             modules: {
                 toolbar: [
                     [{ 'size': ['small', false, 'large', 'huge'] }],
@@ -381,13 +365,18 @@ function toggleWriteBox() {
             }
         });
 
-        // 사진 핸들러 및 폼 전송 설정
+        // 3. 폼 전송 설정
         const writeForm = document.querySelector('form[action="/add-post"]');
         if (writeForm) {
             writeForm.onsubmit = function() {
                 document.getElementById('hidden-content').value = quill.root.innerHTML;
             };
         }
+
+        quill.focus();
+        window.scrollBy({ top: 150, behavior: 'smooth' });
+    }, 200); 
+}
 
         // 이미지 드래그/붙여넣기 연결
         quill.root.addEventListener('drop', (e) => {
