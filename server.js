@@ -949,6 +949,57 @@ app.post('/like-board-comment/:postId/:commentId', async (req, res) => {
     } catch (err) { res.status(500).json({ success: false }); }
 });
 
+
+// ==============================================================
+// 🌟 잃어버렸던 댓글 수정 및 삭제 기능 복구!
+// ==============================================================
+
+// ✏️ 댓글 수정 (AJAX)
+app.post('/edit-board-comment/:postId/:commentId', async (req, res) => {
+    if (!req.session.user) return res.json({ success: false, message: "로그인이 필요합니다." });
+    try {
+        const post = await Post.findById(req.params.postId);
+        const comment = post.comments.id(req.params.commentId);
+        
+        if (req.session.user.name === comment.author || req.session.user.role === 'admin') {
+            comment.text = req.body.newText; // 내용 교체
+            await post.save();
+            return res.json({ success: true });
+        }
+        res.json({ success: false, message: "수정 권한이 없습니다." });
+    } catch (err) { 
+        console.error("댓글 수정 에러:", err);
+        res.status(500).json({ success: false }); 
+    }
+});
+
+// 🗑️ 댓글 삭제 (AJAX) - 최신 안전 버전 🌟
+app.post('/delete-board-comment/:postId/:commentId', async (req, res) => {
+    if (!req.session || !req.session.user) {
+        return res.json({ success: false, message: "로그인이 필요합니다." });
+    }
+    try {
+        const post = await Post.findById(req.params.postId);
+        if (!post) return res.json({ success: false, message: "게시글을 찾을 수 없습니다." });
+
+        const comment = post.comments.id(req.params.commentId);
+        if (!comment) return res.json({ success: false, message: "이미 삭제되었거나 없는 댓글입니다." });
+        
+        // 권한 확인 (작성자 본인이거나 관리자인지)
+        if (req.session.user.name === comment.author || req.session.user.role === 'admin') {
+            // 구형 remove() 대신 최신 버전에서 고장 나지 않는 pull() 사용!
+            post.comments.pull({ _id: req.params.commentId }); 
+            await post.save();
+            return res.json({ success: true });
+        }
+        
+        res.json({ success: false, message: "삭제 권한이 없습니다." });
+    } catch (err) { 
+        console.error("댓글 삭제 서버 에러:", err);
+        res.status(500).json({ success: false, message: "서버 내부 에러가 발생했습니다." }); 
+    }
+});
+
 // ↪️ 답글(대댓글) 등록 (AJAX)
 app.post('/add-board-reply/:postId/:commentId', async (req, res) => {
     if (!req.session.user) return res.json({ success: false, message: "로그인이 필요합니다." });
