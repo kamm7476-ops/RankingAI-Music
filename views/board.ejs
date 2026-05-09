@@ -339,30 +339,54 @@
                             <% if (post.comments && post.comments.length > 0) { %>
                                 <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
                                     <% post.comments.forEach(comment => { %>
-                                        <div style="border-bottom: 1px dashed #333; padding-bottom: 10px;">
-                                            <div style="font-size: 13px; margin-bottom: 5px;">
-                                                <span style="color: #ff5722; font-weight: bold;">@<%= comment.author %></span>
-                                                <span style="color: #666; margin-left: 10px;"><%= new Date(comment.createdAt).toLocaleDateString() %></span>
-                                            </div>
-                                            <div style="color: #ccc; font-size: 14px; line-height: 1.5;"><%= comment.text %></div>
-                                        </div>
-                                    <% }) %>
-                                </div>
-                            <% } else { %>
-                                <p style="color: #555; font-size: 13px;">등록된 댓글이 없습니다. 첫 댓글을 남겨보세요!</p>
-                            <% } %>
+    <div style="border-bottom: 1px dashed #333; padding-bottom: 10px;">
+        
+        <!-- 1. 메인 댓글 작성자 및 🌟수정/삭제 버튼🌟 -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px;">
+            <div>
+                <span style="color: #ff5722; font-weight: bold;">@<%= comment.author %></span>
+                <span style="color: #666; margin-left: 10px; font-size: 13px;"><%= new Date(comment.createdAt).toLocaleDateString() %></span>
+            </div>
+            
+            <!-- 본인 또는 관리자만 보이는 버튼 -->
+            <% if (user && (user.name === comment.author || user.role === 'admin')) { %>
+                <div style="display: flex; gap: 8px;">
+                    <button onclick="editComment('<%= post._id %>', '<%= comment._id %>', '<%= comment.text %>')" style="background: none; border: none; color: #00e5ff; font-size: 12px; cursor: pointer; padding: 0;">수정</button>
+                    <button onclick="deleteComment('<%= post._id %>', '<%= comment._id %>')" style="background: none; border: none; color: #ff4a4a; font-size: 12px; cursor: pointer; padding: 0;">삭제</button>
+                </div>
+            <% } %>
+        </div>
+        
+        <!-- 2. 댓글 본문 내용 -->
+        <div id="comment-text-<%= comment._id %>" style="color: #ccc; font-size: 14px; line-height: 1.5; margin-bottom: 10px;"><%= comment.text %></div>
+        
+        <!-- 3. 🌟답글 달기 버튼 및 숨겨진 입력창🌟 -->
+        <% if (user) { %>
+            <button onclick="document.getElementById('reply-form-<%= comment._id %>').style.display = 'flex';" style="background: none; border: none; color: #aaa; font-size: 12px; cursor: pointer; padding: 0; margin-bottom: 10px;">↳ 답글 달기</button>
+            
+            <form id="reply-form-<%= comment._id %>" onsubmit="submitReply(event, '<%= post._id %>', '<%= comment._id %>')" style="display: none; gap: 10px; margin-bottom: 15px; margin-left: 20px;">
+                <input type="text" id="reply-input-<%= comment._id %>" placeholder="답글을 입력하세요..." required style="flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid #444; background: #1a1a1a; color: #fff; font-size: 13px; outline: none;">
+                <button type="submit" style="background: #444; color: #fff; border: none; padding: 0 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;">등록</button>
+            </form>
+        <% } %>
 
-                            <% if (user) { %>
-                                <!-- 🌟 새로고침 없는 댓글 입력 폼 🌟 -->
-                                <form onsubmit="submitComment(event, '<%= post._id %>')" style="display: flex; gap: 10px; margin-top: 15px;">
-                                    <input type="text" id="comment-input-<%= post._id %>" placeholder="댓글을 입력하세요..." required style="flex: 1; padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff; font-family: inherit; outline: none;">
-                                    <button type="submit" style="background: #ff5722; color: #000; border: none; padding: 0 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">등록</button>
-                                </form>
-                            <% } else { %>
-                                <div style="padding: 12px; background: #222; text-align: center; border-radius: 6px; font-size: 13px; color: #aaa; border: 1px solid #333;">
-                                    댓글을 작성하려면 <a href="/login" style="color: #ff5722; text-decoration: underline;">로그인</a>이 필요합니다.
-                                </div>
-                            <% } %>
+        <!-- 4. 🌟대댓글(답글) 리스트 출력 영역🌟 -->
+        <% if (comment.replies && comment.replies.length > 0) { %>
+            <div style="margin-left: 20px; padding-left: 10px; border-left: 2px solid #333; display: flex; flex-direction: column; gap: 10px;">
+                <% comment.replies.forEach(reply => { %>
+                    <div>
+                        <div style="font-size: 12px; margin-bottom: 3px;">
+                            <span style="color: #ffb300; font-weight: bold;">@<%= reply.author %></span>
+                            <span style="color: #666; margin-left: 8px;"><%= new Date(reply.createdAt).toLocaleDateString() %></span>
+                        </div>
+                        <div style="color: #aaa; font-size: 13px; line-height: 1.4;"><%= reply.text %></div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+
+    </div>
+<% }) %>
                         </div>
 
                     </td>
