@@ -117,6 +117,36 @@
         }
         
         .write-box { position: relative; z-index: 90; }
+
+    /* ======================================================== */
+        /* 🌟 [새로운 디자인] 프리미엄 피드(Feed)형 커뮤니티 카드 🌟 */
+        /* ======================================================== */
+        .feed-container { max-width: 650px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+        .feed-card { background: #161718; border: 1px solid #2a2b2d; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        
+        .feed-header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1f2022; }
+        .feed-author { font-weight: bold; color: #ffb300; font-size: 15px; }
+        .feed-date { color: #666; font-size: 13px; }
+        
+        .feed-media { width: 100%; background: #000; display: flex; justify-content: center; align-items: center; }
+        .feed-media img { width: 100%; max-height: 500px; object-fit: contain; }
+        
+        /* 유튜브 영상 비율(16:9) 완벽 유지기 */
+        .video-container { position: relative; padding-bottom: 56.25%; height: 0; width: 100%; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        
+        .feed-body { padding: 20px; }
+        .feed-title { font-size: 20px; margin: 0 0 15px 0; color: #fff; }
+        .feed-content { color: #ccc; font-size: 15px; line-height: 1.6; margin-bottom: 20px; white-space: pre-wrap; }
+        
+        .feed-actions { display: flex; align-items: center; gap: 15px; padding-top: 15px; border-top: 1px solid #222; }
+        .feed-btn { background: none; border: 1px solid #444; color: #ccc; padding: 8px 15px; border-radius: 20px; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .feed-btn:hover { background: #222; border-color: #ffb300; color: #ffb300; }
+        .admin-actions { margin-left: auto; display: flex; gap: 10px; }
+        .text-btn { background: none; border: none; font-size: 13px; cursor: pointer; color: #888; }
+        .text-btn:hover { color: #fff; }
+        .text-btn.delete { color: #ff4a4a; }
+
     </style>
 </head>
 <body>
@@ -180,6 +210,7 @@
         </div>
 
        <% if (user) { %>
+
 <div class="write-box" id="writeBox" style="display:none;">
     <form action="/add-post" method="POST" enctype="multipart/form-data">
         
@@ -200,8 +231,15 @@
             <div id="editor-container" style="min-height: 400px;"></div>
         </div>
         
+        <!-- 🌟 [여기에 새로 추가되었습니다!] 유튜브 링크 입력칸 🌟 -->
+        <div style="margin-bottom: 25px; background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444;">
+            <label style="color: #ff5722; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: block;">🎥 유튜브 링크 첨부 (선택사항)</label>
+            <input type="text" name="youtubeUrl" placeholder="예: https://youtu.be/... (공유 링크를 붙여넣으세요)" 
+                   style="width: 100%; background: #1c1d20; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; font-size: 15px; outline: none; box-sizing: border-box;">
+        </div>
+
         <div style="margin-bottom: 25px; background: #222; padding: 15px; border-radius: 8px; border: 1px dashed #ff5722;">
-            <label style="color: #ff5722; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: block;">📷 커버 이미지 첨부</label>
+            <label style="color: #ff5722; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: block;">📷 커버 이미지 첨부 (선택사항)</label>
             <input type="file" name="image" accept="image/*" style="color: #aaa; font-size: 14px; width: 100%;">
         </div>
 
@@ -212,103 +250,93 @@
 </div>
 <% } %>
 
-        <div class="post-list">
-            <table class="board-table">
-    <thead>
-        <tr>
-            <th style="width: 60px; text-align: center;"><%= __('th_num') || '번호' %></th>
-            <th style="width: auto; text-align: left;"><%= __('th_title') || '제목' %></th>
-        </tr>
-    </thead>
-    <tbody>
+        <!-- 🌟 피드 리스트 시작 🌟 -->
+<div class="feed-container">
+    <% 
+    // 유튜브 주소를 화면에 띄울 수 있는 Embed 주소로 바꿔주는 마법의 함수
+    function getEmbedUrl(url) {
+        if(!url) return null;
+        const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?\n]+)/);
+        return match ? "https://www.youtube.com/embed/" + match[1] : null;
+    }
+    %>
+
     <% if (typeof posts !== 'undefined' && posts.length > 0) { %>
         <% posts.forEach((post, index) => { %>
             <% const pageNum = Math.floor(index / 20) + 1; %>
+            <% const embedUrl = getEmbedUrl(post.youtubeUrl); %>
 
-            <tr class="board-row page-<%= pageNum %>" 
-                style="<%= pageNum > 1 ? 'display: none;' : '' %>; cursor: pointer;"
-                onclick="const detail = document.getElementById('post-detail-<%= post._id %>'); detail.style.display = (detail.style.display === 'none' || detail.style.display === '') ? 'table-row' : 'none';">
-                
-                <td class="td-num" style="text-align: center; color: #666;"><%= posts.length - index %></td>
-                <td class="td-title" style="font-weight: 500;">
-                    <%= post.title %>
-                    <% if (post.imageUrl) { %> <span style="font-size: 12px; margin-left: 5px;">📷</span> <% } %>
-                    <span style="color: #ff5722; font-size: 12px; margin-left: 5px;">[<%= post.comments ? post.comments.length : 0 %>]</span>
-                </td>
-            </tr>
+            <div class="feed-card page-<%= pageNum %>" style="<%= pageNum > 1 ? 'display: none;' : '' %>">
+                <!-- 1. 작성자 & 날짜 -->
+                <div class="feed-header">
+                    <span class="feed-author">@<%= post.author %></span>
+                    <span class="feed-date"><%= new Date(post.createdAt).toLocaleDateString() %></span>
+                </div>
 
-            <tr id="post-detail-<%= post._id %>" class="post-detail page-<%= pageNum %>" style="display: none; background: #0e0e0f;">
-                <td colspan="2" style="padding: 30px 20px; text-align: left; border-bottom: 2px solid #ff5722;"> 
-                    
-                    <div class="post-info-bar" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #222; font-size: 14px; color: #aaa; display: flex; gap: 15px; flex-wrap: wrap;">
-                        <span style="color: #ff5722; font-weight: bold;">@<%= post.author %></span>
-                        <span>📅 <%= new Date(post.createdAt).toLocaleDateString() %></span>
-                        <span>❤️ 좋아요 <span id="like-post-count-<%= post._id %>"><%= post.likes || 0 %></span></span>
+                <!-- 2. 미디어 (유튜브가 1순위, 사진이 2순위) -->
+                <% if (embedUrl) { %>
+                    <div class="feed-media video-container">
+                        <iframe src="<%= embedUrl %>" frameborder="0" allowfullscreen></iframe>
                     </div>
-                    
-                    <div class="post-content" style="white-space: pre-wrap; line-height: 1.9; color: #e5e5e5; font-size: 16px;">
-                        <%- post.content %>
+                <% } else if (post.imageUrl) { %>
+                    <div class="feed-media">
+                        <img src="<%= post.imageUrl %>" alt="첨부 이미지">
                     </div>
-                    
-                    <% if (post.imageUrl) { %>
-                        <div style="margin: 20px 0; text-align: center;">
-                            <img src="<%= post.imageUrl %>" alt="게시글 이미지" style="max-width: 100%; border-radius: 12px; border: 1px solid #333;">
-                        </div>
-                    <% } %>
+                <% } %>
 
-                    <div class="post-actions" style="display: flex; gap: 15px; align-items: center; margin-top: 20px; margin-bottom: 20px;">
-                        <button class="action-btn" onclick="event.stopPropagation(); likePost('<%= post._id %>')" style="background:none; border:1px solid #444; color:#ccc; padding: 5px 12px; border-radius: 5px; cursor:pointer;">
-                            ❤️ <%= __('th_likes') || '좋아요' %> <span id="like-post-count-<%= post._id %>"><%= post.likes || 0 %></span>
+                <!-- 3. 본문 내용 -->
+                <div class="feed-body">
+                    <h3 class="feed-title"><%= post.title %></h3>
+                    <div class="feed-content"><%- post.content %></div>
+
+                    <!-- 4. 좋아요 & 삭제 등 액션 버튼 -->
+                    <div class="feed-actions">
+                        <button class="feed-btn" onclick="likePost('<%= post._id %>')">
+                            ❤️ 좋아요 <span id="like-post-count-<%= post._id %>"><%= post.likes || 0 %></span>
                         </button>
+                        <span style="color: #888; font-size: 14px;">💬 댓글 <%= post.comments ? post.comments.length : 0 %></span>
 
                         <% if (user && (user.id === post.author || user.role === 'admin')) { %>
-                            <div style="display: flex; gap: 10px; margin-left: auto;">
-                                <button onclick="event.stopPropagation(); location.href='/edit-post/<%= post._id %>'" style="color: #00e5ff; background: none; border: none; cursor: pointer;">✏️ <%= __('action_edit') || '수정' %></button>
-                                <form action="/delete-post/<%= post._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('<%= __('yt_confirm_delete') || '정말 삭제할까요?' %>');">
-                                    <button type="submit" style="color: #ff4a4a; background: none; border: none; cursor: pointer;">🗑 <%= __('action_delete') || '삭제' %></button>
+                            <div class="admin-actions">
+                                <button onclick="location.href='/edit-post/<%= post._id %>'" class="text-btn">수정</button>
+                                <form action="/delete-post/<%= post._id %>" method="POST" style="margin:0;" onsubmit="return confirm('정말 삭제할까요?');">
+                                    <button type="submit" class="text-btn delete">삭제</button>
                                 </form>
                             </div>
                         <% } %>
-                    </div> 
-                    <div id="board-comments-<%= post._id %>" style="background: #111; padding: 20px; border-radius: 8px; border: 1px solid #222;">
-                        <h4 style="margin-top: 0; color: #fff; font-size: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">💬 댓글 (<%= post.comments ? post.comments.length : 0 %>)</h4>
-                        
+                    </div>
+                    
+                    <!-- 5. 댓글 영역 -->
+                    <div style="margin-top: 20px; background: #111; padding: 15px; border-radius: 8px;">
                         <% if (post.comments && post.comments.length > 0) { %>
-                            <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
-                                <% post.comments.forEach(comment => { %>
-                                    <div style="border-bottom: 1px dashed #333; padding-bottom: 10px;">
-                                        <div style="font-size: 13px; margin-bottom: 5px;">
-                                            <span style="color: #ff5722; font-weight: bold;">@<%= comment.author %></span>
-                                            <span style="color: #666; margin-left: 10px;"><%= new Date(comment.createdAt).toLocaleDateString() %></span>
-                                        </div>
-                                        <div style="color: #ccc; font-size: 14px; line-height: 1.5;"><%= comment.text %></div>
-                                    </div>
-                                <% }) %>
-                            </div>
-                        <% } else { %>
-                            <p style="color: #555; font-size: 13px;">등록된 댓글이 없습니다. 첫 댓글을 남겨보세요!</p>
+                            <% post.comments.forEach(comment => { %>
+                                <div style="margin-bottom: 10px; font-size: 14px;">
+                                    <strong style="color: #ffb300;">@<%= comment.author %></strong>
+                                    <span style="color: #ccc; margin-left: 5px;"><%= comment.text %></span>
+                                </div>
+                            <% }) %>
                         <% } %>
-
+                        
                         <% if (user) { %>
-                            <form action="/add-board-comment/<%= post._id %>" method="POST" style="display: flex; gap: 10px; margin-top: 15px;">
-                                <input type="text" name="commentText" placeholder="댓글을 입력하세요..." required style="flex: 1; padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff; font-family: inherit;">
-                                <button type="submit" style="background: #ff5722; color: #000; border: none; padding: 0 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">등록</button>
-                            </form>
+                            <form onsubmit="submitComment(event, '<%= post._id %>')" style="display: flex; gap: 10px; margin-top: 15px;">
+    <input type="text" id="comment-input-<%= post._id %>" placeholder="댓글 달기..." required 
+           style="flex: 1; padding: 10px; border-radius: 20px; border: 1px solid #444; background: #222; color: #fff; outline: none;">
+    <button type="submit" style="background: none; border: none; color: #ffb300; font-weight: bold; cursor: pointer;">게시</button>
+</form>
                         <% } else { %>
-                            <div style="padding: 12px; background: #222; text-align: center; border-radius: 6px; font-size: 13px; color: #aaa; border: 1px solid #333;">
+                            <div style="padding: 10px; text-align: center; font-size: 13px; color: #aaa;">
                                 댓글을 작성하려면 <a href="/login" style="color: #ff5722; text-decoration: underline;">로그인</a>이 필요합니다.
                             </div>
                         <% } %>
                     </div>
-                </td>
-            </tr>
+                </div>
+            </div>
         <% }) %>
     <% } else { %>
-        <tr><td colspan="2" style="padding: 80px 0; color:#555; text-align:center;"><%= __('board_no_post') || '등록된 게시글이 없습니다.' %></td></tr>
+        <div style="text-align: center; padding: 80px 0; color:#555;">등록된 게시글이 없습니다. 첫 글을 남겨보세요!</div>
     <% } %>
-    </tbody>
-</table>
-        </div>
+</div>
+<!-- 🌟 피드 리스트 끝 🌟 -->
 
         <% if (typeof posts !== 'undefined' && posts.length > 10) { %>
             <div class="pagination-container">
@@ -429,6 +457,54 @@ function toggleWriteBox() {
             if (file) compressAndInsertImage(file);
         };
     }
+
+   // ==============================================================
+// 🌟 실시간 댓글 달기 함수 (새로고침 방지)
+// ==============================================================
+async function submitComment(event, postId) {
+    // 1. [매우 중요] 브라우저가 페이지를 새로고침하려는 본능을 강제로 막습니다.
+    event.preventDefault(); 
+    
+    // 2. 어느 입력창에 글을 썼는지 찾아서 내용을 가져옵니다.
+    const inputField = document.getElementById('comment-input-' + postId);
+    const text = inputField.value;
+    if (text.trim() === '') return;
+
+    try {
+        // 3. 1단계에서 만든 서버 주소로 몰래 데이터를 보냅니다.
+        const response = await fetch('/add-board-comment/' + postId, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ commentText: text })
+        });
+        
+        const data = await response.json();
+
+        if (data.success) {
+            // 4. 전송 성공 시 입력창을 깨끗이 비웁니다.
+            inputField.value = '';
+
+            // 5. 서버에서 받아온 정보를 바탕으로 화면에 즉시 댓글을 끼워 넣습니다.
+            // (입력창 바로 위에 새 댓글을 추가하는 방식입니다)
+            const newCommentHtml = `
+                <div style="margin-bottom: 10px; font-size: 14px; animation: fadeIn 0.5s;">
+                    <strong style="color: #ffb300;">@${data.comment.author}</strong>
+                    <span style="color: #ccc; margin-left: 5px;">${data.comment.text}</span>
+                </div>
+            `;
+            
+            // 전송 버튼이 있는 폼(event.target) 바로 앞에 새 댓글을 추가합니다.
+            event.target.insertAdjacentHTML('beforebegin', newCommentHtml);
+            
+        } else {
+            alert(data.message);
+        }
+    } catch (err) {
+        console.error("댓글 통신 에러:", err);
+        alert("댓글 등록 중 문제가 발생했습니다.");
+    }
+}
+
 </script>
 
     <script>

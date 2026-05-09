@@ -101,6 +101,7 @@ const postSchema = new mongoose.Schema({
     content: String,
     author: String,
     imageUrl: String,
+    youtubeUrl: { type: String, default: '' },
     likes: { type: Number, default: 0 },
     likedBy: [String], 
     createdAt: { type: Date, default: Date.now },
@@ -818,7 +819,8 @@ const uploadedImageUrl = req.file ? `${process.env.R2_PUBLIC_URL}/${req.file.key
             title: req.body.title, 
             content: req.body.content, 
             author: req.session.user.name,
-            imageUrl: uploadedImageUrl // 👈 DB에 사진 주소 저장!
+            imageUrl: uploadedImageUrl,
+            youtubeUrl: req.body.youtubeUrl
         }).save();
         
         res.redirect('/board?t=' + Date.now());  // 👈 현재 시간을 몰래 붙여서 브라우저를 속입니다!
@@ -879,18 +881,38 @@ app.post('/edit-post/:id', async (req, res) => {
     }
 });
 
+// =========================================
+// 🌟 1단계: 새로고침 없는 댓글 달기 서버 준비
+// =========================================
 app.post('/add-board-comment/:id', async (req, res) => {
-    if (!req.session || !req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
+    // 1. 로그인 안 한 사람 튕겨내기
+    if (!req.session || !req.session.user) {
+        return res.json({ success: false, message: "로그인이 필요합니다." });
+    }
+    
     try {
         const post = await Post.findById(req.params.id);
-        if (post) {
-            post.comments.push({ author: req.session.user.name, text: req.body.commentText });
-            await post.save();
+        if (!post) {
+            return res.json({ success: false, message: "게시글을 찾을 수 없습니다." });
         }
-        res.redirect('/board?t=' + Date.now()); // 👈 똑같이 바꿔줍니다!
+
+        // 2. 새로운 댓글 정보 예쁘게 포장하기
+        const newComment = { 
+            author: req.session.user.name, 
+            text: req.body.commentText,
+            createdAt: new Date()
+        };
+        
+        // 3. DB에 저장하기
+        post.comments.push(newComment);
+        await post.save();
+        
+        // 🚨 4. [핵심] 새로고침(redirect) 대신 성공했다는 데이터만 돌려줍니다!
+        res.json({ success: true, comment: newComment }); 
+
     } catch (err) {
         console.log("댓글 등록 에러:", err);
-        res.redirect('/board'); 
+        res.status(500).json({ success: false, message: "서버 에러가 발생했습니다." }); 
     }
 });
 
