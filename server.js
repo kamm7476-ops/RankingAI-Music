@@ -110,7 +110,14 @@ const postSchema = new mongoose.Schema({
         text: String, 
         likes: { type: Number, default: 0 },
         likedBy: [String], 
-        createdAt: { type: Date, default: Date.now } 
+        createdAt: { type: Date, default: Date.now },
+        
+        // 🌟 [핵심 추가] 댓글 안의 답글(대댓글)을 저장하는 새로운 공간입니다!
+        replies: [{ 
+            author: String,
+            text: String,
+            createdAt: { type: Date, default: Date.now }
+        }]
     }]
 });
 const Post = mongoose.models.Post || mongoose.model('Post', postSchema);
@@ -940,6 +947,28 @@ app.post('/like-board-comment/:postId/:commentId', async (req, res) => {
             }
         }
     } catch (err) { res.status(500).json({ success: false }); }
+});
+
+// ↪️ 답글(대댓글) 등록 (AJAX)
+app.post('/add-board-reply/:postId/:commentId', async (req, res) => {
+    if (!req.session.user) return res.json({ success: false, message: "로그인이 필요합니다." });
+    try {
+        const post = await Post.findById(req.params.postId);
+        const comment = post.comments.id(req.params.commentId);
+        
+        const newReply = {
+            author: req.session.user.name,
+            text: req.body.replyText,
+            createdAt: new Date()
+        };
+        
+        // 댓글의 replies 배열에 추가 (DB 스키마에 replies가 있어야 합니다)
+        if (!comment.replies) comment.replies = [];
+        comment.replies.push(newReply);
+        await post.save();
+        
+        res.json({ success: true, reply: newReply });
+    } catch (err) { res.json({ success: false }); }
 });
 
 // =========================================
