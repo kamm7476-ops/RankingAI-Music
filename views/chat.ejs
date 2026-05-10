@@ -86,8 +86,31 @@
             padding-bottom: max(10px, env(safe-area-inset-bottom)); /* 아이폰 홈 바 안전 보호 */
             z-index: 100;
         }
-        .input-area input { flex: 1; height: 45px; box-sizing: border-box; background: #0b0c0d; border: 1px solid #333; color: #fff; padding: 0 20px; border-radius: 25px; outline: none; font-size: 15px; margin: 0; }
-        .input-area button { height: 45px; background: #ffb300; color: #000; font-weight: 900; border: none; padding: 0 24px; border-radius: 25px; cursor: pointer; transition: 0.2s; margin: 0; }
+        .input-area input { 
+            flex: 1; 
+            min-width: 0; /* 🚀 핵심: 부모 박스를 뚫고 나가지 않게 잠금! */
+            height: 45px; 
+            box-sizing: border-box; 
+            background: #0b0c0d; 
+            border: 1px solid #333; 
+            color: #fff; 
+            padding: 0 15px; /* 패딩 살짝 조절 */
+            border-radius: 25px; 
+            outline: none; 
+            font-size: 15px; 
+            margin: 0; 
+        }
+        .input-area button { 
+            flex-shrink: 0; /* 🚀 핵심: 너비 고정 */
+            height: 45px; 
+            background: #ffb300; 
+            color: #000; 
+            font-weight: 900; 
+            border: none; 
+            padding: 0 15px; /* 패딩 약간 축소 */
+            border-radius: 25px; 
+            cursor: pointer; 
+        }
         .input-area button:hover { filter: brightness(1.1); transform: scale(1.05); }
         /* 나가기 버튼 스타일 */
 .leave-btn { 
@@ -104,15 +127,16 @@
 
 /* 🌟 파일 첨부 버튼 (클립 모양) 스타일 */
         .btn-attach {
+            flex-shrink: 0; /* 🚀 핵심: 너비가 줄어들지 않게 고정 */
+            width: 45px; 
+            height: 45px;
             background: #222;
             color: #aaa;
             border: 1px solid #333;
-            padding: 0 15px;
+            padding: 0; /* 패딩 제거하고 중앙 정렬 */
             border-radius: 25px;
-            font-size: 16px;
+            font-size: 18px;
             cursor: pointer;
-            transition: 0.2s;
-            margin: 0;
             display: flex;
             align-items: center;
             justify-content: center;
