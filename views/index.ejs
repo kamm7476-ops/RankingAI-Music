@@ -305,21 +305,20 @@
             }
         }
 
-       /* 🚨 [최종 파괴 버전] 카카오톡 버튼 및 감싸는 모든 박스 강제 이동 */
-    @media screen and (max-width: 768px) {
-        /* 카카오와 관련된 모든 요소를 바닥에서 150px 위로 강제 격리 */
-        [id^="kakao-"], 
-        .kakao-chat-btn, 
-        #kakao-talk-channel-chat-button {
-            position: fixed !important;
-            bottom: 150px !important; /* 더 높게 올렸습니다! */
-            right: 10px !important;
-            transform: scale(0.65) !important; /* 더 작게 줄였습니다! */
-            transform-origin: bottom right !important;
-            z-index: 9999999 !important;
+      /* 🚨 모바일 카카오톡 플로팅 버튼 크기/위치 조절 (더 높게! 더 작게!) */
+        @media screen and (max-width: 768px) {
+            #kakao-talk-channel-chat-button,
+            .kakao-chat-btn,
+            #kakao-chat-btn,
+            .kakao-btn,
+            div[id^="kakao-"] {
+                transform: scale(0.55) !important; /* 🚀 크기를 55%로 확 줄였습니다! (원래 70%) */
+                transform-origin: bottom right !important;
+                bottom: 170px !important; /* 🚀 위치를 바닥에서 170px 위로 더 끌어올렸습니다! (원래 140px) */
+                right: 15px !important;
+                z-index: 9999999 !important;
+            }
         }
-    }
-
         /* ========================================= */
         /* 🌟 유튜브 전용 글로벌 디자인 🌟 */
         /* ========================================= */
