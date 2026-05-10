@@ -101,6 +101,24 @@
     font-weight: bold;
 }
 .leave-btn:hover { background: #ff3333; }
+
+/* 🌟 파일 첨부 버튼 (클립 모양) 스타일 */
+        .btn-attach {
+            background: #222;
+            color: #aaa;
+            border: 1px solid #333;
+            padding: 0 15px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-attach:hover { background: #333; color: #fff; }  
+
     </style>
 </head>
 <body>
@@ -131,6 +149,10 @@
     </div>
 
     <form class="input-area" id="chatForm">
+        <input type="file" id="fileInput" accept="audio/*" style="display: none;">
+        
+        <button type="button" class="btn-attach" onclick="document.getElementById('fileInput').click()" title="음원 파일 첨부">📎</button>
+
         <input type="text" id="msgInput" placeholder="메시지를 입력하세요..." autocomplete="off" required>
         <button type="submit">전송</button>
     </form>
@@ -287,6 +309,18 @@
                 });
             }
         } 
+
+      // 🌟 첨부파일 선택 감지 (테스트용)
+        const fileInput = document.getElementById('fileInput');
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files.length > 0) {
+                const fileName = this.files[0].name;
+                alert(`🎵 선택된 파일: ${fileName}\n\n(아직 화면 UI만 만든 상태입니다! 실제 전송은 2단계에서 서버 엔진을 달고 진행합니다.)`);
+                // 테스트용이므로 선택한 파일을 다시 비워둡니다.
+                this.value = ''; 
+            }
+        });
+
     </script>
 </body>
 </html>
