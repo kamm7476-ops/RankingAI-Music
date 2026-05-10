@@ -305,16 +305,18 @@
             }
         }
 
-        /* 🚨 모바일 카카오톡 플로팅 버튼 크기/위치 조절 (여기에 딱 넣으시면 됩니다!) */
+       /* 🚨 모바일 카카오톡 플로팅 버튼 크기/위치 조절 (고정 좌표 강제 이동) */
         @media screen and (max-width: 768px) {
             #kakao-talk-channel-chat-button,
             .kakao-chat-btn,
             #kakao-chat-btn,
-            .kakao-btn {
+            .kakao-btn,
+            div[id^="kakao-"] {
                 transform: scale(0.7) !important; /* 크기 70% 축소 */
                 transform-origin: bottom right !important; /* 우측 하단 기준 */
-                margin-bottom: 30px !important; /* 플레이어 위로 띄우기 */
-                z-index: 99999 !important;
+                bottom: 140px !important; /* 🚀 핵심! 바닥에서부터 140px 위로 강제로 끌어올림! */
+                right: 15px !important; /* 오른쪽 여백도 살짝 띄움 */
+                z-index: 99999 !important; /* 무조건 맨 위로 */
             }
         }
 
