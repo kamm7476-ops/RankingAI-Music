@@ -1686,6 +1686,39 @@ app.post('/chat/leave/:roomId', async (req, res) => {
     }
 });
 
+// =========================================================
+// 🌟 1:1 채팅방 음원 파일 업로드 (로컬 택배 설정 및 전송 창구)
+// =========================================================
+const fs = require('fs');
+const path = require('path'); // 혹시 몰라서 path도 추가했습니다!
+
+// 업로드 폴더가 없으면 자동으로 만들어주는 마법사
+const chatUploadDir = path.join(__dirname, 'public/uploads');
+if (!fs.existsSync(chatUploadDir)) {
+    fs.mkdirSync(chatUploadDir, { recursive: true });
+}
+
+// 택배 저장소 설정
+const chatAudioStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/uploads/') 
+    },
+    filename: function (req, file, cb) {
+        cb(null, 'chat_audio_' + Date.now() + path.extname(file.originalname)) 
+    }
+});
+const uploadChatAudio = multer({ storage: chatAudioStorage });
+
+// 🌟 음원 파일 업로드 전용 창구 (API)
+app.post('/upload-audio', uploadChatAudio.single('audioFile'), (req, res) => {
+    if (!req.file) {
+        return res.json({ success: false, message: '파일이 없습니다.' });
+    }
+    const fileUrl = '/uploads/' + req.file.filename;
+    res.json({ success: true, url: fileUrl });
+});
+
+
 // =========================================
 // 🌟 8. 실시간 웹소켓(Socket.io) 우체국 로직 (최종 통합본)
 // =========================================
