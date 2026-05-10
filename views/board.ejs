@@ -732,6 +732,19 @@ async function submitReply(event, postId, commentId) {
     </script>
 
     <style>
+
+    /* 📱 모바일 카카오톡 플로팅 버튼 크기/위치 조절 */
+    @media screen and (max-width: 768px) {
+        #kakao-talk-channel-chat-button,
+        .kakao-chat-btn,
+        #kakao-chat-btn {
+            transform: scale(0.7) !important; /* 크기 70% 축소 */
+            transform-origin: bottom right !important; /* 우측 하단 기준 */
+            margin-bottom: 20px !important; /* 위로 살짝 띄우기 */
+            z-index: 9999 !important;
+        }
+    }    
+
     /* 🌟 공통 및 모바일 디자인 보정 */
     @media screen and (max-width: 768px) {
         table.board-table, table.board-table tbody, table.board-table tr, table.board-table td {
