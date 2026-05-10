@@ -1690,7 +1690,6 @@ app.post('/chat/leave/:roomId', async (req, res) => {
 // 🌟 1:1 채팅방 음원 파일 업로드 (로컬 택배 설정 및 전송 창구)
 // =========================================================
 const fs = require('fs');
-const path = require('path'); // 혹시 몰라서 path도 추가했습니다!
 
 // 업로드 폴더가 없으면 자동으로 만들어주는 마법사
 const chatUploadDir = path.join(__dirname, 'public/uploads');
