@@ -154,6 +154,19 @@
             pointer-events: auto !important;
         }
 
+        /* 🚨 모바일 글쓰기 본문 입력창 터치/포커스 강제 활성화 */
+    #writeBox textarea,
+    #writeBox input,
+    .note-editable, 
+    .ql-editor {
+        position: relative !important;
+        z-index: 999999 !important; /* 투명 랩 위로 끄집어냄 */
+        pointer-events: auto !important; /* 클릭 및 터치 허용 */
+        user-select: auto !important; /* 텍스트 선택 및 커서 활성화 (핵심!) */
+        -webkit-user-select: auto !important; /* 아이폰(Safari) 강제 활성화 */
+        touch-action: auto !important; /* 모바일 터치 강제 허용 */
+    }
+
     </style>
 </head>
 <body>
