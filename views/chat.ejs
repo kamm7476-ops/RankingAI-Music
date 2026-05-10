@@ -141,7 +141,7 @@
                         <div class="sender-name"><%= msg.senderName %></div>
                     <% } %>
                     <div class="msg <%= msg.senderId === user.id ? 'my' : 'other' %>">
-                        <%= msg.text %>
+                        <%- msg.text %>
                     </div>
                 </div>
             <% }); %>
