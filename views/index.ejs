@@ -304,6 +304,20 @@
                 z-index: 2147483647 !important; /* 모바일에서도 노란 아이콘 완벽하게 덮음 */
             }
         }
+
+        /* 🚨 모바일 카카오톡 플로팅 버튼 크기/위치 조절 (여기에 딱 넣으시면 됩니다!) */
+        @media screen and (max-width: 768px) {
+            #kakao-talk-channel-chat-button,
+            .kakao-chat-btn,
+            #kakao-chat-btn,
+            .kakao-btn {
+                transform: scale(0.7) !important; /* 크기 70% 축소 */
+                transform-origin: bottom right !important; /* 우측 하단 기준 */
+                margin-bottom: 30px !important; /* 플레이어 위로 띄우기 */
+                z-index: 99999 !important;
+            }
+        }
+
         /* ========================================= */
         /* 🌟 유튜브 전용 글로벌 디자인 🌟 */
         /* ========================================= */
