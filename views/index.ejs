@@ -2146,40 +2146,46 @@ window.addEventListener('popstate', async () => {
             window.scrollTo({ top: chartTop - 80, behavior: 'smooth' });
         }
 
-        // 🌟 2. 글로벌 환영 팝업창 제어 기능 (대표님이 만드신 소중한 30줄 무사히 복구!!)
+        // 🌟 2. 글로벌 환영 팝업창 제어 기능 (이름표 완벽 동기화 완료!)
         document.addEventListener("DOMContentLoaded", function() {
-            const popup = document.getElementById('globalWelcomePopup');
+            // HTML에 있는 'globalPopupOverlay'를 정확히 찾아냅니다.
+            const popup = document.getElementById('globalPopupOverlay');
             if(!popup) return; // 팝업 코드가 없으면 패스
 
             const hideUntil = localStorage.getItem('hideWelcomePopupUntil');
             const now = new Date().getTime();
 
-            // '오늘 하루 보지 않기' 시간이 안 지났으면 팝업 띄움
+            // '오늘 하루 보지 않기' 시간이 안 지났으면 팝업을 화면에 짠! 띄웁니다.
             if (!hideUntil || now > parseInt(hideUntil)) {
                 popup.style.display = 'flex';
             }
-
-            // 닫기 버튼 눌렀을 때
-            document.getElementById('btnClosePopup').addEventListener('click', function() {
-                if (document.getElementById('chkHideToday').checked) {
-                    // 24시간 동안 숨기기 저장
-                    localStorage.setItem('hideWelcomePopupUntil', now + (24 * 60 * 60 * 1000));
-                }
-                popup.style.display = 'none';
-            });
-
-            // 팝업 안의 [▶ Play All] 버튼 눌렀을 때
-            document.getElementById('btnPlayFromPopup').addEventListener('click', function() {
-                popup.style.display = 'none';
-                
-                // 대표님의 기존 '전체듣기' 함수를 찾아서 자동으로 실행!
-                if (typeof playAll === 'function') {
-                    playAll();
-                } else {
-                    alert("재생을 시작합니다!");
-                }
-            });
         });
+
+        // 🚨 닫기 버튼 눌렀을 때 작동하는 마법의 함수!
+        function closePopupWithCheck() {
+            const popup = document.getElementById('globalPopupOverlay');
+            const chk = document.getElementById('todayCheck');
+            
+            if (chk && chk.checked) {
+                const now = new Date().getTime();
+                // 24시간 동안 숨기기 메모장에 저장!
+                localStorage.setItem('hideWelcomePopupUntil', now + (24 * 60 * 60 * 1000));
+            }
+            popup.style.display = 'none'; // 팝업 숨기기
+        }
+
+        // 🚨 [추천곡 듣기] 버튼 눌렀을 때 작동하는 함수!
+        function playTodaysPick() {
+            const popup = document.getElementById('globalPopupOverlay');
+            popup.style.display = 'none'; // 일단 팝업은 닫고!
+            
+            // 재생 시작
+            if (typeof playAll === 'function') {
+                playAll();
+            } else {
+                alert("음원 재생을 준비 중입니다!");
+            }
+        }
     </script>
 
 <script>
