@@ -815,18 +815,22 @@
                                     <% } %>
                                 </div>
                                 <div class="singer"><a href="/?search=<%= music.artist %>" class="clickable-artist"><%= music.artist %></a> (<%= __(getGenreKey(music.genre)) || music.genre %>) <span class="ai-badge">🎵 <%= music.aiTool %></span> <span style="margin-left:10px; color:#ff5722; font-size:12px;">🎧 <%= __('txt_play') || '재생' %> <%= music.views || 0 %></span></div>
-                                <% if (user) { %>
+                               <% if (user) { %>
     <% if (user.id !== music.uploader && music._id !== "dummy") { %>
         <div style="margin-top: 12px;">
-            <button type="button" onclick="sendPurchaseMsg('<%= music.uploader %>', '<%= music.name %>')">
-                🤝 <%= __('btn_proposal') || '이 곡의 작곡가에게 구매/사용 제안하기' %>
+            <button type="button" 
+                    style="width: 100%; background: #fff; color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; margin-bottom: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"
+                    onclick="sendPurchaseMsg('<%= music.uploader %>', '<%= music.name %>')">
+                <%= __('btn_proposal') || '🤝 이 곡의 작곡가에게 구매/사용 제안하기' %>
             </button>
         </div>
     <% } %>
 <% } else { %>
     <div style="margin-top: 12px;">
-        <button type="button" onclick="if(confirm('이 곡의 저작권 구매 및 상업적 제안은 로그인이 필요한 서비스입니다! 🚀\n로그인 페이지로 이동하시겠습니까?')) { location.href='/login'; }">
-            🤝 <%= __('btn_proposal') || '이 곡의 작곡가에게 구매/사용 제안하기' %>
+        <button type="button" 
+                style="width: 100%; background: #fff; color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; margin-bottom: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"
+                onclick="if(confirm('이 곡의 저작권 구매 및 상업적 제안은 로그인이 필요한 서비스입니다! 🚀\n로그인 페이지로 이동하시겠습니까?')) { location.href='/login'; }">
+            <%= __('btn_proposal') || '🤝 이 곡의 작곡가에게 구매/사용 제안하기' %>
         </button>
     </div>
 <% } %>
