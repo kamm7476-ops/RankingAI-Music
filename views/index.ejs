@@ -816,36 +816,37 @@
                                 </div>
                                 <div class="singer"><a href="/?search=<%= music.artist %>" class="clickable-artist"><%= music.artist %></a> (<%= __(getGenreKey(music.genre)) || music.genre %>) <span class="ai-badge">🎵 <%= music.aiTool %></span> <span style="margin-left:10px; color:#ff5722; font-size:12px;">🎧 <%= __('txt_play') || '재생' %> <%= music.views || 0 %></span></div>
                                <style>
-    /* 대표님을 위한 고급 다크/주황색 라인 스타일 정의 */
-    .btn-ram-oblong {
-        /* 하얀색 바탕 삭제 -> 어두운 테마 배경#212121로 변경 (아래 버튼 스타일 emulating) */
-        background-color: #212121; 
-        color: #f1f1f1; 
-        
-        padding: 8px 16px; /* oblong 모양을 위한 패딩 */
-        border-radius: 20px; /* oblong rounded shape */
-        border: none; /* 기본 보더 삭제 */
-        
-        font-size: 14px;
-        cursor: pointer;
-        
-        /* 이모티콘과 글자 중앙 정렬 */
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        
-        font-family: inherit;
-        outline: none; /* 기본 브라우저 아웃라인 숨김 */
-        transition: border 0.1s ease-in-out; /* 주황색 라인 부드럽게 등장 */
-        margin-bottom: 12px; /* singer info와의separation */
-    }
+/* 🎨 듣기/가사 버튼과 동일한 고급 다크테마 둥근 버튼 */
+.btn-ram-oblong {
+    background-color: #222;
+    color: #aaa;
+    padding: 8px 18px;
+    border-radius: 20px;
+    border: 1px solid #333;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: all 0.2s ease-in-out;
+    margin-top: 12px;
+}
 
-    /* 🚨 대표님 핵심 요구사항: 클릭했을 때 주황색 라인 효과! */
-    .btn-ram-oblong:active, .btn-ram-oblong:focus {
-        /* 주황색(#FF5722) 2px 라인 생성 */
-        border: 2px solid #FF5722; 
-    }
+/* 마우스 올렸을 때 살짝 밝아짐 */
+.btn-ram-oblong:hover {
+    background-color: #333;
+    color: #fff;
+}
+
+/* 🚨 대표님 요청: 클릭했을 때 주황색 라인 + 주황색 글씨! */
+.btn-ram-oblong:active, .btn-ram-oblong:focus {
+    border: 1px solid #FF5722;
+    color: #FF5722;
+    background-color: #222;
+    outline: none;
+}
 </style>
 
 <% if (user) { %>
@@ -860,9 +861,6 @@
     <div>
         <button type="button" class="btn-ram-oblong" onclick="if(confirm('이 곡의 저작권 구매 및 상업적 제안은 로그인이 필요한 서비스입니다! 🚀\n로그인 페이지로 이동하시겠습니까?')) { location.href='/login'; }">
             <%= __('btn_proposal') || '이 곡의 작곡가에게 구매/사용 제안하기' %>
-        </button>
-    </div>
-<% } %>
         </button>
     </div>
 <% } %>
