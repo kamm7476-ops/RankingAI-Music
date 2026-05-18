@@ -86,5 +86,10 @@
   "proposal_guide_4": "※ 卖场背景音乐播放100%免费！",
   "proposal_ph": "例) 我想作为YouTube背景音乐使用。我提议150元。",
   "btn_send_proposal": "发送提案",
-  "btn_send_proposal": "发送提案"
+  "btn_proposal": "音源使用建议",
+  "action_edit": "编辑",
+  "action_delete": "删除",
+  "action_comments": "评论",
+  "action_likes": "赞",
+  "txt_play": "播放"
 }

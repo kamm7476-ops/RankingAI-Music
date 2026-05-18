@@ -86,5 +86,10 @@
   "proposal_guide_4": "※ 店舗のBGM再生は100%無料です！",
   "proposal_ph": "例) YouTubeのBGMとして使用したいです。3,000円を提案します。",
   "btn_send_proposal": "提案を送信する",
-  "btn_send_proposal": "提案を送信する"
+  "btn_proposal": "音源使用提案",
+  "action_edit": "編集",
+  "action_delete": "削除",
+  "action_comments": "コメント",
+  "action_likes": "いいね",
+  "txt_play": "再生"
 }
