@@ -143,6 +143,28 @@
         }
         .btn-attach:hover { background: #333; color: #fff; }  
 
+        /* 👇👇👇 [여기에 바로 붙여넣기!] 결제 정보(카드) 버튼 스타일 👇👇👇 */
+        .btn-payment {
+            flex-shrink: 0;
+            width: 45px; 
+            height: 45px;
+            background: #222;
+            color: #ffb300; /* 돈과 관련된 기능이니 골드 색상으로 포인트! */
+            border: 1px solid #333;
+            padding: 0;
+            border-radius: 25px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .btn-payment:hover { background: #333; }
+        
+        /* 🚨 입력창 간격 살짝 줄이기 (모바일 좁아짐 방지) */
+        .input-area { gap: 5px !important; }
+
     </style>
 </head>
 <body>
@@ -182,7 +204,7 @@
         <input type="file" id="fileInput" accept="audio/*" style="display: none;">
         
         <button type="button" class="btn-attach" onclick="document.getElementById('fileInput').click()" title="음원 파일 첨부">📎</button>
-
+        <button type="button" class="btn-payment" onclick="sendPaymentInfo()" title="계좌/코인 주소 보내기">💳</button>
         <input type="text" id="msgInput" placeholder="메시지를 입력하세요..." autocomplete="off" required>
         <button type="submit">전송</button>
     </form>
@@ -378,6 +400,28 @@
                 this.value = ''; 
             }
         });
+     
+     // 🌟 결제 정보(계좌/지갑) 전송 함수
+        function sendPaymentInfo() {
+            // 유저에게 입금처 정보를 물어봅니다.
+            const info = prompt("송금받으실 계좌번호, 토스 링크, 또는 코인 지갑 주소를 입력해주세요.\n\n(예: 카카오뱅크 3333-xx-xxxxxxx)");
+            
+            // 유저가 취소를 누르지 않고, 내용을 입력했다면?
+            if (info && info.trim() !== "") {
+                // 단순한 글씨가 아니라, 눈에 띄는 '예쁜 명함 박스' 형태의 HTML로 조립합니다.
+                const paymentBox = `
+                    <div style="background: rgba(255, 179, 0, 0.1); border: 1px solid #ffb300; padding: 12px; border-radius: 8px; text-align: center; margin-top: 5px;">
+                        <div style="font-size: 12px; color: #ffb300; margin-bottom: 8px; font-weight: bold;">💰 입금처 안내</div>
+                        <div style="font-size: 14px; color: #fff; word-break: break-all; line-height: 1.4;">${info}</div>
+                        <div style="font-size: 10px; color: #aaa; margin-top: 8px;">위 주소로 송금 후 메시지를 남겨주세요.</div>
+                    </div>
+                `;
+                
+                // 조립된 명함을 서버 우체국(Socket)을 통해 쏩니다!
+                socket.emit('chatMessage', { roomId: roomId, senderId: myId, senderName: myName, text: paymentBox });
+            }
+        }
+
 
     </script>
 </body>
