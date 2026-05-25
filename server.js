@@ -1525,8 +1525,18 @@ app.post('/admin/popup', async (req, res) => {
     } catch (err) { res.redirect('/'); }
 });
 
-app.get('/admin/delete-user', (req, res) => {
-    res.redirect('/admin');
+app.post('/admin/delete-user', async (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'admin') {
+        return res.status(403).send("<script>alert('권한이 없습니다.'); location.href='/';</script>");
+    }
+    try {
+        const userId = req.body.userId;
+        await User.findByIdAndDelete(userId);
+        res.send("<script>alert('회원이 강제 탈퇴되었습니다.'); location.href='/admin';</script>");
+    } catch (err) {
+        console.error("회원 삭제 에러:", err);
+        res.send("<script>alert('회원 탈퇴 중 오류가 발생했습니다.'); location.href='/admin';</script>");
+    }
 });
 
 app.get('/admin/recover-stats', async (req, res) => {
