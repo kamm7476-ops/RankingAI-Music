@@ -1029,12 +1029,26 @@ async function fetchBigNews() {
         const data = await response.json();
         container.innerHTML = '';
 
+        // ── 화면 렌더링 전 유효성 검사 유틸 ─────────────────────
+        function hasRealContent(str, min) {
+            if (!str) return false;
+            const c = str.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+            return c.length >= (min || 4) && /[a-zA-Z가-힣0-9]/.test(c);
+        }
+
         const cards = data
-            // ① 불량 기사 차단: 제목 또는 내용이 없는 카드는 생성하지 않음
-            .filter(item => item.title && item.title.trim() !== '' && item.desc && item.desc.trim() !== '')
+            // ── [1차 차단] .filter(): 제목이나 설명이 실제 내용 없으면 목록에서 제거
+            .filter(item =>
+                hasRealContent(item.title, 6) &&
+                hasRealContent(item.desc,  10) &&
+                item.link && item.link.startsWith('http')
+            )
             .map(item => {
+                // ── [2차 차단] if 조건문: filter 통과 후에도 재확인, 단 1줄도 생성 안 함
+                if (!hasRealContent(item.title, 6)) return '';
+                if (!hasRealContent(item.desc,  10)) return '';
+
                 const sourceLabel = item.source || 'Global';
-                // ③ 대체 이미지: Clearbit 소스 로고 → 실패 시 사이트 기본 로고
                 const logoUrl = `https://logo.clearbit.com/${sourceLabel}`;
                 return `
                 <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="bento-news-card">
@@ -1055,7 +1069,11 @@ async function fetchBigNews() {
                         <span class="bento-read">원문 읽기 ↗</span>
                     </div>
                 </a>`;
-            }).join('');
+            })
+            // ── [3차 차단] map이 ''를 반환한 잔여 항목 제거
+            .filter(html => html !== '')
+            .join('');
+
         container.innerHTML = cards || '<div style="grid-column:1/-1;text-align:center;color:#aaa;padding:40px;">아직 준비된 뉴스가 없습니다. 잠시 후 다시 확인해 주세요.</div>';
 
         isNewsLoaded = true; // 스위치 ON!
