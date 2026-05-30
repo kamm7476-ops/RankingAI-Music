@@ -297,7 +297,7 @@
                 <!-- 1. 리스트 줄 (제목) : 클릭하면 아래 내용이 열립니다 -->
                 <tr class="board-row page-<%= pageNum %><%= pageNum > 1 ? ' page-hidden' : '' %>"
                     style="cursor: pointer;"
-                    onclick="document.getElementById('post-detail-<%= post._id %>').classList.toggle('open');">
+                    onclick="togglePost('<%= post._id %>');">
                     
                     <td class="td-num" style="text-align: center; color: #666;"><%= posts.length - index %></td>
                     <td class="td-title" style="font-weight: 500;">
@@ -435,6 +435,15 @@
     </table>
 </div>
 <!-- 🌟 깔끔한 리스트형 게시판 끝 🌟 -->
+
+<script>
+/* 게시글 상세 즉시 숨김 - DOMContentLoaded 기다리지 않고 파싱 즉시 실행 */
+(function() {
+    document.querySelectorAll('.post-detail').forEach(function(el) {
+        el.style.setProperty('display', 'none', 'important');
+    });
+})();
+</script>
 
         <% if (typeof posts !== 'undefined' && posts.length > 10) { %>
             <div class="pagination-container">
@@ -699,10 +708,10 @@ async function submitReply(event, postId, commentId) {
 
     <script>
         function changePage(targetPage) {
-            document.querySelectorAll('.board-row').forEach(row => row.classList.add('page-hidden'));
-            document.querySelectorAll('.post-detail').forEach(row => row.classList.remove('open'));
+            document.querySelectorAll('.board-row').forEach(function(row) { row.classList.add('page-hidden'); });
+            document.querySelectorAll('.post-detail').forEach(function(el) { el.style.setProperty('display', 'none', 'important'); });
 
-            document.querySelectorAll('.board-row.page-' + targetPage).forEach(row => row.classList.remove('page-hidden'));
+            document.querySelectorAll('.board-row.page-' + targetPage).forEach(function(row) { row.classList.remove('page-hidden'); });
 
             document.querySelectorAll('.page-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
@@ -800,10 +809,22 @@ async function submitReply(event, postId, commentId) {
 <script>
     // 🚀 페이지 로드 즉시 실행되는 기능 초기화
     function initCommunity() {
-        document.querySelectorAll('.post-detail').forEach(detail => {
-            detail.classList.remove('open');
-            detail.style.removeProperty('display');
+        document.querySelectorAll('.post-detail').forEach(function(el) {
+            el.classList.remove('open');
+            el.style.setProperty('display', 'none', 'important');
         });
+    }
+
+    function togglePost(postId) {
+        var el = document.getElementById('post-detail-' + postId);
+        if (!el) return;
+        var current = el.style.getPropertyValue('display');
+        if (current === 'none' || current === '') {
+            var val = window.innerWidth <= 768 ? 'block' : 'table-row';
+            el.style.setProperty('display', val, 'important');
+        } else {
+            el.style.setProperty('display', 'none', 'important');
+        }
     }
 
     document.addEventListener('DOMContentLoaded', initCommunity);
