@@ -163,9 +163,9 @@
     }
 
     /* 게시글 펼침/숨김 공통 (CSS 클래스 제어) */
-    .post-detail { display: none; }
-    .post-detail.open { display: table-row; }
-    tr.board-row.page-hidden { display: none; }
+    .post-detail { display: none !important; }
+    .post-detail.open { display: table-row !important; }
+    tr.board-row.page-hidden { display: none !important; }
 
     </style>
 </head>
@@ -309,7 +309,7 @@
                 </tr>
 
                 <!-- 2. 숨겨진 본문 내용 (클릭 시 등장) -->
-                <tr id="post-detail-<%= post._id %>" class="post-detail page-<%= pageNum %>" style="background: #0e0e0f;">
+                <tr id="post-detail-<%= post._id %>" class="post-detail page-<%= pageNum %>" style="background: #0e0e0f; display: none;">
                     <td colspan="2" style="padding: 30px 20px; text-align: left; border-bottom: 2px solid #ff5722;"> 
                         
                         <div class="post-info-bar" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #222; font-size: 14px; color: #aaa; display: flex; gap: 15px; flex-wrap: wrap;">
