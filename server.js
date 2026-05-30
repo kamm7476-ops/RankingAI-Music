@@ -425,7 +425,7 @@ app.post('/set-nickname', async (req, res) => {
     try {
         const newNickname = req.body.nickname.trim();
         
-        const existing = await User.findOne({ nickname: newNickname });
+        const existing = await User.findOne({ nickname: { $regex: new RegExp('^' + escapeRegex(newNickname) + '$', 'i') } });
         if (existing) {
             return res.send("<script>alert('이미 다른 분이 사용 중인 이름입니다! 다른 멋진 이름을 지어주세요.'); window.history.back();</script>");
         }
@@ -455,7 +455,15 @@ app.post('/set-nickname', async (req, res) => {
 // ==========================================
 // ✉️ 🌟 이메일 인증 발송 및 확인 파이프 🌟
 // ==========================================
-const verificationCodes = new Map(); 
+const verificationCodes = new Map();
+
+// 만료된 인증코드 자동 정리 (메모리 누수 방지)
+setInterval(() => {
+    const now = Date.now();
+    for (const [email, data] of verificationCodes.entries()) {
+        if (now > data.expires) verificationCodes.delete(email);
+    }
+}, 10 * 60 * 1000);
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -519,25 +527,29 @@ app.post('/verify-code', (req, res) => {
 // ==========================================
 app.get('/signup', (req, res) => res.render('signup'));
 app.get('/login', (req, res) => res.render('login'));
-app.get('/terms', (req, res) => res.render('terms'));
+
+// RegExp 특수문자 이스케이프 (RegExp 인젝션 방지)
+function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 app.post('/signup', async (req, res) => {
   try {
     const username = req.body.username.trim();
     const password = req.body.password;
     const nickname = req.body.nickname ? req.body.nickname.trim() : "";
-    
-    const existingUser = await User.findOne({ 
-        username: { $regex: new RegExp('^' + username + '$', 'i') } 
+
+    const existingUser = await User.findOne({
+        username: { $regex: new RegExp('^' + escapeRegex(username) + '$', 'i') }
     });
-    
+
     if (existingUser) {
       return res.send("<script>alert('이미 사용 중인 아이디입니다! (대/소문자 구분 안 함)'); window.history.back();</script>");
     }
-    
+
     if (nickname) {
-        const existingNickname = await User.findOne({ 
-            nickname: { $regex: new RegExp('^' + nickname + '$', 'i') } 
+        const existingNickname = await User.findOne({
+            nickname: { $regex: new RegExp('^' + escapeRegex(nickname) + '$', 'i') }
         });
         if (existingNickname) {
             return res.send("<script>alert('이미 사용 중인 닉네임입니다!'); window.history.back();</script>");
@@ -565,8 +577,8 @@ app.post('/login', async (req, res) => {
     const username = req.body.username.trim(); 
     const password = req.body.password; 
     
-    const user = await User.findOne({ 
-        username: { $regex: new RegExp('^' + username + '$', 'i') } 
+    const user = await User.findOne({
+        username: { $regex: new RegExp('^' + escapeRegex(username) + '$', 'i') }
     });
     
     if (!user) {
@@ -598,7 +610,7 @@ app.post('/login', async (req, res) => {
     if (userRole === 'admin') {
          res.send("<script>alert('👑 관리자님 환영합니다!'); window.location.href='/';</script>");
     } else {
-         res.send("<script>alert('반갑습니다, " + displayName + "님!'); window.location.href='/';</script>");
+         res.send(`<script>alert('반갑습니다, ' + ${JSON.stringify(displayName)} + '님!'); window.location.href='/';</script>`);
     }
   } catch (error) {
     console.error("로그인 에러:", error);
@@ -841,7 +853,7 @@ app.post('/delete-post/:id', async (req, res) => {
     if (!req.session || !req.session.user) return res.redirect('/board');
     try {
         const post = await Post.findById(req.params.id);
-        if (req.session.user.role === 'admin' || req.session.user.name === post.author) await Post.findByIdAndDelete(req.params.id);
+        if (post && (req.session.user.role === 'admin' || req.session.user.name === post.author)) await Post.findByIdAndDelete(req.params.id);
         res.redirect('/board');
     } catch (err) { console.log(err); }
 });
@@ -1268,7 +1280,7 @@ app.post('/contact/delete/:id', async (req, res) => {
 global.liveUsers = new Map(); 
 
 app.post('/api/heartbeat', async (req, res) => {
-    let userIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
+    let userIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip;
     if (userIp && userIp.includes(',')) userIp = userIp.split(',')[0].trim();
     
     const isPlaying = req.body.isPlaying; 
@@ -1307,7 +1319,7 @@ setInterval(() => {
 
 app.get('/api/admin/live-stats', (req, res) => {
     let playingCount = 0;
-    for (let [ip, data] of global.liveUsers.entries()) {
+    for (let [, data] of global.liveUsers.entries()) {
         if (data.isPlaying) playingCount++;
     }
     res.json({
@@ -1583,10 +1595,11 @@ app.post('/admin/send-message', async (req, res) => {
 });
 
 app.post('/read-message/:id', async (req, res) => {
+    const back = req.get('Referer') || '/';
     try {
         await Message.findByIdAndUpdate(req.params.id, { isRead: true });
-        res.redirect('back');
-    } catch (err) { res.redirect('back'); }
+        res.redirect(back);
+    } catch (err) { res.redirect(back); }
 });
 
 // =========================================

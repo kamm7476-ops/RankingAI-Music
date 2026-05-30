@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
@@ -6,8 +7,7 @@ const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
 
-// 🌟 몽고DB 연결 (회원님의 아이디와 비번 적용 완료!)
-const DB_URI = "mongodb+srv://kamm7476:01483890Nki@cluster0.y95nodi.mongodb.net/RankingAI?retryWrites=true&w=majority";
+const DB_URI = process.env.DB_URI;
 
 mongoose.connect(DB_URI)
     .then(() => console.log("✅ 몽고DB 연결 성공! (슈퍼 관리자 모드)"))
@@ -72,7 +72,7 @@ app.post('/login', async (req, res) => {
     } else { res.send('<script>alert("로그인 정보가 틀립니다."); window.location.href="/";</script>'); }
 });
 
-app.get('/logout', (req, res) => { req.session.destroy(); res.redirect('/'); });
+app.get('/logout', (req, res) => { req.session.destroy(() => res.redirect('/')); });
 
 app.post('/upload', upload.single('mediaFile'), async (req, res) => {
     if (!req.session.user) return res.redirect('/');

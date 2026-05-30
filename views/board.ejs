@@ -100,8 +100,8 @@
             tr.board-row td:first-child { width: 35px !important; min-width: 35px !important; flex-shrink: 0 !important; text-align: center !important; }
             tr.board-row td.td-title { flex-grow: 1 !important; width: calc(100% - 35px) !important; padding-left: 10px !important; white-space: normal !important; word-break: break-word !important; line-height: 1.5 !important; }
 
-            tr.post-detail { display: none; width: 100% !important; flex-direction: column !important; }
-            tr.post-detail[style*="table-row"], tr.post-detail[style*="block"] { display: flex !important; }
+            tr.post-detail { display: none !important; }
+            tr.post-detail.open { display: block !important; }
             tr.post-detail td { width: 100% !important; padding: 20px 15px !important; }
         }
 
@@ -156,11 +156,16 @@
 
         /* 🚨 모바일 글쓰기 박스 내부 "모든 요소(*)" 강제 활성화 (초강력) */
     #writeBox * {
-        pointer-events: auto !important; 
-        user-select: text !important; /* 글자 선택/입력 무조건 허용 */
-        -webkit-user-select: text !important; /* 아이폰 무조건 허용 */
-        touch-action: manipulation !important; /* 터치 씹힘 방지 */
+        pointer-events: auto !important;
+        user-select: text !important;
+        -webkit-user-select: text !important;
+        touch-action: manipulation !important;
     }
+
+    /* 게시글 펼침/숨김 공통 (CSS 클래스 제어) */
+    .post-detail { display: none; }
+    .post-detail.open { display: table-row; }
+    tr.board-row.page-hidden { display: none; }
 
     </style>
 </head>
@@ -290,9 +295,9 @@
                 <% const embedUrl = getEmbedUrl(post.youtubeUrl); %>
 
                 <!-- 1. 리스트 줄 (제목) : 클릭하면 아래 내용이 열립니다 -->
-                <tr class="board-row page-<%= pageNum %>" 
-                    style="<%= pageNum > 1 ? 'display: none;' : '' %>; cursor: pointer;"
-                    onclick="const detail = document.getElementById('post-detail-<%= post._id %>'); detail.style.display = (detail.style.display === 'none' || detail.style.display === '') ? 'table-row' : 'none';">
+                <tr class="board-row page-<%= pageNum %><%= pageNum > 1 ? ' page-hidden' : '' %>"
+                    style="cursor: pointer;"
+                    onclick="document.getElementById('post-detail-<%= post._id %>').classList.toggle('open');">
                     
                     <td class="td-num" style="text-align: center; color: #666;"><%= posts.length - index %></td>
                     <td class="td-title" style="font-weight: 500;">
@@ -304,7 +309,7 @@
                 </tr>
 
                 <!-- 2. 숨겨진 본문 내용 (클릭 시 등장) -->
-                <tr id="post-detail-<%= post._id %>" class="post-detail page-<%= pageNum %>" style="display: none; background: #0e0e0f;">
+                <tr id="post-detail-<%= post._id %>" class="post-detail page-<%= pageNum %>" style="background: #0e0e0f;">
                     <td colspan="2" style="padding: 30px 20px; text-align: left; border-bottom: 2px solid #ff5722;"> 
                         
                         <div class="post-info-bar" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #222; font-size: 14px; color: #aaa; display: flex; gap: 15px; flex-wrap: wrap;">
@@ -694,10 +699,10 @@ async function submitReply(event, postId, commentId) {
 
     <script>
         function changePage(targetPage) {
-            document.querySelectorAll('.board-row').forEach(row => row.style.display = 'none');
-            document.querySelectorAll('.post-detail').forEach(row => row.style.display = 'none');
+            document.querySelectorAll('.board-row').forEach(row => row.classList.add('page-hidden'));
+            document.querySelectorAll('.post-detail').forEach(row => row.classList.remove('open'));
 
-            document.querySelectorAll('.board-row.page-' + targetPage).forEach(row => row.style.display = '');
+            document.querySelectorAll('.board-row.page-' + targetPage).forEach(row => row.classList.remove('page-hidden'));
 
             document.querySelectorAll('.page-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
@@ -747,23 +752,33 @@ async function submitReply(event, postId, commentId) {
 
     /* 🌟 공통 및 모바일 디자인 보정 */
     @media screen and (max-width: 768px) {
-        table.board-table, table.board-table tbody, table.board-table tr, table.board-table td {
-            display: block !important; 
+        table.board-table, table.board-table tbody {
+            display: block !important;
             width: 100% !important;
             box-sizing: border-box !important;
         }
+        table.board-table td { display: block !important; width: 100% !important; box-sizing: border-box !important; }
         table.board-table thead { display: none !important; }
 
-        /* 📱 모바일 카드 디자인 (클릭 간섭 방지) */
+        /* 📱 모바일 카드 디자인 */
         tr.board-row {
-            margin-bottom: 15px !important; 
+            display: block !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            margin-bottom: 15px !important;
             background: #161718 !important;
             border-radius: 12px !important;
             border: 1px solid #252628 !important;
             padding: 10px !important;
             position: relative;
-            z-index: 1; /* 게시글 카드는 기본 높이 */
+            z-index: 1;
         }
+        tr.board-row.page-hidden { display: none !important; }
+        .board-header { flex-wrap: wrap; gap: 10px; align-items: center; }
+        .board-title span { display: none; }
+        .auth-buttons { gap: 8px; }
+        .lang-select { padding: 5px 8px !important; font-size: 11px !important; }
+        .btn-signup { padding: 6px 12px !important; font-size: 12px !important; }
 
         /* ✍️ 글쓰기 버튼 최상단 배치 */
         .btn-write, .write-btn-container {
@@ -785,29 +800,15 @@ async function submitReply(event, postId, commentId) {
 <script>
     // 🚀 페이지 로드 즉시 실행되는 기능 초기화
     function initCommunity() {
-        console.log("커뮤니티 기능을 강제 활성화합니다.");
-        
-        // 1. 아코디언 상세 내용 초기 숨김 세팅
         document.querySelectorAll('.post-detail').forEach(detail => {
-            detail.style.display = 'none';
+            detail.classList.remove('open');
         });
-
-        // 2. 모바일에서 클릭이 먹통되는 현상 방지 (포인터 이벤트 강제 활성화)
-        const writeBtn = document.querySelector('.btn-write, .btn-submit');
-        if (writeBtn) writeBtn.style.pointerEvents = 'auto';
     }
 
-    // 문서가 준비되면 즉시 실행
     document.addEventListener('DOMContentLoaded', initCommunity);
 
-    // 캐시된 화면(뒤로가기 등)으로 올 때도 즉시 실행
     window.addEventListener('pageshow', function(event) {
-        initCommunity(); // 디자인 초기화 함수 호출
-        
-        if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
-            // 캐시가 너무 심할 경우에만 새로고침 수행
-            window.location.reload(); 
-        }
+        initCommunity();
     });
 </script>
     </div> <!-- .container -->

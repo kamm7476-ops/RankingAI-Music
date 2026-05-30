@@ -18,7 +18,9 @@ async function fetchAndSave() {
         const response = await fetch(rssUrl);
         const xmlText = await response.text();
         
-        const items = xmlText.match(/<item>([\s\S]*?)<\/item>/g).slice(0, 30);
+        const matched = xmlText.match(/<item>([\s\S]*?)<\/item>/g);
+        if (!matched) { console.log("❌ 뉴스 항목을 찾을 수 없습니다."); return; }
+        const items = matched.slice(0, 30);
         const newsData = [];
 
         for (const item of items) {
