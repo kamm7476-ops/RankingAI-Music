@@ -1010,20 +1010,22 @@ async function fetchBigNews() {
 
         const cards = data
             .filter(item => item.title && item.title.trim() !== '' && item.desc && item.desc.trim() !== '')
-            .map(item => `
+            .map(item => {
+                const sourceLabel = item.source || 'Global';
+                return `
                 <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="bento-news-card">
                     <div class="bento-header">
-                        <span class="bento-tag">🌐 GLOBAL NEWS</span>
+                        <span class="bento-tag">🌐 ${sourceLabel}</span>
                         <span class="bento-date">${item.date}</span>
                     </div>
                     <h3 class="bento-title">${item.title}</h3>
                     <p class="bento-desc">${item.desc}</p>
                     <div class="bento-footer">
-                        <span>Silicon Valley Curation</span>
+                        <span>${sourceLabel}</span>
                         <span class="bento-read">원문 읽기 ↗</span>
                     </div>
-                </a>
-            `).join('');
+                </a>`;
+            }).join('');
         container.innerHTML = cards || '<div style="grid-column:1/-1;text-align:center;color:#aaa;padding:40px;">아직 준비된 뉴스가 없습니다. 잠시 후 다시 확인해 주세요.</div>';
 
         isNewsLoaded = true; // 스위치 ON!
