@@ -106,6 +106,19 @@
                 <label>아티스트명 (닉네임)</label>
                 <input type="text" name="nickname" placeholder="활동하실 멋진 이름을 입력하세요" required autocomplete="off" maxlength="15">
             </div>
+            <div class="input-group">
+                <label>성별 <span style="color:#777; font-weight:normal;">(선택)</span></label>
+                <select name="gender" style="width:100%; padding:14px; background:#222; border:1px solid #444; border-radius:8px; color:#fff; font-size:15px; outline:none; transition:0.3s; appearance:none; cursor:pointer;">
+                    <option value="">선택 안 함</option>
+                    <option value="male">남성</option>
+                    <option value="female">여성</option>
+                    <option value="other">기타</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>출생연도 <span style="color:#777; font-weight:normal;">(선택)</span></label>
+                <input type="number" name="birthYear" placeholder="예: 1995" min="1920" max="<%= new Date().getFullYear() %>" style="width:100%; padding:14px; background:#222; border:1px solid #444; border-radius:8px; color:#fff; font-size:15px; outline:none; transition:0.3s;">
+            </div>
 
             <div class="input-group">
                 <label>이메일 인증</label>

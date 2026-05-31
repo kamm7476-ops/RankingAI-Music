@@ -143,6 +143,106 @@
         </div>
     </div>
 
+    <%# ── 페이지별 오늘 조회수 ── %>
+    <div style="background: #161718; padding: 20px; border-radius: 12px; border: 1px solid #333; margin-bottom: 25px;">
+        <h3 style="color: #ff5722; margin-top: 0; font-size: 16px;">📄 오늘 페이지별 조회수 (PV)</h3>
+        <% if (typeof pageStats !== 'undefined' && pageStats.length > 0) { %>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <% pageStats.forEach(p => { %>
+                    <% const maxCount = pageStats[0].count || 1; %>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="color: #ccc; font-size: 13px; min-width: 80px; text-align: right;"><%= p.page %></span>
+                        <div style="flex: 1; background: #222; border-radius: 6px; height: 22px; overflow: hidden;">
+                            <div style="width: <%= Math.round((p.count / maxCount) * 100) %>%; background: linear-gradient(90deg, #ff5722, #ffb300); height: 100%; border-radius: 6px; transition: width 0.5s;"></div>
+                        </div>
+                        <span style="color: #00e5ff; font-weight: bold; font-size: 14px; min-width: 40px;"><%= p.count %>회</span>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <span style="color: #777; font-size: 14px;">아직 페이지 데이터가 없습니다.</span>
+        <% } %>
+    </div>
+
+    <%# ── 성별 & 연령대 분포 ── %>
+    <div style="display: flex; gap: 20px; margin-bottom: 25px; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 260px; background: #161718; padding: 20px; border-radius: 12px; border: 1px solid #333;">
+            <h3 style="color: #ff5722; margin-top: 0; font-size: 16px; text-align: center;">👫 회원 성별 분포</h3>
+            <canvas id="genderChart" style="max-height: 220px;"></canvas>
+        </div>
+        <div style="flex: 1; min-width: 260px; background: #161718; padding: 20px; border-radius: 12px; border: 1px solid #333;">
+            <h3 style="color: #ff5722; margin-top: 0; font-size: 16px; text-align: center;">🎂 회원 연령대 분포</h3>
+            <canvas id="ageChart" style="max-height: 220px;"></canvas>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 성별 도넛 차트
+            const genderData = <%- typeof genderStats !== 'undefined' ? JSON.stringify(genderStats) : '[]' %>;
+            if (genderData.length > 0) {
+                const gCtx = document.getElementById('genderChart').getContext('2d');
+                new Chart(gCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: genderData.map(g => g.label),
+                        datasets: [{
+                            data: genderData.map(g => g.count),
+                            backgroundColor: ['#4fc3f7', '#f48fb1', '#ce93d8', '#aaa'],
+                            borderWidth: 2,
+                            borderColor: '#161718'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { labels: { color: '#fff', font: { family: 'Pretendard' } } }
+                        }
+                    }
+                });
+            } else {
+                document.getElementById('genderChart').parentElement.innerHTML += '<p style="color:#777;text-align:center;font-size:13px;">데이터가 없습니다.</p>';
+            }
+
+            // 연령대 막대 차트
+            const ageData = <%- typeof ageStats !== 'undefined' ? JSON.stringify(ageStats) : '[]' %>;
+            const ageOrder = ['10대', '20대', '30대', '40대', '50대+', '미입력'];
+            const sortedAge = ageOrder.map(label => {
+                const found = ageData.find(a => a._id === label);
+                return { label, count: found ? found.count : 0 };
+            }).filter(a => a.count > 0);
+
+            if (sortedAge.length > 0) {
+                const aCtx = document.getElementById('ageChart').getContext('2d');
+                new Chart(aCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedAge.map(a => a.label),
+                        datasets: [{
+                            label: '회원 수',
+                            data: sortedAge.map(a => a.count),
+                            backgroundColor: ['#ff5722','#ffb300','#4caf50','#00e5ff','#ce93d8','#aaa'],
+                            borderRadius: 6,
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: { ticks: { color: '#aaa' }, grid: { color: '#333' } },
+                            y: { ticks: { color: '#aaa', beginAtZero: true, stepSize: 1 }, grid: { color: '#333' } }
+                        }
+                    }
+                });
+            } else {
+                document.getElementById('ageChart').parentElement.innerHTML += '<p style="color:#777;text-align:center;font-size:13px;">데이터가 없습니다.</p>';
+            }
+        });
+    </script>
+
     <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
         <button class="period-btn" onclick="loadChartData('daily', this)" style="padding: 8px 25px; border-radius: 20px; border: 1px solid #ff5722; background: #ff5722; color: #fff; font-weight: bold; cursor: pointer; transition: 0.3s;">일간 (최근 7일)</button>
         <button class="period-btn" onclick="loadChartData('monthly', this)" style="padding: 8px 25px; border-radius: 20px; border: 1px solid #444; background: #222; color: #aaa; font-weight: bold; cursor: pointer; transition: 0.3s;">월간 (최근 12개월)</button>
@@ -256,6 +356,8 @@
             <tr>
                 <th>가입일</th>
                 <th>아이디(닉네임)</th>
+                <th>성별</th>
+                <th>연령</th>
                 <th>업로드 수 🌟</th>
                 <th>오늘 접속</th>
                 <th>총 접속</th>
@@ -269,7 +371,19 @@
                     <tr>
                         <td data-label="가입일"><%= user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '날짜 없음' %></td>
                         <td data-label="닉네임"><strong><%= user.username %></strong> <%= user.nickname ? `(${user.nickname})` : '' %></td>
-                        
+
+                        <td data-label="성별" style="color:#ccc; font-size:13px;">
+                            <% if(user.gender === 'male') { %><span style="color:#4fc3f7;">남성</span>
+                            <% } else if(user.gender === 'female') { %><span style="color:#f48fb1;">여성</span>
+                            <% } else if(user.gender === 'other') { %><span style="color:#ce93d8;">기타</span>
+                            <% } else { %><span style="color:#555;">-</span><% } %>
+                        </td>
+                        <td data-label="연령" style="color:#ccc; font-size:13px;">
+                            <% if(user.birthYear) { %>
+                                <%= new Date().getFullYear() - user.birthYear %>세
+                            <% } else { %><span style="color:#555;">-</span><% } %>
+                        </td>
+
                         <td data-label="업로드 수">
                             <span style="color:#00e5ff; font-weight:bold; text-decoration:underline; cursor:pointer;" onclick="toggleMusicList('<%= user.username %>')">
                                 🎧 <%= user.musicCount %>곡 보기
@@ -300,7 +414,7 @@
                     </tr>
 
                     <tr id="music-list-<%= user.username %>" class="music-dropdown" style="display: none;">
-                        <td colspan="7" style="padding: 15px; border: 1px dashed #444;"> <% if (user.uploadedMusic && user.uploadedMusic.length > 0) { %>
+                        <td colspan="9" style="padding: 15px; border: 1px dashed #444;"> <% if (user.uploadedMusic && user.uploadedMusic.length > 0) { %>
                                 <ul style="list-style:none; padding:0; margin:0;">
                                     <% user.uploadedMusic.forEach(music => { %>
                                         <li class="music-item-li">
@@ -322,7 +436,7 @@
                     </tr>
                 <% }) %>
             <% } else { %>
-                <tr><td colspan="7" style="text-align:center; padding: 30px;">가입한 유저가 없습니다.</td></tr>
+                <tr><td colspan="9" style="text-align:center; padding: 30px;">가입한 유저가 없습니다.</td></tr>
             <% } %>
         </tbody>
     </table>

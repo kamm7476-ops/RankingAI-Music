@@ -16,7 +16,9 @@ const userSchema = new mongoose.Schema({
   // ==========================================
   totalLogins: { type: Number, default: 0 }, // 총 접속 횟수
   todayLogins: { type: Number, default: 0 }, // 오늘 접속 횟수
-  lastLoginDate: { type: String, default: '' } // 마지막 접속 날짜 (자정 지나면 초기화하기 위함)
+  lastLoginDate: { type: String, default: '' }, // 마지막 접속 날짜 (자정 지나면 초기화하기 위함)
+  gender: { type: String, default: '' },        // 'male', 'female', 'other'
+  birthYear: { type: Number, default: null }    // 출생연도 (나이 계산용)
 });
 
 module.exports = mongoose.model('User', userSchema);

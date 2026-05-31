@@ -194,6 +194,7 @@ const VisitLogSchema = new mongoose.Schema({
     date: { type: String, required: true },
     country: { type: String, default: 'Unknown' },
     userId: { type: String, default: 'Guest' },
+    page: { type: String, default: '/' },
     playTime: { type: Number, default: 0 },
     totalPlayTime: { type: Number, default: 0 }, // 👈 추가된 새 감상시간
     dwellTime: { type: Number, default: 0 },     // 👈 추가된 체류시간
@@ -300,6 +301,30 @@ app.use(async (req, res, next) => {
         } catch (err) {
             console.error("방문자 통계 에러:", err);
         }
+    }
+    next();
+});
+
+// =========================================
+// 📄 페이지별 방문 추적 미들웨어
+// =========================================
+const trackedPages = ['/board', '/youtube', '/shorts', '/radio', '/mymusic', '/chat', '/chatlist', '/contact'];
+
+app.use(async (req, res, next) => {
+    if (req.method === 'GET' && trackedPages.includes(req.path)) {
+        try {
+            let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+            if (ip && ip.includes(',')) ip = ip.split(',')[0].trim();
+            const geo = geoip.lookup(ip);
+            const country = geo ? geo.country : 'Unknown';
+            const today = getTodayDate();
+            new VisitLog({
+                date: today,
+                country: country,
+                userId: req.session && req.session.user ? req.session.user.id : 'Guest',
+                page: req.path
+            }).save().catch(() => {});
+        } catch(e) {}
     }
     next();
 });
@@ -558,10 +583,12 @@ app.post('/signup', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    const newUser = new User({ 
-        username: username.toLowerCase(), 
-        password: hashedPassword, 
-        nickname: nickname 
+    const newUser = new User({
+        username: username.toLowerCase(),
+        password: hashedPassword,
+        nickname: nickname,
+        gender: req.body.gender || '',
+        birthYear: req.body.birthYear ? parseInt(req.body.birthYear) : null
     });
     await newUser.save();
     
@@ -656,7 +683,8 @@ app.get('/', async (req, res) => {
    new VisitLog({
        date: today,
        country: country,
-       userId: req.session.user ? req.session.user.id : 'Guest'
+       userId: req.session.user ? req.session.user.id : 'Guest',
+       page: '/'
    }).save().catch(err => console.error("로그 저장 실패:", err));
 
    try {
@@ -1462,6 +1490,68 @@ app.get('/admin', async (req, res) => {
             { $limit: 20 }
         ]);
 
+        // 📄 페이지별 조회수 (오늘)
+        const pageLabels = {
+            '/': '메인(차트)',
+            '/board': '게시판',
+            '/youtube': '유튜브',
+            '/shorts': '쇼츠',
+            '/radio': '라디오',
+            '/mymusic': '내 음악',
+            '/chat': '채팅',
+            '/chatlist': '채팅목록',
+            '/contact': '문의'
+        };
+        const rawPageStats = await VisitLog.aggregate([
+            { $match: { date: today } },
+            { $group: { _id: "$page", count: { $sum: 1 } } },
+            { $sort: { count: -1 } }
+        ]);
+        const pageStats = rawPageStats.map(p => ({
+            page: pageLabels[p._id] || p._id,
+            count: p.count
+        }));
+
+        // 👫 성별 분포
+        const rawGenderStats = await User.aggregate([
+            { $group: { _id: "$gender", count: { $sum: 1 } } }
+        ]);
+        const genderMap = { male: '남성', female: '여성', other: '기타', '': '미입력' };
+        const genderStats = rawGenderStats.map(g => ({
+            label: genderMap[g._id] || '미입력',
+            count: g.count
+        }));
+
+        // 🎂 연령대 분포
+        const currentYear = new Date().getFullYear();
+        const rawAgeStats = await User.aggregate([
+            {
+                $project: {
+                    ageGroup: {
+                        $cond: {
+                            if: { $not: ["$birthYear"] },
+                            then: "미입력",
+                            else: {
+                                $switch: {
+                                    branches: [
+                                        { case: { $lt: [{ $subtract: [currentYear, "$birthYear"] }, 20] }, then: "10대" },
+                                        { case: { $lt: [{ $subtract: [currentYear, "$birthYear"] }, 30] }, then: "20대" },
+                                        { case: { $lt: [{ $subtract: [currentYear, "$birthYear"] }, 40] }, then: "30대" },
+                                        { case: { $lt: [{ $subtract: [currentYear, "$birthYear"] }, 50] }, then: "40대" },
+                                        { case: { $gte: [{ $subtract: [currentYear, "$birthYear"] }, 50] }, then: "50대+" }
+                                    ],
+                                    default: "미입력"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            { $group: { _id: "$ageGroup", count: { $sum: 1 } } },
+            { $sort: { _id: 1 } }
+        ]);
+        const ageStats = rawAgeStats;
+
         // ⏳ [최종 해결] 체류시간(dwellTime)까지 싹 다 합쳐서 계산합니다!
         const playTimeStats = await VisitLog.aggregate([
             { $match: { date: today } },
@@ -1499,15 +1589,18 @@ app.get('/admin', async (req, res) => {
         const chartVisitors = past7Stats.map(s => s.dailyVisitors || 0);
         const chartPlays = past7Stats.map(s => s.dailyPlays || 0);
         
-        res.render('admin', { 
-            users: usersWithMusic, 
-            stats: stats, 
-            countryStats: countryStats, 
+        res.render('admin', {
+            users: usersWithMusic,
+            stats: stats,
+            countryStats: countryStats,
+            pageStats: pageStats,
+            genderStats: genderStats,
+            ageStats: ageStats,
             todayPlayTime: todayPlayTime,
-            chartDates: chartDates,       
-            chartVisitors: chartVisitors, 
-            chartPlays: chartPlays,       
-            user: req.session.user 
+            chartDates: chartDates,
+            chartVisitors: chartVisitors,
+            chartPlays: chartPlays,
+            user: req.session.user
         });
     } catch (err) {
         console.error("관리자 페이지 로딩 에러:", err);
