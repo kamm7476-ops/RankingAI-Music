@@ -24,22 +24,25 @@
 
         /* 🌟 상단바 디자인 (메인과 완벽히 동일) */
         .main-header { background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
-        .header-top { display: flex; justify-content: flex-start; align-items: center; padding: 10px 15px; border-bottom: 1px solid #1a1b1c; }
-        .logo-img { height: 50px; max-width: 100%; cursor: pointer; object-fit: contain; }
+        .main-header { background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
+        .header-top { display: flex; justify-content: flex-start; align-items: center; padding: 8px 15px; border-bottom: 1px solid #1a1b1c; }
+        .logo-img { height: 38px; max-width: 160px; cursor: pointer; object-fit: contain; }
 
-        .header-auth { display: flex; justify-content: flex-end; align-items: center; padding: 6px 15px; border-bottom: 1px solid #1a1b1c; gap: 12px; }
-        .header-search { padding: 8px 15px; border-bottom: 1px solid #1a1b1c; }
-        .top-search-form { display: flex; align-items: center; background: #222 !important; border: 2px solid #ff5722; border-radius: 25px; padding: 5px 12px; width: 100%; max-width: 600px; margin: 0 auto; box-sizing: border-box; }
+        .header-auth { display: flex; justify-content: space-between; align-items: center; padding: 6px 15px; border-bottom: 1px solid #1a1b1c; }
+        .auth-left { display: flex; align-items: center; }
+        .auth-right { display: flex; align-items: center; gap: 10px; }
+
+        .header-search { padding: 7px 15px; border-bottom: 1px solid #1a1b1c; }
+        .top-search-form { display: flex; align-items: center; background: #222 !important; border: 2px solid #ff5722; border-radius: 25px; padding: 5px 12px; width: 100%; box-sizing: border-box; }
         .top-search-input { background: transparent !important; border: none !important; color: white !important; outline: none; flex: 1; font-size: 14px; padding: 5px; min-width: 0; }
         .top-search-input::placeholder { color: #aaa; }
         .top-search-btn { background: none; border: none; color: #ff5722; font-weight: bold; cursor: pointer; font-size: 16px; padding: 0 10px; }
 
-        .auth-buttons { display: flex; gap: 12px; align-items: center; flex-shrink: 0; }
-        .lang-select { padding: 7px 14px; background: #222; color: #fff; border: 2px solid #ff5722; border-radius: 20px; font-weight: bold; font-size: 13px; outline: none; cursor: pointer; transition: 0.2s; }
+        .lang-select { padding: 6px 12px; background: #222; color: #fff; border: 2px solid #ff5722; border-radius: 20px; font-weight: bold; font-size: 13px; outline: none; cursor: pointer; transition: 0.2s; }
         .lang-select:hover { background: #ff5722; color: #000; }
-        .btn-admin { color: #ff4a4a; font-weight: bold; font-size: 14px; border: 1px solid #ff4a4a; padding: 5px 12px; border-radius: 15px; }
-        .btn-login { color: #bbb; font-size: 14px; }
-        .btn-signup { background: #ff5722; color: #000; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .btn-admin { color: #ff4a4a; font-weight: bold; font-size: 13px; border: 1px solid #ff4a4a; padding: 4px 10px; border-radius: 15px; }
+        .btn-login { color: #bbb; font-size: 13px; }
+        .btn-signup { background: #ff5722; color: #000; padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 13px; }
 
         /* 🌟 메뉴바 */
         .header-nav { display: flex; justify-content: center; gap: 40px; padding: 12px 0; background: #0b0c0d; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
@@ -198,20 +201,20 @@
         </div>
 
         <div class="header-auth">
-            <div class="auth-buttons">
+            <div class="auth-left">
                 <select id="smartLangSelect" onchange="window.location.href='/change-lang/' + this.value" class="lang-select">
                     <option value="ko" <%= typeof getLocale !== 'undefined' && getLocale() === 'ko' ? 'selected' : '' %>>🇰🇷 한국어</option>
                     <option value="en" <%= typeof getLocale !== 'undefined' && getLocale() === 'en' ? 'selected' : '' %>>🇺🇸 English</option>
                     <option value="ja" <%= typeof getLocale !== 'undefined' && getLocale() === 'ja' ? 'selected' : '' %>>🇯🇵 日本語</option>
                     <option value="zh" <%= typeof getLocale !== 'undefined' && getLocale() === 'zh' ? 'selected' : '' %>>🇨🇳 中文</option>
                 </select>
-
+            </div>
+            <div class="auth-right">
                 <% if (user && user.role === 'admin') { %>
                     <a href="/admin" class="btn-admin">👑 관리자</a>
                 <% } %>
-
                 <% if (user) { %>
-                    <span style="color: #aaa; font-size: 14px;"><%= user.name || user.id %><%= __('welcome_user') || '님' %></span>
+                    <span style="color: #aaa; font-size: 13px;"><%= user.name || user.id %><%= __('welcome_user') || '님' %></span>
                     <a href="/logout" class="btn-login"><%= __('btn_logout') || '로그아웃' %></a>
                 <% } else { %>
                     <a href="/login" class="btn-login"><%= __('btn_login') || '로그인' %></a>
