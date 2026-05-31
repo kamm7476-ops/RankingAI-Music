@@ -1735,8 +1735,8 @@ document.addEventListener('click', async (e) => {
         return; // 브라우저야, 이건 네가 원래 하던 대로 진짜 페이지 이동을 해!
     }
 
-    // 🚨 쇼츠, 유튜브, 라디오는 엔진 보호를 위해 '진짜 이동(새로고침)' 시킴
-    if (href.includes('shorts') || href.includes('youtube') || href.includes('radio')) {
+    // 🚨 쇼츠, 유튜브, 라디오, 커뮤니티는 엔진 보호를 위해 '진짜 이동(새로고침)' 시킴
+    if (href.includes('shorts') || href.includes('youtube') || href.includes('radio') || href.includes('board')) {
         window.location.assign(href);
         return;
     }
@@ -1813,8 +1813,8 @@ async function navigateTo(href, isPopState = false) {
 window.addEventListener('popstate', async () => {
     const targetUrl = location.pathname + location.search;
     
-    // 뒤로 갔을 때 쇼츠나 유튜브라면 새로고침 이동
-    if (targetUrl.includes('shorts') || targetUrl.includes('youtube') || targetUrl.includes('radio')) {
+    // 뒤로 갔을 때 쇼츠, 유튜브, 커뮤니티라면 새로고침 이동
+    if (targetUrl.includes('shorts') || targetUrl.includes('youtube') || targetUrl.includes('radio') || targetUrl.includes('board')) {
         location.href = targetUrl;
     } else {
         // ✅ 핵심: 음악 유지하며 본문만 바꿔치기 (isPopState = true 전달)
