@@ -827,25 +827,31 @@ app.get('/board', async (req, res) => {
 });
 
 // 🌟 커뮤니티 게시글 작성 (이미지 업로드 기능 장착 완료!)
-app.post('/add-post', upload.single('image'), async (req, res) => {
+app.post('/add-post', function(req, res, next) {
+    upload.single('image')(req, res, function(err) {
+        if (err) {
+            console.log("이미지 업로드 에러:", err);
+            return res.status(500).send("<script>alert('이미지 업로드 중 에러가 발생했습니다. 파일 크기(10MB 이하)와 형식을 확인해주세요.'); history.back();</script>");
+        }
+        next();
+    });
+}, async (req, res) => {
     if (!req.session || !req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); location.href='/login';</script>");
     try {
-        // 🌟 유저가 사진을 올렸으면 그 금고 주소를 가져오고, 안 올렸으면 빈칸('')으로 둡니다.
-        // 🌟 게시판 사진도 R2 주소로 저장!
-const uploadedImageUrl = req.file ? `${process.env.R2_PUBLIC_URL}/${req.file.key}` : '';
+        const uploadedImageUrl = req.file ? `${process.env.R2_PUBLIC_URL}/${req.file.key}` : '';
 
-        await new Post({ 
-            title: req.body.title, 
-            content: req.body.content, 
+        await new Post({
+            title: req.body.title,
+            content: req.body.content,
             author: req.session.user.name,
             imageUrl: uploadedImageUrl,
             youtubeUrl: req.body.youtubeUrl
         }).save();
-        
-        res.redirect('/board?t=' + Date.now());  // 👈 현재 시간을 몰래 붙여서 브라우저를 속입니다!
-    } catch (err) { 
-        console.log("게시글 작성 에러:", err); 
-        res.status(500).send("<script>alert('글쓰기 중 에러가 발생했습니다. 첨부파일 크기를 확인해주세요.'); history.back();</script>");
+
+        res.redirect('/board?t=' + Date.now());
+    } catch (err) {
+        console.log("게시글 작성 에러:", err);
+        res.status(500).send("<script>alert('글쓰기 중 에러가 발생했습니다. 잠시 후 다시 시도해주세요.'); history.back();</script>");
     }
 });
 

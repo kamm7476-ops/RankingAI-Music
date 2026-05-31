@@ -519,13 +519,6 @@ function toggleWriteBox() {
             }
         });
 
-        const writeForm = document.querySelector('form[action="/add-post"]');
-        if (writeForm) {
-            writeForm.onsubmit = function() {
-                document.getElementById('hidden-content').value = quill.root.innerHTML;
-            };
-        }
-
         quill.focus();
         window.scrollBy({ top: 150, behavior: 'smooth' });
     }, 200); 
@@ -833,6 +826,20 @@ async function submitReply(event, postId, commentId) {
             el.classList.remove('open');
             el.style.setProperty('display', 'none', 'important');
         });
+
+        // 글쓰기 폼 submit 이벤트 - 페이지 로드 시 반드시 등록 (타이밍 문제 방지)
+        const writeForm = document.querySelector('form[action="/add-post"]');
+        if (writeForm && !writeForm.dataset.submitBound) {
+            writeForm.dataset.submitBound = 'true';
+            writeForm.addEventListener('submit', function(e) {
+                if (!quill) {
+                    e.preventDefault();
+                    alert('에디터가 아직 준비 중입니다. 잠시 후 다시 시도해주세요.');
+                    return false;
+                }
+                document.getElementById('hidden-content').value = quill.root.innerHTML;
+            });
+        }
     }
 
     function togglePost(postId) {
