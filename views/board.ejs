@@ -107,15 +107,30 @@
 
         /* 🚨 모바일 에디터 터치 및 키보드 미출력 완벽 해결 패치 🚨 */
         .ql-editor {
-            -webkit-user-select: text !important; /* 🚀 여기를 text로 변경하여 키보드가 무조건 뜨게 만듭니다 */
+            -webkit-user-select: text !important;
             user-select: text !important;
             -webkit-touch-callout: default !important;
             touch-action: manipulation !important;
             cursor: text !important;
-            min-height: 250px !important; 
-            padding-bottom: 50px !important; 
+            min-height: 250px !important;
+            padding-bottom: 50px !important;
         }
-        
+
+        /* 🔧 Quill 툴바 SVG 아이콘 크기 고정 (삼각형 깨짐 방지) */
+        .ql-toolbar.ql-snow button svg,
+        .ql-toolbar.ql-snow .ql-picker-label svg {
+            width: 18px !important;
+            height: 18px !important;
+            max-width: 18px !important;
+            max-height: 18px !important;
+        }
+        .ql-toolbar.ql-snow button {
+            width: 28px !important;
+            height: 24px !important;
+            padding: 3px 5px !important;
+            overflow: hidden !important;
+        }
+
         .write-box { position: relative; z-index: 90; }
 
     /* ======================================================== */
@@ -489,13 +504,18 @@ function toggleWriteBox() {
             theme: 'snow',
             placeholder: '내용을 입력하세요...',
             modules: {
-                toolbar: [
-                    [{ 'size': ['small', false, 'large', 'huge'] }],
-                    ['bold', 'italic', 'underline', 'strike'],
-                    [{ 'color': [] }, { 'background': [] }],
-                    ['image', 'video', 'link'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }]
-                ]
+                toolbar: {
+                    container: [
+                        [{ 'size': ['small', false, 'large', 'huge'] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        ['image', 'link'],          // 'video' 제거 (삼각형 SVG 오류 원인)
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }]
+                    ],
+                    handlers: {
+                        image: imageHandler       // 이미지 압축 핸들러 연결
+                    }
+                }
             }
         });
 
