@@ -115,5 +115,12 @@
   "proposal_guide_4": "※ Store/Business BGM is 100% FREE!",
   "proposal_ph": "e.g., I want to use it for a YouTube BGM. I propose $30.",
   "btn_send_proposal": "Send Proposal",
-  "btn_send_proposal": "Send Proposal"
+  "btn_send_proposal": "Send Proposal",
+  "news_back_btn": "🔙 Back to Chart",
+  "news_subtitle": "Daily updates of global AI music and creative trends.",
+  "news_loading": "Loading latest trends... 🚀",
+  "news_read_more": "Read Article ↗",
+  "news_empty": "No news ready yet. Please check back later.",
+  "news_error": "AI is collecting global news. Please refresh in a moment! 🤖🚀",
+  "news_scanning": "Scanning Global Trends..."
 }

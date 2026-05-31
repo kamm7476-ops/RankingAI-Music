@@ -59,11 +59,11 @@ function isAiMusicRelated(title) {
     return AI_MUSIC_KEYWORDS.some(kw => lower.includes(kw));
 }
 
-async function translateText(raw) {
+async function translateTextToLang(raw, targetLang) {
     const text = cleanText(raw);
     if (!isReal(text)) return '';
     try {
-        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ko&dt=t&q=${encodeURIComponent(text)}`;
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
         const res  = await fetch(url, { signal: AbortSignal.timeout(8000) });
         const data = await res.json();
         return cleanText(data[0].map(x => x[0]).join(''));
@@ -170,17 +170,32 @@ async function fetchAndSave() {
         const tag = isAiMusicRelated(item.title) ? '🎵' : '📰';
         console.log(`   ${tag} 번역: ${item.title.substring(0, 55)}...`);
 
-        const translatedTitle = await translateText(item.title);
-        const translatedDesc  = await translateText(item.desc);
+        // 모든 언어 병렬 번역
+        const [titleKo, descKo, titleJa, descJa, titleZh, descZh] = await Promise.all([
+            translateTextToLang(item.title, 'ko'),
+            translateTextToLang(item.desc,  'ko'),
+            translateTextToLang(item.title, 'ja'),
+            translateTextToLang(item.desc,  'ja'),
+            translateTextToLang(item.title, 'zh-cn'),
+            translateTextToLang(item.desc,  'zh-cn'),
+        ]);
 
-        if (!isReal(translatedTitle, 6) || !isReal(translatedDesc, 10)) continue;
+        if (!isReal(titleKo, 6) || !isReal(descKo, 10)) continue;
 
         // 원본 영문 제목 끝 " - 출처이름" 추출 (예: "Suno raises $125M - TechCrunch" → "TechCrunch")
         const rawSource = item.title.match(/[-–]\s*([^-–]+?)\s*$/)?.[1]?.trim() || 'Global';
 
         newsData.push({
-            title:  translatedTitle,
-            desc:   translatedDesc,
+            title:    titleKo,
+            desc:     descKo,
+            title_en: item.title,
+            desc_en:  item.desc,
+            title_ko: titleKo,
+            desc_ko:  descKo,
+            title_ja: titleJa || item.title,
+            desc_ja:  descJa  || item.desc,
+            title_zh: titleZh || item.title,
+            desc_zh:  descZh  || item.desc,
             link:   item.link,
             source: rawSource,
             date:   item.pubDate

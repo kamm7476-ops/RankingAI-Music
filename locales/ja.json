@@ -91,5 +91,12 @@
   "action_delete": "削除",
   "action_comments": "コメント",
   "action_likes": "いいね",
-  "txt_play": "再生"
+  "txt_play": "再生",
+  "news_back_btn": "🔙 チャートに戻る",
+  "news_subtitle": "毎日更新されるグローバルAIミュージック＆クリエイティブトレンド。",
+  "news_loading": "最新トレンドを読み込み中... 🚀",
+  "news_read_more": "記事を読む ↗",
+  "news_empty": "まだニュースはありません。後でご確認ください。",
+  "news_error": "AIがグローバルニュースを収集中。少し後にリフレッシュしてください！🤖🚀",
+  "news_scanning": "Scanning Global Trends..."
 }

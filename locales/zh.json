@@ -91,5 +91,12 @@
   "action_delete": "删除",
   "action_comments": "评论",
   "action_likes": "赞",
-  "txt_play": "播放"
+  "txt_play": "播放",
+  "news_back_btn": "🔙 返回图表",
+  "news_subtitle": "每日更新的全球AI音乐和创意趋势。",
+  "news_loading": "正在加载最新趋势... 🚀",
+  "news_read_more": "阅读文章 ↗",
+  "news_empty": "暂无新闻。请稍后查看。",
+  "news_error": "AI正在收集全球新闻。请稍后刷新！🤖🚀",
+  "news_scanning": "Scanning Global Trends..."
 }

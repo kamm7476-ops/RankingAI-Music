@@ -976,7 +976,7 @@
         <h3 style="margin:0;">AI CREATIVE TRENDS</h3>
     </div>
     <div id="news-api-list">
-        <div style="color:#aaa; font-size:13px; padding: 10px;">Scanning Global Trends...</div>
+        <div style="color:#aaa; font-size:13px; padding: 10px;"><%= __('news_scanning') || 'Scanning Global Trends...' %></div>
     </div>
 </section>
                 
@@ -987,66 +987,76 @@
 <div id="full-news-page" style="display: none; padding: 40px 20px; min-height: 80vh; max-width: 1200px; margin: 0 auto;">
     <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #f97316; padding-bottom: 10px; margin-bottom: 20px;">
         <h2 style="color: #f97316; font-size: 36px; margin: 0; font-weight: 900;">GLOBAL AI TRENDS</h2>
-        <button onclick="closeNewsPage()" style="background: #222; color: #fff; border: 1px solid #444; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold;">🔙 차트로 돌아가기</button>
+        <button onclick="closeNewsPage()" style="background: #222; color: #fff; border: 1px solid #444; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold;"><%= __('news_back_btn') || '🔙 차트로 돌아가기' %></button>
     </div>
-    <p style="color: #aaa; font-size: 16px; margin-bottom: 40px;">매일 업데이트되는 전 세계 AI 음악 및 창작 트렌드입니다.</p>
+    <p style="color: #aaa; font-size: 16px; margin-bottom: 40px;"><%= __('news_subtitle') || '매일 업데이트되는 전 세계 AI 음악 및 창작 트렌드입니다.' %></p>
 
     <div id="big-news-list" style="display: grid; grid-template-columns: 1fr; gap: 20px;">
         </div>
 </div>
 
 <script>
+const NEWS_LANG = '<%= getLocale() %>';
+
+const NEWS_UI = {
+    ko: { loading: '최신 트렌드를 불러오는 중... 🚀', readMore: '원문 읽기 ↗', empty: '아직 준비된 뉴스가 없습니다. 잠시 후 다시 확인해 주세요.', error: 'AI 로봇이 전 세계 뉴스를 번역하고 있습니다. 잠시 후 새로고침 해주세요! 🤖🚀' },
+    en: { loading: 'Loading latest trends... 🚀', readMore: 'Read Article ↗', empty: 'No news ready yet. Please check back later.', error: 'AI is collecting global news. Please refresh in a moment! 🤖🚀' },
+    ja: { loading: '最新トレンドを読み込み中... 🚀', readMore: '記事を読む ↗', empty: 'まだニュースはありません。後でご確認ください。', error: 'AIがグローバルニュースを収集中。少し後にリフレッシュしてください！🤖🚀' },
+    zh: { loading: '正在加载最新趋势... 🚀', readMore: '阅读文章 ↗', empty: '暂无新闻。请稍后查看。', error: 'AI正在收集全球新闻。请稍后刷新！🤖🚀' },
+};
+const UI = NEWS_UI[NEWS_LANG] || NEWS_UI['en'];
+
+function getNewsTitle(item) {
+    return item['title_' + NEWS_LANG] || item.title_en || item.title;
+}
+function getNewsDesc(item) {
+    return item['desc_' + NEWS_LANG] || item.desc_en || item.desc;
+}
+
 let isNewsLoaded = false;
 
-// 뉴스 페이지 열기
 function openNewsPage() {
-    document.querySelector('.main-layout').style.display = 'none'; 
-    document.getElementById('full-news-page').style.display = 'block'; 
-    
+    document.querySelector('.main-layout').style.display = 'none';
+    document.getElementById('full-news-page').style.display = 'block';
+
     if (!isNewsLoaded) {
-        fetchBigNews(); 
+        fetchBigNews();
     }
 }
 
-// 뉴스 페이지 닫고 차트로 돌아가기
 function closeNewsPage() {
-    document.getElementById('full-news-page').style.display = 'none'; 
-    document.querySelector('.main-layout').style.display = 'flex'; 
+    document.getElementById('full-news-page').style.display = 'none';
+    document.querySelector('.main-layout').style.display = 'flex';
 }
 
-// 🚨 로봇이 만들어둔 파일을 0.1초 만에 가져오는 핵심 엔진!
 async function fetchBigNews() {
     const container = document.getElementById('big-news-list');
-    container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:50px; color:#fff;">최신 트렌드를 불러오는 중... 🚀</div>';
+    container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:50px; color:#fff;">${UI.loading}</div>`;
 
     try {
-        // 로봇이 저장해둔 완성본(news-data.json)을 그냥 읽기만 합니다.
         const response = await fetch('/news-data.json');
-        
-        // 만약 로봇이 아직 파일을 못 만들었다면 에러로 넘김
-        if (!response.ok) throw new Error("파일 아직 없음"); 
-        
+        if (!response.ok) throw new Error('no file');
+
         const data = await response.json();
         container.innerHTML = '';
 
-        // ── 화면 렌더링 전 유효성 검사 유틸 ─────────────────────
         function hasRealContent(str, min) {
             if (!str) return false;
             const c = str.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
-            return c.length >= (min || 4) && /[a-zA-Z가-힣0-9]/.test(c);
+            return c.length >= (min || 4) && /[a-zA-Z가-힣ぁ-んァ-ン一-龥0-9]/.test(c);
         }
 
         const cards = data
-            // ── [1차 차단] .filter(): 제목이나 설명이 실제 내용 없으면 목록에서 제거
             .filter(item =>
                 hasRealContent(item.title, 6) &&
-                hasRealContent(item.desc,  10) &&
+                hasRealContent(item.desc, 10) &&
                 item.link && item.link.startsWith('http')
             )
             .map(item => {
-                // ── [2차 차단] if 조건문: filter 통과 후에도 재확인, 단 1줄도 생성 안 함
-                if (!hasRealContent(item.title, 6)) return '';
-                if (!hasRealContent(item.desc,  10)) return '';
+                const title = getNewsTitle(item);
+                const desc  = getNewsDesc(item);
+                if (!hasRealContent(title, 6)) return '';
+                if (!hasRealContent(desc,  10)) return '';
 
                 const sourceLabel = item.source || 'Global';
                 const logoUrl = `https://logo.clearbit.com/${sourceLabel}`;
@@ -1062,26 +1072,64 @@ async function fetchBigNews() {
                         <span class="bento-tag">🌐 ${sourceLabel}</span>
                         <span class="bento-date">${item.date}</span>
                     </div>
-                    <h3 class="bento-title">${item.title}</h3>
-                    <p class="bento-desc">${item.desc}</p>
+                    <h3 class="bento-title">${title}</h3>
+                    <p class="bento-desc">${desc}</p>
                     <div class="bento-footer">
                         <span>${sourceLabel}</span>
-                        <span class="bento-read">원문 읽기 ↗</span>
+                        <span class="bento-read">${UI.readMore}</span>
                     </div>
                 </a>`;
             })
-            // ── [3차 차단] map이 ''를 반환한 잔여 항목 제거
             .filter(html => html !== '')
             .join('');
 
-        container.innerHTML = cards || '<div style="grid-column:1/-1;text-align:center;color:#aaa;padding:40px;">아직 준비된 뉴스가 없습니다. 잠시 후 다시 확인해 주세요.</div>';
+        container.innerHTML = cards || `<div style="grid-column:1/-1;text-align:center;color:#aaa;padding:40px;">${UI.empty}</div>`;
+        isNewsLoaded = true;
 
-        isNewsLoaded = true; // 스위치 ON!
+        loadSideNews(data);
 
     } catch (error) {
-        container.innerHTML = '<div style="color:red; text-align:center; grid-column:1/-1;">AI 로봇이 전 세계 뉴스를 번역하고 있습니다. 잠시 후 새로고침 해주세요! 🤖🚀</div>';
+        container.innerHTML = `<div style="color:red; text-align:center; grid-column:1/-1;">${UI.error}</div>`;
     }
 }
+
+function loadSideNews(data) {
+    const sidebar = document.getElementById('news-api-list');
+    if (!sidebar) return;
+
+    function hasRealContent(str, min) {
+        if (!str) return false;
+        const c = str.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+        return c.length >= (min || 4) && /[a-zA-Z가-힣ぁ-んァ-ン一-龥0-9]/.test(c);
+    }
+
+    const items = data
+        .filter(item => hasRealContent(item.title, 6) && item.link && item.link.startsWith('http'))
+        .slice(0, 6)
+        .map(item => {
+            const title = getNewsTitle(item);
+            if (!hasRealContent(title, 6)) return '';
+            const sourceLabel = item.source || 'Global';
+            return `
+            <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="news-item-link">
+                <div class="news-item-title">${title}</div>
+                <div class="news-meta">${sourceLabel} · ${item.date}</div>
+            </a>`;
+        })
+        .filter(h => h !== '')
+        .join('');
+
+    sidebar.innerHTML = items || `<div style="color:#aaa; font-size:13px; padding:10px;">${UI.empty}</div>`;
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const res = await fetch('/news-data.json');
+        if (!res.ok) return;
+        const data = await res.json();
+        loadSideNews(data);
+    } catch(e) {}
+});
 </script>
 
     <div class="bottom-player-bar" id="bottomPlayerBar">
