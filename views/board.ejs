@@ -24,25 +24,30 @@
 
         /* 🌟 상단바 디자인 (메인과 완벽히 동일) */
         .main-header { background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
-        .main-header { background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
-        .header-top { display: flex; justify-content: center; align-items: center; padding: 0; border-bottom: 1px solid #1a1b1c; background: #000; }
-        .logo-img { width: 100%; height: auto; max-height: 80px; cursor: pointer; object-fit: cover; object-position: center; display: block; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #1a1b1c; gap: 10px; flex-wrap: nowrap; }
+        .logo-img { height: 50px; max-width: 100%; cursor: pointer; object-fit: contain; flex-shrink: 0; }
 
-        .header-auth { display: flex; justify-content: space-between; align-items: center; padding: 6px 15px; border-bottom: 1px solid #1a1b1c; }
-        .auth-left { display: flex; align-items: center; }
-        .auth-right { display: flex; align-items: center; gap: 10px; }
-
-        .header-search { padding: 7px 15px; border-bottom: 1px solid #1a1b1c; }
-        .top-search-form { display: flex; align-items: center; background: #222 !important; border: 2px solid #ff5722; border-radius: 25px; padding: 5px 12px; width: 100%; box-sizing: border-box; }
+        .top-search-form { display: flex; align-items: center; background: #222 !important; border: 2px solid #ff5722; border-radius: 25px; padding: 5px 12px; flex: 1; max-width: 400px; margin: 0; min-width: 0; }
         .top-search-input { background: transparent !important; border: none !important; color: white !important; outline: none; flex: 1; font-size: 14px; padding: 5px; min-width: 0; }
         .top-search-input::placeholder { color: #aaa; }
         .top-search-btn { background: none; border: none; color: #ff5722; font-weight: bold; cursor: pointer; font-size: 16px; padding: 0 10px; }
 
-        .lang-select { padding: 6px 12px; background: #222; color: #fff; border: 2px solid #ff5722; border-radius: 20px; font-weight: bold; font-size: 13px; outline: none; cursor: pointer; transition: 0.2s; }
+        .auth-buttons { display: flex; gap: 15px; align-items: center; flex-shrink: 0; }
+        .lang-select { padding: 7px 14px; background: #222; color: #fff; border: 2px solid #ff5722; border-radius: 20px; font-weight: bold; font-size: 13px; outline: none; cursor: pointer; transition: 0.2s; }
         .lang-select:hover { background: #ff5722; color: #000; }
-        .btn-admin { color: #ff4a4a; font-weight: bold; font-size: 13px; border: 1px solid #ff4a4a; padding: 4px 10px; border-radius: 15px; }
-        .btn-login { color: #bbb; font-size: 13px; }
-        .btn-signup { background: #ff5722; color: #000; padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 13px; }
+        .btn-admin { color: #ff4a4a; font-weight: bold; font-size: 14px; border: 1px solid #ff4a4a; padding: 5px 12px; border-radius: 15px; }
+        .btn-login { color: #bbb; font-size: 14px; }
+        .btn-signup { background: #ff5722; color: #000; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+
+        @media screen and (max-width: 768px) {
+            .header-top { flex-wrap: wrap !important; padding: 15px 15px !important; gap: 15px !important; }
+            .logo-img { height: 60px !important; max-width: 350px !important; flex-shrink: 0 !important; }
+            .auth-buttons { flex: 1; justify-content: flex-end; width: auto !important; flex-wrap: nowrap; gap: 10px !important; }
+            .lang-select { font-size: 11px !important; padding: 5px 8px !important; margin-bottom: 0 !important; margin-right: auto !important; }
+            .btn-signup, .btn-login { font-size: 12px !important; padding: 6px 10px !important; }
+            .top-search-form { width: 100% !important; flex: 1 1 100% !important; margin: 0 !important; padding: 5px 15px !important; order: 3; }
+            .top-search-input { font-size: 14px !important; padding: 5px !important; }
+        }
 
         /* 🌟 메뉴바 */
         .header-nav { display: flex; justify-content: center; gap: 40px; padding: 12px 0; background: #0b0c0d; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
@@ -198,18 +203,24 @@
     <header class="main-header">
         <div class="header-top">
             <img src="/logo.png" alt="RANKING AI 로고" class="logo-img" onclick="window.location.href='/?sort=views'">
-        </div>
 
-        <div class="header-auth">
-            <div class="auth-left">
+            <form action="/" method="GET" class="top-search-form">
+                <div style="display: flex; align-items: center; justify-content: center; cursor: pointer; background: #fff; padding: 2px; border-radius: 4px; margin-right: 10px; box-shadow: 0 0 5px rgba(255,87,34,0.5); flex-shrink: 0;"
+                     title="클릭하면 크게 확대됩니다! 친구들에게 공유해보세요 🚀"
+                     onclick="window.open('https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://rankingaimusic.com', '_blank')">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=30x30&data=https://rankingaimusic.com" alt="QR Code" style="display: block; width: 24px; height: 24px;">
+                </div>
+                <input type="text" name="search" class="top-search-input" placeholder="<%= __('search_placeholder') || '아티스트 검색...' %>" value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                <button type="submit" class="top-search-btn">🔍</button>
+            </form>
+
+            <div class="auth-buttons">
                 <select id="smartLangSelect" onchange="window.location.href='/change-lang/' + this.value" class="lang-select">
                     <option value="ko" <%= typeof getLocale !== 'undefined' && getLocale() === 'ko' ? 'selected' : '' %>>🇰🇷 한국어</option>
-                    <option value="en" <%= typeof getLocale !== 'undefined' && getLocale() === 'en' ? 'selected' : '' %>>🇺🇸 English</option>
+                    <option value="en" <%= typeof getLocale !== 'undefined' && getLocale() === 'en' ? 'selected' : '' %>>🇺🇸 us English</option>
                     <option value="ja" <%= typeof getLocale !== 'undefined' && getLocale() === 'ja' ? 'selected' : '' %>>🇯🇵 日本語</option>
                     <option value="zh" <%= typeof getLocale !== 'undefined' && getLocale() === 'zh' ? 'selected' : '' %>>🇨🇳 中文</option>
                 </select>
-            </div>
-            <div class="auth-right">
                 <% if (user && user.role === 'admin') { %>
                     <a href="/admin" class="btn-admin">👑 관리자</a>
                 <% } %>
@@ -221,18 +232,6 @@
                     <a href="/signup" class="btn-signup"><%= __('btn_signup') || '회원가입' %></a>
                 <% } %>
             </div>
-        </div>
-
-        <div class="header-search">
-            <form action="/" method="GET" class="top-search-form">
-                <div style="display: flex; align-items: center; justify-content: center; cursor: pointer; background: #fff; padding: 2px; border-radius: 4px; margin-right: 10px; box-shadow: 0 0 5px rgba(255,87,34,0.5); flex-shrink: 0;"
-                     title="클릭하면 크게 확대됩니다! 친구들에게 공유해보세요 🚀"
-                     onclick="window.open('https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://rankingaimusic.com', '_blank')">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=30x30&data=https://rankingaimusic.com" alt="QR Code" style="display: block; width: 24px; height: 24px;">
-                </div>
-                <input type="text" name="search" class="top-search-input" placeholder="<%= __('search_placeholder') || '아티스트 검색...' %>" value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-                <button type="submit" class="top-search-btn">🔍</button>
-            </form>
         </div>
 
         <div class="header-nav">
