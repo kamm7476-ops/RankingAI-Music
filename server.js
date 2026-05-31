@@ -195,6 +195,7 @@ const VisitLogSchema = new mongoose.Schema({
     country: { type: String, default: 'Unknown' },
     userId: { type: String, default: 'Guest' },
     page: { type: String, default: '/' },
+    deviceType: { type: String, default: 'PC' },
     playTime: { type: Number, default: 0 },
     totalPlayTime: { type: Number, default: 0 }, // 👈 추가된 새 감상시간
     dwellTime: { type: Number, default: 0 },     // 👈 추가된 체류시간
@@ -260,8 +261,14 @@ app.use(i18n.init);
 // =========================================
 const getTodayDate = () => {
     const today = new Date();
-    // 🌟 한국 시간대 기준으로 날짜 뽑기 (서버 시간 오류 방지)
     return today.toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' }).replace(/\. /g, '-').replace('.', '');
+};
+
+const getDeviceType = (ua) => {
+    if (!ua) return 'PC';
+    if (/mobile|android|iphone|ipod/i.test(ua)) return '모바일';
+    if (/tablet|ipad/i.test(ua)) return '태블릿';
+    return 'PC';
 };
 
 app.use(async (req, res, next) => {
@@ -322,7 +329,8 @@ app.use(async (req, res, next) => {
                 date: today,
                 country: country,
                 userId: req.session && req.session.user ? req.session.user.id : 'Guest',
-                page: req.path
+                page: req.path,
+                deviceType: getDeviceType(req.headers['user-agent'])
             }).save().catch(() => {});
         } catch(e) {}
     }
@@ -684,7 +692,8 @@ app.get('/', async (req, res) => {
        date: today,
        country: country,
        userId: req.session.user ? req.session.user.id : 'Guest',
-       page: '/'
+       page: '/',
+       deviceType: getDeviceType(req.headers['user-agent'])
    }).save().catch(err => console.error("로그 저장 실패:", err));
 
    try {
@@ -1490,67 +1499,87 @@ app.get('/admin', async (req, res) => {
             { $limit: 20 }
         ]);
 
-        // 📄 페이지별 조회수 (오늘)
+        // 📄 페이지 레이블 맵
         const pageLabels = {
-            '/': '메인(차트)',
-            '/board': '게시판',
-            '/youtube': '유튜브',
-            '/shorts': '쇼츠',
-            '/radio': '라디오',
-            '/mymusic': '내 음악',
-            '/chat': '채팅',
-            '/chatlist': '채팅목록',
-            '/contact': '문의'
+            '/': '메인(차트)', '/board': '게시판', '/youtube': '유튜브',
+            '/shorts': '쇼츠', '/radio': '라디오', '/mymusic': '내 음악',
+            '/chat': '채팅', '/chatlist': '채팅목록', '/contact': '문의'
         };
-        const rawPageStats = await VisitLog.aggregate([
+
+        // 📊 페이지별 회원/비회원 분리 통계
+        const pageDetailRaw = await VisitLog.aggregate([
             { $match: { date: today } },
-            { $group: { _id: "$page", count: { $sum: 1 } } },
-            { $sort: { count: -1 } }
+            { $group: { _id: { page: '$page', isGuest: { $eq: ['$userId', 'Guest'] } }, count: { $sum: 1 } } }
         ]);
-        const pageStats = rawPageStats.map(p => ({
-            page: pageLabels[p._id] || p._id,
-            count: p.count
-        }));
+        const pageDetailMap = {};
+        pageDetailRaw.forEach(item => {
+            const p = item._id.page || '/';
+            if (!pageDetailMap[p]) pageDetailMap[p] = { label: pageLabels[p] || p, member: 0, guest: 0, total: 0 };
+            if (item._id.isGuest) pageDetailMap[p].guest += item.count;
+            else pageDetailMap[p].member += item.count;
+            pageDetailMap[p].total += item.count;
+        });
+        const pageDetailStats = Object.values(pageDetailMap).sort((a, b) => b.total - a.total);
 
-        // 👫 성별 분포
-        const rawGenderStats = await User.aggregate([
-            { $group: { _id: "$gender", count: { $sum: 1 } } }
-        ]);
-        const genderMap = { male: '남성', female: '여성', other: '기타', '': '미입력' };
-        const genderStats = rawGenderStats.map(g => ({
-            label: genderMap[g._id] || '미입력',
-            count: g.count
-        }));
-
-        // 🎂 연령대 분포
+        // 👤 회원 분석: 오늘 방문한 회원의 페이지·성별·연령 (VisitLog ↔ User 조인)
         const currentYear = new Date().getFullYear();
-        const rawAgeStats = await User.aggregate([
+        const memberAnalysisRaw = await VisitLog.aggregate([
+            { $match: { date: today, userId: { $ne: 'Guest' } } },
+            { $lookup: { from: 'users', localField: 'userId', foreignField: 'username', as: 'info' } },
+            { $unwind: { path: '$info', preserveNullAndEmptyArrays: true } },
             {
                 $project: {
+                    page: 1,
+                    gender: { $ifNull: ['$info.gender', ''] },
                     ageGroup: {
                         $cond: {
-                            if: { $not: ["$birthYear"] },
-                            then: "미입력",
+                            if: { $not: [{ $ifNull: ['$info.birthYear', null] }] },
+                            then: '미입력',
                             else: {
                                 $switch: {
                                     branches: [
-                                        { case: { $lt: [{ $subtract: [currentYear, "$birthYear"] }, 20] }, then: "10대" },
-                                        { case: { $lt: [{ $subtract: [currentYear, "$birthYear"] }, 30] }, then: "20대" },
-                                        { case: { $lt: [{ $subtract: [currentYear, "$birthYear"] }, 40] }, then: "30대" },
-                                        { case: { $lt: [{ $subtract: [currentYear, "$birthYear"] }, 50] }, then: "40대" },
-                                        { case: { $gte: [{ $subtract: [currentYear, "$birthYear"] }, 50] }, then: "50대+" }
+                                        { case: { $lt: [{ $subtract: [currentYear, '$info.birthYear'] }, 20] }, then: '10대' },
+                                        { case: { $lt: [{ $subtract: [currentYear, '$info.birthYear'] }, 30] }, then: '20대' },
+                                        { case: { $lt: [{ $subtract: [currentYear, '$info.birthYear'] }, 40] }, then: '30대' },
+                                        { case: { $lt: [{ $subtract: [currentYear, '$info.birthYear'] }, 50] }, then: '40대' },
+                                        { case: { $gte: [{ $subtract: [currentYear, '$info.birthYear'] }, 50] }, then: '50대+' }
                                     ],
-                                    default: "미입력"
+                                    default: '미입력'
                                 }
                             }
                         }
                     }
                 }
             },
-            { $group: { _id: "$ageGroup", count: { $sum: 1 } } },
-            { $sort: { _id: 1 } }
+            {
+                $facet: {
+                    byPage:   [{ $group: { _id: '$page',    count: { $sum: 1 } } }, { $sort: { count: -1 } }],
+                    byGender: [{ $group: { _id: '$gender',  count: { $sum: 1 } } }],
+                    byAge:    [{ $group: { _id: '$ageGroup', count: { $sum: 1 } } }]
+                }
+            }
         ]);
-        const ageStats = rawAgeStats;
+        const ma = memberAnalysisRaw[0] || { byPage: [], byGender: [], byAge: [] };
+        const gLabelMap = { male: '남성', female: '여성', other: '기타', '': '미입력' };
+        const memberPageStats   = ma.byPage.map(p => ({ label: pageLabels[p._id] || p._id || '/', count: p.count }));
+        const memberGenderStats = ma.byGender.map(g => ({ label: gLabelMap[g._id] || '미입력', count: g.count }));
+        const memberAgeStats    = ma.byAge;
+
+        // 👻 비회원 분석: 페이지·디바이스·국가
+        const nonMemberAnalysisRaw = await VisitLog.aggregate([
+            { $match: { date: today, userId: 'Guest' } },
+            {
+                $facet: {
+                    byPage:    [{ $group: { _id: '$page',       count: { $sum: 1 } } }, { $sort: { count: -1 } }],
+                    byDevice:  [{ $group: { _id: '$deviceType', count: { $sum: 1 } } }],
+                    byCountry: [{ $group: { _id: '$country',    count: { $sum: 1 } } }, { $sort: { count: -1 } }, { $limit: 10 }]
+                }
+            }
+        ]);
+        const nma = nonMemberAnalysisRaw[0] || { byPage: [], byDevice: [], byCountry: [] };
+        const nonMemberPageStats    = nma.byPage.map(p => ({ label: pageLabels[p._id] || p._id || '/', count: p.count }));
+        const nonMemberDeviceStats  = nma.byDevice;
+        const nonMemberCountryStats = nma.byCountry;
 
         // ⏳ [최종 해결] 체류시간(dwellTime)까지 싹 다 합쳐서 계산합니다!
         const playTimeStats = await VisitLog.aggregate([
@@ -1593,9 +1622,13 @@ app.get('/admin', async (req, res) => {
             users: usersWithMusic,
             stats: stats,
             countryStats: countryStats,
-            pageStats: pageStats,
-            genderStats: genderStats,
-            ageStats: ageStats,
+            pageDetailStats: pageDetailStats,
+            memberPageStats: memberPageStats,
+            memberGenderStats: memberGenderStats,
+            memberAgeStats: memberAgeStats,
+            nonMemberPageStats: nonMemberPageStats,
+            nonMemberDeviceStats: nonMemberDeviceStats,
+            nonMemberCountryStats: nonMemberCountryStats,
             todayPlayTime: todayPlayTime,
             chartDates: chartDates,
             chartVisitors: chartVisitors,
