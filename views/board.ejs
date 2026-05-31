@@ -40,10 +40,15 @@
         .btn-signup { background: #ff5722; color: #000; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 14px; }
 
         /* 🌟 메뉴바 */
-        .header-nav { display: flex; justify-content: center; gap: 40px; padding: 12px 0; background: #0b0c0d; }
-        .nav-item { color: #aaa; font-weight: 600; font-size: 16px; transition: 0.2s; position: relative; }
+        .header-nav { display: flex; justify-content: center; gap: 40px; padding: 12px 0; background: #0b0c0d; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+        .header-nav::-webkit-scrollbar { display: none; }
+        .nav-item { color: #aaa; font-weight: 600; font-size: 16px; transition: 0.2s; position: relative; white-space: nowrap; flex-shrink: 0; }
         .nav-item:hover, .nav-item.active { color: #ff5722; }
         .nav-item.active::after { content: ''; position: absolute; bottom: -12px; left: 0; width: 100%; height: 3px; background: #ff5722; }
+
+        @media screen and (max-width: 768px) {
+            .header-nav { justify-content: flex-start; gap: 20px; padding: 12px 15px; }
+        }
 
         /* 🌟 커뮤니티 기본 설정 */
         .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
@@ -826,6 +831,12 @@ async function submitReply(event, postId, commentId) {
             el.classList.remove('open');
             el.style.setProperty('display', 'none', 'important');
         });
+
+        // 모바일 네비게이션: 활성 탭(커뮤니티)을 화면 중앙으로 자동 스크롤
+        var activeNav = document.querySelector('.header-nav .nav-item.active');
+        if (activeNav) {
+            activeNav.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+        }
 
         // 글쓰기 폼 submit 이벤트 - 페이지 로드 시 반드시 등록 (타이밍 문제 방지)
         const writeForm = document.querySelector('form[action="/add-post"]');
