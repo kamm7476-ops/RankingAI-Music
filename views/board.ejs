@@ -26,8 +26,9 @@
         .main-header { background: #121314; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
         .header-top { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #1a1b1c; gap: 10px; flex-wrap: nowrap; }
         .logo-img { height: 50px; max-width: 100%; cursor: pointer; object-fit: contain; flex-shrink: 0; }
-        
-        .top-search-form { display: flex; align-items: center; background: #222 !important; border: 2px solid #ff5722; border-radius: 25px; padding: 5px 12px; flex: 1; max-width: 400px; margin: 0; min-width: 0; }
+
+        .header-search { padding: 8px 15px; border-bottom: 1px solid #1a1b1c; }
+        .top-search-form { display: flex; align-items: center; background: #222 !important; border: 2px solid #ff5722; border-radius: 25px; padding: 5px 12px; width: 100%; max-width: 600px; margin: 0 auto; box-sizing: border-box; }
         .top-search-input { background: transparent !important; border: none !important; color: white !important; outline: none; flex: 1; font-size: 14px; padding: 5px; min-width: 0; }
         .top-search-input::placeholder { color: #aaa; }
         .top-search-btn { background: none; border: none; color: #ff5722; font-weight: bold; cursor: pointer; font-size: 16px; padding: 0 10px; }
@@ -193,16 +194,6 @@
     <header class="main-header">
         <div class="header-top">
             <img src="/logo.png" alt="RANKING AI 로고" class="logo-img" onclick="window.location.href='/?sort=views'">
-            
-            <form action="/" method="GET" class="top-search-form">
-                <div style="display: flex; align-items: center; justify-content: center; cursor: pointer; background: #fff; padding: 2px; border-radius: 4px; margin-right: 10px; box-shadow: 0 0 5px rgba(255,87,34,0.5); flex-shrink: 0;" 
-                     title="클릭하면 크게 확대됩니다! 친구들에게 공유해보세요 🚀" 
-                     onclick="window.open('https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://rankingaimusic.com', '_blank')">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=30x30&data=https://rankingaimusic.com" alt="QR Code" style="display: block; width: 24px; height: 24px;">
-                </div>
-                <input type="text" name="search" class="top-search-input" placeholder="<%= __('search_placeholder') || '아티스트 검색...' %>" value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-                <button type="submit" class="top-search-btn">🔍</button>
-            </form>
 
             <div class="auth-buttons">
                 <select id="smartLangSelect" onchange="window.location.href='/change-lang/' + this.value" class="lang-select">
@@ -225,7 +216,19 @@
                 <% } %>
             </div>
         </div>
-        
+
+        <div class="header-search">
+            <form action="/" method="GET" class="top-search-form">
+                <div style="display: flex; align-items: center; justify-content: center; cursor: pointer; background: #fff; padding: 2px; border-radius: 4px; margin-right: 10px; box-shadow: 0 0 5px rgba(255,87,34,0.5); flex-shrink: 0;"
+                     title="클릭하면 크게 확대됩니다! 친구들에게 공유해보세요 🚀"
+                     onclick="window.open('https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://rankingaimusic.com', '_blank')">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=30x30&data=https://rankingaimusic.com" alt="QR Code" style="display: block; width: 24px; height: 24px;">
+                </div>
+                <input type="text" name="search" class="top-search-input" placeholder="<%= __('search_placeholder') || '아티스트 검색...' %>" value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                <button type="submit" class="top-search-btn">🔍</button>
+            </form>
+        </div>
+
         <div class="header-nav">
             <a href="/?sort=views" class="nav-item"><%= __('menu_chart') || 'RANKING AI 차트' %></a>
             <a href="/?sort=latest" class="nav-item"><%= __('menu_latest') || '최신음악' %></a>
