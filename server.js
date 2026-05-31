@@ -1514,12 +1514,35 @@ app.get('/admin', async (req, res) => {
         const pageDetailMap = {};
         pageDetailRaw.forEach(item => {
             const p = item._id.page || '/';
-            if (!pageDetailMap[p]) pageDetailMap[p] = { label: pageLabels[p] || p, member: 0, guest: 0, total: 0 };
+            if (!pageDetailMap[p]) pageDetailMap[p] = { path: p, label: pageLabels[p] || p, member: 0, guest: 0, total: 0 };
             if (item._id.isGuest) pageDetailMap[p].guest += item.count;
             else pageDetailMap[p].member += item.count;
             pageDetailMap[p].total += item.count;
         });
-        const pageDetailStats = Object.values(pageDetailMap).sort((a, b) => b.total - a.total);
+        // 📱 전체 디바이스 현황 (오늘)
+        const deviceRaw = await VisitLog.aggregate([
+            { $match: { date: today } },
+            { $group: { _id: '$deviceType', count: { $sum: 1 } } }
+        ]);
+        const deviceStats = { PC: 0, '모바일': 0, '태블릿': 0 };
+        deviceRaw.forEach(d => { if (d._id) deviceStats[d._id] = d.count; });
+
+        // 📱 페이지별 디바이스 분류
+        const pageDeviceRaw = await VisitLog.aggregate([
+            { $match: { date: today } },
+            { $group: { _id: { page: '$page', device: '$deviceType' }, count: { $sum: 1 } } }
+        ]);
+        const pageDeviceMap = {};
+        pageDeviceRaw.forEach(item => {
+            const p = item._id.page || '/';
+            const d = item._id.device || 'PC';
+            if (!pageDeviceMap[p]) pageDeviceMap[p] = {};
+            pageDeviceMap[p][d] = (pageDeviceMap[p][d] || 0) + item.count;
+        });
+
+        const pageDetailStats = Object.values(pageDetailMap)
+            .map(p => ({ ...p, devices: pageDeviceMap[p.path] || {} }))
+            .sort((a, b) => b.total - a.total);
 
         // 👤 회원 분석: 오늘 방문한 회원의 페이지·성별·연령 (VisitLog ↔ User 조인)
         const currentYear = new Date().getFullYear();
@@ -1622,6 +1645,7 @@ app.get('/admin', async (req, res) => {
             users: usersWithMusic,
             stats: stats,
             countryStats: countryStats,
+            deviceStats: deviceStats,
             pageDetailStats: pageDetailStats,
             memberPageStats: memberPageStats,
             memberGenderStats: memberGenderStats,

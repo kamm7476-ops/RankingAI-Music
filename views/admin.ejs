@@ -126,6 +126,33 @@
             <h3>전체 누적 재생수</h3>
             <p class="number"><%= stats ? stats.totalPlays : 0 %> <span>회</span></p>
         </div>
+
+        <%# 기기 현황 카드 %>
+        <div class="card" style="text-align: center; grid-column: 1 / -1;">
+            <h3 style="color: #ff5722; font-size: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 14px;">📱 오늘 접속 기기 현황 (회원+비회원)</h3>
+            <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div style="flex:1; min-width:80px;">
+                    <div style="font-size: 28px; margin-bottom: 4px;">💻</div>
+                    <div style="color: #aaa; font-size: 12px; margin-bottom: 4px;">PC</div>
+                    <strong style="font-size: 26px; color: #00e5ff;"><%= typeof deviceStats !== 'undefined' ? deviceStats['PC'] : 0 %></strong>
+                    <span style="color: #555; font-size: 12px;">명</span>
+                </div>
+                <div style="width:1px; height:50px; background:#333; flex-shrink:0;"></div>
+                <div style="flex:1; min-width:80px;">
+                    <div style="font-size: 28px; margin-bottom: 4px;">📱</div>
+                    <div style="color: #aaa; font-size: 12px; margin-bottom: 4px;">모바일</div>
+                    <strong style="font-size: 26px; color: #ff5722;"><%= typeof deviceStats !== 'undefined' ? deviceStats['모바일'] : 0 %></strong>
+                    <span style="color: #555; font-size: 12px;">명</span>
+                </div>
+                <div style="width:1px; height:50px; background:#333; flex-shrink:0;"></div>
+                <div style="flex:1; min-width:80px;">
+                    <div style="font-size: 28px; margin-bottom: 4px;">🖥️</div>
+                    <div style="color: #aaa; font-size: 12px; margin-bottom: 4px;">태블릿</div>
+                    <strong style="font-size: 26px; color: #ffb300;"><%= typeof deviceStats !== 'undefined' ? deviceStats['태블릿'] : 0 %></strong>
+                    <span style="color: #555; font-size: 12px;">명</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div style="background: #161718; padding: 20px; border-radius: 12px; border: 1px solid #333; margin-bottom: 20px; margin-top: 20px;">
@@ -161,8 +188,8 @@
                 %>
                 <div style="display:flex; gap:8px; margin-bottom:12px; font-size:11px; color:#aaa; font-weight:bold;">
                     <span style="min-width:90px; text-align:right;">페이지</span>
-                    <span style="flex:1;">전체 / 회원(🔹) / 비회원(🔸)</span>
-                    <span style="min-width:90px; text-align:right;">합계</span>
+                    <span style="flex:1;">회원(🔹) / 비회원(🔸) 비율</span>
+                    <span style="min-width:120px; text-align:right;">💻PC / 📱모바일 / 합계</span>
                 </div>
                 <% pageDetailStats.forEach(p => { %>
                     <% const mPct = p.total ? Math.round((p.member / p.total) * 100) : 0; %>
@@ -175,7 +202,11 @@
                                 🔹 <%= p.member %> / 🔸 <%= p.guest %>
                             </span>
                         </div>
-                        <span style="color:#ffb300; font-weight:bold; font-size:14px; min-width:50px; text-align:right;"><%= p.total %>회</span>
+                        <span style="font-size:12px; min-width:120px; text-align:right; color:#aaa; white-space:nowrap;">
+                            💻<strong style="color:#00e5ff;"><%= p.devices && p.devices['PC'] ? p.devices['PC'] : 0 %></strong>
+                            &nbsp;📱<strong style="color:#ff5722;"><%= p.devices && p.devices['모바일'] ? p.devices['모바일'] : 0 %></strong>
+                            &nbsp;<span style="color:#ffb300; font-weight:bold;"><%= p.total %>회</span>
+                        </span>
                     </div>
                 <% }) %>
             <% } else { %>
