@@ -262,7 +262,7 @@
 <div class="write-box" id="writeBox" style="display:none;">
     <form action="/add-post" method="POST" enctype="multipart/form-data">
         
-        <input type="text" name="title" class="write-input" placeholder="제목을 입력하세요" required
+        <input type="text" name="title" class="write-input" placeholder="<%= __('ph_post_title') %>" required
                style="width: 100%; background: #1c1d20; border: 1px solid #444; color: #fff; padding: 18px 20px; border-radius: 10px; font-size: 18px; margin-bottom: 20px; outline: none;">
         
         <input type="hidden" name="content" id="hidden-content">
@@ -281,18 +281,18 @@
         
         <!-- 🌟 [여기에 새로 추가되었습니다!] 유튜브 링크 입력칸 🌟 -->
         <div style="margin-bottom: 25px; background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444;">
-            <label style="color: #ff5722; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: block;">🎥 유튜브 링크 첨부 (선택사항)</label>
-            <input type="text" name="youtubeUrl" placeholder="예: https://youtu.be/... (공유 링크를 붙여넣으세요)" 
+            <label style="color: #ff5722; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: block;"><%= __('board_youtube_label') %></label>
+            <input type="text" name="youtubeUrl" placeholder="<%= __('board_youtube_ph') %>"
                    style="width: 100%; background: #1c1d20; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; font-size: 15px; outline: none; box-sizing: border-box;">
         </div>
 
         <div style="margin-bottom: 25px; background: #222; padding: 15px; border-radius: 8px; border: 1px dashed #ff5722;">
-            <label style="color: #ff5722; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: block;">📷 커버 이미지 첨부 (선택사항)</label>
+            <label style="color: #ff5722; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: block;"><%= __('board_image_label') %></label>
             <input type="file" name="image" accept="image/*" style="color: #aaa; font-size: 14px; width: 100%;">
         </div>
 
         <button type="submit" class="btn-submit" style="width: 100%; background: #ff5722; color: #000; border: none; padding: 16px; border-radius: 10px; font-weight: bold; font-size: 18px; cursor: pointer;">
-            ✏️ 커뮤니티에 글 등록하기
+            <%= __('board_post_submit') %>
         </button>
     </form>
 </div>
@@ -312,8 +312,8 @@
     <table class="board-table">
         <thead>
             <tr>
-                <th style="width: 60px; text-align: center;">번호</th>
-                <th style="width: auto; text-align: left;">제목</th>
+                <th style="width: 60px; text-align: center;"><%= __('th_num') %></th>
+                <th style="width: auto; text-align: left;"><%= __('th_title') %></th>
             </tr>
         </thead>
         <tbody>
@@ -373,7 +373,7 @@
                             <% if (user && (user.id === post.author || user.role === 'admin')) { %>
                                 <div style="display: flex; gap: 10px; margin-left: auto;">
                                     <button onclick="event.stopPropagation(); location.href='/edit-post/<%= post._id %>'" style="color: #00e5ff; background: none; border: none; cursor: pointer;">✏️ 수정</button>
-                                    <form action="/delete-post/<%= post._id %>" method="POST" style="margin: 0;" onsubmit="return confirm('정말 삭제할까요?');">
+                                    <form action="/delete-post/<%= post._id %>" method="POST" style="margin: 0;" onsubmit="return confirm(window.boardI18n.confirmDeletePost);">
                                         <button type="submit" style="color: #ff4a4a; background: none; border: none; cursor: pointer;">🗑 삭제</button>
                                     </form>
                                 </div>
@@ -382,7 +382,7 @@
 
                         <!-- 실시간 AJAX 댓글 영역 -->
                         <div id="board-comments-<%= post._id %>" style="background: #111; padding: 20px; border-radius: 8px; border: 1px solid #222;">
-    <h4 style="margin-top: 0; color: #fff; font-size: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">💬 댓글 (<%= post.comments ? post.comments.length : 0 %>)</h4>
+    <h4 style="margin-top: 0; color: #fff; font-size: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;"><%= __('board_comments_title') %> (<%= post.comments ? post.comments.length : 0 %>)</h4>
     
     <% if (post.comments && post.comments.length > 0) { %>
         <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
@@ -399,8 +399,8 @@
                         <!-- 본인 또는 관리자만 보이는 버튼 -->
                         <% if (user && (user.name === comment.author || user.role === 'admin')) { %>
                             <div style="display: flex; gap: 8px;">
-                                <button onclick="editComment('<%= post._id %>', '<%= comment._id %>', '<%= comment.text %>')" style="background: none; border: none; color: #00e5ff; font-size: 12px; cursor: pointer; padding: 0;">수정</button>
-                                <button onclick="deleteComment('<%= post._id %>', '<%= comment._id %>')" style="background: none; border: none; color: #ff4a4a; font-size: 12px; cursor: pointer; padding: 0;">삭제</button>
+                                <button onclick="editComment('<%= post._id %>', '<%= comment._id %>', '<%= comment.text %>')" style="background: none; border: none; color: #00e5ff; font-size: 12px; cursor: pointer; padding: 0;"><%= __('action_edit') %></button>
+                                <button onclick="deleteComment('<%= post._id %>', '<%= comment._id %>')" style="background: none; border: none; color: #ff4a4a; font-size: 12px; cursor: pointer; padding: 0;"><%= __('action_delete') %></button>
                             </div>
                         <% } %>
                     </div>
@@ -410,11 +410,11 @@
                     
                     <!-- 3. 답글 달기 버튼 및 숨겨진 입력창 -->
                     <% if (user) { %>
-                        <button onclick="document.getElementById('reply-form-<%= comment._id %>').style.display = 'flex';" style="background: none; border: none; color: #aaa; font-size: 12px; cursor: pointer; padding: 0; margin-bottom: 10px;">↳ 답글 달기</button>
-                        
+                        <button onclick="document.getElementById('reply-form-<%= comment._id %>').style.display = 'flex';" style="background: none; border: none; color: #aaa; font-size: 12px; cursor: pointer; padding: 0; margin-bottom: 10px;"><%= __('board_reply_btn') %></button>
+
                         <form id="reply-form-<%= comment._id %>" onsubmit="submitReply(event, '<%= post._id %>', '<%= comment._id %>')" style="display: none; gap: 10px; margin-bottom: 15px; margin-left: 20px;">
-                            <input type="text" id="reply-input-<%= comment._id %>" placeholder="답글을 입력하세요..." required style="flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid #444; background: #1a1a1a; color: #fff; font-size: 13px; outline: none;">
-                            <button type="submit" style="background: #444; color: #fff; border: none; padding: 0 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;">등록</button>
+                            <input type="text" id="reply-input-<%= comment._id %>" placeholder="<%= __('board_reply_ph') %>" required style="flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid #444; background: #1a1a1a; color: #fff; font-size: 13px; outline: none;">
+                            <button type="submit" style="background: #444; color: #fff; border: none; padding: 0 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;"><%= __('btn_submit') %></button>
                         </form>
                     <% } %>
 
@@ -437,18 +437,18 @@
             <% }) %>
         </div>
     <% } else { %>
-        <p style="color: #555; font-size: 13px;">등록된 댓글이 없습니다. 첫 댓글을 남겨보세요!</p>
+        <p style="color: #555; font-size: 13px;"><%= __('board_no_comment_first') %></p>
     <% } %>
 
     <% if (user) { %>
         <!-- 🌟 새 댓글 달기 폼 (절대 지워지면 안 되는 부분!) -->
         <form onsubmit="submitComment(event, '<%= post._id %>')" style="display: flex; gap: 10px; margin-top: 15px;">
-            <input type="text" id="comment-input-<%= post._id %>" placeholder="댓글을 입력하세요..." required style="flex: 1; padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff; font-family: inherit; outline: none;">
-            <button type="submit" style="background: #ff5722; color: #000; border: none; padding: 0 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">등록</button>
+            <input type="text" id="comment-input-<%= post._id %>" placeholder="<%= __('ph_comment') %>" required style="flex: 1; padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff; font-family: inherit; outline: none;">
+            <button type="submit" style="background: #ff5722; color: #000; border: none; padding: 0 20px; border-radius: 6px; font-weight: bold; cursor: pointer;"><%= __('btn_submit') %></button>
         </form>
     <% } else { %>
         <div style="padding: 12px; background: #222; text-align: center; border-radius: 6px; font-size: 13px; color: #aaa; border: 1px solid #333;">
-            댓글을 작성하려면 <a href="/login" style="color: #ff5722; text-decoration: underline;">로그인</a>이 필요합니다.
+            <%= __('board_login_comment_pre') %> <a href="/login" style="color: #ff5722; text-decoration: underline;"><%= __('btn_login') %></a><%= __('board_login_comment_post') %>
         </div>
     <% } %>
 </div>
@@ -457,7 +457,7 @@
                 </tr>
             <% }) %>
         <% } else { %>
-            <tr><td colspan="2" style="padding: 80px 0; color:#555; text-align:center;">등록된 게시글이 없습니다.</td></tr>
+            <tr><td colspan="2" style="padding: 80px 0; color:#555; text-align:center;"><%= __('board_no_post') %></td></tr>
         <% } %>
         </tbody>
     </table>
@@ -485,7 +485,23 @@
     <!-- End of board list -->
 
 <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
-    
+
+<script>
+window.boardI18n = {
+    confirmDeletePost: "<%= __('board_confirm_delete_post') %>",
+    confirmDeleteComment: "<%= __('board_confirm_delete_comment') %>",
+    editorLoading: "<%= __('board_editor_loading') %>",
+    editorNotReady: "<%= __('board_editor_not_ready') %>",
+    editorPlaceholder: "<%= __('ph_editor_content') %>",
+    imgOnly: "<%= __('board_img_only') %>",
+    commentError: "<%= __('board_comment_error') %>",
+    editCommentPrompt: "<%= __('board_edit_comment_prompt') %>",
+    editFail: "<%= __('board_edit_fail') %>",
+    deleteSuccess: "<%= __('board_delete_success') %>",
+    commError: "<%= __('board_comm_error') %>"
+};
+</script>
+
 <script>
   window.quill = null;
 
@@ -504,7 +520,7 @@ function toggleWriteBox() {
     // 2. 0.2초만 기다렸다가 상자를 새로 짓고 에디터를 넣습니다.
     setTimeout(function() {
         if (typeof Quill === 'undefined') {
-            alert("라이브러리 로딩 중입니다. 잠시 후 다시 눌러주세요!");
+            alert(window.boardI18n.editorLoading);
             return;
         }
 
@@ -515,7 +531,7 @@ function toggleWriteBox() {
 
         quill = new Quill('#editor-container', {
             theme: 'snow',
-            placeholder: '내용을 입력하세요...',
+            placeholder: window.boardI18n.editorPlaceholder,
             modules: {
                 toolbar: {
                     container: [
@@ -540,7 +556,7 @@ function toggleWriteBox() {
     // 🚀 이미지 자동 압축 엔진
     function compressAndInsertImage(file) {
         if (!file.type.match(/^image\/(jpeg|png|gif|webp)$/)) {
-            alert('이미지 파일만 업로드 가능합니다.');
+            alert(window.boardI18n.imgOnly);
             return;
         }
         const reader = new FileReader();
@@ -634,7 +650,7 @@ async function submitComment(event, postId) {
         }
     } catch (err) {
         console.error("댓글 통신 에러:", err);
-        alert("댓글 등록 중 문제가 발생했습니다.");
+        alert(window.boardI18n.commentError);
     }
 }
 
@@ -645,7 +661,7 @@ async function submitComment(event, postId) {
 // ✏️ 댓글 수정 (AJAX)
 async function editComment(postId, commentId, oldText) {
     // 1. 사용자에게 수정할 내용을 입력받습니다. (기본값으로 예전 댓글 내용이 뜹니다)
-    const newText = prompt("댓글을 수정하세요:", oldText);
+    const newText = prompt(window.boardI18n.editCommentPrompt, oldText);
     
     // 2. 취소를 누르거나 내용이 그대로면 아무 작업도 하지 않습니다.
     if (!newText || newText.trim() === '' || newText === oldText) return;
@@ -664,18 +680,18 @@ async function editComment(postId, commentId, oldText) {
         if (data.success) {
             document.getElementById('comment-text-' + commentId).innerText = newText;
         } else {
-            alert(data.message || "수정에 실패했습니다.");
+            alert(data.message || window.boardI18n.editFail);
         }
     } catch (err) {
         console.error(err);
-        alert("통신 에러가 발생했습니다.");
+        alert(window.boardI18n.commError);
     }
 }
 
 // 🗑️ 댓글 삭제 (AJAX)
 async function deleteComment(postId, commentId) {
     // 1. 진짜 지울 건지 한 번 더 물어봅니다.
-    if (!confirm("정말 이 댓글을 삭제할까요?")) return;
+    if (!confirm(window.boardI18n.confirmDeleteComment)) return;
 
     try {
         // 2. 서버에 삭제 요청을 보냅니다.
@@ -687,14 +703,14 @@ async function deleteComment(postId, commentId) {
         
         // 3. 성공했다면 화면을 깔끔하게 새로고침하여 지워진 상태를 보여줍니다.
         if (data.success) {
-            alert("삭제되었습니다.");
-            window.location.reload(); 
+            alert(window.boardI18n.deleteSuccess);
+            window.location.reload();
         } else {
-            alert(data.message || "삭제 권한이 없습니다.");
+            alert(data.message || window.boardI18n.deleteSuccess);
         }
     } catch (err) {
         console.error(err);
-        alert("통신 에러가 발생했습니다.");
+        alert(window.boardI18n.commError);
     }
 }
 
@@ -720,13 +736,13 @@ async function submitReply(event, postId, commentId) {
         
         // 4. 성공했다면 화면을 새로고침하여 방금 단 답글을 보여줍니다.
         if (data.success) {
-            window.location.reload(); 
+            window.location.reload();
         } else {
-            alert(data.message || "답글 등록에 실패했습니다.");
+            alert(data.message || window.boardI18n.commError);
         }
     } catch (err) {
         console.error(err);
-        alert("통신 에러가 발생했습니다.");
+        alert(window.boardI18n.commError);
     }
 }
 
@@ -853,7 +869,7 @@ async function submitReply(event, postId, commentId) {
             writeForm.addEventListener('submit', function(e) {
                 if (!quill) {
                     e.preventDefault();
-                    alert('에디터가 아직 준비 중입니다. 잠시 후 다시 시도해주세요.');
+                    alert(window.boardI18n.editorNotReady);
                     return false;
                 }
                 document.getElementById('hidden-content').value = quill.root.innerHTML;
