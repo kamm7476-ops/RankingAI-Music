@@ -82,6 +82,7 @@
 </head>
 <body>
 
+    <div class="container">
     <div class="radio-header">
         <a href="/" class="btn-back">← 메인 차트로 돌아가기</a>
         <div class="radio-logo">RAM RADIO 📻</div>
@@ -108,7 +109,7 @@
             <button class="mood-btn" onclick="changeMood('study', this)">💻 집중/스터디</button>
             <button class="mood-btn" onclick="changeMood('healing', this)">🌿 힐링/명상</button>
             <button class="mood-btn" onclick="changeMood('fitness', this)">🏋️ 헬스/운동</button>
-            
+
             <button class="mood-btn" onclick="changeMood('drive', this)">🚗 신나는 드라이브</button>
             <button class="mood-btn" onclick="changeMood('night', this)">🌃 새벽 감성</button>
             <button class="mood-btn" onclick="changeMood('rain', this)">☔ 비 오는 날</button>
@@ -117,6 +118,7 @@
     </div>
 
     <audio id="radio-audio" style="display:none;"></audio>
+    </div>
 
     <script>
         const vinyl = document.getElementById('radio-cover');
@@ -127,7 +129,7 @@
 
         let radioPlaylist = [];
         let currentIdx = 0;
-        let isPlaying = false;
+        let radioIsPlaying = false;
         let currentMood = 'all';
 
         // 📡 1. 자판기에서 음악 뭉치 뽑아오기
@@ -138,9 +140,9 @@
                 if(data && data.length > 0) {
                     radioPlaylist = data;
                     currentIdx = 0;
-                    loadTrack(0);
+                    loadRadioTrack(0);
                     // 곡을 가져왔으니 바로 재생!
-                    if (isPlaying) audio.play().catch(e => console.log(e));
+                    if (radioIsPlaying) audio.play().catch(e => console.log(e));
                 } else {
                     titleEl.innerText = "이 채널엔 아직 곡이 없어요 😢";
                     vinyl.classList.remove('playing');
@@ -149,7 +151,7 @@
         }
 
         // 💿 2. 오디오 장전 및 화면(LP판/제목) 업데이트
-        function loadTrack(index) {
+        function loadRadioTrack(index) {
             if(index >= radioPlaylist.length) {
                 // 리스트가 끝났으면 다시 자판기에서 새로운 랜덤 20곡을 뽑아옵니다!
                 fetchTracks(currentMood);
@@ -174,12 +176,12 @@
 
        // ⏭️ 4. 앞/뒤 곡 넘기기 버튼
         document.getElementById('btn-radio-next').addEventListener('click', () => {
-            if(radioPlaylist.length > 0) playNextTrack();
+            if(radioPlaylist.length > 0) playNextRadioTrack();
         });
         document.getElementById('btn-radio-prev').addEventListener('click', () => {
             if(currentIdx > 0) {
                 currentIdx--;
-                loadTrack(currentIdx);
+                loadRadioTrack(currentIdx);
                 // 🚨 뒤로가기 누르면 조건 없이 무조건 재생!
                 audio.play().catch(e => console.log(e)); 
             }
@@ -210,18 +212,17 @@
         }
 
         // 🚀 처음에 접속하면 '전체 랜덤' 채널로 곡을 장전해둠!
-        window.onload = () => {
-            fetchTracks('all');
-        };
+        // (SPA 방식으로 페이지가 끼워질 땐 'load' 이벤트가 다시 발생하지 않으므로 즉시 호출)
+        fetchTracks('all');
 
         // ==========================================================
         // 🚀 [함정 완벽 제거!] 턴테이블 동기화 & 무한 연속 재생 엔진
         // ==========================================================
-        
+
         audio.addEventListener('play', () => {
             vinyl.classList.add('playing');
             playBtn.innerText = "⏸";
-            isPlaying = true;
+            radioIsPlaying = true;
         });
 
         audio.addEventListener('pause', () => {
@@ -229,13 +230,13 @@
             if (audio.currentTime !== audio.duration && audio.currentTime > 0) {
                 vinyl.classList.remove('playing');
                 playBtn.innerText = "▶";
-                isPlaying = false;
+                radioIsPlaying = false;
             }
         });
 
         // 🎵 곡이 끝나면 무조건 다음 곡 쏘기!
         audio.addEventListener('ended', () => {
-            playNextTrack(); 
+            playNextRadioTrack();
         });
 
         // 💀 깨진 음원 방어
@@ -243,21 +244,21 @@
             console.log("🚨 깨진 음원 감지! 1초 뒤 강제 스킵합니다.");
             vinyl.classList.remove('playing');
             setTimeout(() => {
-                playNextTrack();
+                playNextRadioTrack();
             }, 1000);
         });
 
         // 5. 다음 곡 재생 / 리필 함수
-        function playNextTrack() {
+        function playNextRadioTrack() {
             currentIdx++;
             if (currentIdx < radioPlaylist.length) {
-                loadTrack(currentIdx);
-                
+                loadRadioTrack(currentIdx);
+
                 // 🚨 핵심 해결책: isPlaying 조건 다 빼버리고 무조건 재생 발사!!!
                 const playPromise = audio.play();
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
-                        isPlaying = true;
+                        radioIsPlaying = true;
                     }).catch(e => console.log("자동재생 에러:", e));
                 }
             } else {

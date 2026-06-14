@@ -1777,19 +1777,13 @@ document.addEventListener('click', async (e) => {
     if (!link) return;
     
     const href = link.getAttribute('href');
-    
+
     // 🚨 [여기가 원인!] 로그인(login), 회원가입(signup)을 다시 예외 명단에 추가했습니다!
     if (!href || !href.startsWith('/') || href.includes('logout') || href.includes('admin') || href.includes('delete') || href.includes('edit') || href.includes('login') || href.includes('signup')) {
         return; // 브라우저야, 이건 네가 원래 하던 대로 진짜 페이지 이동을 해!
     }
 
-    // 🚨 쇼츠, 유튜브, 라디오, 커뮤니티는 엔진 보호를 위해 '진짜 이동(새로고침)' 시킴
-    if (href.includes('shorts') || href.includes('youtube') || href.includes('radio') || href.includes('board')) {
-        window.location.assign(href);
-        return;
-    }
-
-    // 그 외 일반 메뉴는 '새로고침'을 막고 본문만 바꿔치기함
+    // 🎵 쇼츠/유튜브/라디오/커뮤니티도 음악이 끊기지 않도록 SPA 방식으로 이동
     e.preventDefault();
     navigateTo(href);
 });
@@ -1797,32 +1791,52 @@ document.addEventListener('click', async (e) => {
 // 2. 핵심 본문 교체 엔진 (navigateTo)
 async function navigateTo(href, isPopState = false) {
     try {
-        const response = await fetch(href); 
+        const response = await fetch(href);
         const html = await response.text();
         const newDoc = new DOMParser().parseFromString(html, 'text/html');
-        
+
+        // 🚨 라디오 탭 등에서 JS로 직접 칠해놓은 body 배경색이 다른 탭까지 따라오는 것 방지
+        document.body.style.removeProperty('background');
+
+        // 🎨 쇼츠/유튜브/라디오/커뮤니티처럼 전용 디자인(<style>)이 필요한 페이지는
+        //    헤더에 있던 전용 스타일을 주입하고, 떠날 때는 정리합니다.
+        document.querySelectorAll('style[data-spa-style]').forEach(el => el.remove());
+        const needsOwnStyles = href.includes('shorts') || href.includes('youtube') || href.includes('radio') || href.includes('board');
+        if (needsOwnStyles) {
+            newDoc.querySelectorAll('head style').forEach(styleEl => {
+                const clone = styleEl.cloneNode(true);
+                clone.setAttribute('data-spa-style', 'true');
+                document.head.appendChild(clone);
+            });
+        }
+
         // [A] 본문 알맹이(.container)만 쏙 교체
         const currentContainer = document.querySelector('.container');
         const newContainer = newDoc.querySelector('.container');
         if (currentContainer && newContainer) {
             currentContainer.innerHTML = newContainer.innerHTML;
-        
+
          // 🔥 쇼츠/유튜브 영상 강제 부활 (추가된 부분)
         if (href.includes('shorts') || href.includes('youtube')) {
             const iframes = currentContainer.querySelectorAll('iframe');
             iframes.forEach(iframe => {
                 const src = iframe.src;
-                iframe.src = ''; 
-                iframe.src = src; 
+                iframe.src = '';
+                iframe.src = src;
             });
         }
-            
+
             // 새 본문에 들어있는 스크립트(댓글, 좋아요 등) 강제 부활
             const scripts = currentContainer.querySelectorAll('script');
             scripts.forEach(script => {
                 const newScript = document.createElement('script');
                 Array.from(script.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-                newScript.text = script.text;
+                if (script.src) {
+                    newScript.async = false; // 외부 라이브러리(Quill 등) 로딩 순서 보장
+                } else {
+                    // 🚨 같은 탭을 여러 번 재방문할 때 let/const 중복 선언 에러가 나지 않도록 변환
+                    newScript.text = script.text.replace(/\b(let|const)(\s+(?=[A-Za-z_$]))/g, 'var$2');
+                }
                 document.body.appendChild(newScript);
                 document.body.removeChild(newScript); // 실행 후 메모리 정리
             });
@@ -1860,15 +1874,10 @@ async function navigateTo(href, isPopState = false) {
 // 3. 모바일 뒤로가기/앞으로가기 완벽 가로채기 (popstate)
 window.addEventListener('popstate', async () => {
     const targetUrl = location.pathname + location.search;
-    
-    // 뒤로 갔을 때 쇼츠, 유튜브, 커뮤니티라면 새로고침 이동
-    if (targetUrl.includes('shorts') || targetUrl.includes('youtube') || targetUrl.includes('radio') || targetUrl.includes('board')) {
-        location.href = targetUrl;
-    } else {
-        // ✅ 핵심: 음악 유지하며 본문만 바꿔치기 (isPopState = true 전달)
-        console.log("뒤로가기 감지: 음악을 유지하며 화면을 교체합니다.");
-        navigateTo(targetUrl, true); 
-    }
+
+    // ✅ 핵심: 음악 유지하며 본문만 바꿔치기 (isPopState = true 전달)
+    console.log("뒤로가기 감지: 음악을 유지하며 화면을 교체합니다.");
+    navigateTo(targetUrl, true);
 });
 
         // 주의: 이전에 있던 window.addEventListener('popstate', ...) 줄은 아예 없앴습니다. 이게 뒤로 가기 충돌의 원인이었습니다!
@@ -1889,33 +1898,39 @@ window.addEventListener('popstate', async () => {
             navigator.clipboard.writeText(window.location.origin + '/?play=' + encodeURIComponent(musicId)).then(() => alert("노래 공유 링크가 복사되었습니다! 🔗"));
         }  
 
-// 🚀 [통화 종료 후 화면 복귀 시 자동 재생 엔진] 🚀
+// 🚀 [통화/차량연결 종료 후 자동 재생 엔진] 🚀
         let wasPlayingBeforeInterruption = false;
 
         mainAudio.addEventListener('pause', () => {
             if (isPlaying) {
-                console.log("📞 시스템(전화 등)에 의해 오디오 강제 정지됨!");
-                wasPlayingBeforeInterruption = true; 
+                console.log("📞 시스템(전화/블루투스/차량연결 등)에 의해 오디오 강제 정지됨!");
+                wasPlayingBeforeInterruption = true;
+                attemptResume();
             }
         });
 
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible' && wasPlayingBeforeInterruption) {
-                console.log("👀 화면 복귀 감지! 중단된 음악을 즉시 자동 재생 시도합니다.");
-                
-                const playPromise = mainAudio.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        console.log("✅ 통화 종료 후 자동 재생 성공!");
-                        wasPlayingBeforeInterruption = false; 
-                        isPlaying = true;
-                        if(btnPlay) btnPlay.innerText = "⏸";
-                    }).catch(e => {
-                        console.log("❌ 브라우저 자동재생 방어막에 막힘 (터치 1회 필요)");
-                    });
-                }
+        function attemptResume() {
+            if (!wasPlayingBeforeInterruption) return;
+            const playPromise = mainAudio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    console.log("✅ 자동 재생 복구 성공!");
+                    wasPlayingBeforeInterruption = false;
+                    isPlaying = true;
+                    if(btnPlay) btnPlay.innerText = "⏸";
+                    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
+                }).catch(e => {
+                    console.log("❌ 자동재생 복구 실패, 잠시 후 재시도");
+                });
             }
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') attemptResume();
         });
+
+        // 🚗 차량 블루투스 연결/해제 등 visibilitychange 없이 멈추는 경우를 위한 주기적 워치독
+        setInterval(attemptResume, 3000);
     </script>
 
    <script>

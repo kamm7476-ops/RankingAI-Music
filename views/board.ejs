@@ -889,11 +889,8 @@ async function submitReply(event, postId, commentId) {
         }
     }
 
-    document.addEventListener('DOMContentLoaded', initCommunity);
-
-    window.addEventListener('pageshow', function(event) {
-        initCommunity();
-    });
+    // 🚨 SPA 방식으로 끼워질 땐 DOMContentLoaded/pageshow가 다시 발생하지 않으므로 즉시 실행
+    initCommunity();
 </script>
     </div> <!-- .container -->
 </body>
