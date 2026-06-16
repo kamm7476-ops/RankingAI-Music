@@ -75,15 +75,17 @@
         }
 
         /* 🚀 핵심: 화면에서 끄지 않고, 저 밑에(top: 100vh) 숨겨둡니다! (에러 완전 차단) */
-        .shorts-modal { 
-            position: fixed; top: 100vh; left: 0; width: 100vw; height: 100vh; 
-            background: #000; z-index: 99999; 
+        .shorts-modal {
+            position: fixed; top: 100vh; left: 0; width: 100vw; height: 100vh;
+            background: #000; z-index: 99999;
             transition: top 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); /* 쫀득하게 올라옴 */
             display: block; /* 절대 none 쓰지 않음 */
+            pointer-events: none; /* 숨겨진 상태에서 클릭 차단 */
         }
-        
-        .shorts-modal.show { 
+
+        .shorts-modal.show {
             top: 0; /* 클래스가 붙으면 화면으로 올라옵니다 */
+            pointer-events: auto; /* 표시될 때 클릭 허용 */
         }
 
         .btn-close-modal { position: fixed; top: 20px; left: 20px; z-index: 100000; background: rgba(255,255,255,0.2); border: none; color: white; font-size: 20px; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; }
@@ -268,8 +270,16 @@
         modal.classList.add('show');
         document.body.style.overflow = 'hidden'; // 뒷배경 스크롤 방지
 
-        // 5. 모달이 다 올라온 뒤에 다음 영상 감지 센서를 켭니다.
-        setTimeout(initObserver, 400);
+        // 5. 전환 애니메이션이 완전히 끝난 뒤 스크롤 감지 센서를 켭니다.
+        //    (setTimeout 고정 시간 대신 transitionend로 타이밍을 정확히 잡습니다)
+        let observerInitialized = false;
+        function safeInitObserver() {
+            if (observerInitialized) return;
+            observerInitialized = true;
+            initObserver();
+        }
+        modal.addEventListener('transitionend', safeInitObserver, { once: true });
+        setTimeout(safeInitObserver, 500); // 혹시 transitionend가 안 오면 폴백
     }
 
     // 👀 스크롤 감지 센서 (위아래로 넘길 때 작동)
