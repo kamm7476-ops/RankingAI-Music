@@ -277,8 +277,8 @@
     var isNavigating = false;
 
     function openModal(index) {
-        currentIdx = index;
-        renderShorts(index, null);
+        // 클릭 즉시 새로고침하여 autoplay 정상 작동
+        window.location.href = '/shorts?play=' + index;
     }
 
     function renderShorts(index, direction) {
@@ -366,7 +366,22 @@
         document.body.style.overflow = '';
         currentIdx = -1;
         isNavigating = false;
+        // URL에서 ?play= 파라미터 제거
+        history.replaceState(null, '', '/shorts');
     }
+
+    // 페이지 로드 시 ?play= 파라미터 확인 후 자동 오픈
+    (function() {
+        var params = new URLSearchParams(window.location.search);
+        var play = params.get('play');
+        if (play !== null) {
+            var idx = parseInt(play, 10);
+            if (!isNaN(idx) && idx >= 0 && idx < shortsData.length) {
+                currentIdx = idx;
+                renderShorts(idx, null);
+            }
+        }
+    })();
 
     // 키보드 내비게이션 (↑↓ 방향키, ESC)
     document.addEventListener('keydown', function(e) {
