@@ -134,106 +134,92 @@
     </div>
 
     <script>
-        const vinyl    = document.getElementById('radio-cover');
-        const playBtn  = document.getElementById('btn-radio-play');
-        const titleEl  = document.getElementById('radio-title');
-        const artistEl = document.getElementById('radio-artist');
-        const audio    = document.getElementById('radio-audio');
+        var vinyl    = document.getElementById('radio-cover');
+        var playBtn  = document.getElementById('btn-radio-play');
+        var titleEl  = document.getElementById('radio-title');
+        var artistEl = document.getElementById('radio-artist');
+        var audio    = document.getElementById('radio-audio');
 
-        let radioPlaylist  = [];
-        let currentIdx     = 0;
-        let radioIsPlaying = false;
-        let currentMood    = 'all';
-        let wantsToPlay    = false; // 사용자가 재생 의도를 가지고 있는지 추적
+        var playlist    = [];
+        var curIdx      = 0;
+        var playing     = false;
+        var curMood     = 'all';
 
-        // ─────────────────────────────────────────
-        // 📡 트랙 목록 가져오기
-        // ─────────────────────────────────────────
-        async function fetchTracks(mood) {
-            try {
-                const res  = await fetch('/api/radio-tracks?mood=' + mood);
-                const data = await res.json();
+        // ── 트랙 로드 ──────────────────────────────────────
+        function loadTrack(idx) {
+            if (idx >= playlist.length) { fetchTracks(curMood, playing); return; }
+            var t = playlist[idx];
+            audio.src  = t.audioUrl || t.audio || '';
+            titleEl.textContent  = t.name   || '제목 없음';
+            artistEl.textContent = t.artist || '';
+            vinyl.src  = t.imageUrl || '/logo.png';
+        }
 
-                if (data && data.length > 0) {
-                    radioPlaylist = data;
-                    currentIdx    = 0;
-                    loadRadioTrack(0);
+        // ── 다음 곡 ────────────────────────────────────────
+        function nextTrack() {
+            curIdx++;
+            if (curIdx < playlist.length) {
+                loadTrack(curIdx);
+                if (playing) audio.play().catch(function() {});
+            } else {
+                fetchTracks(curMood, playing);
+            }
+        }
 
-                    if (wantsToPlay) {
-                        const p = audio.play();
-                        if (p) p.catch(() => {
-                            // autoplay 차단 시 ▶ 버튼 클릭 유도
+        // ── 트랙 목록 가져오기 ─────────────────────────────
+        function fetchTracks(mood, doPlay) {
+            fetch('/api/radio-tracks?mood=' + mood)
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (!data || data.length === 0) {
+                        titleEl.textContent = '이 채널엔 아직 곡이 없어요 😢';
+                        vinyl.classList.remove('playing');
+                        return;
+                    }
+                    playlist = data;
+                    curIdx   = 0;
+                    loadTrack(0);
+                    if (doPlay) {
+                        audio.play().catch(function() {
                             playBtn.textContent = '▶';
-                            radioIsPlaying = false;
+                            playing = false;
                         });
                     }
-                } else {
-                    titleEl.innerText = '이 채널엔 아직 곡이 없어요 😢';
-                    vinyl.classList.remove('playing');
-                }
-            } catch (e) {
-                titleEl.innerText = '채널 로드 실패, 새로고침 해주세요 😢';
-                console.error(e);
-            }
+                })
+                .catch(function() {
+                    titleEl.textContent = '채널 로드 실패, 새로고침 해주세요 😢';
+                });
         }
 
-        // ─────────────────────────────────────────
-        // 💿 오디오 소스 교체 및 화면 업데이트
-        // ─────────────────────────────────────────
-        function loadRadioTrack(index) {
-            if (index >= radioPlaylist.length) {
-                fetchTracks(currentMood);
-                return;
-            }
-            const track  = radioPlaylist[index];
-            const src    = track.audioUrl || track.audio || '';
-            if (audio.src !== src) {
-                audio.src = src;
-                audio.load(); // 새 소스를 명시적으로 로드해 브라우저 캐시 문제 방지
-            }
-            titleEl.innerText  = track.name   || '제목 없음';
-            artistEl.innerText = track.artist || '';
-            vinyl.src          = track.imageUrl || '/logo.png';
-        }
-
-        // ─────────────────────────────────────────
-        // ▶️ 재생/일시정지 버튼
-        // ─────────────────────────────────────────
-        playBtn.addEventListener('click', () => {
-            if (radioPlaylist.length === 0) return alert('채널을 불러오는 중입니다...');
+        // ── ▶/⏸ 버튼 ──────────────────────────────────────
+        playBtn.addEventListener('click', function() {
+            if (playlist.length === 0) { alert('채널 로드 중입니다...'); return; }
             if (audio.paused) {
-                wantsToPlay = true;
-                audio.play().catch(e => console.log('재생 차단:', e));
+                audio.play().catch(function(e) { console.log(e); });
             } else {
-                wantsToPlay = false;
                 audio.pause();
             }
         });
 
-        // ─────────────────────────────────────────
-        // ⏭️ 앞/뒤 곡 버튼
-        // ─────────────────────────────────────────
-        document.getElementById('btn-radio-next').addEventListener('click', () => {
-            if (radioPlaylist.length > 0) playNextRadioTrack();
+        // ── ⏮ ⏭ 버튼 ──────────────────────────────────────
+        document.getElementById('btn-radio-next').addEventListener('click', function() {
+            if (playlist.length > 0) nextTrack();
         });
-        document.getElementById('btn-radio-prev').addEventListener('click', () => {
-            if (currentIdx > 0) {
-                currentIdx--;
-                loadRadioTrack(currentIdx);
-                audio.play().catch(e => console.log(e));
+        document.getElementById('btn-radio-prev').addEventListener('click', function() {
+            if (curIdx > 0) {
+                curIdx--;
+                loadTrack(curIdx);
+                if (playing) audio.play().catch(function() {});
             }
         });
 
-        // ─────────────────────────────────────────
-        // 🎛️ 무드(상황) 탭 변경
-        // ─────────────────────────────────────────
-        function changeMood(mood, element) {
-            document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('active'));
-            element.classList.add('active');
-            currentMood = mood;
+        // ── 무드(상황) 탭 ───────────────────────────────────
+        function changeMood(mood, el) {
+            document.querySelectorAll('.mood-btn').forEach(function(b) { b.classList.remove('active'); });
+            el.classList.add('active');
+            curMood = mood;
 
-            // 배경색 전환
-            const bgMap = {
+            var bg = {
                 cafe:    'linear-gradient(135deg, #1a1412, #2c1e16)',
                 study:   'linear-gradient(135deg, #0f171e, #1e293b)',
                 healing: 'linear-gradient(135deg, #141f18, #1c2e22)',
@@ -241,81 +227,53 @@
                 drive:   'linear-gradient(135deg, #102a43, #0284c7)',
                 night:   'linear-gradient(135deg, #171010, #2e1065)',
                 rain:    'linear-gradient(135deg, #1e293b, #334155)',
-                work:    'linear-gradient(135deg, #141414, #047857)',
+                work:    'linear-gradient(135deg, #141414, #047857)'
             };
-            document.body.style.background = bgMap[mood] || 'linear-gradient(135deg, #0b0c0d, #1a1111)';
+            document.body.style.background = bg[mood] || 'linear-gradient(135deg, #0b0c0d, #1a1111)';
 
-            titleEl.innerText  = '채널 튜닝 중... 📻';
-            artistEl.innerText = '잠시만 기다려주세요';
+            titleEl.textContent  = '채널 튜닝 중... 📻';
+            artistEl.textContent = '잠시만 기다려주세요';
 
-            // ✅ 사용자 제스처(클릭) 시점에 play()를 호출해 브라우저 autoplay 잠금 해제
-            // 현재 src가 있으면 잠금 해제 후 pause → 새 트랙 로드 후 재생
-            wantsToPlay = true;
-            const unlockPromise = audio.play();
-            if (unlockPromise) {
-                unlockPromise
-                    .then(() => { audio.pause(); }) // 이전 트랙 멈추고 새 트랙 대기
-                    .catch(() => {});               // 아직 src 없으면 무시
-            }
-
-            fetchTracks(mood);
+            // 사용자 클릭 제스처 안에서 play() 호출 → iOS/Android autoplay 잠금 해제
+            var fetched = false;
+            audio.pause();
+            audio.play().then(function() {
+                // play() 성공 → 바로 pause하고 새 트랙 로드
+                audio.pause();
+                if (!fetched) { fetched = true; fetchTracks(mood, true); }
+            }).catch(function() {
+                // play() 차단됐어도 fetch는 진행 (▶ 버튼으로 재생 유도)
+                if (!fetched) { fetched = true; fetchTracks(mood, true); }
+            });
         }
 
-        // ─────────────────────────────────────────
-        // 🚀 페이지 진입 시 전체 랜덤 채널 로드
-        // ─────────────────────────────────────────
-        wantsToPlay = false; // 첫 로드는 autoplay 시도 안 함 (브라우저 정책 준수)
-        fetchTracks('all');
+        // ── 초기 로드 ──────────────────────────────────────
+        fetchTracks('all', false);
 
-        // ─────────────────────────────────────────
-        // 🔁 오디오 이벤트 리스너
-        // ─────────────────────────────────────────
-        audio.addEventListener('play', () => {
+        // ── 오디오 이벤트 ──────────────────────────────────
+        audio.addEventListener('play', function() {
             vinyl.classList.add('playing');
             playBtn.textContent = '⏸';
-            radioIsPlaying = true;
+            playing = true;
         });
-
-        audio.addEventListener('pause', () => {
-            // 곡이 완전히 끝난 게 아닐 때만 일시정지 처리
-            if (audio.currentTime !== audio.duration && audio.currentTime > 0) {
+        audio.addEventListener('pause', function() {
+            if (!audio.ended && audio.currentTime > 0) {
                 vinyl.classList.remove('playing');
-                playBtn.textContent = '▶'; // 수정: 기존 코드가 "⏸"으로 잘못 설정됨
-                radioIsPlaying = false;
+                playBtn.textContent = '▶';
+                playing = false;
             }
         });
-
-        audio.addEventListener('ended', () => playNextRadioTrack());
-
-        audio.addEventListener('error', () => {
-            console.log('🚨 깨진 음원 감지! 1초 뒤 강제 스킵합니다.');
+        audio.addEventListener('ended', nextTrack);
+        audio.addEventListener('error', function() {
+            console.log('음원 오류, 1초 후 다음 곡');
             vinyl.classList.remove('playing');
-            setTimeout(playNextRadioTrack, 1000);
+            setTimeout(nextTrack, 1000);
         });
 
-        // ─────────────────────────────────────────
-        // ⏭️ 다음 곡 재생 / 리필 함수
-        // ─────────────────────────────────────────
-        function playNextRadioTrack() {
-            currentIdx++;
-            if (currentIdx < radioPlaylist.length) {
-                loadRadioTrack(currentIdx);
-                if (radioIsPlaying || wantsToPlay) {
-                    const p = audio.play();
-                    if (p) p.then(() => { radioIsPlaying = true; })
-                            .catch(e => console.log('자동재생 에러:', e));
-                }
-            } else {
-                titleEl.innerText  = '채널 곡 리필 중... 📻';
-                artistEl.innerText = '잠시만 기다려주세요';
-                fetchTracks(currentMood);
-            }
-        }
-
-        // 모바일 터치 시 일시정지된 재생 재개
-        document.addEventListener('touchstart', () => {
-            if (radioPlaylist.length > 0 && audio.paused && radioIsPlaying) {
-                audio.play().catch(() => {});
+        // 모바일 터치 시 중단된 재생 재개
+        document.addEventListener('touchstart', function() {
+            if (playlist.length > 0 && audio.paused && playing) {
+                audio.play().catch(function() {});
             }
         }, { passive: true });
     </script>

@@ -259,9 +259,16 @@
         <button class="s-close" onclick="closeModal()">✕</button>
         <div class="s-counter" id="sCounter"></div>
         <div id="sIframeWrap">
+            <!-- 정적 iframe: src만 교체해 autoplay 차단 우회 -->
+            <iframe id="sPlayer"
+                src=""
+                allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                allowfullscreen
+                style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;background:#000;">
+            </iframe>
             <div id="sLoadingSpinner"><div class="spinner-ring"></div><span>로딩 중...</span></div>
         </div>
-        <div id="sSwipeHint">위로 스와이프하여 다음 쇼츠 ↑</div>
+        <div id="sSwipeHint">위로 스와이프 → 다음 쇼츠</div>
         <div class="s-info">
             <div class="s-uploader" id="sUploader"></div>
             <div class="s-title"   id="sTitle"></div>
@@ -276,125 +283,100 @@
 <script>
     var shortsData = <%- JSON.stringify((shorts || []).map(function(v) {
         var m = v.url ? v.url.match(/(?:youtube\.com\/shorts\/|youtu\.be\/|youtube\.com\/watch\?v=)([^"&?\/\s]{11})/) : null;
-        return {
-            _id:      String(v._id),
-            title:    v.title || '',
-            uploader: v.uploader || '',
-            vid:      m ? m[1] : null
-        };
+        return { _id: String(v._id), title: v.title || '', uploader: v.uploader || '', vid: m ? m[1] : null };
     })) %>;
 
     var currentUserRole = '<%= user ? (user.role || "") : "" %>';
     var currentUserId   = '<%= user ? (user.id  || "") : "" %>';
-    var currentIdx = -1;
+    var currentIdx  = -1;
     var isNavigating = false;
 
-    function openModal(index) {
-        currentIdx = index;
-        renderShorts(index, null);
+    // ── 유틸: 공통 UI 갱신 ─────────────────────────
+    function updateUI(index) {
+        var d = shortsData[index];
+        document.getElementById('sTitle').textContent    = d.title;
+        document.getElementById('sUploader').textContent = '@' + d.uploader;
+        document.getElementById('sCounter').textContent  = (index + 1) + ' / ' + shortsData.length;
+        document.getElementById('sPrevBtn').disabled     = (index === 0);
+        document.getElementById('sNextBtn').disabled     = (index === shortsData.length - 1);
+        var del = document.getElementById('sDeleteBtn');
+        del.style.display = (currentUserRole === 'admin' || currentUserId === d.uploader) ? 'flex' : 'none';
     }
 
-    function renderShorts(index, direction) {
-        var data = shortsData[index];
-        if (!data || !data.vid) return;
-
-        var modal   = document.getElementById('shortsModal');
-        var wrap    = document.getElementById('sIframeWrap');
+    // ── 핵심: 정적 iframe src 교체 (autoplay 차단 없음) ─
+    function loadVideo(vid, animClass) {
+        var player  = document.getElementById('sPlayer');
         var spinner = document.getElementById('sLoadingSpinner');
 
-        // 1. 텍스트 정보 먼저 업데이트
-        document.getElementById('sTitle').textContent    = data.title;
-        document.getElementById('sUploader').textContent = '@' + data.uploader;
-        document.getElementById('sCounter').textContent  = (index + 1) + ' / ' + shortsData.length;
+        if (spinner) { spinner.style.display = 'flex'; }
+        player.classList.remove('slide-in-up', 'slide-in-down');
 
-        // 2. 삭제 버튼 표시 여부
-        var delBtn = document.getElementById('sDeleteBtn');
-        delBtn.style.display = (currentUserRole === 'admin' || currentUserId === data.uploader) ? 'flex' : 'none';
+        player.src = 'https://www.youtube.com/embed/' + vid
+            + '?autoplay=1&mute=1&loop=1&playlist=' + vid
+            + '&playsinline=1&rel=0&controls=1&enablejsapi=1';
 
-        // 3. 이전/다음 버튼 비활성화 처리
-        document.getElementById('sPrevBtn').disabled = (index === 0);
-        document.getElementById('sNextBtn').disabled = (index === shortsData.length - 1);
+        player.onload = function() {
+            if (spinner) spinner.style.display = 'none';
+            if (animClass) {
+                player.classList.add(animClass);
+                setTimeout(function() { player.classList.remove(animClass); }, 350);
+            }
+            isNavigating = false;
+        };
+    }
 
-        // 4. 기존 iframe 제거 + 로딩 스피너 표시
-        wrap.innerHTML = '';
-        if (spinner) {
-            var newSpinner = spinner.cloneNode(true);
-            wrap.appendChild(newSpinner);
-        } else {
-            wrap.innerHTML = '<div id="sLoadingSpinner"><div class="spinner-ring"></div><span>로딩 중...</span></div>';
-        }
+    // ── 카드 클릭 → 모달 열기 ──────────────────────
+    function openModal(index) {
+        var d = shortsData[index];
+        if (!d || !d.vid) return;
+        currentIdx = index;
+        updateUI(index);
 
-        // 5. 모달을 먼저 visible 상태로 만든다 (핵심 수정!)
-        //    display:none 상태에서 iframe을 삽입하면 브라우저가 autoplay를 차단함
+        var modal = document.getElementById('shortsModal');
         modal.classList.add('show');
         document.body.style.overflow = 'hidden';
 
-        // 6. 모달이 렌더링된 후 다음 프레임에서 iframe 삽입 → autoplay 정상 작동
-        requestAnimationFrame(function() {
-            requestAnimationFrame(function() {
-                var animClass = direction === 1 ? 'slide-in-up' : direction === -1 ? 'slide-in-down' : '';
-                var iframe = document.createElement('iframe');
-                iframe.src = 'https://www.youtube.com/embed/' + data.vid +
-                    '?autoplay=1&mute=1&loop=1&playlist=' + data.vid +
-                    '&playsinline=1&rel=0&controls=1&enablejsapi=1';
-                iframe.setAttribute('allow', 'autoplay; fullscreen; encrypted-media; picture-in-picture');
-                iframe.setAttribute('allowfullscreen', '');
-                iframe.style.position = 'absolute';
-                iframe.style.top = '0'; iframe.style.left = '0';
-                iframe.style.width = '100%'; iframe.style.height = '100%';
-                iframe.style.border = 'none';
-                if (animClass) iframe.classList.add(animClass);
-
-                wrap.innerHTML = '';
-                wrap.appendChild(iframe);
-                isNavigating = false;
-            });
-        });
+        loadVideo(d.vid, null);
     }
 
+    // ── 이전/다음 탐색 ─────────────────────────────
     function navShorts(dir) {
         if (isNavigating) return;
         var next = currentIdx + dir;
         if (next < 0 || next >= shortsData.length) return;
         isNavigating = true;
         currentIdx = next;
-        renderShorts(next, dir);
+        var d = shortsData[next];
+        if (!d || !d.vid) { isNavigating = false; return; }
+        updateUI(next);
+        loadVideo(d.vid, dir > 0 ? 'slide-in-up' : 'slide-in-down');
     }
 
+    // ── 모달 닫기 ──────────────────────────────────
+    function closeModal() {
+        var player  = document.getElementById('sPlayer');
+        var spinner = document.getElementById('sLoadingSpinner');
+        player.src  = '';  // 영상 정지
+        if (spinner) spinner.style.display = 'flex';
+        document.getElementById('shortsModal').classList.remove('show');
+        document.body.style.overflow = '';
+        currentIdx   = -1;
+        isNavigating = false;
+    }
+
+    // ── 쇼츠 삭제 ──────────────────────────────────
     function deleteCurrentShorts() {
-        var data = shortsData[currentIdx];
-        if (!data) return;
+        var d = shortsData[currentIdx];
+        if (!d) return;
         if (!confirm('<%= __("yt_confirm_delete") || "이 쇼츠를 삭제할까요?" %>')) return;
         var form = document.createElement('form');
         form.method = 'POST';
-        form.action = '/delete-video/' + data._id;
+        form.action = '/delete-video/' + d._id;
         document.body.appendChild(form);
         form.submit();
     }
 
-    function closeModal() {
-        document.getElementById('shortsModal').classList.remove('show');
-        document.getElementById('sIframeWrap').innerHTML =
-            '<div id="sLoadingSpinner"><div class="spinner-ring"></div><span>로딩 중...</span></div>';
-        document.body.style.overflow = '';
-        currentIdx = -1;
-        isNavigating = false;
-    }
-
-    // 페이지 로드 시 sessionStorage에서 재생할 인덱스 확인 후 자동 오픈
-    (function() {
-        var stored = sessionStorage.getItem('shorts_play_index');
-        if (stored !== null) {
-            sessionStorage.removeItem('shorts_play_index');
-            var idx = parseInt(stored, 10);
-            if (!isNaN(idx) && idx >= 0 && idx < shortsData.length) {
-                currentIdx = idx;
-                renderShorts(idx, null);
-            }
-        }
-    })();
-
-    // 키보드 내비게이션 (↑↓ 방향키, ESC)
+    // ── 키보드 단축키 ──────────────────────────────
     document.addEventListener('keydown', function(e) {
         if (!document.getElementById('shortsModal').classList.contains('show')) return;
         if (e.key === 'ArrowUp')   navShorts(-1);
@@ -402,47 +384,39 @@
         if (e.key === 'Escape')    closeModal();
     });
 
-    // 릴스형 터치 스와이프 내비게이션 (실시간 드래그 피드백 포함)
+    // ── 릴스형 터치 스와이프 ───────────────────────
     (function() {
-        var touchStartY = 0, touchStartX = 0, currentDragY = 0;
-        var isDragging = false;
-        var modal = document.getElementById('shortsModal');
-        var wrap  = document.getElementById('sIframeWrap');
-        var THRESHOLD = 80; // 전환 감도(px)
+        var startY = 0, startX = 0;
+        var dragging = false;
+        var THRESHOLD = 70;
+        var modal  = document.getElementById('shortsModal');
+        var player = document.getElementById('sPlayer');
 
         modal.addEventListener('touchstart', function(e) {
             if (isNavigating) return;
-            touchStartY = e.touches[0].clientY;
-            touchStartX = e.touches[0].clientX;
-            currentDragY = 0;
-            isDragging = true;
+            startY = e.touches[0].clientY;
+            startX = e.touches[0].clientX;
+            dragging = true;
         }, { passive: true });
 
         modal.addEventListener('touchmove', function(e) {
-            if (!isDragging || isNavigating) return;
-            var dy = touchStartY - e.touches[0].clientY;
-            var dx = Math.abs(touchStartX - e.touches[0].clientX);
-            if (dx > Math.abs(dy)) return; // 수평 스와이프 무시
-
-            currentDragY = dy;
-            // 실시간 드래그 피드백 (릴스처럼 손가락 따라 이동)
-            var pull = Math.min(Math.abs(dy), 120) * (dy > 0 ? 1 : -1);
-            var iframe = wrap.querySelector('iframe');
-            if (iframe) iframe.style.transform = 'translateY(' + (-pull * 0.3) + 'px)';
+            if (!dragging || isNavigating) return;
+            var dy = startY - e.touches[0].clientY;
+            var dx = Math.abs(startX - e.touches[0].clientX);
+            if (dx > Math.abs(dy)) return;
+            // 손가락 드래그 따라 이동 (릴스 느낌)
+            var pull = Math.max(-100, Math.min(100, -dy * 0.25));
+            player.style.transform = 'translateY(' + pull + 'px)';
         }, { passive: true });
 
         modal.addEventListener('touchend', function(e) {
-            if (!isDragging || isNavigating) return;
-            isDragging = false;
+            if (!dragging || isNavigating) return;
+            dragging = false;
+            player.style.transform = '';
 
-            // 드래그 피드백 초기화
-            var iframe = wrap.querySelector('iframe');
-            if (iframe) iframe.style.transform = '';
-
-            var dy = touchStartY - e.changedTouches[0].clientY;
-            var dx = Math.abs(touchStartX - e.changedTouches[0].clientX);
-            if (dx > Math.abs(dy)) return;
-            if (Math.abs(dy) < THRESHOLD) return;
+            var dy = startY - e.changedTouches[0].clientY;
+            var dx = Math.abs(startX - e.changedTouches[0].clientX);
+            if (dx > Math.abs(dy) || Math.abs(dy) < THRESHOLD) return;
             if (dy > 0) navShorts(1);
             else        navShorts(-1);
         }, { passive: true });
