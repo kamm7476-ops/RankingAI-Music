@@ -5,16 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RAM 무드 라디오 📻</title>
     <style>
-        /* 🌟 라디오 전용 감성 배경 (PC화면 잘림 방지 스크롤 허용!) */
-        body { 
-            margin: 0; padding: 0; 
-            min-height: 100vh; /* 🚨 height를 min-height로 변경해서 화면이 좁아도 늘어나게 함 */
-            background: linear-gradient(135deg, #0b0c0d, #1a1111); 
-            color: #fff; font-family: 'Pretendard', sans-serif; 
-            display: flex; flex-direction: column; 
-            overflow-x: hidden; 
-            overflow-y: auto; /* 🚨 PC에서 버튼이 잘리면 스크롤할 수 있도록 허용! */
-            transition: background 1s ease; 
+        /* 🌟 라디오 전용 감성 배경 */
+        html, body {
+            margin: 0; padding: 0;
+            min-height: 100%;
+            background: linear-gradient(135deg, #0b0c0d, #1a1111);
+            color: #fff; font-family: 'Pretendard', sans-serif;
+            overflow-x: hidden;
+            transition: background 1s ease;
+        }
+        body {
+            display: flex; flex-direction: column;
         }
         
         /* 상단 뒤로가기 헤더 */
@@ -24,7 +25,7 @@
         .radio-logo { font-size: 20px; font-weight: 900; color: #ff5722; letter-spacing: 1px; }
 
         /* 메인 중앙 정렬 */
-        .radio-container { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 20px 20px 50px 20px; position: relative; z-index: 5; }
+        .radio-container { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 20px 20px 60px 20px; position: relative; z-index: 5; }
         
         /* 🌟 빙글빙글 블랙 LP판 & 경계선 빛반사 효과 🌟 */
         .vinyl-wrapper { position: relative; margin-bottom: 40px; }
@@ -64,19 +65,31 @@
         .btn-play-huge:hover { transform: scale(1.05); background: #fff; }
 
         /* 무드(태그) 선택기 */
-        .mood-selector { 
-            display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; 
-            max-width: 800px; /* 🚨 PC 화면에서 버튼들이 답답하게 안 뭉치도록 넓게 펼쳐줌! */
+        .mood-selector {
+            display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+            max-width: 800px;
+            padding-bottom: 20px;
         }
-        .mood-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #ccc; padding: 10px 20px; border-radius: 30px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.3s; backdrop-filter: blur(5px); }
+        .mood-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15);
+            color: #ccc; padding: 10px 20px; border-radius: 30px; font-size: 14px;
+            font-weight: bold; cursor: pointer; transition: 0.3s;
+            touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+            user-select: none; -webkit-user-select: none;
+        }
         .mood-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
         .mood-btn.active { background: #ff5722; color: #000; border-color: #ff5722; box-shadow: 0 0 15px rgba(255,87,34,0.5); }
 
         @media (max-width: 600px) {
-            .vinyl-record { width: 220px; height: 220px; border-width: 8px; padding: 60px; } 
-            .track-title { font-size: 22px; }
-            .mood-selector { gap: 8px; max-width: 100%; }
-            .mood-btn { padding: 8px 15px; font-size: 13px; }
+            .vinyl-record { width: 170px; height: 170px; border-width: 7px; padding: 45px; }
+            .track-title { font-size: 18px; margin: 0 0 6px 0; }
+            .track-artist { font-size: 14px; margin: 0 0 18px 0; }
+            .radio-controls { gap: 20px; margin-bottom: 25px; }
+            .btn-play-huge { width: 58px; height: 58px; font-size: 22px; }
+            .mood-selector { gap: 7px; max-width: 100%; }
+            .mood-btn { padding: 7px 13px; font-size: 12px; }
+            .vinyl-wrapper { margin-bottom: 20px; }
+            .radio-container { padding: 15px 15px 40px 15px; }
         }
     </style>
 </head>

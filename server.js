@@ -829,6 +829,10 @@ app.get('/api/radio-tracks', async (req, res) => {
         else if (mood === 'study') filter = { genre: { $in: ['뉴에이지', '클래식/재즈', '인디음악'] } };
         else if (mood === 'healing') filter = { genre: { $in: ['발라드', '뉴에이지', 'R&B/Soul'] } };
         else if (mood === 'fitness') filter = { genre: { $in: ['댄스', '랩/힙합', '일렉트로니카', '록/메탈'] } };
+        else if (mood === 'drive') filter = { genre: { $in: ['POP', '댄스', '록/메탈', '랩/힙합'] } };
+        else if (mood === 'night') filter = { genre: { $in: ['발라드', 'R&B/Soul', '인디음악', '뉴에이지'] } };
+        else if (mood === 'rain') filter = { genre: { $in: ['발라드', '뉴에이지', '인디음악', '클래식/재즈'] } };
+        else if (mood === 'work') filter = { genre: { $in: ['일렉트로니카', '뉴에이지', '인디음악', '클래식/재즈'] } };
 
         let tracks = await Music.aggregate([
             { $match: filter },
