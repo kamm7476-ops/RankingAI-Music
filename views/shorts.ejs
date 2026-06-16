@@ -80,20 +80,23 @@
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #000; z-index: 99999;
             align-items: center; justify-content: center;
+            overscroll-behavior: contain;
         }
         #shortsModal.show { display: flex; }
         #sIframeWrap {
             width: 100%; max-width: 450px; height: 100vh;
             position: relative; overflow: hidden;
+            touch-action: pan-y;
         }
         #sIframeWrap iframe {
             position: absolute; top: 0; left: 0;
             width: 100%; height: 100%; border: none;
+            will-change: transform;
         }
         #sLoadingSpinner {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             color: #fff; font-size: 14px; display: flex; flex-direction: column;
-            align-items: center; gap: 12px; pointer-events: none;
+            align-items: center; gap: 12px; pointer-events: none; z-index: 2;
         }
         .spinner-ring {
             width: 40px; height: 40px; border: 3px solid #333;
@@ -102,11 +105,20 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* 슬라이드 전환 애니메이션 */
-        .slide-in-up { animation: slideInUp 0.25s ease-out; }
-        .slide-in-down { animation: slideInDown 0.25s ease-out; }
-        @keyframes slideInUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes slideInDown { from { transform: translateY(-40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        /* 릴스형 슬라이드 전환 애니메이션 */
+        .slide-in-up { animation: slideInUp 0.32s cubic-bezier(0.4, 0, 0.2, 1); }
+        .slide-in-down { animation: slideInDown 0.32s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes slideInUp { from { transform: translateY(100%); opacity: 0.5; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideInDown { from { transform: translateY(-100%); opacity: 0.5; } to { transform: translateY(0); opacity: 1; } }
+
+        /* 스와이프 힌트 */
+        #sSwipeHint {
+            position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+            z-index: 100001; color: rgba(255,255,255,0.6); font-size: 12px;
+            animation: fadeHint 3s ease-out forwards;
+            pointer-events: none;
+        }
+        @keyframes fadeHint { 0% { opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
 
         .s-close {
             position: fixed; top: 15px; left: 15px; z-index: 100001;
@@ -249,6 +261,7 @@
         <div id="sIframeWrap">
             <div id="sLoadingSpinner"><div class="spinner-ring"></div><span>로딩 중...</span></div>
         </div>
+        <div id="sSwipeHint">위로 스와이프하여 다음 쇼츠 ↑</div>
         <div class="s-info">
             <div class="s-uploader" id="sUploader"></div>
             <div class="s-title"   id="sTitle"></div>
@@ -277,9 +290,8 @@
     var isNavigating = false;
 
     function openModal(index) {
-        // 클릭/더블클릭 시 인덱스를 저장하고 일반 새로고침
-        sessionStorage.setItem('shorts_play_index', String(index));
-        location.reload();
+        currentIdx = index;
+        renderShorts(index, null);
     }
 
     function renderShorts(index, direction) {
@@ -390,24 +402,49 @@
         if (e.key === 'Escape')    closeModal();
     });
 
-    // 터치 스와이프 내비게이션 (모바일 릴스/쇼츠 방식)
+    // 릴스형 터치 스와이프 내비게이션 (실시간 드래그 피드백 포함)
     (function() {
-        var touchStartY = 0;
-        var touchStartX = 0;
+        var touchStartY = 0, touchStartX = 0, currentDragY = 0;
+        var isDragging = false;
         var modal = document.getElementById('shortsModal');
+        var wrap  = document.getElementById('sIframeWrap');
+        var THRESHOLD = 80; // 전환 감도(px)
 
         modal.addEventListener('touchstart', function(e) {
+            if (isNavigating) return;
             touchStartY = e.touches[0].clientY;
             touchStartX = e.touches[0].clientX;
+            currentDragY = 0;
+            isDragging = true;
+        }, { passive: true });
+
+        modal.addEventListener('touchmove', function(e) {
+            if (!isDragging || isNavigating) return;
+            var dy = touchStartY - e.touches[0].clientY;
+            var dx = Math.abs(touchStartX - e.touches[0].clientX);
+            if (dx > Math.abs(dy)) return; // 수평 스와이프 무시
+
+            currentDragY = dy;
+            // 실시간 드래그 피드백 (릴스처럼 손가락 따라 이동)
+            var pull = Math.min(Math.abs(dy), 120) * (dy > 0 ? 1 : -1);
+            var iframe = wrap.querySelector('iframe');
+            if (iframe) iframe.style.transform = 'translateY(' + (-pull * 0.3) + 'px)';
         }, { passive: true });
 
         modal.addEventListener('touchend', function(e) {
+            if (!isDragging || isNavigating) return;
+            isDragging = false;
+
+            // 드래그 피드백 초기화
+            var iframe = wrap.querySelector('iframe');
+            if (iframe) iframe.style.transform = '';
+
             var dy = touchStartY - e.changedTouches[0].clientY;
             var dx = Math.abs(touchStartX - e.changedTouches[0].clientX);
-            if (dx > Math.abs(dy)) return; // 수평 스와이프는 무시
-            if (Math.abs(dy) < 60) return; // 최소 스와이프 거리
-            if (dy > 0) navShorts(1);  // 위로 스와이프 → 다음
-            else        navShorts(-1); // 아래로 스와이프 → 이전
+            if (dx > Math.abs(dy)) return;
+            if (Math.abs(dy) < THRESHOLD) return;
+            if (dy > 0) navShorts(1);
+            else        navShorts(-1);
         }, { passive: true });
     })();
 </script>
