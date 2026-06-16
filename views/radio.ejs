@@ -154,13 +154,20 @@
                     radioPlaylist = data;
                     currentIdx = 0;
                     loadRadioTrack(0);
-                    // 곡을 가져왔으니 바로 재생!
-                    if (radioIsPlaying) audio.play().catch(e => console.log(e));
+                    // 무드 버튼 클릭 or 재생 중이면 바로 재생 시도
+                    audio.play().catch(e => {
+                        // 브라우저 자동재생 차단 시 → 재생 버튼 클릭 유도
+                        playBtn.innerText = "▶";
+                        radioIsPlaying = false;
+                    });
                 } else {
                     titleEl.innerText = "이 채널엔 아직 곡이 없어요 😢";
                     vinyl.classList.remove('playing');
                 }
-            } catch(e) { console.log(e); }
+            } catch(e) {
+                titleEl.innerText = "채널 로드 실패, 새로고침 해주세요 😢";
+                console.log(e);
+            }
         }
 
         // 💿 2. 오디오 장전 및 화면(LP판/제목) 업데이트
@@ -181,7 +188,7 @@
         playBtn.addEventListener('click', () => {
             if(radioPlaylist.length === 0) return alert("채널을 불러오는 중입니다...");
             if(audio.paused) {
-                audio.play();
+                audio.play().catch(e => console.log("재생 차단:", e));
             } else {
                 audio.pause();
             }
@@ -281,40 +288,10 @@
                 fetchTracks(currentMood); 
             }
         }
-// ==========================================================
-        // 🚀 [브라우저 족쇄 풀기 꼼수] 전역 터치 권한 연장기
-        // ==========================================================
-        // 유저가 화면을 스크롤하거나, 댓글을 보거나, 아무 곳이나 터치할 때마다
-        // 브라우저에게 "나 이 사이트 계속 보고 있어!"라고 몰래 신고해서 
-        // 오디오 자동재생 권한을 끈질기게 연장시킵니다.
-        
+        // 화면 터치 시 브라우저 자동재생 차단이 풀리면 즉시 재생 재개
         document.addEventListener('touchstart', () => {
-            // 브라우저 몰래 무음 오디오 컨텍스트를 계속 깨워줍니다
-            if (typeof audioCtx !== 'undefined' && audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            
-            // 만약 브라우저가 막아서 '대기 상태(isPlaying = false)'로 빠졌는데, 
-            // 재생 버튼이 번쩍거리고 있는 상황이라면? 
-            // 유저가 화면 아무 곳이나 터치하는 순간 바로 낚아채서 재생 시작!
-            const mainAudioEl = document.getElementById('main-audio'); // 라디오면 'radio-audio'
-            const playBtnEl = document.getElementById('btn-play'); // 라디오면 'btn-radio-play'
-            
-            if (mainAudioEl && mainAudioEl.paused && playBtnEl && playBtnEl.innerText === "▶" && document.getElementById('main-player-title').innerText.includes("터치해서")) {
-                console.log("👀 화면 터치 감지! 막혀있던 재생을 몰래 시작합니다.");
-                mainAudioEl.play().then(() => {
-                    isPlaying = true;
-                    playBtnEl.innerText = "⏸";
-                    playBtnEl.style.boxShadow = "none";
-                    playBtnEl.style.background = "#fff";
-                    playBtnEl.style.color = "#000";
-                    
-                    const currentTrack = playlist[currentIndex]; // 라디오면 radioPlaylist[currentIdx]
-                    if (currentTrack) {
-                        document.getElementById('main-player-title').innerText = currentTrack.title || currentTrack.name;
-                        document.getElementById('main-player-artist').innerText = currentTrack.artist;
-                    }
-                }).catch(e => {});
+            if (radioPlaylist.length > 0 && audio.paused && radioIsPlaying) {
+                audio.play().catch(e => {});
             }
         }, { passive: true });
     </script>

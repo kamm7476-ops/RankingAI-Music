@@ -217,7 +217,7 @@
                 <% shorts.forEach(function(video, index) { 
                     const videoId = getYoutubeId(video.url);
                 %>
-                <div class="shorts-card" onclick="openModal(<%= index %>)">
+                <div class="shorts-card" onclick="openModal(<%= index %>)" ondblclick="openModal(<%= index %>)">
                     <% if (videoId) { %>
                         <div class="shorts-card-inner">
                             <img src="https://i.ytimg.com/vi/<%= videoId %>/hqdefault.jpg" alt="썸네일">
@@ -277,8 +277,9 @@
     var isNavigating = false;
 
     function openModal(index) {
-        // 클릭 즉시 새로고침하여 autoplay 정상 작동
-        window.location.href = '/shorts?play=' + index;
+        // 클릭/더블클릭 시 인덱스를 저장하고 일반 새로고침
+        sessionStorage.setItem('shorts_play_index', String(index));
+        location.reload();
     }
 
     function renderShorts(index, direction) {
@@ -366,16 +367,14 @@
         document.body.style.overflow = '';
         currentIdx = -1;
         isNavigating = false;
-        // URL에서 ?play= 파라미터 제거
-        history.replaceState(null, '', '/shorts');
     }
 
-    // 페이지 로드 시 ?play= 파라미터 확인 후 자동 오픈
+    // 페이지 로드 시 sessionStorage에서 재생할 인덱스 확인 후 자동 오픈
     (function() {
-        var params = new URLSearchParams(window.location.search);
-        var play = params.get('play');
-        if (play !== null) {
-            var idx = parseInt(play, 10);
+        var stored = sessionStorage.getItem('shorts_play_index');
+        if (stored !== null) {
+            sessionStorage.removeItem('shorts_play_index');
+            var idx = parseInt(stored, 10);
             if (!isNaN(idx) && idx >= 0 && idx < shortsData.length) {
                 currentIdx = idx;
                 renderShorts(idx, null);
