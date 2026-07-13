@@ -367,7 +367,7 @@
                         
                         <!-- 좋아요 및 관리 버튼 -->
                         <div class="post-actions" style="display: flex; gap: 15px; align-items: center; margin-top: 20px; margin-bottom: 20px;">
-                            <button class="action-btn" onclick="event.stopPropagation(); likePost('<%= post._id %>')" style="background:none; border:1px solid #444; color:#ccc; padding: 5px 12px; border-radius: 5px; cursor:pointer;">
+                            <button id="like-post-btn-<%= post._id %>" class="action-btn" onclick="event.stopPropagation(); likePost('<%= post._id %>')" style="background:none; border:1px solid #444; color:#ccc; padding: 5px 12px; border-radius: 5px; cursor:pointer;">
                                 ❤️ 좋아요 <span id="like-post-count-<%= post._id %>"><%= post.likes || 0 %></span>
                             </button>
 
@@ -400,7 +400,7 @@
                         <!-- 본인 또는 관리자만 보이는 버튼 -->
                         <% if (user && (user.name === comment.author || user.role === 'admin')) { %>
                             <div style="display: flex; gap: 8px;">
-                                <button onclick="editComment('<%= post._id %>', '<%= comment._id %>', '<%= comment.text %>')" style="background: none; border: none; color: #00e5ff; font-size: 12px; cursor: pointer; padding: 0;"><%= __('action_edit') %></button>
+                                <button onclick="editComment('<%= post._id %>', '<%= comment._id %>')" style="background: none; border: none; color: #00e5ff; font-size: 12px; cursor: pointer; padding: 0;"><%= __('action_edit') %></button>
                                 <button onclick="deleteComment('<%= post._id %>', '<%= comment._id %>')" style="background: none; border: none; color: #ff4a4a; font-size: 12px; cursor: pointer; padding: 0;"><%= __('action_delete') %></button>
                             </div>
                         <% } %>
@@ -474,7 +474,7 @@
 })();
 </script>
 
-        <% if (typeof posts !== 'undefined' && posts.length > 10) { %>
+        <% if (typeof posts !== 'undefined' && posts.length > 20) { %>
             <div class="pagination-container">
                 <% const totalPages = Math.ceil(posts.length / 20); %>
                 <% for(let i=1; i<=totalPages; i++) { %>
@@ -660,8 +660,10 @@ async function submitComment(event, postId) {
 // ==============================================================
 
 // ✏️ 댓글 수정 (AJAX)
-async function editComment(postId, commentId, oldText) {
+async function editComment(postId, commentId) {
     // 1. 사용자에게 수정할 내용을 입력받습니다. (기본값으로 예전 댓글 내용이 뜹니다)
+    const textEl = document.getElementById('comment-text-' + commentId);
+    const oldText = textEl ? textEl.innerText : '';
     const newText = prompt(window.boardI18n.editCommentPrompt, oldText);
     
     // 2. 취소를 누르거나 내용이 그대로면 아무 작업도 하지 않습니다.
