@@ -90,7 +90,7 @@ const musicSchema = new mongoose.Schema({
 const Music = mongoose.models.Music || mongoose.model('Music', musicSchema);
 
 // =========================================
-// 🌟 2. 유튜브/쇼츠 DB 주머니 (썸네일 포함)
+// 🌟 2. 유튜브 DB 주머니 (썸네일 포함)
 // =========================================
 const videoSchema = new mongoose.Schema({
     title: String, url: String, type: String, uploader: String,
@@ -321,7 +321,7 @@ app.use(async (req, res, next) => {
 // =========================================
 // 📄 페이지별 방문 추적 미들웨어
 // =========================================
-const trackedPages = ['/board', '/youtube', '/shorts', '/radio', '/mymusic', '/chat', '/chatlist', '/contact'];
+const trackedPages = ['/board', '/youtube', '/mymusic', '/chat', '/chatlist', '/contact'];
 
 app.use(async (req, res, next) => {
     if (req.method === 'GET' && trackedPages.includes(req.path)) {
@@ -782,15 +782,11 @@ app.get('/mymusic', async (req, res) => {
 });
 
 // =========================================
-// 🌟 유튜브 / 쇼츠 기능
+// 🌟 유튜브 기능
 // =========================================
 app.get('/youtube', async (req, res) => {
     const videos = await Video.find({ type: 'youtube' }).sort({ createdAt: -1 });
     res.render('youtube', { videos: videos });
-});
-app.get('/shorts', async (req, res) => {
-    const shorts = await Video.find({ type: 'shorts' }).sort({ createdAt: -1 });
-    res.render('shorts', { shorts: shorts });
 });
 app.post('/add-youtube', async (req, res) => {
     if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
@@ -799,14 +795,6 @@ app.post('/add-youtube', async (req, res) => {
     const thumbnail = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : 'https://via.placeholder.com/320x180/222/ff5722?text=No+Thumb';
     await new Video({ title: req.body.title, url: req.body.youtubeLink, thumbnail: thumbnail, type: 'youtube', uploader: req.session.user.id }).save();
     res.redirect('/youtube');
-});
-app.post('/add-shorts', async (req, res) => {
-    if (!req.session.user) return res.send("<script>alert('로그인이 필요합니다.'); history.back();</script>");
-    const videoIdMatch = req.body.youtubeLink.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/|watch\?.+&v=))([^"&?\/\s]{11})/);
-    const videoId = videoIdMatch ? videoIdMatch[1] : null;
-    const thumbnail = videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : 'https://via.placeholder.com/320x568/222/ff5722?text=No+Thumb';
-    await new Video({ title: req.body.title, url: req.body.youtubeLink, thumbnail: thumbnail, type: 'shorts', uploader: req.session.user.id }).save();
-    res.redirect('/shorts');
 });
 
 app.post('/delete-video/:id', async (req, res) => {
@@ -818,42 +806,6 @@ app.post('/delete-video/:id', async (req, res) => {
         }
         res.redirect('/youtube');
     } catch (err) { res.redirect('/youtube'); }
-});
-
-// =========================================
-// 🌟 라디오 전용 라우터
-// =========================================
-app.get('/radio', (req, res) => {
-    res.render('radio');
-});
-app.get('/api/radio-tracks', async (req, res) => {
-    try {
-        const mood = req.query.mood || 'all';
-        let filter = {};
-
-        if (mood === 'cafe') filter = { genre: { $in: ['클래식/재즈', '인디음악', 'R&B/Soul', 'POP'] } };
-        else if (mood === 'study') filter = { genre: { $in: ['뉴에이지', '클래식/재즈', '인디음악'] } };
-        else if (mood === 'healing') filter = { genre: { $in: ['발라드', '뉴에이지', 'R&B/Soul'] } };
-        else if (mood === 'fitness') filter = { genre: { $in: ['댄스', '랩/힙합', '일렉트로니카', '록/메탈'] } };
-        else if (mood === 'drive') filter = { genre: { $in: ['POP', '댄스', '록/메탈', '랩/힙합'] } };
-        else if (mood === 'night') filter = { genre: { $in: ['발라드', 'R&B/Soul', '인디음악', '뉴에이지'] } };
-        else if (mood === 'rain') filter = { genre: { $in: ['발라드', '뉴에이지', '인디음악', '클래식/재즈'] } };
-        else if (mood === 'work') filter = { genre: { $in: ['일렉트로니카', '뉴에이지', '인디음악', '클래식/재즈'] } };
-
-        let tracks = await Music.aggregate([
-            { $match: filter },
-            { $sample: { size: 20 } }
-        ]);
-
-        if (tracks.length === 0) {
-            tracks = await Music.aggregate([{ $sample: { size: 20 } }]);
-        }
-
-        res.json(tracks);
-    } catch (err) {
-        console.error("라디오 트랙 에러:", err);
-        res.json([]);
-    }
 });
 
 // =========================================
@@ -1642,7 +1594,7 @@ app.get('/admin', async (req, res) => {
         // 📄 페이지 레이블 맵
         const pageLabels = {
             '/': '메인(차트)', '/board': '게시판', '/youtube': '유튜브',
-            '/shorts': '쇼츠', '/radio': '라디오', '/mymusic': '내 음악',
+            '/mymusic': '내 음악',
             '/chat': '채팅', '/chatlist': '채팅목록', '/contact': '문의'
         };
 

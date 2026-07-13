@@ -332,28 +332,13 @@
         .video-info { padding: 15px; }
         .video-title { font-size: 16px; font-weight: bold; margin: 0 0 10px 0; color: #fff; line-height: 1.4; }
 
-        /* ========================================= */
-        /* 🌟 쇼츠(Shorts) 전용 오리지널 디자인 (PC 5칸 절대 고정!) 🌟 */
-        /* ========================================= */
-        .shorts-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; width: 100%; visibility: visible; }
-        .shorts-card { width: 100%; background: #111; border: 1px solid #222; border-radius: 12px; overflow: hidden; position: relative; cursor: pointer; transition: 0.2s; }
-        .shorts-card:hover { border-color: #ff5722; transform: translateY(-5px); box-shadow: 0 8px 20px rgba(255,87,34,0.3); }
-        .shorts-card-inner { width: 100%; padding-bottom: 177.77%; position: relative; }
-        .shorts-card-inner img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
-        .shorts-logo-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; pointer-events: none; z-index: 10; }
         .grid-info { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); padding: 30px 12px 12px; box-sizing: border-box; pointer-events: none; z-index: 5; }
         .grid-title { font-size: 14px; font-weight: bold; color: #fff; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 1px 1px 2px #000; }
         .grid-uploader { font-size: 11px; color: #aaa; margin-bottom: 4px; text-shadow: 1px 1px 2px #000;}
 
-        /* 📱 반응형 (유튜브 + 쇼츠) */
-        @media (max-width: 1024px) { .shorts-grid { grid-template-columns: repeat(4, 1fr); } }
+        /* 📱 반응형 (유튜브) */
         @media (max-width: 768px) {
-            .video-grid { grid-template-columns: 1fr; } 
-            
-            /* 모바일 세로: 무조건 3칸으로 강력 고정! */
-            .shorts-grid { grid-template-columns: repeat(3, 1fr); gap: 9px; }
-            .shorts-card { border-radius: 8px; } 
-            .shorts-logo-box { width: 35px; height: 35px; }
+            .video-grid { grid-template-columns: 1fr; }
             .grid-info { padding: 20px 8px 8px; }
             .grid-title { font-size: 12px; }
             .grid-uploader { font-size: 10px; margin-bottom: 2px; }
@@ -368,16 +353,16 @@
             .floating-chat-btn { width: 38px; height: 38px; font-size: 18px; bottom: 150px; right: 15px; }
         }
         
-        /* 🚀 [새로운 아이디어] 모바일 쇼츠/영상 직접 터치 하이패스 */
-        .shorts-card-inner iframe, .video-iframe-wrap iframe {
+        /* 🚀 [새로운 아이디어] 모바일 영상 직접 터치 하이패스 */
+        .video-iframe-wrap iframe {
             z-index: 10 !important; /* 영상 우선순위 올림 */
             pointer-events: auto !important; /* 영상이 직접 터치를 흡수함 */
         }
-        
-        .grid-info, .shorts-logo-box, .video-info {
+
+        .grid-info, .video-info {
             z-index: 20 !important; /* 글자와 로고는 영상 위로 보이게 함 */
             pointer-events: none !important; /* 🚨 핵심: 글자에 닿은 터치는 통과시켜서 영상에 꽂히게 만듦 */
-        }   
+        }
 
     </style>
 
@@ -642,7 +627,6 @@
             <a href="#" id="pwa-install-btn" class="nav-item" style="color: #00e5ff; font-weight: 900; display: none;"><%= __('menu_app_install') || '📲앱 설치하기' %></a>
             
            <a href="/youtube" class="nav-item"><%= __('menu_youtube') || '유튜브' %></a>
-            <a href="/shorts" class="nav-item"><%= __('menu_shorts') || '쇼츠' %></a>
             <a href="/board" class="nav-item"><%= __('menu_community') || '커뮤니티' %></a>
             <a href="/copyright-proof" class="nav-item">🔏 저작권 증명</a>
         </div>
@@ -1799,10 +1783,10 @@ document.addEventListener('click', async (e) => {
 
     // 🚨 [여기가 원인!] 로그인(login), 회원가입(signup)을 다시 예외 명단에 추가했습니다!
     if (!href || !href.startsWith('/') || href.includes('logout') || href.includes('admin') || href.includes('delete') || href.includes('edit') || href.includes('login') || href.includes('signup') || href.includes('/go/sound/')) {
-        return; // 브라우저야, 이건 네가 원래 하던 대로 진짜 페이지 이동을 해! (쇼츠 딥링크는 실제 302 리다이렉트가 필요하므로 SPA 가로채기 제외)
+        return; // 브라우저야, 이건 네가 원래 하던 대로 진짜 페이지 이동을 해! (사운드 딥링크는 실제 302 리다이렉트가 필요하므로 SPA 가로채기 제외)
     }
 
-    // 🎵 쇼츠/유튜브/라디오/커뮤니티도 음악이 끊기지 않도록 SPA 방식으로 이동
+    // 🎵 유튜브/커뮤니티도 음악이 끊기지 않도록 SPA 방식으로 이동
     e.preventDefault();
     navigateTo(href);
 });
@@ -1814,13 +1798,13 @@ async function navigateTo(href, isPopState = false) {
         const html = await response.text();
         const newDoc = new DOMParser().parseFromString(html, 'text/html');
 
-        // 🚨 라디오 탭 등에서 JS로 직접 칠해놓은 body 배경색이 다른 탭까지 따라오는 것 방지
+        // 🚨 다른 페이지에서 JS로 직접 칠해놓은 body 배경색이 다른 탭까지 따라오는 것 방지
         document.body.style.removeProperty('background');
 
-        // 🎨 쇼츠/유튜브/라디오/커뮤니티처럼 전용 디자인(<style>)이 필요한 페이지는
+        // 🎨 유튜브/커뮤니티처럼 전용 디자인(<style>)이 필요한 페이지는
         //    헤더에 있던 전용 스타일을 주입하고, 떠날 때는 정리합니다.
         document.querySelectorAll('style[data-spa-style]').forEach(el => el.remove());
-        const needsOwnStyles = href.includes('shorts') || href.includes('youtube') || href.includes('radio') || href.includes('board') || href.includes('copyright-proof');
+        const needsOwnStyles = href.includes('youtube') || href.includes('board') || href.includes('copyright-proof');
         if (needsOwnStyles) {
             newDoc.querySelectorAll('head style').forEach(styleEl => {
                 const clone = styleEl.cloneNode(true);
@@ -1835,8 +1819,8 @@ async function navigateTo(href, isPopState = false) {
         if (currentContainer && newContainer) {
             currentContainer.innerHTML = newContainer.innerHTML;
 
-         // 🔥 쇼츠/유튜브 영상 강제 부활 (추가된 부분)
-        if (href.includes('shorts') || href.includes('youtube')) {
+         // 🔥 유튜브 영상 강제 부활 (추가된 부분)
+        if (href.includes('youtube')) {
             const iframes = currentContainer.querySelectorAll('iframe');
             iframes.forEach(iframe => {
                 const src = iframe.src;
