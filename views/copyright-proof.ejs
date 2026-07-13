@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>미발매 음원 저작권 증명 - RANKING AI</title>
+    <style>
+        body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; padding: 40px 20px 120px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ff5722; padding-bottom: 15px; margin-bottom: 15px; }
+        .title { color: #ff5722; margin: 0; font-size: 24px; }
+        .btn-home { color: #aaa; text-decoration: none; border: 1px solid #444; padding: 8px 15px; border-radius: 8px; }
+        .desc-box { background: #161718; border: 1px solid #333; border-radius: 12px; padding: 18px 20px; margin-bottom: 30px; color: #bbb; font-size: 13px; line-height: 1.7; }
+        .desc-box b { color: #ff5722; }
+
+        .card { background: #161718; border: 1px solid #333; border-radius: 12px; padding: 25px; margin-bottom: 30px; }
+        .card h3 { margin-top: 0; color: #fff; font-size: 17px; }
+
+        .drop-zone {
+            border: 2px dashed #444; border-radius: 12px; padding: 35px 20px; text-align: center;
+            color: #888; cursor: pointer; transition: 0.2s; background: #0f1011;
+        }
+        .drop-zone.dragover { border-color: #ff5722; color: #ff5722; background: rgba(255,87,34,0.05); }
+        .drop-zone input[type="file"] { display: none; }
+
+        .input-group { margin-top: 15px; }
+        label { display: block; font-size: 13px; color: #aaa; margin-bottom: 5px; }
+        input[type="text"] { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; outline: none; font-family: inherit; }
+        input[type="text"]:focus { border-color: #ff5722; }
+
+        .hash-box { margin-top: 15px; background: #0f1011; border: 1px solid #333; border-radius: 8px; padding: 12px 15px; font-family: monospace; font-size: 12px; color: #00e5ff; word-break: break-all; display: none; }
+        .hash-box.show { display: block; }
+
+        .btn-main { width: 100%; margin-top: 20px; background: #ff5722; color: #000; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; }
+        .btn-main:hover { filter: brightness(1.1); }
+        .btn-main:disabled { background: #444; color: #888; cursor: not-allowed; }
+
+        .btn-secondary { background: #222; color: #ff5722; border: 1px solid #ff5722; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; }
+
+        .cert-result { display: none; margin-top: 25px; background: #0f1011; border: 1px solid #ff5722; border-radius: 12px; padding: 20px; }
+        .cert-result.show { display: block; }
+        .cert-row { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px dashed #2a2a2a; font-size: 13px; }
+        .cert-row:last-child { border-bottom: none; }
+        .cert-row .k { color: #888; flex-shrink: 0; }
+        .cert-row .v { color: #fff; text-align: right; word-break: break-all; font-family: monospace; }
+
+        .verify-result { margin-top: 15px; padding: 12px 15px; border-radius: 8px; font-size: 13px; display: none; }
+        .verify-result.ok { display: block; background: rgba(0,230,64,0.08); border: 1px solid #00e640; color: #6dffa0; }
+        .verify-result.bad { display: block; background: rgba(255,74,74,0.08); border: 1px solid #ff4a4a; color: #ffb3b3; }
+
+        table.history { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        table.history th, table.history td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #222; font-size: 12px; }
+        table.history th { color: #888; font-weight: 600; }
+        table.history td { color: #ddd; word-break: break-all; }
+        .mono { font-family: monospace; font-size: 11px; color: #00e5ff; }
+        .copy-btn { background: none; border: 1px solid #444; color: #aaa; border-radius: 6px; padding: 3px 8px; font-size: 11px; cursor: pointer; }
+        .copy-btn:hover { border-color: #ff5722; color: #ff5722; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2 class="title">🔏 미발매 음원 저작권 증명</h2>
+            <a href="/" class="btn-home">돌아가기</a>
+        </div>
+
+        <div class="desc-box">
+            파일은 <b>서버에 전송되거나 저장되지 않습니다.</b> 브라우저 안에서 <b>Web Crypto API</b>로 파일 고유의
+            SHA-256 지문(해시)만 즉석에서 계산하고, 그 지문과 아티스트명, 그리고 조작할 수 없는
+            <b>서버 시각(타임스탬프)</b>을 묶어 서버가 비밀키로 서명(HMAC-SHA256)한 뒤 원장에 기록합니다.
+            파일이 1비트라도 바뀌면 지문이 완전히 달라지므로, 이 인증서는 "특정 시점에 이 원본이 존재했음"을
+            증명하는 무료 타임스탬프 역할을 합니다.
+        </div>
+
+        <!-- 1. 새 인증서 발급 -->
+        <div class="card">
+            <h3>1️⃣ 새 저작권 타임스탬프 발급받기</h3>
+
+            <div class="drop-zone" id="dropZone">
+                <p id="dropZoneText">🎵 음원 파일을 여기로 끌어다 놓거나 클릭해서 선택하세요</p>
+                <input type="file" id="fileInput">
+            </div>
+            <div class="hash-box" id="hashBox"></div>
+
+            <div class="input-group">
+                <label>아티스트명 (필수)</label>
+                <input type="text" id="artistName" value="<%= user ? user.name : '' %>" placeholder="예: 홍길동">
+            </div>
+            <div class="input-group">
+                <label>곡 제목 (선택)</label>
+                <input type="text" id="trackTitle" placeholder="예: 아직 발매 전인 데모곡 제목">
+            </div>
+
+            <button class="btn-main" id="registerBtn" disabled>파일을 먼저 선택해주세요</button>
+
+            <div class="cert-result" id="certResult"></div>
+        </div>
+
+        <!-- 2. 인증서 검증 -->
+        <div class="card">
+            <h3>2️⃣ 발급된 인증서 검증하기</h3>
+            <div class="input-group">
+                <label>인증서 ID (Certificate ID)</label>
+                <input type="text" id="verifyCertId" placeholder="예: 3f9c1a2e-....">
+            </div>
+            <button class="btn-secondary" id="verifyBtn" style="margin-top:12px;">🔍 검증하기</button>
+            <div class="verify-result" id="verifyResult"></div>
+        </div>
+
+        <!-- 3. 내 발급 이력 -->
+        <% if (user) { %>
+        <div class="card">
+            <h3>3️⃣ 내가 발급받은 인증서 목록</h3>
+            <% if (myProofs && myProofs.length > 0) { %>
+                <table class="history">
+                    <thead>
+                        <tr><th>발급일시</th><th>아티스트/곡명</th><th>인증서 ID</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        <% myProofs.forEach(function(p) { %>
+                            <tr>
+                                <td><%= new Date(p.timestamp).toLocaleString('ko-KR') %></td>
+                                <td><%= p.artistName %><% if (p.trackTitle) { %> - <%= p.trackTitle %><% } %></td>
+                                <td class="mono"><%= p.certId %></td>
+                                <td><button type="button" class="copy-btn" onclick="fillVerify('<%= p.certId %>')">검증란에 넣기</button></td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            <% } else { %>
+                <p style="color:#777; font-size:13px;">아직 발급받은 인증서가 없습니다.</p>
+            <% } %>
+        </div>
+        <% } %>
+    </div>
+
+    <script>
+    (function () {
+        const dropZone = document.getElementById('dropZone');
+        const dropZoneText = document.getElementById('dropZoneText');
+        const fileInput = document.getElementById('fileInput');
+        const hashBox = document.getElementById('hashBox');
+        const registerBtn = document.getElementById('registerBtn');
+        const certResult = document.getElementById('certResult');
+
+        let currentFile = null;
+        let currentHash = null;
+
+        // 🌟 파일 -> SHA-256 지문 계산 (100% 브라우저 내장 Web Crypto API, 서버 전송 없음, 비용 0원)
+        async function computeSha256(file) {
+            const buffer = await file.arrayBuffer();
+            const digest = await crypto.subtle.digest('SHA-256', buffer);
+            return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function handleFile(file) {
+            if (!file) return;
+            currentFile = file;
+            dropZoneText.textContent = '⏳ 지문(해시) 계산 중... (' + file.name + ')';
+            registerBtn.disabled = true;
+            registerBtn.textContent = '계산 중...';
+
+            try {
+                currentHash = await computeSha256(file);
+                dropZoneText.textContent = '✅ 선택된 파일: ' + file.name;
+                hashBox.textContent = 'SHA-256: ' + currentHash;
+                hashBox.classList.add('show');
+                registerBtn.disabled = false;
+                registerBtn.textContent = '🔏 이 시점으로 타임스탬프 발급받기 (무료)';
+            } catch (err) {
+                dropZoneText.textContent = '❌ 해시 계산 중 에러가 발생했습니다. 다시 시도해주세요.';
+                registerBtn.disabled = true;
+                registerBtn.textContent = '파일을 먼저 선택해주세요';
+            }
+        }
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+        });
+
+        registerBtn.addEventListener('click', async () => {
+            if (!currentHash) return;
+            const artistName = document.getElementById('artistName').value.trim();
+            const trackTitle = document.getElementById('trackTitle').value.trim();
+
+            if (!artistName) { alert('아티스트명을 입력해주세요.'); return; }
+
+            registerBtn.disabled = true;
+            registerBtn.textContent = '발급 중...';
+
+            try {
+                const res = await fetch('/api/proof/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fileHash: currentHash,
+                        fileName: currentFile ? currentFile.name : '',
+                        artistName: artistName,
+                        trackTitle: trackTitle
+                    })
+                });
+                const data = await res.json();
+
+                if (!data.success) {
+                    alert(data.message || '발급에 실패했습니다.');
+                    registerBtn.disabled = false;
+                    registerBtn.textContent = '🔏 이 시점으로 타임스탬프 발급받기 (무료)';
+                    return;
+                }
+
+                renderCertificate(data.record);
+                registerBtn.textContent = '✅ 발급 완료!';
+            } catch (err) {
+                alert('서버와 통신 중 에러가 발생했습니다.');
+                registerBtn.disabled = false;
+                registerBtn.textContent = '🔏 이 시점으로 타임스탬프 발급받기 (무료)';
+            }
+        });
+
+        function renderCertificate(record) {
+            const dateStr = new Date(record.timestamp).toLocaleString('ko-KR');
+            certResult.innerHTML = `
+                <div class="cert-row"><span class="k">인증서 ID</span><span class="v">${record.certId}</span></div>
+                <div class="cert-row"><span class="k">아티스트</span><span class="v">${record.artistName}</span></div>
+                <div class="cert-row"><span class="k">곡 제목</span><span class="v">${record.trackTitle || '(미입력)'}</span></div>
+                <div class="cert-row"><span class="k">파일명</span><span class="v">${record.fileName || '(미입력)'}</span></div>
+                <div class="cert-row"><span class="k">SHA-256 지문</span><span class="v">${record.fileHash}</span></div>
+                <div class="cert-row"><span class="k">서버 발급 시각</span><span class="v">${dateStr}</span></div>
+                <div class="cert-row"><span class="k">HMAC 서명</span><span class="v">${record.signature}</span></div>
+                <button class="btn-secondary" style="margin-top:15px; width:100%;" onclick='downloadCertificate(${JSON.stringify(record)})'>⬇️ 인증서 파일(JSON) 다운로드</button>
+            `;
+            certResult.classList.add('show');
+            document.getElementById('verifyCertId').value = record.certId;
+        }
+
+        window.downloadCertificate = function (record) {
+            const blob = new Blob([JSON.stringify(record, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'RAM_copyright_certificate_' + record.certId + '.json';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        };
+
+        window.fillVerify = function (certId) {
+            document.getElementById('verifyCertId').value = certId;
+            window.scrollTo({ top: document.getElementById('verifyCertId').getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
+        };
+
+        // 2. 인증서 검증
+        const verifyBtn = document.getElementById('verifyBtn');
+        const verifyResult = document.getElementById('verifyResult');
+
+        verifyBtn.addEventListener('click', async () => {
+            const certId = document.getElementById('verifyCertId').value.trim();
+            if (!certId) { alert('인증서 ID를 입력해주세요.'); return; }
+
+            verifyResult.className = 'verify-result';
+            verifyResult.textContent = '검증 중...';
+            verifyResult.style.display = 'block';
+
+            try {
+                const res = await fetch('/api/proof/verify/' + encodeURIComponent(certId));
+                const data = await res.json();
+
+                if (!data.success) {
+                    verifyResult.className = 'verify-result bad';
+                    verifyResult.textContent = '❌ ' + (data.message || '인증서를 찾을 수 없습니다.');
+                    return;
+                }
+
+                const r = data.record;
+                const dateStr = new Date(r.timestamp).toLocaleString('ko-KR');
+
+                if (data.valid) {
+                    verifyResult.className = 'verify-result ok';
+                    verifyResult.innerHTML = `✅ <b>서명이 유효합니다.</b> 이 지문(${r.fileHash.slice(0,16)}...)은 <b>${dateStr}</b>에 <b>${r.artistName}</b>님 명의로 위변조 없이 기록되었습니다.`;
+                } else {
+                    verifyResult.className = 'verify-result bad';
+                    verifyResult.textContent = '⚠️ 서명이 원본 데이터와 일치하지 않습니다. 원장 데이터가 변조되었을 가능성이 있습니다.';
+                }
+            } catch (err) {
+                verifyResult.className = 'verify-result bad';
+                verifyResult.textContent = '서버와 통신 중 에러가 발생했습니다.';
+            }
+        });
+    })();
+    </script>
+</body>
+</html>

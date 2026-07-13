@@ -242,6 +242,7 @@
             <a href="/youtube" class="nav-item"><%= __('menu_youtube') || '유튜브' %></a>
             <a href="/shorts" class="nav-item"><%= __('menu_shorts') || '쇼츠' %></a>
             <a href="/board" class="nav-item active"><%= __('menu_community') || '커뮤니티' %></a>
+            <a href="/copyright-proof" class="nav-item">🔏 저작권 증명</a>
         </div>
     </header>
 
@@ -795,11 +796,13 @@ async function submitReply(event, postId, commentId) {
         .kakao-chat-btn,
         #kakao-chat-btn {
             transform: scale(0.7) !important; /* 크기 70% 축소 */
-            transform-origin: bottom right !important; /* 우측 하단 기준 */
+            transform-origin: bottom left !important; /* 좌측 하단 기준 */
             margin-bottom: 20px !important; /* 위로 살짝 띄우기 */
+            left: 15px !important; /* 음원플레이어를 가리지 않도록 왼쪽 끝으로 이동 */
+            right: auto !important;
             z-index: 9999 !important;
         }
-    }    
+    }
 
     /* 🌟 공통 및 모바일 디자인 보정 */
     @media screen and (max-width: 768px) {

@@ -44,6 +44,18 @@
                 <label>가사 (시간 싱크 포함 가능)</label>
                 <textarea name="lyrics"><%= music.lyrics %></textarea>
             </div>
+            <div class="input-group">
+                <label>🔗 틱톡 오리지널 사운드 URL (선택)</label>
+                <input type="text" name="tiktokSoundUrl" value="<%= music.tiktokSoundUrl || '' %>">
+            </div>
+            <div class="input-group">
+                <label>🔗 인스타그램 릴스 오디오 URL (선택)</label>
+                <input type="text" name="igReelSoundUrl" value="<%= music.igReelSoundUrl || '' %>">
+            </div>
+            <div class="input-group">
+                <label>🔗 유튜브 오리지널 사운드 URL (선택)</label>
+                <input type="text" name="ytShortsSoundUrl" value="<%= music.ytShortsSoundUrl || '' %>">
+            </div>
             <div class="btn-group">
                 <a href="/" class="btn-cancel">취소하기</a>
                 <button type="submit" class="btn-save">수정 내용 저장</button>

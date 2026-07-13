@@ -21,8 +21,10 @@ const { Server } = require("socket.io");
 // 🌟 [변경됨] Cloudflare R2 영구 금고 세팅 (클라우디너리 이사 완료!)
 const { S3Client } = require('@aws-sdk/client-s3');
 const multerS3 = require('multer-s3');
-const User = require('./user'); 
+const User = require('./user');
 const Stats = require('./models/Stats'); // 🌟 통계 DB
+const ProofRecord = require('./models/ProofRecord'); // 🌟 저작권 증명 원장 DB
+const crypto = require('crypto'); // 🌟 HMAC 서명용 Node 내장 암호화 도구 (비용 0원)
 const bcrypt = require('bcrypt'); // 암호화 믹서기
 
 // 🔑 R2 열쇠 꽂기
@@ -75,6 +77,10 @@ mongoose.connect(process.env.DB_URI)
 const musicSchema = new mongoose.Schema({
     name: String, artist: String, genre: String, aiTool: String, lyrics: String,
     uploader: String, uploaderRealName: String, imageUrl: String, audioUrl: String,
+    // 🌟 숏폼 오디오 딥링크: 크리에이터가 각 앱에 무료로 등록한 '오리지널 사운드' 고유 URL
+    tiktokSoundUrl: { type: String, default: '' },
+    igReelSoundUrl: { type: String, default: '' },
+    ytShortsSoundUrl: { type: String, default: '' },
     views: { type: Number, default: 0 },
     likes: { type: Number, default: 0 },
     likedBy: [String], 
@@ -1126,14 +1132,19 @@ app.post('/add-music', (req, res, next) => {
     });
 }, async (req, res) => {
     try {
-        const { name, artist, genre, aiTool, lyrics, realName } = req.body;
-        const uploader = req.session.user.id; 
+        const { name, artist, genre, aiTool, lyrics, realName, tiktokSoundUrl, igReelSoundUrl, ytShortsSoundUrl } = req.body;
+        const uploader = req.session.user.id;
         // 🌟 R2의 진짜 주소와 파일 이름을 합쳐서 저장합니다.
 const baseUrl = process.env.R2_PUBLIC_URL;
 const imageUrl = req.files && req.files['image'] ? `${baseUrl}/${req.files['image'][0].key}` : 'https://via.placeholder.com/150';
 const audioUrl = req.files && req.files['audio'] ? `${baseUrl}/${req.files['audio'][0].key}` : '';
-        
-        const newMusic = new Music({ name, artist, genre, aiTool, lyrics, uploaderRealName: realName, uploader, imageUrl, audioUrl });
+
+        const newMusic = new Music({
+            name, artist, genre, aiTool, lyrics, uploaderRealName: realName, uploader, imageUrl, audioUrl,
+            tiktokSoundUrl: (tiktokSoundUrl || '').trim(),
+            igReelSoundUrl: (igReelSoundUrl || '').trim(),
+            ytShortsSoundUrl: (ytShortsSoundUrl || '').trim()
+        });
         await newMusic.save();
         res.redirect('/');
     } catch (err) { res.status(500).send("<h1>DB 저장 실패 이유: " + err.message + "</h1>"); }
@@ -1177,13 +1188,138 @@ app.post('/edit/:id', async (req, res) => {
         const isAdmin = req.session.user.role === 'admin';
         const isOwner = req.session.user.id === music.uploader;
         if (isAdmin || isOwner) {
-            const { name, artist, genre, aiTool, lyrics } = req.body;
-            await Music.findByIdAndUpdate(req.params.id, { name, artist, genre, aiTool, lyrics });
+            const { name, artist, genre, aiTool, lyrics, tiktokSoundUrl, igReelSoundUrl, ytShortsSoundUrl } = req.body;
+            await Music.findByIdAndUpdate(req.params.id, {
+                name, artist, genre, aiTool, lyrics,
+                tiktokSoundUrl: (tiktokSoundUrl || '').trim(),
+                igReelSoundUrl: (igReelSoundUrl || '').trim(),
+                ytShortsSoundUrl: (ytShortsSoundUrl || '').trim()
+            });
             res.redirect('/');
         } else {
             res.send("<script>alert('권한이 없습니다.'); location.href='/';</script>");
         }
     } catch (err) { res.redirect('/'); }
+});
+
+// =========================================
+// 🌟 숏폼(쇼츠/릴스/틱톡) 오리지널 사운드 딥링크 라우팅
+// 크리에이터가 각 앱에 무료로 등록해둔 '오리지널 사운드' URL로 그대로 튕겨 보낸다.
+// 이 중간 라우터를 거치게 해두면, 나중에 클릭 통계를 붙이거나 링크를 바꿔도
+// 우리 사이트 버튼 주소(/go/sound/...)는 그대로 유지할 수 있다.
+// =========================================
+const SOUND_PLATFORM_FIELDS = {
+    tiktok: 'tiktokSoundUrl',
+    instagram: 'igReelSoundUrl',
+    youtube: 'ytShortsSoundUrl'
+};
+
+app.get('/go/sound/:id/:platform', async (req, res) => {
+    try {
+        const field = SOUND_PLATFORM_FIELDS[req.params.platform];
+        if (!field) return res.redirect('/');
+
+        const music = await Music.findById(req.params.id);
+        const targetUrl = music ? music[field] : '';
+
+        if (!targetUrl) {
+            return res.send("<script>alert('아직 이 플랫폼에 등록된 오리지널 사운드 링크가 없습니다.'); history.back();</script>");
+        }
+
+        // 외부 앱(틱톡/인스타/유튜브) 촬영 화면으로 즉시 이동
+        res.redirect(targetUrl);
+    } catch (err) {
+        console.error("사운드 딥링크 에러:", err);
+        res.redirect('/');
+    }
+});
+
+// =========================================
+// 🔏 미발매 음원 저작권(선점) 증명 시스템
+// 파일 자체는 서버에 올리지 않는다 (비용 0원). 브라우저가 Web Crypto API로
+// 뽑아낸 SHA-256 지문(fileHash)만 전달받아, 서버 시각(timestamp)과 함께
+// 우리만 아는 비밀키(PROOF_HMAC_SECRET)로 HMAC-SHA256 서명을 찍어 원장에 남긴다.
+// 파일이 1비트라도 바뀌면 지문이 완전히 달라지므로, 이 서명은
+// "이 해시가 이 시각에 이 사람 이름으로 존재했다"는 사실을 증명하는 영수증 역할을 한다.
+// =========================================
+function buildProofSignature(fileHash, artistName, trackTitle, timestamp) {
+    const payload = `${fileHash}|${artistName}|${trackTitle}|${timestamp}`;
+    return crypto.createHmac('sha256', process.env.PROOF_HMAC_SECRET).update(payload).digest('hex');
+}
+
+app.get('/copyright-proof', async (req, res) => {
+    try {
+        let myProofs = [];
+        if (req.session.user) {
+            myProofs = await ProofRecord.find({ uploaderId: req.session.user.id }).sort({ createdAt: -1 });
+        }
+        res.render('copyright-proof', { user: req.session.user || null, myProofs });
+    } catch (err) {
+        console.error("저작권 증명 페이지 에러:", err);
+        res.status(500).send("페이지를 불러오는 중 에러가 발생했습니다.");
+    }
+});
+
+app.post('/api/proof/register', async (req, res) => {
+    try {
+        const { fileHash, fileName, artistName, trackTitle } = req.body;
+
+        // SHA-256은 항상 64자리 16진수 문자열이어야 한다 (조작된 값 방어)
+        if (!fileHash || !/^[a-f0-9]{64}$/i.test(fileHash)) {
+            return res.status(400).json({ success: false, message: '유효하지 않은 파일 지문(해시)입니다.' });
+        }
+        if (!artistName || !artistName.trim()) {
+            return res.status(400).json({ success: false, message: '아티스트명을 입력해주세요.' });
+        }
+
+        const timestamp = Date.now(); // 조작 불가능한 서버 시각
+        const certId = crypto.randomUUID();
+        const normalizedHash = fileHash.toLowerCase();
+        const normalizedArtist = artistName.trim();
+        const normalizedTitle = (trackTitle || '').trim();
+
+        const signature = buildProofSignature(normalizedHash, normalizedArtist, normalizedTitle, timestamp);
+
+        const record = await new ProofRecord({
+            certId,
+            uploaderId: req.session.user ? req.session.user.id : 'Guest',
+            artistName: normalizedArtist,
+            trackTitle: normalizedTitle,
+            fileName: (fileName || '').trim(),
+            fileHash: normalizedHash,
+            signature,
+            timestamp
+        }).save();
+
+        res.json({ success: true, record });
+    } catch (err) {
+        console.error("저작권 증명 등록 에러:", err);
+        res.status(500).json({ success: false, message: '서버 에러로 등록에 실패했습니다.' });
+    }
+});
+
+app.get('/api/proof/verify/:certId', async (req, res) => {
+    try {
+        const record = await ProofRecord.findOne({ certId: req.params.certId });
+        if (!record) {
+            return res.status(404).json({ success: false, message: '해당 인증서를 찾을 수 없습니다.' });
+        }
+
+        const expectedSignature = buildProofSignature(record.fileHash, record.artistName, record.trackTitle, record.timestamp);
+
+        // 길이가 다르면(=DB 값이 손상/변조되었으면) timingSafeEqual이 바로 예외를 던지므로 감싸준다
+        let isValid = false;
+        try {
+            isValid = crypto.timingSafeEqual(Buffer.from(expectedSignature, 'hex'), Buffer.from(record.signature, 'hex'));
+        } catch (e) {
+            isValid = false;
+        }
+
+        res.json({ success: true, valid: isValid, record });
+    } catch (err) {
+        console.error("저작권 증명 검증 에러:", err);
+        res.status(500).json({ success: false, message: '검증 중 서버 에러가 발생했습니다.' });
+    }
 });
 
 app.post('/like/:id', async (req, res) => {

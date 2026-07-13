@@ -313,9 +313,10 @@
             .kakao-btn,
             div[id^="kakao-"] {
                 transform: scale(0.55) !important; /* 🚀 크기를 55%로 확 줄였습니다! (원래 70%) */
-                transform-origin: bottom right !important;
+                transform-origin: bottom left !important;
                 bottom: 170px !important; /* 🚀 위치를 바닥에서 170px 위로 더 끌어올렸습니다! (원래 140px) */
-                right: 15px !important;
+                left: 15px !important; /* 음원플레이어를 가리지 않도록 왼쪽 끝으로 이동 */
+                right: auto !important;
                 z-index: 9999999 !important;
             }
         }
@@ -643,6 +644,7 @@
            <a href="/youtube" class="nav-item"><%= __('menu_youtube') || '유튜브' %></a>
             <a href="/shorts" class="nav-item"><%= __('menu_shorts') || '쇼츠' %></a>
             <a href="/board" class="nav-item"><%= __('menu_community') || '커뮤니티' %></a>
+            <a href="/copyright-proof" class="nav-item">🔏 저작권 증명</a>
         </div>
     </header>
 
@@ -706,6 +708,13 @@
                                 <span style="font-size: 12px; color: #ff5722; display: block; margin-bottom: 5px;"><%= __('upload_mp3') || '🎵 MP3 음원 (필수)' %></span>
                                 <input type="file" name="audio" accept="audio/*" class="file-upload" required>
                             </div>
+                        </div>
+
+                        <div style="margin-top:15px; padding:12px; background:#1a1b1c; border-radius:8px; border:1px solid #333;">
+                            <span style="font-size:12px; color:#ff5722; display:block; margin-bottom:8px; font-weight:bold;">🔗 숏폼 오리지널 사운드 링크 (선택 - 틱톡/릴스/유튜브쇼츠에 먼저 음원을 등록한 뒤 주소를 붙여넣으세요)</span>
+                            <input type="text" name="tiktokSoundUrl" placeholder="틱톡 오리지널 사운드 URL (예: https://www.tiktok.com/music/...)" style="width:100%; background:#222; border:1px solid #333; color:#fff; padding:10px; border-radius:8px; margin-bottom:8px; box-sizing:border-box;">
+                            <input type="text" name="igReelSoundUrl" placeholder="인스타그램 릴스 오디오 URL (예: https://www.instagram.com/reels/audio/...)" style="width:100%; background:#222; border:1px solid #333; color:#fff; padding:10px; border-radius:8px; margin-bottom:8px; box-sizing:border-box;">
+                            <input type="text" name="ytShortsSoundUrl" placeholder="유튜브 오리지널 사운드 URL (예: https://www.youtube.com/source/영상ID/shorts/remix)" style="width:100%; background:#222; border:1px solid #333; color:#fff; padding:10px; border-radius:8px; box-sizing:border-box;">
                         </div>
 
                         <button type="submit" class="btn-upload"><%= __('btn_submit_chart') || '차트 등록하기' %></button>
@@ -902,6 +911,16 @@
                                     <div class="action-btn" id="like-btn-<%= music._id %>" onclick="likeMusic('<%= music._id %>')" style="<%= isLiked ? 'color:#ff4a4a; border-color:#ff4a4a;' : '' %>">
                                         <%= isLiked ? '❤️' : '🤍' %> <%= __('action_likes') || '좋아요' %> <span id="like-count-<%= music._id %>"><%= music.likes || 0 %></span>
                                     </div>
+
+                                    <% if (music.tiktokSoundUrl) { %>
+                                        <a class="action-btn" href="/go/sound/<%= music._id %>/tiktok" target="_blank" rel="noopener">🎬 틱톡으로 촬영하기</a>
+                                    <% } %>
+                                    <% if (music.igReelSoundUrl) { %>
+                                        <a class="action-btn" href="/go/sound/<%= music._id %>/instagram" target="_blank" rel="noopener">📷 릴스로 촬영하기</a>
+                                    <% } %>
+                                    <% if (music.ytShortsSoundUrl) { %>
+                                        <a class="action-btn" href="/go/sound/<%= music._id %>/youtube" target="_blank" rel="noopener">▶️ 쇼츠로 촬영하기</a>
+                                    <% } %>
                                 </div>
 
                                 <div id="lyrics-<%= music._id %>" class="hidden-box lyrics-window"><div id="lyrics-content-<%= music._id %>"></div></div>
@@ -1779,8 +1798,8 @@ document.addEventListener('click', async (e) => {
     const href = link.getAttribute('href');
 
     // 🚨 [여기가 원인!] 로그인(login), 회원가입(signup)을 다시 예외 명단에 추가했습니다!
-    if (!href || !href.startsWith('/') || href.includes('logout') || href.includes('admin') || href.includes('delete') || href.includes('edit') || href.includes('login') || href.includes('signup')) {
-        return; // 브라우저야, 이건 네가 원래 하던 대로 진짜 페이지 이동을 해!
+    if (!href || !href.startsWith('/') || href.includes('logout') || href.includes('admin') || href.includes('delete') || href.includes('edit') || href.includes('login') || href.includes('signup') || href.includes('/go/sound/')) {
+        return; // 브라우저야, 이건 네가 원래 하던 대로 진짜 페이지 이동을 해! (쇼츠 딥링크는 실제 302 리다이렉트가 필요하므로 SPA 가로채기 제외)
     }
 
     // 🎵 쇼츠/유튜브/라디오/커뮤니티도 음악이 끊기지 않도록 SPA 방식으로 이동
@@ -1801,7 +1820,7 @@ async function navigateTo(href, isPopState = false) {
         // 🎨 쇼츠/유튜브/라디오/커뮤니티처럼 전용 디자인(<style>)이 필요한 페이지는
         //    헤더에 있던 전용 스타일을 주입하고, 떠날 때는 정리합니다.
         document.querySelectorAll('style[data-spa-style]').forEach(el => el.remove());
-        const needsOwnStyles = href.includes('shorts') || href.includes('youtube') || href.includes('radio') || href.includes('board');
+        const needsOwnStyles = href.includes('shorts') || href.includes('youtube') || href.includes('radio') || href.includes('board') || href.includes('copyright-proof');
         if (needsOwnStyles) {
             newDoc.querySelectorAll('head style').forEach(styleEl => {
                 const clone = styleEl.cloneNode(true);
