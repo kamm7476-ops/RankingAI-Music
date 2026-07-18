@@ -161,7 +161,7 @@
 
             <div class="drop-zone" id="dropZone">
                 <p id="dropZoneText"><%= __('cp_dropzone_text') %></p>
-                <button type="button" class="btn-secondary" id="browseBtn" style="margin-top:14px;"><%= __('cp_btn_browse') || '📁 파일 찾아보기' %></button>
+                <label for="fileInput" class="btn-secondary" id="browseBtn" style="display:inline-block; margin:14px auto 0;"><%= __('cp_btn_browse') || '📁 파일 찾아보기' %></label>
                 <input type="file" id="fileInput" accept="audio/*">
             </div>
             <div class="hash-box" id="hashBox"></div>
@@ -297,7 +297,10 @@
 
         const browseBtn = document.getElementById('browseBtn');
         dropZone.addEventListener('click', () => fileInput.click());
-        browseBtn.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
+        // browseBtn is a <label for="fileInput">: the browser already opens the picker natively.
+        // Only stop the click from bubbling to dropZone, which would call fileInput.click() a second time
+        // and cause the OS file dialog to open and immediately close.
+        browseBtn.addEventListener('click', (e) => e.stopPropagation());
         fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
 
         dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
