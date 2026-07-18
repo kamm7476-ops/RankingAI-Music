@@ -1772,9 +1772,22 @@ app.get('/admin/users', async (req, res) => {
         if (!req.session.user || req.session.user.role !== 'admin') {
             return res.send("<script>alert('관리자만 접근 가능합니다!'); location.href='/';</script>");
         }
-        const users = await User.find().sort({ createdAt: -1 }); 
+        const users = await User.find().sort({ createdAt: -1 });
         res.render('admin_users', { users: users });
     } catch (err) { res.status(500).send("유저 목록 에러"); }
+});
+
+app.get('/admin/copyright-proof', async (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'admin') {
+        return res.send("<script>alert('관리자만 접근 가능합니다!'); location.href='/';</script>");
+    }
+    try {
+        const proofs = await ProofRecord.find().sort({ createdAt: -1 }).lean();
+        res.render('admin_copyright_proof', { proofs, user: req.session.user });
+    } catch (err) {
+        console.error("저작권증명 관리 페이지 에러:", err);
+        res.status(500).send("저작권증명 목록을 불러오는 중 에러가 났습니다.");
+    }
 });
 
 app.post('/admin/popup', async (req, res) => {

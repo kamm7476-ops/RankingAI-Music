@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 - 저작권증명 발급 관리 - RANKING AI</title>
+    <style>
+        body { background: #0b0c0d; color: #fff; font-family: 'Pretendard', sans-serif; padding: 20px; margin: 0; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; flex-wrap: wrap; gap: 10px; }
+        .header h1 { margin: 0; color: #ff5722; font-size: 22px; }
+        .back-btn { color: #ff5722; text-decoration: underline; font-weight: bold; font-size: 14px; }
+
+        .search-box { margin-bottom: 20px; }
+        .search-box input { width: 100%; max-width: 320px; background: #161718; border: 1px solid #444; color: #fff; padding: 10px 14px; border-radius: 8px; outline: none; font-family: inherit; box-sizing: border-box; }
+        .search-box input:focus { border-color: #ff5722; }
+
+        table { width: 100%; border-collapse: collapse; background: #161718; border-radius: 12px; overflow: hidden; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #333; font-size: 13px; }
+        th { background: #222; color: #ff5722; font-weight: bold; }
+        tr:hover { background: #1a1a1a; }
+        td.mono { font-family: monospace; font-size: 11px; color: #00e5ff; word-break: break-all; }
+        .copy-btn { background: none; border: 1px solid #444; color: #aaa; border-radius: 6px; padding: 3px 8px; font-size: 11px; cursor: pointer; white-space: nowrap; }
+        .copy-btn:hover { border-color: #ff5722; color: #ff5722; }
+        .guest-tag { color: #777; }
+
+        @media (max-width: 768px) {
+            table, thead, tbody, th, td, tr { display: block; }
+            thead tr { display: none; }
+            tr { background: #161718; margin-bottom: 15px; border-radius: 10px; border: 1px solid #333; padding: 12px; }
+            td { display: flex; justify-content: space-between; align-items: center; gap: 10px; border: none; padding: 6px 0; border-bottom: 1px solid #222; text-align: right; }
+            td:last-child { border-bottom: none; }
+            td::before { content: attr(data-label); font-weight: bold; color: #ff5722; font-size: 12px; flex-shrink: 0; margin-right: 10px; text-align: left; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🔏 저작권증명 발급 관리 (총 <%= proofs ? proofs.length : 0 %>건)</h1>
+        <div style="display:flex; gap:15px;">
+            <a href="/admin" class="back-btn">← 통제실로</a>
+            <a href="/" class="back-btn">메인으로</a>
+        </div>
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="🔍 발급자 / 아티스트명 / 곡명 / 인증서ID 검색" oninput="filterRows()">
+    </div>
+
+    <table id="proofTable">
+        <thead>
+            <tr>
+                <th>발급일시</th>
+                <th>발급자(ID)</th>
+                <th>아티스트명</th>
+                <th>곡명</th>
+                <th>파일명</th>
+                <th>인증서ID</th>
+                <th>파일 해시(SHA-256)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (proofs && proofs.length > 0) { %>
+                <% proofs.forEach(function(p) { %>
+                    <tr>
+                        <td data-label="발급일시"><%= new Date(p.timestamp || p.createdAt).toLocaleString('ko') %></td>
+                        <td data-label="발급자(ID)"><% if (p.uploaderId && p.uploaderId !== 'Guest') { %><strong><%= p.uploaderId %></strong><% } else { %><span class="guest-tag">비회원</span><% } %></td>
+                        <td data-label="아티스트명"><%= p.artistName %></td>
+                        <td data-label="곡명"><%= p.trackTitle || '-' %></td>
+                        <td data-label="파일명"><%= p.fileName || '-' %></td>
+                        <td data-label="인증서ID" class="mono"><%= p.certId %> <button type="button" class="copy-btn" onclick="navigator.clipboard.writeText('<%= p.certId %>')">복사</button></td>
+                        <td data-label="파일 해시" class="mono"><%= p.fileHash %></td>
+                    </tr>
+                <% }); %>
+            <% } else { %>
+                <tr><td colspan="7" style="text-align:center; padding: 30px;">발급된 저작권증명이 없습니다.</td></tr>
+            <% } %>
+        </tbody>
+    </table>
+
+    <script>
+        function filterRows() {
+            const q = document.getElementById('searchInput').value.trim().toLowerCase();
+            document.querySelectorAll('#proofTable tbody tr').forEach(function(row) {
+                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>
