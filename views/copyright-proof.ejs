@@ -159,25 +159,35 @@
         <div class="card">
             <h3><%= __('cp_card1_title') || '1️⃣ 새 저작권 타임스탬프 발급받기' %></h3>
 
-            <div class="drop-zone" id="dropZone">
-                <p id="dropZoneText"><%= __('cp_dropzone_text') %></p>
-                <label for="fileInput" class="btn-secondary" id="browseBtn" style="display:inline-block; margin:14px auto 0;"><%= __('cp_btn_browse') || '📁 파일 찾아보기' %></label>
-                <input type="file" id="fileInput" accept="audio/*">
-            </div>
-            <div class="hash-box" id="hashBox"></div>
+            <% if (!user) { %>
+                <div style="text-align:center; padding:35px 15px; background:#0f1011; border:1px dashed #444; border-radius:12px;">
+                    <p style="color:#ddd; font-size:14px; line-height:1.8; margin:0 0 18px; word-break:keep-all;">🔒 <%= __('cp_login_required_desc') || '저작권 증명 발급은 회원만 이용할 수 있습니다. 회원가입 후 무료로 발급받아 보세요.' %></p>
+                    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                        <a href="/signup" class="btn-main" style="width:auto; display:inline-block; padding:12px 24px;"><%= __('cp_btn_signup_first') || '회원가입하고 발급받기' %></a>
+                        <a href="/login" class="btn-secondary" style="display:inline-block; padding:12px 24px;"><%= __('btn_login') || '로그인' %></a>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="drop-zone" id="dropZone">
+                    <p id="dropZoneText"><%= __('cp_dropzone_text') %></p>
+                    <label for="fileInput" class="btn-secondary" id="browseBtn" style="display:inline-block; margin:14px auto 0;"><%= __('cp_btn_browse') || '📁 파일 찾아보기' %></label>
+                    <input type="file" id="fileInput" accept="audio/*">
+                </div>
+                <div class="hash-box" id="hashBox"></div>
 
-            <div class="input-group">
-                <label><%= __('cp_label_artist') %></label>
-                <input type="text" id="artistName" value="<%= user ? user.name : '' %>" placeholder="<%= __('cp_ph_artist') %>">
-            </div>
-            <div class="input-group">
-                <label><%= __('cp_label_track') %></label>
-                <input type="text" id="trackTitle" placeholder="<%= __('cp_ph_track') %>">
-            </div>
+                <div class="input-group">
+                    <label><%= __('cp_label_artist') %></label>
+                    <input type="text" id="artistName" value="<%= user.name %>" placeholder="<%= __('cp_ph_artist') %>">
+                </div>
+                <div class="input-group">
+                    <label><%= __('cp_label_track') %></label>
+                    <input type="text" id="trackTitle" placeholder="<%= __('cp_ph_track') %>">
+                </div>
 
-            <button class="btn-main" id="registerBtn" disabled><%= __('cp_btn_select_file') %></button>
+                <button class="btn-main" id="registerBtn" disabled><%= __('cp_btn_select_file') %></button>
 
-            <div class="cert-result" id="certResult"></div>
+                <div class="cert-result" id="certResult"></div>
+            <% } %>
         </div>
 
         <!-- 2. 인증서 검증 -->
@@ -249,6 +259,7 @@
     };
     </script>
 
+    <% if (user) { %>
     <script>
     (function () {
         const dropZone = document.getElementById('dropZone');
@@ -386,8 +397,19 @@
             document.getElementById('verifyCertId').value = certId;
             window.scrollTo({ top: document.getElementById('verifyCertId').getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
         };
+    })();
+    </script>
+    <% } %>
 
-        // 2. 인증서 검증
+    <script>
+    (function () {
+        // 2. 인증서 검증 (비회원도 이용 가능)
+        const i18n = window.cpI18n;
+
+        function fmt(template, values) {
+            return template.replace(/\{(\w+)\}/g, (m, key) => (values[key] !== undefined ? values[key] : m));
+        }
+
         const verifyBtn = document.getElementById('verifyBtn');
         const verifyResult = document.getElementById('verifyResult');
 

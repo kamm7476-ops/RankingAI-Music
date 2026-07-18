@@ -142,6 +142,8 @@
   "cp_btn_home": "Back",
   "cp_desc": "The file is <b>never uploaded to or stored on the server.</b> Your browser uses the <b>Web Crypto API</b> to instantly compute the file's unique SHA-256 fingerprint (hash). That fingerprint, the artist name, and a tamper-proof <b>server timestamp</b> are then signed by the server with a secret key (HMAC-SHA256) and recorded in the ledger. Changing even a single bit of the file completely changes its fingerprint, so this certificate serves as a free timestamp proving that \"this exact original existed at this specific point in time.\"",
   "cp_card1_title": "1️⃣ Issue a New Copyright Timestamp",
+  "cp_login_required_desc": "Copyright proof issuance is available to members only. Sign up for free to get started.",
+  "cp_btn_signup_first": "Sign Up & Get Your Proof",
   "cp_dropzone_text": "🎵 Drag and drop your track here, or click to select a file",
   "cp_btn_browse": "📁 Browse files",
   "cp_label_artist": "Artist Name (Required)",

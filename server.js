@@ -1221,6 +1221,11 @@ app.get('/copyright-proof', async (req, res) => {
 
 app.post('/api/proof/register', async (req, res) => {
     try {
+        // 저작권 증명 발급은 회원만 가능 (비회원은 회원가입 후 이용)
+        if (!req.session.user) {
+            return res.status(401).json({ success: false, message: '회원만 저작권 증명을 발급받을 수 있습니다. 회원가입 후 이용해주세요.', requireLogin: true });
+        }
+
         const { fileHash, fileName, artistName, trackTitle } = req.body;
 
         // SHA-256은 항상 64자리 16진수 문자열이어야 한다 (조작된 값 방어)
@@ -1241,7 +1246,7 @@ app.post('/api/proof/register', async (req, res) => {
 
         const record = await new ProofRecord({
             certId,
-            uploaderId: req.session.user ? req.session.user.id : 'Guest',
+            uploaderId: req.session.user.id,
             artistName: normalizedArtist,
             trackTitle: normalizedTitle,
             fileName: (fileName || '').trim(),
