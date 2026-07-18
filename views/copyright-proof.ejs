@@ -296,10 +296,15 @@
         }
 
         const browseBtn = document.getElementById('browseBtn');
-        dropZone.addEventListener('click', () => fileInput.click());
-        // browseBtn is a <label for="fileInput">: the browser already opens the picker natively.
-        // Only stop the click from bubbling to dropZone, which would call fileInput.click() a second time
-        // and cause the OS file dialog to open and immediately close.
+        // browseBtn is a <label for="fileInput">: clicking it makes the browser forward a native
+        // click to fileInput. Since fileInput lives inside dropZone, that forwarded click bubbles
+        // back up to dropZone and would call fileInput.click() a second time, reopening/cancelling
+        // the OS file dialog before the selection registers. Ignore clicks that originate from the
+        // label or the input itself so the picker only ever opens once per user click.
+        dropZone.addEventListener('click', (e) => {
+            if (e.target === fileInput || e.target === browseBtn) return;
+            fileInput.click();
+        });
         browseBtn.addEventListener('click', (e) => e.stopPropagation());
         fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
 
