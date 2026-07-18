@@ -1194,9 +1194,16 @@ app.get('/go/sound/:id/:platform', async (req, res) => {
 // 파일이 1비트라도 바뀌면 지문이 완전히 달라지므로, 이 서명은
 // "이 해시가 이 시각에 이 사람 이름으로 존재했다"는 사실을 증명하는 영수증 역할을 한다.
 // =========================================
+// Render 등 배포 환경에 PROOF_HMAC_SECRET이 아직 등록되지 않아도 기능이 죽지 않도록
+// 폴백 키를 둔다. (배포 환경변수에 PROOF_HMAC_SECRET을 등록하면 그 값이 우선 사용된다)
+if (!process.env.PROOF_HMAC_SECRET) {
+    console.warn('⚠️ PROOF_HMAC_SECRET 환경변수가 설정되지 않아 폴백 키를 사용합니다. Render 대시보드에 등록해주세요.');
+}
+const PROOF_HMAC_SECRET = process.env.PROOF_HMAC_SECRET || 'ranking_proof_fallback_secret_2026';
+
 function buildProofSignature(fileHash, artistName, trackTitle, timestamp) {
     const payload = `${fileHash}|${artistName}|${trackTitle}|${timestamp}`;
-    return crypto.createHmac('sha256', process.env.PROOF_HMAC_SECRET).update(payload).digest('hex');
+    return crypto.createHmac('sha256', PROOF_HMAC_SECRET).update(payload).digest('hex');
 }
 
 app.get('/copyright-proof', async (req, res) => {
