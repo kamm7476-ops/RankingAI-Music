@@ -161,7 +161,8 @@
 
             <div class="drop-zone" id="dropZone">
                 <p id="dropZoneText"><%= __('cp_dropzone_text') %></p>
-                <input type="file" id="fileInput">
+                <button type="button" class="btn-secondary" id="browseBtn" style="margin-top:14px;"><%= __('cp_btn_browse') || '📁 파일 찾아보기' %></button>
+                <input type="file" id="fileInput" accept="audio/*">
             </div>
             <div class="hash-box" id="hashBox"></div>
 
@@ -294,7 +295,9 @@
             }
         }
 
+        const browseBtn = document.getElementById('browseBtn');
         dropZone.addEventListener('click', () => fileInput.click());
+        browseBtn.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
         fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
 
         dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
