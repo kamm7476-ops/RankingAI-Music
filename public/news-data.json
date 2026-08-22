@@ -1,5 +1,35 @@
 [
   {
+    "title": "Round Hill Music, AI 교육 관행에 대해 Suno와 Anthropic을 고소 - edm.com",
+    "desc": "Round Hill Music, AI 교육 관행에 대해 Suno와 Anthropic을 고소 edm.com",
+    "title_en": "Round Hill Music Sues Suno and Anthropic Over AI Training Practices - edm.com",
+    "desc_en": "Round Hill Music Sues Suno and Anthropic Over AI Training Practices edm.com",
+    "title_ko": "Round Hill Music, AI 교육 관행에 대해 Suno와 Anthropic을 고소 - edm.com",
+    "desc_ko": "Round Hill Music, AI 교육 관행에 대해 Suno와 Anthropic을 고소 edm.com",
+    "title_ja": "ラウンドヒル・ミュージック、AIトレーニング実践をめぐりスノとアンスロピックを訴訟 - edm.com",
+    "desc_ja": "ラウンドヒル・ミュージック、AIトレーニング実践を巡りスノとアンスロピックを訴訟 edm.com",
+    "title_zh": "Round Hill Music 就 AI 训练实践起诉 Suno 和 Anthropic - edm.com",
+    "desc_zh": "Round Hill Music 就人工智能训练实践起诉 Suno 和 Anthropic edm.com",
+    "link": "https://news.google.com/rss/articles/CBMihwFBVV95cUxPQmVldzE0NWJJZHZjc3hyWlk5UFR2U0tUTHpTLXFlUmZkbkpKSzJVM1hiMFZ6bF9rYk4wZTBhRXF1cThaUTdRMV9sQjh6U3RoWVBVWFItWkllQVF6NTRuR0Z3NXMzeHlzRFBRYmdsVnlIVXVRVzNPSVhja1BsMnMzVFpIeFFoYmM?oc=5",
+    "source": "edm.com",
+    "date": "2026. 8. 22."
+  },
+  {
+    "title": "음악 – 페이지 245 - Rolling Stone",
+    "desc": "음악 – 페이지 245 롤링 스톤",
+    "title_en": "Music – Page 245 - Rolling Stone",
+    "desc_en": "Music – Page 245 Rolling Stone",
+    "title_ko": "음악 – 페이지 245 - Rolling Stone",
+    "desc_ko": "음악 – 페이지 245 롤링 스톤",
+    "title_ja": "音楽 – ページ 245 - ローリングストーン",
+    "desc_ja": "音楽 – ページ 245 ローリングストーン誌",
+    "title_zh": "音乐 – 第 245 页 – 滚石",
+    "desc_zh": "音乐 – 第 245 页 滚石乐队",
+    "link": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE5OSk1LdjczX2V4NGhKQ1VQa3REcmdTS09TVU1XOHU2MUtfYmVYWVNpcUFjQ215Xzc0anh3NEFqcnNycGJEdTRWVmI1OXJaVXhxeXZCQ2VnN2N1LW1uVVZCbVhHZw?oc=5",
+    "source": "Rolling Stone",
+    "date": "2026. 8. 22."
+  },
+  {
     "title": "페이지 2875 – 음악, 영화, TV 및 정치 뉴스 보도 - Rolling Stone",
     "desc": "페이지 2875 – 음악, 영화, TV 및 정치 뉴스 보도 롤링 스톤",
     "title_en": "Page 2875 – Music, Film, TV and Political News Coverage - Rolling Stone",
@@ -300,16 +330,16 @@
     "date": "2026. 8. 20."
   },
   {
-    "title": "Apple Music의 AI 공개 라벨은 곧 선택 사항이 아닌 필수 사항이 될 것입니다 - AppleInsider",
-    "desc": "Apple Music의 AI 공개 레이블은 곧 선택 사항이 아닌 필수 사항입니다. AppleInsider",
-    "title_en": "Apple Music's AI disclosure labels will soon be mandatory, rather than optional - AppleInsider",
-    "desc_en": "Apple Music's AI disclosure labels will soon be mandatory, rather than optional AppleInsider",
-    "title_ko": "Apple Music의 AI 공개 라벨은 곧 선택 사항이 아닌 필수 사항이 될 것입니다 - AppleInsider",
-    "desc_ko": "Apple Music의 AI 공개 레이블은 곧 선택 사항이 아닌 필수 사항입니다. AppleInsider",
-    "title_ja": "Apple MusicのAI開示ラベルは間もなく任意ではなく義務化される - AppleInsider",
-    "desc_ja": "Apple MusicのAI開示ラベルは、オプションのAppleInsiderではなく、まもなく義務化される",
-    "title_zh": "Apple Music 的人工智能披露标签很快将成为强制性的，而不是可选的 - AppleInsider",
-    "desc_zh": "Apple Music 的 AI 披露标签很快将成为强制性的，而不是可选的 AppleInsider",
+    "title": "Apple Music의 AI 콘텐츠에 곧 라벨이 지정되어야 합니다 - AppleInsider",
+    "desc": "Apple Music의 AI 콘텐츠에는 곧 AppleInsider라는 라벨이 지정되어야 합니다.",
+    "title_en": "AI content in Apple Music will soon have to be labeled - AppleInsider",
+    "desc_en": "AI content in Apple Music will soon have to be labeled AppleInsider",
+    "title_ko": "Apple Music의 AI 콘텐츠에 곧 라벨이 지정되어야 합니다 - AppleInsider",
+    "desc_ko": "Apple Music의 AI 콘텐츠에는 곧 AppleInsider라는 라벨이 지정되어야 합니다.",
+    "title_ja": "Apple MusicのAIコンテンツは間もなくラベル付けが必要になる - AppleInsider",
+    "desc_ja": "Apple Music の AI コンテンツには間もなく AppleInsider というラベルが付けられるようになる",
+    "title_zh": "Apple Music 中的人工智能内容很快就必须被贴上标签 - AppleInsider",
+    "desc_zh": "Apple Music 中的人工智能内容很快将被贴上 AppleInsider 的标签",
     "link": "https://news.google.com/rss/articles/CBMivAFBVV95cUxQcTd6S2tBenlvaEJQVkhJTnRidG1GcENwTzk5ZV8zdlBfZzV5c2VrY29JdE05NWtWdHlYUUxZSndzWmtsLWZLQVl2eUx0YkpjY0JzUWExU0ltRXZabGtOM0dQQW1nU3ZRMVZrUnNLbjF2UUhNdlhkaDU1YWRsOUsxVzhSM1NlOTdrRkp5TmdOb29hdGUtRDhwcTVwVVctQW93eTNOYlFMNTBDTXFoZVR3NjRzb20tMl9VcGFfVw?oc=5",
     "source": "AppleInsider",
     "date": "2026. 8. 20."
@@ -555,21 +585,6 @@
     "date": "2026. 8. 20."
   },
   {
-    "title": "R&B/힙합 파워 플레이어: 빌보드의 2026년 목록 공개 - Billboard",
-    "desc": "R&B/힙합 파워 플레이어: 빌보드의 2026년 목록 공개 Billboard",
-    "title_en": "R&B/Hip-Hop Power Players: Billboard’s 2026 List Revealed - Billboard",
-    "desc_en": "R&B/Hip-Hop Power Players: Billboard’s 2026 List Revealed Billboard",
-    "title_ko": "R&B/힙합 파워 플레이어: 빌보드의 2026년 목록 공개 - Billboard",
-    "desc_ko": "R&B/힙합 파워 플레이어: 빌보드의 2026년 목록 공개 Billboard",
-    "title_ja": "R&B/ヒップホップのパワープレイヤー：ビルボードの2026年リストが明らかに - Billboard",
-    "desc_ja": "R&B/ヒップホップのパワープレイヤー：ビルボードの2026年リストが明らかに",
-    "title_zh": "R&B/Hip-Hop 实力选手：Billboard 2026 年榜单揭晓 - Billboard",
-    "desc_zh": "R&B/Hip-Hop 实力选手：Billboard 2026 年榜单揭晓",
-    "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxORVdJYUhrSjN4NXF1akVqb0lTN21xUkxpNjRIRW8yRjRNdHZkbW44bG56dFowd3lhMFRTTE1xdDlDR01JUUVnTjBZRDhCS3c3a01aM3dpbVFKYjEtUjFmMjZmMmhWRERIcGNNM3M3cVItWENzUUNmQ3FhR3RLdjVubQ?oc=5",
-    "source": "Billboard",
-    "date": "2026. 8. 20."
-  },
-  {
     "title": "Tame Impala와 Steve Lacy는 Spider-Man 덕분에 급등했습니다. 그런데 왜 해외에서 하나가 다른 것보다 더 큰가요? - 빌보드",
     "desc": "Tame Impala와 Steve Lacy는 Spider-Man 덕분에 급등했습니다. 그런데 왜 해외에서 하나가 다른 것보다 더 큰가요? 광고 게시판",
     "title_en": "Tame Impala & Steve Lacy Hits Surge Thanks to Spider-Man — But Why Is One Bigger Than the Other Abroad? - Billboard",
@@ -733,20 +748,5 @@
     "link": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE9aelNMSkRvQmJndjNPODNIdkpNR25NQy1aQTBJVG5TYW5OY0RNWV9QZU5sRDNteDlHbmQtaGJQRkZxMHdFcG1QVGF2Zy1JaEJUV0E?oc=5",
     "source": "Rolling Stone Australia",
     "date": "2026. 8. 20."
-  },
-  {
-    "title": "영화관이 그 어느 때보다 콘서트 영화에 기대고 있는 이유와 아티스트가 혜택을 누리는 방법 - Billboard",
-    "desc": "영화관이 그 어느 때보다 콘서트 영화에 기대고 있는 이유와 아티스트가 빌보드에 혜택을 주는 방법",
-    "title_en": "Why Movie Theaters Are Leaning on Concert Films More Than Ever — And How Artists Benefit - Billboard",
-    "desc_en": "Why Movie Theaters Are Leaning on Concert Films More Than Ever — And How Artists Benefit Billboard",
-    "title_ko": "영화관이 그 어느 때보다 콘서트 영화에 기대고 있는 이유와 아티스트가 혜택을 누리는 방법 - Billboard",
-    "desc_ko": "영화관이 그 어느 때보다 콘서트 영화에 기대고 있는 이유와 아티스트가 빌보드에 혜택을 주는 방법",
-    "title_ja": "映画館がこれまで以上にコンサート映画に頼るようになった理由 — そしてアーティストはどのように利益を受けるのか - Billboard",
-    "desc_ja": "映画館がこれまで以上にコンサート映画に頼るようになった理由 — そしてアーティストはビルボードにどのような利益をもたらすのか",
-    "title_zh": "为什么电影院比以往任何时候都更依赖音乐会电影以及艺术家如何受益 - Billboard",
-    "desc_zh": "为什么电影院比以往任何时候都更依赖音乐会电影 - 以及艺术家如何使 Billboard 受益",
-    "link": "https://news.google.com/rss/articles/CBMijgFBVV95cUxOY09tVXdhN21NRDBOTnN4SWJmYU9yRDQ4YllRdHh4Y05IbDYzRGg2ZklhY2l2VzVGeEhnVW5qa2NUOWt1cmVneFQxb1ZIY3Bqcmd5ejJFUEhQWTZ0anBGZW1rTm8taVMyZG1rZ0MxbzdJUlk5V3NrdW1vcmg2Vk42cVB0dTZad3NMQl96b1lB?oc=5",
-    "source": "Billboard",
-    "date": "2026. 8. 19."
   }
 ]
